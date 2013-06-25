@@ -10,24 +10,13 @@ As the aim is to go Open Source in June 2013, it is important that most of the
 currently known problems in OpenTraffic are fixed by that time. 
 <h2>Dead code</h2>
 <ul>
-<li>GeoObjects/Graph.java (is it ever used?): GT deleted</li>
-<li>GeoObjects/Querylab (never used): GT deleted</li>
-<li>GUI/FileIO/FileType.java (never used): GT deleted</li>
-<li>GUI/FileIO/ImportGIS.java (effectively empty): GT deleted</li>
-<li>GUI/FileIO/ReadDataDemand.java (effectively empty): GT deleted</li>
-<li>Layout/CardPanel.java (never used): GT deleted</li>
-<li>Layout/Find.java (never used): GT deleted</li>
-<li>Model/Units.java (effectively empty): GT deleted</li>
-<li>GUI/FileIO/WriteDataNetwork (never used)</li>
 </ul>
 <h2>Lots of half-cocked class files</h2>
 <ul>
-<li>Model/Settings.java do we really need a separate class for this? GT: I think </li>
-<li>it would be nice to have a kind of project file with settings / files etc.<li>
+<li>Model/Settings.java do we really need a separate class for this? GT: I think 
+it would be nice to have a kind of project file with settings / files etc.</li>
 <li>Model/SimulationSettings.java    GT: perhaps delete or make Simulator specific</li>
-<li>NetworkUtilities.ZonesAndNetwork.java (effectively empty): GT deleted</li>
 <li>ShortestPathAlgorithms/DijkstraAlgorithm method getPathNodesBytes uses weird constants: TODO Guus</li>
-<li>ShortestPathAlgorithms/PathNodesList.java do we really need a separate class for this?: GT deleted</li>
 <li>Simulators.RoadwaySimulator does not have a way to specify vehicle source and sinks</li>
 <li>Testing/TestNetwork.java does not appear to test any part of OpenTraffic</li>
 </ul>
@@ -51,11 +40,11 @@ having to select another node to commit a change is also not intuitive</li>
 but the source should be credited.</li>
 <li>ModelIO/TableImport.java looks like it was stolen, but source is not credited</li>
 </ul>
-<h2>Poor design</h2>
-The CrossSectionElement class has ArrayLists for road markings, turning arrows 
-and roadMarkerAlongIDs. This looks like overkill.
-Especially since some of these are never used, created, written, or drawn.
-The current distinction between along and across objects may not be useful.
+<h2>Improved design</h2>
+The CrossSectionElement class had ArrayLists for road markings, turning arrows 
+and roadMarkerAlongIDs. This was overkill.
+Especially since some of these are never used, created, written, or drawn. This
+has been replaced by one ArrayList of CrossSectionObject.
 <br />
 What visual (and non-visual) objects could (and probably should) be embedded in a CrossSectionElement?
 <ul>
@@ -147,5 +136,7 @@ The GNU General Public License requires that source code must be made available
 to all users of the software. GPL is <i>infective</i> in the sense that all
 distributed derivative works must be licensed under the same (or, in some
 cases, any later version of the) GPL license.
+<h2>Currently preferred option</h2>
+GPL
 </body>
 </html>
