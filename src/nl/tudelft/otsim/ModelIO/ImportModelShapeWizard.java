@@ -698,7 +698,7 @@ public class ImportModelShapeWizard implements ActionListener {
 
 	        	if (voedingsLinkAB == false)  {
 		        	if (direction == valueDirectionAB  || direction == valueDirectionABBA)  {
-		        		addImportedLink(linkID, typologyName, fromNodeID, toNodeID,  defaultLaneWidth, rmaList, pointList, turnLanes, maxSpeed, length, zoneID);
+		        		addImportedLink(linkID, typologyName, fromNodeID, toNodeID, defaultLaneWidth, rmaList, pointList, turnLanes, maxSpeed, length, zoneID);
 			        	linkID++;
 		        	}
 	        	}
@@ -746,14 +746,19 @@ public class ImportModelShapeWizard implements ActionListener {
 		RoadMarkerAlong rma = null;
 		ArrayList<RoadMarkerAlong> rmaList = new ArrayList<RoadMarkerAlong>();
 		for (int i = 0; i < lanes; i++ )  {
+    		double offSet = i * defaultLaneWidth; 
 			if (i == 0)  {
-	    		double offSet = i * defaultLaneWidth; 
 	    		rma = new RoadMarkerAlong("|", offSet);
 	    		rmaList.add(rma);
 			}
-			double offSet = (i + 1) * defaultLaneWidth; 
-			rma = new RoadMarkerAlong(":", offSet);
-			rmaList.add(rma);
+			offSet = (i + 1) * defaultLaneWidth;
+			if (i < lanes - 1)  {
+				rma = new RoadMarkerAlong(":", offSet);
+			}
+			else {
+				rma = new RoadMarkerAlong("|", offSet);				
+			}
+			rmaList.add(rma);				
 		}
 		return rmaList;
 	}
@@ -776,14 +781,10 @@ public class ImportModelShapeWizard implements ActionListener {
 		if (null == typologyName)
 			typologyName = "road";
 			//throw new Error ("CrossSectionElement has null typologyName");
-		CrossSectionElement cse = new CrossSectionElement(cs, typologyName, laneWidth * rmaList.size()-1, rmaList, null);
-
-    			//cse.setCrossSectionElementTypology(cset);
+		CrossSectionElement cse = new CrossSectionElement(cs, typologyName, laneWidth * (rmaList.size()-1), rmaList, null);
     	ArrayList<CrossSectionElement> cseList = new ArrayList<CrossSectionElement>();
     	cseList.add(cse);
     	cs.setCrossSectionElementList_w(cseList);
-//        	CrossSection cs = new CrossSection(linkID, 0.0, 0.5, cseList);
-
     	String name = String.valueOf(linkID);       	
     	// if turnlanes are defined, we create an intermediate crossSection at a certain pre-defined distance from the junction (toNode)
     	if (turnLanes != null  && turnLanes.length() > 0)  {
@@ -811,15 +812,11 @@ public class ImportModelShapeWizard implements ActionListener {
     			ArrayList<TurnArrow> turnArrowList = analyseTurns(turnLanes);
     			ArrayList<RoadMarkerAlong> newRmaList = new ArrayList<RoadMarkerAlong>();
     			int newLanes = turnLanes.length();
-	        	for (int i = 0; i < newLanes; i++ ) {
-	        		if (i == 0)
-		        		newRmaList.add(new RoadMarkerAlong("|", i * laneWidth));
-	        		newRmaList.add(new RoadMarkerAlong(":", (i + 1) * laneWidth));
-	        	}	
-        		CrossSectionElement cse1 = new CrossSectionElement(cs, typologyName, laneWidth * rmaList.size()-1, rmaList, null);
-        		CrossSectionElement cse2 = new CrossSectionElement(cs, typologyName, laneWidth * rmaList.size()-1, rmaList, null);
-        		cse1 = new CrossSectionElement(cs1, typologyName, laneWidth * newRmaList.size()-1 , newRmaList, turnArrowList);
-        		cse2 = new CrossSectionElement(cs2, typologyName, laneWidth * newRmaList.size()-1 , newRmaList, turnArrowList);
+    			newRmaList = createRMA(newLanes, laneWidth);	
+        		/*CrossSectionElement cse1 = new CrossSectionElement(cs, typologyName, laneWidth * (rmaList.size() - 1), rmaList, null);
+        		CrossSectionElement cse2 = new CrossSectionElement(cs, typologyName, laneWidth * (rmaList.size() - 1), rmaList, null);*/
+    			CrossSectionElement cse1 = new CrossSectionElement(cs1, typologyName, laneWidth * (newRmaList.size()-1) , newRmaList, turnArrowList);
+    			CrossSectionElement cse2 = new CrossSectionElement(cs2, typologyName, laneWidth * (newRmaList.size()-1) , newRmaList, turnArrowList);
         		ArrayList<CrossSectionElement> cse1List = new ArrayList<CrossSectionElement>();
             	cse1List.add(cse1);
             	cs1.setCrossSectionElementList_w(cse1List);
