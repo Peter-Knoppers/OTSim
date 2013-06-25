@@ -5,3 +5,7 @@
 *.war
 *.ear
 /bin
+*.html
+!/doc/Problems.htlm
+!/doc/Setup_Eclipse_Juno.html
+!/doc/Network\ architecture.html
