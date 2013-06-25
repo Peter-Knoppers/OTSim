@@ -230,11 +230,11 @@ public class VehicleDetector extends CrossSectionObject {
 	 * VehicleDetector
 	 */
 	public ArrayList<Vertex> getPolygon_r() {
-		ArrayList<Vertex> guideLine = Planar.slicePolyline(crossSectionElement.getLinkPointList(lateralReference, true), longitudinalPosition, longitudinalLength);
+		ArrayList<Vertex> guideLine = Planar.slicePolyline(crossSectionElement.getLinkPointList(lateralReference, true, false), longitudinalPosition, longitudinalLength);
 		while (guideLine.size() > 2)	// We only want the first and last point
 			guideLine.remove(1);
-		ArrayList<Vertex> result = Planar.createParallelVertices(guideLine, lateralPosition - lateralWidth / 2,  lateralPosition - lateralWidth / 2);
-		for (Vertex v : Reversed.reversed(Planar.createParallelVertices(guideLine, lateralPosition + lateralWidth / 2, lateralPosition + lateralWidth / 2)))
+		ArrayList<Vertex> result = Planar.createParallelVertices(guideLine, null, lateralPosition - lateralWidth / 2,  lateralPosition - lateralWidth / 2);
+		for (Vertex v : Reversed.reversed(Planar.createParallelVertices(guideLine, null, lateralPosition + lateralWidth / 2, lateralPosition + lateralWidth / 2)))
 			result.add(v);
 		return result;
 	}

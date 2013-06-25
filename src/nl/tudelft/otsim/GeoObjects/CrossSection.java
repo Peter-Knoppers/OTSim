@@ -8,6 +8,7 @@ import nl.tudelft.otsim.FileIO.ParsedNode;
 import nl.tudelft.otsim.FileIO.StaXWriter;
 import nl.tudelft.otsim.FileIO.XML_IO;
 import nl.tudelft.otsim.GUI.InputValidator;
+import nl.tudelft.otsim.GeoObjects.Node.DirectionalLink;
 import nl.tudelft.otsim.Utilities.Reversed;
 
 /**
@@ -156,7 +157,7 @@ public class CrossSection implements XML_IO {
 		boolean inner = ((rank % 2 == 0) == countFromLeft) != atEnd;
 		//System.out.println(String.format("side %s", inner ? "inner" : "outer"));
 		CrossSectionElement cse = crossSectionElementFromNode(atEnd, countFromLeft, rank);
-		return inner ? cse.getLinkPointListInner(false, adjust) : cse.getLinkPointListOuter(false, adjust);
+		return inner ? cse.createAndCleanLinkPointListInner(true, true, false) : cse.createAndCleanLinkPointListOuter(true, true, false);
 	}
 
 	/**
@@ -462,6 +463,31 @@ public class CrossSection implements XML_IO {
 		link.network.setModified();
 	}
 
+	/* Retrieve {@link CrossSection CrossSections} from a node with only two links;
+	 * @param node Node; 
+	 * */
+	public static ArrayList<CrossSection> getCrossSectionsAtNode(Node node) {
+    	ArrayList<DirectionalLink> dlList = node.getLinksFromJunction();
+		int inCount = node.incomingCount();
+		int outCount = node.leavingCount();
+		// the simple case: two links 
+		ArrayList<CrossSection> csList = null;
+		if ((inCount == 1) && (outCount == 1))	{
+			// set the neighbour index of the end cross section of the entering
+			// and the starting cross section of the leaving link
+	    	Link fromLink = dlList.get(0).incoming ? dlList.get(0).link : dlList.get(1).link;
+	    	Link toLink = dlList.get(0).incoming ? dlList.get(1).link : dlList.get(0).link;
+	    	if (! fromLink.getFromNode_r().equals(toLink.getToNode_r())) {
+		    	csList = new ArrayList<CrossSection>();
+				CrossSection inCS = fromLink.getCrossSections_r().get(fromLink.getCrossSections_r().size() - 1);
+				CrossSection outCS = toLink.getCrossSections_r().get(0);
+				csList.add(inCS);
+				csList.add(outCS);	
+	    	}
+		}
+		return csList;
+	}
+	
 	/**
 	 * Link the {@link CrossSectionElement CrossSectionElements} of this
 	 * CrossSection to compatible CrossSectionElements of another CrossSection.

@@ -12,18 +12,20 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.index.SpatialIndex;
-import com.vividsolutions.jts.linearref.LinearLocation;
-import com.vividsolutions.jts.linearref.LocationIndexedLine;
+
 import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.GeoObjects.ActivityLocation;
 import nl.tudelft.otsim.GeoObjects.CrossSection;
 import nl.tudelft.otsim.GeoObjects.Lane;
 import nl.tudelft.otsim.GeoObjects.Link;
 import nl.tudelft.otsim.GeoObjects.Vertex;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.index.SpatialIndex;
+import com.vividsolutions.jts.linearref.LinearLocation;
+import com.vividsolutions.jts.linearref.LocationIndexedLine;
 
 /**
  * 
@@ -1053,6 +1055,22 @@ public class Planar {
     	}
 		return result;
 	}
+
+	/**
+	 * Create a polyline with specified offset from a reference polyline. If
+	 * the reference polyline is malformed (double vertices or no vertices),
+	 * the result may be malformed.
+	 * @param referenceVertices ArrayList&lt;{@link Vertex}&gt;; the reference
+	 * polyline
+	 * @param prevReferenceVertices ArrayList&lt;{@link Vertex}&gt;; the reference
+	 * polyline of the preceding design line
+	 * @param lateralPosition Double; offset used for each vertex
+	 * vertices
+	 * @return ArrayList&lt;{@link Vertex}&gt;; the new polyline
+	 */
+    public static ArrayList<Vertex> createParallelVertices(ArrayList<Vertex> referenceVertices, ArrayList<Vertex> prevReferenceVertices, double lateralPosition) {
+    	return createParallelVertices(referenceVertices, prevReferenceVertices, lateralPosition, lateralPosition);
+    }
 	
 	/**
 	 * Create a polyline with specified offset from a reference polyline. If
@@ -1060,20 +1078,27 @@ public class Planar {
 	 * the result may be malformed.
 	 * @param referenceVertices ArrayList&lt;{@link Vertex}&gt;; the reference
 	 * polyline
+	 * @param prevReferenceVertices ArrayList&lt;{@link Vertex}&gt;; the reference
+	 * polyline of the preceding design line
 	 * @param firstLateralPosition Double; offset used for the first vertex
 	 * @param subsequentLateralPosition Double; offset used for all other
 	 * vertices
 	 * @return ArrayList&lt;{@link Vertex}&gt;; the new polyline
 	 */
-    public static ArrayList<Vertex> createParallelVertices(ArrayList<Vertex> referenceVertices, double firstLateralPosition, double subsequentLateralPosition) {
+    public static ArrayList<Vertex> createParallelVertices(ArrayList<Vertex> referenceVertices, ArrayList<Vertex> prevReferenceVertices, double firstLateralPosition, double subsequentLateralPosition) {
     	// Create an ArrayList of vertices at a certain offset from a reference
     	//System.out.println(String.format("\r\ncreateParallelVertices: offset is %f, number of vertices is %d\r\n\t%s", lateralPosition, referenceVertices.size(), referenceVertices.toString()));
     	ArrayList<Vertex> result = new ArrayList<Vertex>();
     	Vertex prevVertex = null;
     	Line2D.Double prevParallel = null;
-    	for (Vertex vertex : referenceVertices) {
-    		if (null != prevVertex)
-    		{
+    	if (prevReferenceVertices != null) {
+    		int size = prevReferenceVertices.size();
+    	    Vertex Vertex1 = prevReferenceVertices.get(size-2);
+    		Vertex vertex2 = prevReferenceVertices.get(size-1);
+			prevParallel = new Line2D.Double(Vertex1.getX(), Vertex1.getY(), vertex2.getX(), vertex2.getY());
+    	}
+    	for (Vertex vertex : referenceVertices) {		
+    		if (null != prevVertex)	{
     			// compute the line parallel to reference line
     			double direction = Math.atan2(vertex.getY() - prevVertex.getY(), vertex.getX() - prevVertex.getX());
     			double perpendicular = direction - Math.PI / 2;
@@ -1115,7 +1140,7 @@ public class Planar {
      * @return ArrayList&lt;{@link Vertex}&gt;; the new polyline
      */
     public static ArrayList<Vertex> createParallelVertices(ArrayList<Vertex> referenceVertices, double lateralPosition) {
-    	return createParallelVertices(referenceVertices, lateralPosition, lateralPosition);
+    	return createParallelVertices(referenceVertices, null, lateralPosition, lateralPosition);
     }
 
     /**

@@ -1,6 +1,7 @@
 package nl.tudelft.otsim.GeoObjects;
 
 import java.awt.Color;
+
 import nl.tudelft.otsim.FileIO.ParsedNode;
 import nl.tudelft.otsim.FileIO.StaXWriter;
 import nl.tudelft.otsim.FileIO.XML_IO;
@@ -329,7 +330,7 @@ public class CrossSectionElementTypology implements XML_IO {
 	 */
 	public Color getColor_r() {
     	if (getDrivable())
-    		return Color.BLACK;
+    		return Color.GRAY;
     	if (getName_r().equals("barrier"))
     		return Color.RED;
     	return Color.GREEN;

@@ -8,6 +8,7 @@ import nl.tudelft.otsim.FileIO.ParsedNode;
 import nl.tudelft.otsim.FileIO.StaXWriter;
 import nl.tudelft.otsim.GeoObjects.Network;
 import nl.tudelft.otsim.Population.Population;
+import nl.tudelft.otsim.ShortesPathAlgorithms.CreatePaths;
 import nl.tudelft.otsim.TrafficDemand.TrafficDemand;
 
 /**

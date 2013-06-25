@@ -2,6 +2,7 @@ package nl.tudelft.otsim.GeoObjects;
 
 import java.awt.Color;
 import java.util.ArrayList;
+
 import nl.tudelft.otsim.FileIO.ParsedNode;
 import nl.tudelft.otsim.FileIO.StaXWriter;
 import nl.tudelft.otsim.GUI.GraphicsPanel;
@@ -84,7 +85,7 @@ public class TurnArrow extends CrossSectionObject {
 	@Override
 	public void paint(GraphicsPanel graphicsPanel) {
 		if (crossSectionElement != null) {
-			if (crossSectionElement.getLinkPointList(CrossSectionElement.LateralReferenceLeft, true) != null)
+			if (crossSectionElement.getVerticesInner() != null)
 				;//System.out.println("no linkPointList for Turn arrow paint");
 			else {
 				double referencePos = longitudinalPosition;
@@ -92,13 +93,13 @@ public class TurnArrow extends CrossSectionObject {
 					referencePos += crossSectionElement.getCrossSection().getLongitudinalLength();
 				for (int repeat = 0; ; repeat++) {
 					double fromDistance = referencePos + longitudinalRepeat * repeat;
-					ArrayList<Vertex> slice = Planar.slicePolyline(crossSectionElement.getLinkPointList(CrossSectionElement.LateralReferenceLeft, true), fromDistance, longitudinalLength);
+					ArrayList<Vertex> slice = Planar.slicePolyline(crossSectionElement.getVerticesInner(), fromDistance, longitudinalLength);
 					if (slice.size() < 2)
 						return;	// improper slice
 					// We only want the first and the last Vertex of the slice
 					while (slice.size() > 2)
 						slice.remove(1);
-					slice = Planar.createParallelVertices(slice, lateralPosition, lateralPosition);
+					slice = Planar.createParallelVertices(slice, null, lateralPosition, lateralPosition);
 					graphicsPanel.setColor(Color.BLUE);
 					// FIXME: draw a proper road surface arrow
 					// Drawing a credible arrow is a bit hard for now

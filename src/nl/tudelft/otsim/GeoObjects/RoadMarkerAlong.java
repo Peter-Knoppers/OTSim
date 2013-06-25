@@ -110,8 +110,8 @@ public class RoadMarkerAlong extends CrossSectionObject implements XML_IO {
 	public void createVertices(CrossSectionElement cse) {
 		if (null == cse)
 			throw new Error ("The crossSectionElement of this RoadMarkerAlong is null");
-		ArrayList<Vertex> innerVertices = cse.getLinkPointListInner(false, true);
-		ArrayList<Vertex> outerVertices = cse.getLinkPointListOuter(false, true);
+		ArrayList<Vertex> innerVertices = cse.createAndCleanLinkPointListInner(false, true, false);
+		ArrayList<Vertex> outerVertices = cse.createAndCleanLinkPointListOuter(false, true, false);
 		while (innerVertices.size() != outerVertices.size()) {
 			System.out.println("RMA: createVertices: inner and outer vertices have unequal length:");
 			System.out.println("inner: " + Planar.verticesToString(innerVertices));
@@ -164,7 +164,7 @@ public class RoadMarkerAlong extends CrossSectionObject implements XML_IO {
 			else
 				throw new Error("Unknown stripe type \"" + stripeType + "\"");
 			double offset = stripeSpacing * (i - (type.length() - 1) / 2.0);
-			ArrayList<Vertex> stripeCenterLine = Planar.createParallelVertices(vertices, offset, offset);
+			ArrayList<Vertex> stripeCenterLine = Planar.createParallelVertices(vertices, null, offset, offset);
 			graphicsPanel.drawPolyLine(stripeCenterLine);
 		}
 	}

@@ -32,6 +32,19 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import nl.tudelft.otsim.Charts.MeasurementPlan;
+import nl.tudelft.otsim.Events.Scheduler;
+import nl.tudelft.otsim.FileIO.ParsedNode;
+import nl.tudelft.otsim.FileIO.StaXWriter;
+import nl.tudelft.otsim.GeoObjects.Network;
+import nl.tudelft.otsim.GeoObjects.Node;
+import nl.tudelft.otsim.ModelIO.ExportModel;
+import nl.tudelft.otsim.ModelIO.ImportModelShapeWizard;
+import nl.tudelft.otsim.ModelIO.LoadModel;
+import nl.tudelft.otsim.ModelIO.SaveModel;
+import nl.tudelft.otsim.Simulators.Simulator;
+import nl.tudelft.otsim.Simulators.LaneSimulator.LaneSimulator;
+import nl.tudelft.otsim.Simulators.RoadwaySimulator.RoadwaySimulator;
+import nl.tudelft.otsim.TrafficDemand.TrafficDemand;
 
 /**
  * This class implements the Main window of OpenTraffic.
@@ -368,7 +381,7 @@ public class Main extends JFrame implements ActionListener {
     	menu.setText(caption);
     	parent.add(menu);
         // Try to load the image from the resources
-        String imgLocation = "/resources/" + iconName;
+        String imgLocation = "/nl/tudelft/otsim/Resources/" + iconName;
         java.net.URL imageURL = Main.mainFrame.getClass().getResource(imgLocation);
         if (imageURL != null)
             menu.setIcon(new ImageIcon(imageURL, caption));
@@ -419,7 +432,7 @@ public class Main extends JFrame implements ActionListener {
     private JButton makeButton(String caption, String toolTipText, String actionCommand, String iconName) {
         JButton button = makeButton("", toolTipText, actionCommand);
         // Try to load the image from the resources
-        String imgLocation = "/resources/" + iconName + ".gif";
+        String imgLocation = "/nl/tudelft/otsim/Resources/" + iconName + ".gif";
         java.net.URL imageURL = Main.mainFrame.getClass().getResource(imgLocation);
         if (imageURL != null) {                     // image found
             button.setIcon(new ImageIcon(imageURL, caption));
@@ -779,7 +792,7 @@ public class Main extends JFrame implements ActionListener {
 	private void loadStorable(Storable storable) {
 		if (! mayDiscardChanges(storable))
 			return;	// cancel Open file operation
-		String fileName = GUI.FileDialog.showFileDialog(true, storable.fileType(), storable.description(), initialDirectory);
+		String fileName = FileDialog.showFileDialog(true, storable.fileType(), storable.description(), initialDirectory);
 		if (null != fileName)
 			loadStorable(storable, fileName);
 	}
@@ -882,7 +895,7 @@ public class Main extends JFrame implements ActionListener {
         fileSelectedNetwork = "";
         mainFrame.setTitle(myName + " - " + fileSelectedNetwork);
     	setActiveGraph();
-        System.out.printf("created new empty network");
+        System.out.println("created new empty network");
 		menuItemSaveModel.setEnabled(true);
 		menuItemExportModel.setEnabled(true);
 	}

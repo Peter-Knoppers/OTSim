@@ -130,6 +130,13 @@ public class Node extends Vertex implements XML_IO {
 				&& staXWriter.writeNodeEnd(XMLTAG);
     }
     
+    /*
+    // Duplicate a node
+    public Node (Network network, Node aNode) {
+        this(network, aNode.getName_r(), aNode.getNodeID(), aNode.getX(), aNode.getY(), aNode.getZ());
+    }
+    */
+    
     /**
      * Retrieve the name of this Node.
      * @return String; the name of this Node
@@ -506,10 +513,6 @@ public class Node extends Vertex implements XML_IO {
 		return vertices;
 	}
 	
-	/**
-	 * Try to link {@link CrossSectionElement CrossSectionElements} of the
-	 * {@link Link Links} that meet at this Node. 
-	 */
 	public void fixGeometry () {
 		System.out.println(String.format("Entering fixGeometry: Directional links at node %d (%s) %s", nodeID, toString(), links.toString()));
 		//conflictArea = null;
@@ -685,7 +688,7 @@ public class Node extends Vertex implements XML_IO {
 		return result;
 	}
 	
-    private void determineSinkOrSource() {
+    public void determineSinkOrSource() {
     	sink = false;
     	source = false;
     	int inCount = incomingCount();
@@ -744,18 +747,31 @@ public class Node extends Vertex implements XML_IO {
 
     }
     
+    
+	public ArrayList<DirectionalLink> getLinksFromJunction()  {
+	    determineSinkOrSource();
+	    ArrayList<DirectionalLink> dlList = null;
+		if (0 == links.size())
+			return dlList;
+		// the number of incoming and leaving links from this node
+
+		// retrieve all directional links that are connected to this node
+		return dlList = getLinks();
+	}
+	
+	/**
+	 * Try to link {@link CrossSectionElement CrossSectionElements} of the
+	 * {@link Link Links} that meet at this Node. 
+	 */
     /**
      * Connect the {@link Link Links} at this Node.
      */
     public void fixLinkConnections() {
-		determineSinkOrSource();
-		if (0 == links.size())
-			return;
-		// the number of incoming and leaving links from this node
+    	
+    	ArrayList<DirectionalLink> dlList = getLinksFromJunction();
 		int inCount = incomingCount();
 		int outCount = leavingCount();
-		// retrieve all directional links that are connected to this node
-		ArrayList<DirectionalLink> dlList = getLinks();
+
 		// Create junction expansion
 		// At junctions every entering link and every exiting link receives a new node
 		// This new node replaces the original one, and gets the coordinates of the driving lane
@@ -767,10 +783,9 @@ public class Node extends Vertex implements XML_IO {
 
 		ArrayList<Link> newLinks = new ArrayList<Link>();
 		// the simple case: two links 
-		if ((inCount == 1) && (outCount == 1))		
-			connectTwoLinks(dlList);
+
 		// a type of junction 
-		else if ((inCount >= 1) && (outCount >= 1) && (inCount + outCount > 2)) {
+		if ((inCount >= 1) && (outCount >= 1) && (inCount + outCount > 2)) {
 			// Expand nodes and create junction connecting links/lanes (connectors)
 			int incomingArm = 0; // index of the incoming arm: start at zero
 			for (DirectionalLink incoming : dlList)   {
@@ -1263,6 +1278,14 @@ public class Node extends Vertex implements XML_IO {
 		}
     }
     
+    
+	/**
+	 * Clean up the way that the {@link CrossSection CrossSections} of this 
+	 * Link are joined.
+	 * @param csList 
+	 */
+	
+    
     public Point2D.Double getConflictIntersectionPoint(ArrayList<Vertex> verticesA, ArrayList<Vertex> verticesB, double longitudinalA, double longitudinalB)   {
 		Vertex prevA = null;
 		Vertex prevB = null;
@@ -1294,42 +1317,6 @@ public class Node extends Vertex implements XML_IO {
 		}
 		return p;
     }
-    
-	// This is probably the easy case
-    private static void connectTwoLinks(ArrayList<DirectionalLink> links) {
-    	// It is guaranteed that there is exactly one incoming and exactly one outgoing link in links
-    	Link fromLink = links.get(0).incoming ? links.get(0).link : links.get(1).link;
-    	Link toLink = links.get(0).incoming ? links.get(1).link : links.get(0).link;
-    	ArrayList<CrossSection> csList = new ArrayList<CrossSection>();
-		CrossSection inCS = fromLink.getCrossSections_r().get(fromLink.getCrossSections_r().size() - 1);
-		CrossSection outCS = toLink.getCrossSections_r().get(0);
-		csList.add(inCS);
-		csList.add(outCS);
-		if (! fromLink.getFromNode_r().equals(toLink.getToNode_r()))  {
-			inCS.linkToCrossSection(outCS); 				
-			Link.connectSuccessiveLanesAtLink(csList);
-			}
-		// Connect the CrossSections UNLESS the other ends of these links are at the same Node (which would create a U-turn)
-
-/*	    for (CrossSectionElement inCSE : inCS.getCrossSectionElementList_r()) {
-	    	if (inCSE.getNeighborIndex() != -1) { 
-	        	CrossSectionElement outCSE = outCS.getCrossSectionElementList_r().get(inCSE.getNeighborIndex());
-	        	outCSE.connectCSE(inCSE);
-	        	if (outCSE.getCrossSectionElementTypology().getDrivable()) {
-	        		if (! (fromLink.getFromNode_r().equals(toLink.getToNode_r()))) {
-				    	outCSE.fixLaneJump(inCSE);
-				    	outCSE.fixLanePoints();
-				    	inCSE.fixLanePoints();
-	        		} else { // U-turn is prohibited!
-	        			for (CrossSectionObject inLane : inCSE.getCrossSectionObjects(Lane.class))
-	        				((Lane) inLane).clearDownLanes();	// sink!
-	        			for (CrossSectionObject outLane : outCSE.getCrossSectionObjects(Lane.class))
-	        				((Lane) outLane).clearUpLanes();	// source!
-	        		}
-	        	}	            		
-	        }
-	    }*/
-	}
     
     private static Lane newLaneConnection(Lane upLane, Lane downLane, boolean createCurve, Lane oldLane, boolean sameOutlink) {
 		// create a new lane that connects the in and outgoing lane 
@@ -1491,7 +1478,7 @@ public class Node extends Vertex implements XML_IO {
     		// Node is not (yet) expanded for this link; create an extra node
 			String nodeName = "" + link.getFromNode_r().getNodeID() + "_" + link.getToNode_r().getNodeID();
 			// TODO: rewrite this using vertexFromNode
-			ArrayList<Vertex> linkPointList = inCse.getLinkPointListInner(true, true);
+			ArrayList<Vertex> linkPointList = inCse.createAndCleanLinkPointListInner(true, true, false);
 			if (linkPointList.size() < 1) {
 				System.err.println("expandNode: linkPointList is too short");
 				return null;	// TODO figure out if this is fatal further down the road
@@ -1517,7 +1504,6 @@ public class Node extends Vertex implements XML_IO {
      * Draw this Node on a GraphicsPanel.
      * @param graphicsPanel GraphicsPanel; graphicsPanel to draw onto
      */
-	@Override
 	public void paint(GraphicsPanel graphicsPanel) {
         final int nonSelectedNodeDiameter = 6;
         final int selectedNodeDiameter = 20;

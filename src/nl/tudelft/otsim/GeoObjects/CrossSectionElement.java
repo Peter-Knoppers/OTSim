@@ -354,18 +354,30 @@ public class CrossSectionElement implements XML_IO {
      * {@link #LateralReferenceCenter}, or {@link #LateralReferenceRight}.
      * @param adjust Boolean; if true, the returned reference line is adjusted
      * to connect to the corresponding preceding CrossSectionElement; if false,
+     * the unadjusted reference line is returned
+     * @param adjustLink Boolean; if true, the returned reference line is adjusted
+     * to connect to the corresponding CrossSectionElement of the preceding link; if false,
      * the unadjusted reference line is returned 
      * @return ArrayList&lt;{@link Vertex}&gt;; the list of vertices that
      * describes the requested reference line
      */
-	public ArrayList<Vertex> getLinkPointList(int lateralReference, boolean adjust) {
-		return generateLinkPointList(lateralReference, adjust);
+	public ArrayList<Vertex> getLinkPointList(int lateralReference, boolean adjust, boolean adjustLink) {
+		return generateLinkPointList(lateralReference, adjust, adjustLink);
 	}
 	
-	private ArrayList<Vertex> generateLinkPointList(int lateralReference, boolean adjust) {
+	private ArrayList<Vertex> generateLinkPointList(int lateralReference, boolean adjust, boolean adjustLink) {
 		if (null == crossSection)
 			throw new Error("parent is null");
         ArrayList<Vertex> referenceVertices = crossSection.getVertices_r();
+        ArrayList<Vertex> prevReferenceVertices = null;
+        if (this.connectedFrom != null && adjustLink) {
+        	prevReferenceVertices = new ArrayList<Vertex> ();
+        	if (lateralReference == LateralReferenceLeft)
+        		prevReferenceVertices = this.connectedFrom.getVerticesInner();
+        	else if (lateralReference == LateralReferenceRight)
+        		prevReferenceVertices = this.connectedFrom.getVerticesOuter();  
+        }
+        
         if (null == referenceVertices)
         	throw new Error("referenceVertices is null");
         if (referenceVertices.size() < 2) {
@@ -375,8 +387,11 @@ public class CrossSectionElement implements XML_IO {
         double myLateralPosition = getLateralPosition(lateralReference);
         double previousLateralPosition = myLateralPosition;
         int myRank = crossSection.getLink().getCrossSections_r().indexOf(crossSection);
-        if (adjust && (null != connectedFrom) && (myRank >= 0))
+        if (adjust && (null != connectedFrom) && (myRank >= 0)) {
         	previousLateralPosition = connectedFrom.getLateralPosition(lateralReference);
+        	if ( crossSection.getLongitudinalPosition_r() == 0)
+        		System.out.println(crossSection.getLink().toString() + "crosssection number " + crossSection.getLongitudinalPosition_r());
+        }
         else if (adjust && (myRank >= 0)) {
         	ArrayList<CrossSectionElement> cseList = crossSection.getCrossSectionElementList_r();
         	int myLateralIndex = cseList.indexOf(this);
@@ -397,19 +412,22 @@ public class CrossSectionElement implements XML_IO {
             			break;
             		}
         		}
-        	if (otherIndex >= cseList.size())
+    		if (otherIndex >= cseList.size())
         		System.out.println("No connected CrossSectionElement found");
         }
-        ArrayList<Vertex> result = Planar.createParallelVertices(referenceVertices, previousLateralPosition, myLateralPosition);
-        if (result.size() < 2)
-        	System.err.println("too short");
+        ArrayList<Vertex> result = Planar.createParallelVertices(referenceVertices, prevReferenceVertices, previousLateralPosition, myLateralPosition);
         ArrayList<CrossSection> csList = crossSection.getLink().getCrossSections_r();
-        if (crossSection == csList.get(0))
+        if (crossSection == csList.get(0) && this.connectedFrom == null)
         	result = crossSection.getLink().getFromNode_r().truncateAtConflictArea(result);
+        //&& ! csList.get(csList.size() - 1).getLink().getToNodeExpand().equals(csList.get(csList.size() - 1).getLink().getToNode_r())
+        if (crossSection == csList.get(csList.size() - 1)  && ! adjustLink)  {
+        	result = crossSection.getLink().getToNode_r().truncateAtConflictArea(result);
+        	if (crossSection.getLongitudinalPosition_r()== 0)
+        		System.out.println("Node at start");       		
+        }
+
         if (result.size() < 2)
         	System.err.println("too short");
-        if (crossSection == csList.get(csList.size() - 1))
-        	result = crossSection.getLink().getToNode_r().truncateAtConflictArea(result);
         return result;
 	}
 
@@ -425,8 +443,8 @@ public class CrossSectionElement implements XML_IO {
 	 * the reference line is not adjusted
 	 * @return {@link Vertex} the selected Vertex from the inner reference line
 	 */
-	public final Vertex getLinkPointInner(int index, boolean cleanup, boolean adjust) {
-		ArrayList<Vertex> list = cleanLinkPointList(generateLinkPointList(LateralReferenceLeft, adjust), cleanup);
+	public final Vertex getLinkPointInner(int index, boolean cleanup, boolean adjust, boolean adjustLink) {
+		ArrayList<Vertex> list = cleanLinkPointList(generateLinkPointList(LateralReferenceLeft, adjust, adjustLink), cleanup);
 		//System.out.print("index=" + index);
 		int useIndex = index;
 		if (useIndex < 0)
@@ -448,8 +466,8 @@ public class CrossSectionElement implements XML_IO {
 	 * the reference line is not adjusted
 	 * @return {@link Vertex} the selected Vertex from the inner reference line
 	 */
-	public Vertex getLinkPointOuter(int index, boolean cleanup, boolean adjust) {
-		ArrayList<Vertex> list = cleanLinkPointList(generateLinkPointList(LateralReferenceRight, adjust), cleanup);
+	public Vertex getLinkPointOuter(int index, boolean cleanup, boolean adjust, boolean adjustLink) {
+		ArrayList<Vertex> list = cleanLinkPointList(generateLinkPointList(LateralReferenceRight, adjust, adjustLink), cleanup);
 		if (index < 0)
 			index = list.size() + index;
 		return list.get(index);
@@ -608,10 +626,14 @@ public class CrossSectionElement implements XML_IO {
 	 * @return ArrayList&lt;{@link Vertex}&gt;; the vertices that describe the
 	 * reference line
 	 */
-	public ArrayList<Vertex> getLinkPointListInner(boolean cleanup, boolean adjust) {
-		return cleanLinkPointList(generateLinkPointList(LateralReferenceLeft, adjust), cleanup);
+	public ArrayList<Vertex> createAndCleanLinkPointListInner(boolean cleanup, boolean adjust, boolean adjustLink) {
+		return cleanLinkPointList(generateLinkPointList(LateralReferenceLeft, adjust, adjustLink), cleanup);
 	}
 
+	public ArrayList<Vertex> createAndCleanLinkPointListOuter(boolean cleanup, boolean adjust, boolean adjustLink) {
+		return cleanLinkPointList(generateLinkPointList(LateralReferenceRight, adjust, adjustLink), cleanup);
+	}
+	
 	public ArrayList<Vertex> getVerticesInner() {
 		return verticesInner;
 	}
@@ -638,8 +660,8 @@ public class CrossSectionElement implements XML_IO {
 	 * @return ArrayList&lt;{@link Vertex}&gt;; the vertices that describe the
 	 * reference line
 	 */
-	public ArrayList<Vertex> getLinkPointListOuter(boolean cleanup, boolean adjust) {
-		return cleanLinkPointList(generateLinkPointList(LateralReferenceRight, adjust), cleanup);
+	public ArrayList<Vertex> getLinkPointListOuter(boolean cleanup, boolean adjust, boolean adjustLink) {
+		return cleanLinkPointList(generateLinkPointList(LateralReferenceRight, adjust, adjustLink), cleanup);
 	}
 
 	/**
@@ -716,13 +738,6 @@ public class CrossSectionElement implements XML_IO {
     	ArrayList<CrossSectionObject> curCSO = getCrossSectionObjects(Lane.class);
     	// is there an increase (or decrease: negative value) of the number of lanes?
     	int increaseOfLanes = curCSO.size() - prevCSECSO.size();
-    	
-/*    	if (increaseOfLanes == 0) {	// number lanes remains the same
-    		ConnectLanes(prevCSECSO, curCSO, 0, 0);	 		
-    	} 
-    	else {
-    		connectUnequalSections(prevCSE, prevCSECSO,  curCSO, increaseOfLanes);
-    	}*/
     	connectUnequalSections(prevCSE, prevCSECSO,  curCSO, increaseOfLanes);
     }
   
@@ -750,7 +765,7 @@ public class CrossSectionElement implements XML_IO {
     private void connectUnequalSections(CrossSectionElement prevCSE, ArrayList<CrossSectionObject> prevCSECSO, ArrayList<CrossSectionObject> curCSO, int increaseOfLanes)   {
     	ArrayList<CrossSectionObject> wide;
     	ArrayList<CrossSectionObject> narrow;
-    	if (increaseOfLanes < 0) {
+    	if (increaseOfLanes <= 0) {
     		wide = prevCSECSO;
     		narrow = curCSO;
     	} else {
@@ -788,11 +803,11 @@ public class CrossSectionElement implements XML_IO {
             	//connect the lanes   
 				if (increaseOfLanes < 0) { 
 					ConnectLanes(wideLaneOne, narrowLane);
-					fixRoadMarkerPoint(prevCSE, this, wideLaneIndex, narrowLaneIndex);
+					//fixRoadMarkerPoint(prevCSE, this, wideLaneIndex, narrowLaneIndex);
 				}
 				else if (increaseOfLanes > 0) {
 					ConnectLanes(narrowLane, wideLaneOne);
-					fixRoadMarkerPoint(prevCSE, this, narrowLaneIndex, wideLaneIndex);
+					//fixRoadMarkerPoint(prevCSE, this, narrowLaneIndex, wideLaneIndex);
 				}
 	    		//reduce the amount of lanes to be connected on both crossSections by 1
 	    		wideLanesToConnect--;
@@ -806,11 +821,11 @@ public class CrossSectionElement implements XML_IO {
 	    				narrowLane = (Lane) narrow.get(narrowLaneIndex);
 	    				if (increaseOfLanes < 0)  {
 	    					ConnectLanes(wideLaneTwo, narrowLane);
-				    		fixRoadMarkerPoint(prevCSE, this, wideLaneIndex, narrowLaneIndex);
+				    		//fixRoadMarkerPoint(prevCSE, this, wideLaneIndex, narrowLaneIndex);
 	    				}
 	    				else if (increaseOfLanes > 0)  {
 	    					ConnectLanes(narrowLane, wideLaneTwo);
-	    					fixRoadMarkerPoint(prevCSE, this, narrowLaneIndex, wideLaneIndex);
+	    					//fixRoadMarkerPoint(prevCSE, this, narrowLaneIndex, wideLaneIndex);
 	    				}
 	    			}
 		    		else if (wide == curCSO)
@@ -835,11 +850,11 @@ public class CrossSectionElement implements XML_IO {
 	    		if (wideLaneIndex == wide.size() - 1) {
     				if (increaseOfLanes < 0)  {
     					ConnectLanes(wideLaneTwo, narrowLane);
-			    		fixRoadMarkerPoint(prevCSE, this, wideLaneIndex, narrowLaneIndex);
+			    		//fixRoadMarkerPoint(prevCSE, this, wideLaneIndex, narrowLaneIndex);
     				}
     				if (increaseOfLanes > 0)  {
     					ConnectLanes(narrowLane, wideLaneTwo);
-    					fixRoadMarkerPoint(prevCSE, this, narrowLaneIndex, wideLaneIndex);
+    					//fixRoadMarkerPoint(prevCSE, this, narrowLaneIndex, wideLaneIndex);
     					//    					fixRoadMarkerPoint(this, prevCSE, indexNarrowLane, indexWideLane);
     				}
 	    		}
@@ -848,27 +863,56 @@ public class CrossSectionElement implements XML_IO {
     }
 
     // Adjust geometry of vertices when number of lanes changes (narrow or widen)
-    private static void fixRoadMarkerPoint(CrossSectionElement prevCSE, CrossSectionElement thisCSE, int upLane , int downLane) {
-    	ArrayList<CrossSectionObject> prevCSERMA = prevCSE.getCrossSectionObjects(RoadMarkerAlong.class); 
-    	int sizeRmaPrev = prevCSERMA.size();
-    	ArrayList<Vertex> lpl = ((RoadMarkerAlong) prevCSERMA.get(0)).getVertices();
+    public static void fixRoadMarkerPoint(ArrayList<CrossSectionObject> prevRMAList, ArrayList<CrossSectionObject> thisRMAList, ArrayList<CrossSectionObject> prevLanes, ArrayList<CrossSectionObject> thisLanes) { 
+    	ArrayList<Vertex> lpl = ((RoadMarkerAlong) prevRMAList.get(0)).getVertices();
     	if (null == lpl) {
     		System.err.println("Network.fixRoadMarkerPoint: rmaVertices is null");
     		return;
     	}
-    	int sizePrevVertices = ((RoadMarkerAlong) prevCSERMA.get(0)).getVertices().size();
-    	ArrayList<CrossSectionObject> thisCSERMA = thisCSE.getCrossSectionObjects(RoadMarkerAlong.class);
-    	int sizeRma = thisCSERMA.size();
+    	int sizePrevVertices = ((RoadMarkerAlong) prevRMAList.get(0)).getVertices().size();
     	// the inner and outerRMA of a lane are adjusted
-    	for (int i = 0; i < 2; i++)  {
-	    	// get the last vertex from the previous RMA
-	    	Vertex vertex = new Vertex(((RoadMarkerAlong) prevCSERMA.get(upLane + i)).getVertices().get(sizePrevVertices - 1));
-			ArrayList<Vertex> vertices = ((RoadMarkerAlong) thisCSERMA.get(downLane + i)).getVertices();
-			if (null == vertices)
-				System.err.println("fixRoadMarkerPoint: vertices is null");
-			else
-				vertices.set(0, vertex);
-    	}
+    	int sizePrevLanes = prevLanes.size();
+    	int sizeThisLane = thisLanes.size();
+    	int iLanePrev = 0;
+    	int jLaneThis = 0;
+    	
+    	//if (sizePrevLanes != sizeThisLane)  {
+    		while (iLanePrev < prevLanes.size() && jLaneThis < thisLanes.size())  {
+	    		Lane prevLane = ((Lane) prevLanes.get(iLanePrev));
+	    		if (prevLane.getDown()==null)  {
+	    			iLanePrev++;
+	    		}
+//	    			System.out.println("test");
+	    		else if (prevLane.getDown().size() > 0)  {
+		    		if (prevLane.getDown().get(0).equals(thisLanes.get(jLaneThis))) {
+		    			for (int i = 0; i < 2; i++)  {
+			    			lpl = ((RoadMarkerAlong) prevRMAList.get(iLanePrev + i)).getVertices();
+			    			Vertex vertex = new Vertex(lpl.get(sizePrevVertices - 1));
+			    			ArrayList<Vertex> vertices = ((RoadMarkerAlong) thisRMAList.get(jLaneThis + i)).getVertices();
+			    			if (null == vertices)
+			    				System.err.println("fixRoadMarkerPoint: vertices is null");
+			    			else
+			    				vertices.set(0, vertex);
+			    			createLaneVertices(thisRMAList, thisLanes);
+		    			}
+		    			iLanePrev++;
+		    			jLaneThis++;
+		    		}
+		    		else {
+		    	    	if (sizePrevLanes < sizeThisLane)     			
+		    	    		jLaneThis++;
+		    	    	else if (sizePrevLanes > sizeThisLane)     			
+		        	    	iLanePrev++;
+		    	    	else if (sizePrevLanes == sizeThisLane)   {
+		    	    		jLaneThis++;
+		    	    		System.out.println("STRANGE");
+		    	    	}
+		    		}
+	    		}
+	    		else
+	    			iLanePrev++;
+    		}
+    	//}
     }
     
     /**
@@ -902,28 +946,7 @@ public class CrossSectionElement implements XML_IO {
     	}
     }
 
-    public void connectCSE(CrossSectionElement prevCSE) {	
-		if (prevCSE.getNeighborIndex() == this.getNeighborIndex() )  {
-			int size = prevCSE.getLinkPointListInner(false, false).size();
-			Vertex p1 = prevCSE.getLinkPointInner(size-2, false, false); 
-			Vertex p2 = prevCSE.getLinkPointInner(size-1, false, false); 
-			Vertex p3 = this.getLinkPointInner(0, false, false); 
-			Vertex p4 = this.getLinkPointInner(1, false, false);
-			if (! p2.equals2D(p3))  {
-				if (Planar.lineSegmentIntersectsLineSegment(p1.getPoint(), p2.getPoint(), p3.getPoint(), p4.getPoint()) ); {
-					Line2D.Double l1 = new Line2D.Double(p1.getPoint(),p2.getPoint());
-					Line2D.Double l2 = new Line2D.Double(p3.getPoint(),p4.getPoint());
-					Point2D.Double p = Planar.intersection(l1, l2);
-					if (p != null)   {
-						p2.setX(p.getX());
-						p2.setY(p.getY());
-						p3.setX(p.getX());
-						p3.setY(p.getY());
-					}
-				}
-			}
-		}
-    }
+
     /**
      * Re-generate the {@link Lane Lanes} of this CrossSectionElement
      */
@@ -1006,7 +1029,7 @@ public class CrossSectionElement implements XML_IO {
 			objects.add(lane);
 	}
 	
-	public void createLaneVertices(ArrayList<CrossSectionObject> RMAList, ArrayList<CrossSectionObject> laneList)  {
+	public static void createLaneVertices(ArrayList<CrossSectionObject> RMAList, ArrayList<CrossSectionObject> laneList)  {
 		RoadMarkerAlong rmaPrev = null;
 		int j = 0;
 		for (CrossSectionObject cso : RMAList) {
@@ -1064,30 +1087,27 @@ public class CrossSectionElement implements XML_IO {
 		return lane;
     }
 
-    
-    
+   
     /**
      * Draw this CrossSectionElement on a {@link GraphicsPanel}
      * @param graphicsPanel {@link GraphicsPanel} to draw on
      */
 
     public void paint(GraphicsPanel graphicsPanel) {
-    	//if (getCrossSectionElementTypology().getDrivable())
-    	//	System.out.println("Drivable polygon");
-    	//ArrayList<Vertex> inner = getLinkPointListInner(false, true);
-    	//ArrayList<Vertex> outer = getLinkPointListOuter(false, true);
     	ArrayList<Vertex> inner = getVerticesInner();
     	ArrayList<Vertex> outer = getVerticesOuter();
-    	Point2D.Double[] outline = new Point2D.Double[inner.size() + outer.size()];
-    	int nextPoint = 0;
-    	for (Vertex v : inner)
-    		outline[nextPoint++] = new Point2D.Double(v.getX(), v.getY());
-    	nextPoint = outline.length;
-    	for (Vertex v : outer)	// reverse the outer point list
-    		outline[--nextPoint] = v.getPoint();
-    	if (! crossSection.getLink().isAutoGenerated()) {
-    		graphicsPanel.setColor(getCrossSectionElementTypology().getColor_r());
-    		graphicsPanel.drawPolygon(outline);
+    	if (inner != null && outer != null )  {
+	    	Point2D.Double[] outline = new Point2D.Double[inner.size() + outer.size()];
+	    	int nextPoint = 0;
+	    	for (Vertex v : inner)
+	    		outline[nextPoint++] = new Point2D.Double(v.getX(), v.getY());
+	    	nextPoint = outline.length;
+	    	for (Vertex v : outer)	// reverse the outer point list
+	    		outline[--nextPoint] = v.getPoint();
+	    	//if (! crossSection.getLink().isAutoGenerated()) {
+	    		graphicsPanel.setColor(getCrossSectionElementTypology().getColor_r());
+	    		graphicsPanel.drawPolygon(outline);
+	    	//}
     	}
     	//if (getCrossSectionElementTypology().getDrivable())
     	//	System.out.println("drivable polygon" + GeometryTools.pointsToString(outline));
@@ -1099,6 +1119,7 @@ public class CrossSectionElement implements XML_IO {
 		for (CrossSectionObject cso : objects)
 			if ((! (cso instanceof RoadMarkerAlong)) && (! (cso instanceof Lane)))
 				cso.paint(graphicsPanel);
+
     }
     private boolean writeCrossSectionObjectsXML(StaXWriter staXWriter) {
     	for (CrossSectionObject cso : getCrossSectionObjects(CrossSectionObject.class))

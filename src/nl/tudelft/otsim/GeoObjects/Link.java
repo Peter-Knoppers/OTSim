@@ -9,6 +9,7 @@ import nl.tudelft.otsim.FileIO.ParsedNode;
 import nl.tudelft.otsim.FileIO.StaXWriter;
 import nl.tudelft.otsim.FileIO.XML_IO;
 import nl.tudelft.otsim.GUI.InputValidator;
+import nl.tudelft.otsim.GeoObjects.Node.DirectionalLink;
 import nl.tudelft.otsim.SpatialTools.Planar;
 import nl.tudelft.otsim.Utilities.Reversed;
 
@@ -484,23 +485,49 @@ public class Link implements XML_IO {
    		CrossSection csPrev = null;
    		for (CrossSection cs : csList) {
         	if (csPrev != null)  {
-                for (CrossSectionElement csePrev : csPrev.getCrossSectionElementList_r()) {
-                    if (csePrev.getCrossSectionElementTypology().getDrivable()) {
-                    	int neighborIndex = csePrev.getNeighborIndex();
-                    	// There is no guarantee that every drive-able CrossSectionElement gets linked
-                    	if (neighborIndex < 0)
-                    		continue;
-                    	CrossSectionElement cse = cs.getCrossSectionElementList_r().get(neighborIndex);
-				    	cse.fixLaneJump(csePrev);
-				    	//cse.fixLanePoints();
-				    	//csePrev.fixLanePoints();
-                    }
-             	}
+        		connectSectionElements(csPrev, cs);
             }
         	csPrev = cs;
    		}
 	}
+	
+	public static void connectSuccessiveLanesAtNode(Node node) {
+    	ArrayList<DirectionalLink> dlList = node.getLinksFromJunction();
+		int inCount = node.incomingCount();
+		int outCount = node.leavingCount();
+		// the simple case: two links 
+		if ((inCount == 1) && (outCount == 1) )	{
+			// set the neighbour index of the end cross section of the entering
+			// and the starting cross section of the leaving link
+	    	Link fromLink = dlList.get(0).incoming ? dlList.get(0).link : dlList.get(1).link;
+	    	Link toLink = dlList.get(0).incoming ? dlList.get(1).link : dlList.get(0).link;
+	    	if (! fromLink.getFromNode_r().equals(toLink.getToNode_r())) {
+		    	ArrayList<CrossSection> csList = new ArrayList<CrossSection>();
+				CrossSection inCS = fromLink.getCrossSections_r().get(fromLink.getCrossSections_r().size() - 1);
+				CrossSection outCS = toLink.getCrossSections_r().get(0);
+				csList.add(inCS);
+				csList.add(outCS);
+				if (! fromLink.getFromNode_r().equals(toLink.getToNode_r()))  {
+					inCS.linkToCrossSection(outCS); 				
+				}
+				connectSectionElements(inCS, outCS);	
+	    	}
+		}
+	}
 
+	public static void connectSectionElements(CrossSection csPrev, CrossSection cs)   {
+	    for (CrossSectionElement csePrev : csPrev.getCrossSectionElementList_r()) {
+	        if (csePrev.getCrossSectionElementTypology().getDrivable()) {
+	        	int neighborIndex = csePrev.getNeighborIndex();
+	        	// There is no guarantee that every drive-able CrossSectionElement gets linked
+	        	if (neighborIndex < 0)
+	        		continue;
+	        	CrossSectionElement cse = cs.getCrossSectionElementList_r().get(neighborIndex);
+		    	cse.fixLaneJump(csePrev);
+	        }
+	 	}
+	}
+    
 	private boolean writeXMLVertices(StaXWriter staXWriter) {
 		for (Vertex v : getIntermediateVertices_r())
 			if (! (staXWriter.writeNodeStart(XML_VERTICES)

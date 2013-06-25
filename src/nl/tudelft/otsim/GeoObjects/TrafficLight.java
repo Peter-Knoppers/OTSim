@@ -276,9 +276,9 @@ public class TrafficLight extends CrossSectionObject {
 	 * TrafficLight
 	 */
 	public ArrayList<Vertex> getPolygon_r() {
-		ArrayList<Vertex> guideLine = Planar.slicePolyline(crossSectionElement.getLinkPointList(lateralReference, true), longitudinalPosition, longitudinalLength);
-		ArrayList<Vertex> result = Planar.createParallelVertices(guideLine, -lateralWidth / 2,  -lateralWidth / 2);
-		for (Vertex v : Reversed.reversed(Planar.createParallelVertices(guideLine, lateralWidth / 2, lateralWidth / 2)))
+		ArrayList<Vertex> guideLine = Planar.slicePolyline(crossSectionElement.getLinkPointList(lateralReference, true, false), longitudinalPosition, longitudinalLength);
+		ArrayList<Vertex> result = Planar.createParallelVertices(guideLine, null, -lateralWidth / 2,  -lateralWidth / 2);
+		for (Vertex v : Reversed.reversed(Planar.createParallelVertices(guideLine, null, lateralWidth / 2, lateralWidth / 2)))
 			result.add(v);
 		return result;
 	}

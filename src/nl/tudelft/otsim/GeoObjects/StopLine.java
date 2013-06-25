@@ -161,8 +161,8 @@ public class StopLine extends CrossSectionObject {
 	public void paint(GraphicsPanel graphicsPanel) {
 		if (null == crossSectionElement)
 			return;
-		ArrayList<Vertex> outLine = Planar.slicePolyline(crossSectionElement.getLinkPointList(CrossSectionElement.LateralReferenceLeft, true), longitudinalPosition, longitudinalLength);
-		ArrayList<Vertex> add = Planar.slicePolyline(crossSectionElement.getLinkPointList(CrossSectionElement.LateralReferenceRight, true), longitudinalPosition, longitudinalLength);		
+		ArrayList<Vertex> outLine = Planar.slicePolyline(crossSectionElement.getLinkPointList(CrossSectionElement.LateralReferenceLeft, true, false), longitudinalPosition, longitudinalLength);
+		ArrayList<Vertex> add = Planar.slicePolyline(crossSectionElement.getLinkPointList(CrossSectionElement.LateralReferenceRight, true, false), longitudinalPosition, longitudinalLength);		
 		ArrayList<Vertex> result = new ArrayList<Vertex>();
 		for (int i = 0; i < outLine.size(); i++) {
 			result.add(Vertex.weightedVertex(this.lateralPosition / crossSectionElement.getWidth_r(), outLine.get(i), add.get(i)));
