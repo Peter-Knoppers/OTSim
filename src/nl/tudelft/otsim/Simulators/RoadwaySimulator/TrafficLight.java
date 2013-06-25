@@ -33,7 +33,7 @@ public class TrafficLight implements SimulatedTrafficLight {
 	/**
 	 * Set the color of this SimulatedTrafficLight.
 	 * <br /> This method should only be called by the
-	 * {@link SimulatedTrafficLightController} that controls this 
+	 * {@link nl.tudelft.otsim.Simulators.SimulatedTrafficLightController} that controls this 
 	 * SimulatedTrafficLight.
 	 * @param newColor Color; the new color of this SimulatedTrafficLight
 	 */

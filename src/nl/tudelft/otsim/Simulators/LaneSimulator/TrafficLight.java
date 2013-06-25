@@ -23,7 +23,7 @@ public class TrafficLight extends RSU implements SimulatedTrafficLight {
      * Constructor that sets the traffic light as noticeable.
      * @param lane Lane where the traffic light is at.
      * @param position Position on the lane.
-     * @param name String; name of this traffic light for communication with a {@link Simulators.SimulatedTrafficLightController}
+     * @param name String; name of this traffic light for communication with a {@link nl.tudelft.otsim.Simulators.SimulatedTrafficLightController}
      * @param outline Point2D.Double[] polygon of this traffic light
      */
     public TrafficLight(Lane lane, double position, String name, Point2D.Double outline[]) {

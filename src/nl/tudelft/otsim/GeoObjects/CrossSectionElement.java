@@ -493,7 +493,7 @@ public class CrossSectionElement implements XML_IO {
 	 * Retrieve a list of {@link CrossSectionObject CrossSectionObjects} of 
 	 * this CrossSectionElement.
 	 * <br /> This method is provided primarily for the 
-	 * {@link GUI.ObjectInspector}.
+	 * {@link nl.tudelft.otsim.GUI.ObjectInspector}.
 	 * @return ArrayList&lt;{@link CrossSectionObject}&gt; the list of all
 	 * CrossSectionObjects of this CrossSectionElement
 	 */
@@ -522,7 +522,7 @@ public class CrossSectionElement implements XML_IO {
 	
 	/**
 	 * Create an item list for {@link CrossSectionObject CrossSectionObjects}
-	 * that can be added through the {@link GUI.ObjectInspector}.
+	 * that can be added through the {@link nl.tudelft.otsim.GUI.ObjectInspector}.
 	 * @return ArrayList&lt;String&gt;; the list of item texts
 	 */
 	public ArrayList<String> itemizeAdd_i () {
@@ -535,7 +535,7 @@ public class CrossSectionElement implements XML_IO {
 	
 	/**
 	 * Return a fixed string to be used to label the tree node in the
-	 * {@link GUI.ObjectInspector} that must be clicked to add a
+	 * {@link nl.tudelft.otsim.GUI.ObjectInspector} that must be clicked to add a
 	 * {@link CrossSectionObject} to this CrossSectionElement.
 	 * @return String; <code>"new cross section object"</code>
 	 */

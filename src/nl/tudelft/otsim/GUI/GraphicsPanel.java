@@ -60,8 +60,8 @@ public class GraphicsPanel extends JPanel implements MouseListener, MouseMotionL
 	}
 	
 	/**
-	 * Convert coordinates from {@link GeoObjects.Network Network}, or 
-	 * {@link Simulators.Simulator Simulator} space to the coordinate system of 
+	 * Convert coordinates from {@link nl.tudelft.otsim.GeoObjects.Network Network}, or 
+	 * {@link nl.tudelft.otsim.Simulators.Simulator Simulator} space to the coordinate system of 
 	 * the JPanel that displays the Network, or Simulator. 
 	 * @param p Point2D.Double; the point to be converted
 	 * @return Point2D.Double; the converted point
@@ -78,8 +78,8 @@ public class GraphicsPanel extends JPanel implements MouseListener, MouseMotionL
 	
 	/**
 	 * Convert coordinates from the coordinate system of the JPanel that
-	 * displays the {@link GeoObjects.Network Network}, or 
-	 * {@link Simulators.Simulator Simulator} to Network, or Simulator space.
+	 * displays the {@link nl.tudelft.otsim.GeoObjects.Network Network}, or 
+	 * {@link nl.tudelft.otsim.Simulators.Simulator Simulator} to Network, or Simulator space.
 	 * @param p Point2D.Double; the point to be converted
 	 * @return Point2D.Double; the converted point
 	 */
@@ -94,7 +94,7 @@ public class GraphicsPanel extends JPanel implements MouseListener, MouseMotionL
 	 * Change the pan setting of this GraphicsPanel.
 	 * <br />
 	 * The pan setting arguments are in pixels on the JPanel that displays the
-	 * {@link GeoObjects.Network}, or {@link Simulators.Simulator Simulator}.
+	 * {@link nl.tudelft.otsim.GeoObjects.Network}, or {@link nl.tudelft.otsim.Simulators.Simulator Simulator}.
 	 * @param panX Double; X-coordinate of the new pan setting
 	 * @param panY Double; Y-coordinate of the new pan setting
 	 */
@@ -108,8 +108,8 @@ public class GraphicsPanel extends JPanel implements MouseListener, MouseMotionL
 	 * Shift the pan setting of this GraphicsPanel.
 	 * <br />
 	 * The shift is specified in pixels on the JPanel that displays the
-	 * {@link GeoObjects.Network Network}, or
-	 * {@link Simulators.Simulator Simulator}.
+	 * {@link nl.tudelft.otsim.GeoObjects.Network Network}, or
+	 * {@link nl.tudelft.otsim.Simulators.Simulator Simulator}.
 	 * @param deltaX Double; difference for the X-coordinate of the pan setting
 	 * @param deltaY Double; difference for the Y-coordinate of the pan setting 
 	 */
@@ -121,8 +121,8 @@ public class GraphicsPanel extends JPanel implements MouseListener, MouseMotionL
 	 * Retrieve the current pan setting.
 	 * <br />
 	 * The pan setting arguments are in pixels on the JPanel that displays the
-	 * {@link GeoObjects.Network Network}, or 
-	 * {@link Simulators.Simulator Simulator}. 
+	 * {@link nl.tudelft.otsim.GeoObjects.Network Network}, or 
+	 * {@link nl.tudelft.otsim.Simulators.Simulator Simulator}. 
 	 * @return Point2D.Double; the current pan setting
 	 */
 	public Point2D.Double getPan() {
@@ -212,8 +212,8 @@ public class GraphicsPanel extends JPanel implements MouseListener, MouseMotionL
     /**
      * Draw a line on this GraphicsPanel in the current Color and Stroke.
      * @param from Point2D.Double; start of the line in 
-     * {@link GeoObjects.Network Network}, or
-     * {@link Simulators.Simulator Simulator} coordinates
+     * {@link nl.tudelft.otsim.GeoObjects.Network Network}, or
+     * {@link nl.tudelft.otsim.Simulators.Simulator Simulator} coordinates
      * @param to Point2D.Double; end of the line in  Network, or Simulator 
      * coordinates
      */
@@ -229,8 +229,8 @@ public class GraphicsPanel extends JPanel implements MouseListener, MouseMotionL
      * Draw a line along a series of points using the current Color and Stroke.
      * @param points Array of Point2D.Double; the points to draw the line
      * along. These coordinates must be specified in 
-     * {@link GeoObjects.Network Network}, or
-     * {@link Simulators.Simulator Simulator} coordinates.
+     * {@link nl.tudelft.otsim.GeoObjects.Network Network}, or
+     * {@link nl.tudelft.otsim.Simulators.Simulator Simulator} coordinates.
      */
     public void drawPolyLine(Point2D.Double[] points) {
     	if (null == g2)
@@ -251,8 +251,8 @@ public class GraphicsPanel extends JPanel implements MouseListener, MouseMotionL
      * Draw a line along a series of points using the current Color and Stroke.
      * @param vertices ArrayList&lt;Point2D.Double&gt; List of points to draw the
      * line along. These coordinates must be specified in 
-     * {@link GeoObjects.Network Network}, or
-     * {@link Simulators.Simulator Simulator} coordinates.
+     * {@link nl.tudelft.otsim.GeoObjects.Network Network}, or
+     * {@link nl.tudelft.otsim.Simulators.Simulator Simulator} coordinates.
      */
     public void drawPolyLine(ArrayList<Vertex> vertices) {
     	if (null == g2)
@@ -274,8 +274,8 @@ public class GraphicsPanel extends JPanel implements MouseListener, MouseMotionL
      * automatically.
      * @param points Array of Point2D.Double, or {@link Vertex}; the points 
      * to draw the line along. These coordinates must be specified in 
-     * {@link GeoObjects.Network Network}, or
-     * {@link Simulators.Simulator Simulator} coordinates.
+     * {@link nl.tudelft.otsim.GeoObjects.Network Network}, or
+     * {@link nl.tudelft.otsim.Simulators.Simulator Simulator} coordinates.
      */
 	public void drawPolygon(Object[] points) {
     	if (null == g2)
@@ -314,9 +314,9 @@ public class GraphicsPanel extends JPanel implements MouseListener, MouseMotionL
     }
     
     /**
-     * Translate a Path2D from {@link GeoObjects.Network Network}, or 
-	 * {@link Simulators.Simulator Simulator} space to the coordinate system of 
-	 * the JPanel that displays the Network, or Simulator.  
+     * Translate a Path2D from {@link nl.tudelft.otsim.GeoObjects.Network Network}, or 
+	 * {@link nl.tudelft.otsim.Simulators.Simulator Simulator} space to the 
+	 * coordinate system of the JPanel that displays the Network, or Simulator.  
      * @param path Path2D; the path to translate
      * @return GeneralPath; the translated path
      */
@@ -357,8 +357,8 @@ public class GraphicsPanel extends JPanel implements MouseListener, MouseMotionL
 	 * locations.
 	 * @param points Array of Point2D.Double; the points to highlight.
      * These coordinates must be specified in 
-     * {@link GeoObjects.Network Network}, or
-     * {@link Simulators.Simulator Simulator} coordinates.
+     * {@link nl.tudelft.otsim.GeoObjects.Network Network}, or
+     * {@link nl.tudelft.otsim.Simulators.Simulator Simulator} coordinates.
 	 */
     public void drawPoints(Point2D.Double[] points) {
     	if (null == g2)
@@ -376,8 +376,8 @@ public class GraphicsPanel extends JPanel implements MouseListener, MouseMotionL
      * size of the X is 6 by 6 pixels.
      * @param points Array of Point2D.Double; the points to highlight.
      * These coordinates must be specified in 
-     * {@link GeoObjects.Network Network}, or 
-     * {@link Simulators.Simulator Simulator} coordinates.
+     * {@link nl.tudelft.otsim.GeoObjects.Network Network}, or 
+     * {@link nl.tudelft.otsim.Simulators.Simulator Simulator} coordinates.
      */
     public void drawX(Point2D.Double[] points) {
     	if (null == g2)

@@ -228,8 +228,8 @@ public class TrafficLight extends CrossSectionObject {
 	}
 	
 	/**
-	 * Return a caption to use for the pop up menu of the {@link GUI.ObjectInspector}.
-	 * @return String; caption for the pop up menu of the {@link GUI.ObjectInspector}
+	 * Return a caption to use for the pop up menu of the {@link nl.tudelft.otsim.GUI.ObjectInspector}.
+	 * @return String; caption for the pop up menu of the {@link nl.tudelft.otsim.GUI.ObjectInspector}
 	 */
 	@SuppressWarnings("static-method")
 	public String itemizeTrafficLightController_caption() {
@@ -312,7 +312,7 @@ public class TrafficLight extends CrossSectionObject {
 	
 	/**
 	 * A TrafficLight can always be deleted.
-	 * <br /> This method is only used by the {@link GUI.ObjectInspector}.
+	 * <br /> This method is only used by the {@link nl.tudelft.otsim.GUI.ObjectInspector}.
 	 * @return Boolean; always true
 	 */
 	@SuppressWarnings("static-method")

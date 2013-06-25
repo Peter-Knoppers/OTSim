@@ -29,23 +29,23 @@ public abstract class Simulator implements GraphicsPanelClient {
 	/**
 	 * This method is called when the simulator is to be shut down. The
 	 * Simulator should close all files and sockets when this method is called.
-	 * <br /> All {@link Events.Step} events queued in the {@link Scheduler} of the
+	 * <br /> All {@link nl.tudelft.otsim.Events.Step} events queued in the {@link Scheduler} of the
 	 * simulator are removed (by the Scheduler) <b>after</b? the call to Shutdown.
 	 * This ensures that the Simulator can call the 
-	 * {@link Scheduler#scheduledEvents} method of the Scheduler inside ShutDown
+	 * {@link nl.tudelft.otsim.Events.Scheduler#scheduledEvents} method of the Scheduler inside ShutDown
 	 * to obtain a list of all pending events.
 	 */
 	abstract public void Shutdown ();
 	/**
 	 * This method is called before one or more calls to the 
-	 * {@link Events.Step#step} method of 
-	 * {@link Events.Step} objects in this Simulator.
+	 * {@link nl.tudelft.otsim.Events.Step#step} method of 
+	 * {@link nl.tudelft.otsim.Events.Step} objects in this Simulator.
 	 */
 	abstract public void preStep();
 	/**
 	 * This method is called after one or more calls to the
-	 * {@link Events.Step#step} method of 
-	 * {@link Events.Step} objects in this Simulator.
+	 * {@link nl.tudelft.otsim.Events.Step#step} method of 
+	 * {@link nl.tudelft.otsim.Events.Step} objects in this Simulator.
 	 */
 	abstract public void postStep();
 	/**

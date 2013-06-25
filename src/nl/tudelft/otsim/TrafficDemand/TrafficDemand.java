@@ -63,7 +63,7 @@ public class TrafficDemand implements Storable {
 	/**
 	 * This methods creates node Paths
 	 * The {@link TripPattern} list contains information of different types of locations:
-	 * {@link MicroZone} or {@link GeoObjects.PolyZone} objects; these zones may refer to a list of 
+	 * {@link MicroZone} or {@link nl.tudelft.otsim.GeoObjects.PolyZone} objects; these zones may refer to a list of 
 	 * {@link Node} elements 
 	 * {@link ActivityLocation} objects
 	 * {@link Node} objects

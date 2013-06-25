@@ -264,8 +264,8 @@ public class Node extends Vertex implements XML_IO {
 	}
 	
 	/**
-	 * Retrieve the {@link GeoInfraCreation.Circle} that indicates the extent of this Node.
-	 * @return {@link GeoInfraCreation.Circle}; circle that indicates the extent of this Node.
+	 * Retrieve the {@link nl.tudelft.otsim.SpatialTools.Circle} that indicates the extent of this Node.
+	 * @return {@link nl.tudelft.otsim.SpatialTools.Circle}; circle that indicates the extent of this Node.
 	 */
 	public final Circle getCircle() {
 		return circle;
@@ -1278,13 +1278,6 @@ public class Node extends Vertex implements XML_IO {
 		}
     }
     
-    
-	/**
-	 * Clean up the way that the {@link CrossSection CrossSections} of this 
-	 * Link are joined.
-	 * @param csList 
-	 */
-	
     
     public Point2D.Double getConflictIntersectionPoint(ArrayList<Vertex> verticesA, ArrayList<Vertex> verticesB, double longitudinalA, double longitudinalB)   {
 		Vertex prevA = null;
