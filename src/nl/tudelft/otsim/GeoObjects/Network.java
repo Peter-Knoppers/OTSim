@@ -33,8 +33,6 @@ import nl.tudelft.otsim.GUI.ObjectInspector;
 import nl.tudelft.otsim.GUI.Storable;
 import nl.tudelft.otsim.SpatialTools.Planar;
 
-import org.opengis.metadata.spatial.GeometricObjects;
-
 /**
  * The Network class holds the geographical information about a network.
  * <br />

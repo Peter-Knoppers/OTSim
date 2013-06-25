@@ -1,6 +1,5 @@
 package nl.tudelft.otsim.GeoObjects;
 
-import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -441,6 +440,9 @@ public class CrossSectionElement implements XML_IO {
 	 * @param adjust Boolean; if true, the reference line is adjusted to
 	 * connect to the corresponding preceding CrossSectionElement; if false,
 	 * the reference line is not adjusted
+	 * @param adjustLink Boolean; if true; the result is adjusted to connect
+	 * to the preceding CrossSectionElement; if false; no such adjustment is
+	 * performed
 	 * @return {@link Vertex} the selected Vertex from the inner reference line
 	 */
 	public final Vertex getLinkPointInner(int index, boolean cleanup, boolean adjust, boolean adjustLink) {
@@ -464,6 +466,9 @@ public class CrossSectionElement implements XML_IO {
 	 * @param adjust Boolean; if true, the reference line is adjusted to
 	 * connect to the corresponding preceding CrossSectionElement; if false,
 	 * the reference line is not adjusted
+	 * @param adjustLink Boolean; if true; the result is adjusted to connect
+	 * to the preceding CrossSectionElement; if false; no such adjustment is
+	 * performed
 	 * @return {@link Vertex} the selected Vertex from the inner reference line
 	 */
 	public Vertex getLinkPointOuter(int index, boolean cleanup, boolean adjust, boolean adjustLink) {
@@ -657,6 +662,9 @@ public class CrossSectionElement implements XML_IO {
 	 * @param adjust Boolean; if true, the reference line is adjusted to
 	 * connect to the corresponding preceding CrossSectionElement; if false,
 	 * the reference line is not adjusted
+	 * @param adjustLink Boolean; if true; the result is adjusted to connect
+	 * to the preceding CrossSectionElement; if false; no such adjustment is
+	 * performed
 	 * @return ArrayList&lt;{@link Vertex}&gt;; the vertices that describe the
 	 * reference line
 	 */
@@ -762,7 +770,7 @@ public class CrossSectionElement implements XML_IO {
     	}
     }
     
-    private void connectUnequalSections(CrossSectionElement prevCSE, ArrayList<CrossSectionObject> prevCSECSO, ArrayList<CrossSectionObject> curCSO, int increaseOfLanes)   {
+    private static void connectUnequalSections(CrossSectionElement prevCSE, ArrayList<CrossSectionObject> prevCSECSO, ArrayList<CrossSectionObject> curCSO, int increaseOfLanes)   {
     	ArrayList<CrossSectionObject> wide;
     	ArrayList<CrossSectionObject> narrow;
     	if (increaseOfLanes <= 0) {
@@ -1029,7 +1037,7 @@ public class CrossSectionElement implements XML_IO {
 			objects.add(lane);
 	}
 	
-	public static void createLaneVertices(ArrayList<CrossSectionObject> RMAList, ArrayList<CrossSectionObject> laneList)  {
+	private static void createLaneVertices(ArrayList<CrossSectionObject> RMAList, ArrayList<CrossSectionObject> laneList)  {
 		RoadMarkerAlong rmaPrev = null;
 		int j = 0;
 		for (CrossSectionObject cso : RMAList) {

@@ -101,6 +101,10 @@ public class Vertex {
 			throw new Exception("Incompletely defined Vertex");
 	}
 
+	/**
+	 * Create a Vertex from a Coordinate.
+	 * @param coordinate {@link com.vividsolutions.jts.geom.Coordinate}; the Coordinate to create a Vertex from
+	 */
 	public Vertex(Coordinate coordinate) {
 		x = coordinate.x;
 		y = coordinate.y;
