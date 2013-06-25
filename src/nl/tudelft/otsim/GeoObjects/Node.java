@@ -42,7 +42,7 @@ public class Node extends Vertex implements XML_IO {
     private boolean source = false;
 	private TreeSet<DirectionalLink> links = null;
 	ArrayList<Vertex> conflictArea;
-	ArrayList<ArrayList<Vertex>> closingLines;
+	ArrayList<ArrayList<Vertex>> closingLines = new ArrayList<ArrayList<Vertex>>();
 	private Network network;
 	Circle circle;
 

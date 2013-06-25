@@ -126,7 +126,7 @@
       <name>drie_1_3</name>
       <fromNode>1</fromNode>
       <toNode>3</toNode>
-      <distance>100.4987562112089</distance>
+      <distance>100.49875621120891</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -271,7 +271,7 @@
       <name>nul_0_1</name>
       <fromNode>0</fromNode>
       <toNode>1</toNode>
-      <distance>316.2277660168379</distance>
+      <distance>316.22776601683796</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -567,7 +567,7 @@
       <name>twee_3_1</name>
       <fromNode>3</fromNode>
       <toNode>1</toNode>
-      <distance>100.4987562112089</distance>
+      <distance>100.49875621120891</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -617,13 +617,6 @@
           <name>road</name>
           <width>16.0</width>
           <vehicleDetector>
-            <ID>VD_1114</ID>
-            <lateralCenter>-5.0</lateralCenter>
-            <width>3.0</width>
-            <length>10.0</length>
-            <longitudinalPosition>0.0</longitudinalPosition>
-          </vehicleDetector>
-          <vehicleDetector>
             <ID>VD_1111</ID>
             <lateralCenter>-5.0</lateralCenter>
             <width>3.0</width>
@@ -631,8 +624,8 @@
             <longitudinalPosition>22.0</longitudinalPosition>
           </vehicleDetector>
           <vehicleDetector>
-            <ID>VD_1115</ID>
-            <lateralCenter>-1.0</lateralCenter>
+            <ID>VD_1114</ID>
+            <lateralCenter>-3.0</lateralCenter>
             <width>3.0</width>
             <length>10.0</length>
             <longitudinalPosition>0.0</longitudinalPosition>
@@ -656,8 +649,15 @@
             <lateralPosition>0.2</lateralPosition>
           </roadMarkerAlong>
           <vehicleDetector>
+            <ID>VD_1115</ID>
+            <lateralCenter>1.0</lateralCenter>
+            <width>3.0</width>
+            <length>10.0</length>
+            <longitudinalPosition>0.0</longitudinalPosition>
+          </vehicleDetector>
+          <vehicleDetector>
             <ID>VD_1116</ID>
-            <lateralCenter>3.0</lateralCenter>
+            <lateralCenter>5.0</lateralCenter>
             <width>3.0</width>
             <length>10.0</length>
             <longitudinalPosition>0.0</longitudinalPosition>
@@ -727,7 +727,7 @@
             <longitudinalPosition>20.0</longitudinalPosition>
           </vehicleDetector>
           <roadMarkerAlong>
-            <type>|</type>
+            <type>:</type>
             <lateralPosition>5.5</lateralPosition>
           </roadMarkerAlong>
           <roadMarkerAlong>
@@ -972,8 +972,8 @@
       <ControlURL>d:/cppb/trafcod/trafcod.exe d:/cppb/trafcod/4Arm/4Arm.tfc sumo://localhost:6789</ControlURL>
       <Detector>VD_1051</Detector>
       <Detector>VD_1052</Detector>
-      <Detector>VD_1083</Detector>
       <Detector>VD_1053</Detector>
+      <Detector>VD_1083</Detector>
       <Detector>VD_1054</Detector>
       <Detector>VD_1111</Detector>
       <Detector>VD_1112</Detector>

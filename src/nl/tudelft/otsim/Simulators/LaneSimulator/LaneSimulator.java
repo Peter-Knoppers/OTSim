@@ -378,7 +378,7 @@ public class LaneSimulator extends Simulator {
         ConsistencyCheck.checkPreInit(jmodel);
         System.out.println("model.init()");
         jmodel.init();
-        //ConsistencyCheck.checkPostInit(jmodel);
+        ConsistencyCheck.checkPostInit(jmodel);
         System.out.println("model created");
         scheduler.enqueueEvent(0d, new Stepper(this));
 	}
