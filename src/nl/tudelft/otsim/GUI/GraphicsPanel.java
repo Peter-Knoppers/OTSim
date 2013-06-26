@@ -70,6 +70,8 @@ public class GraphicsPanel extends JPanel implements MouseListener, MouseMotionL
 		if (null == p) {
 			System.err.println("null pointer in translate");
 		}
+		if (p.distance(new Point2D.Double(85775.7, 445476.2)) < 0.25)
+			System.out.println("komt ie");
 		double x = p.x * zoom + panX;
 		double y = height - (p.y * zoom - panY);
 		Point2D.Double result = new Point2D.Double(x, y);
