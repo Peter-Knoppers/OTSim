@@ -453,7 +453,7 @@ public class ImportModelShapeWizard implements ActionListener {
 	        }
         }
         finally   {
-        	featuresZone.close(iteratorZone);
+        	// There is no longer a close method... featuresZone.close(iteratorZone);
         }
         
 		// Reading Nodes
@@ -483,7 +483,7 @@ public class ImportModelShapeWizard implements ActionListener {
 	        }
         }
         finally   {
-        	featuresNode.close(iteratorNode);
+        	// there is no longer a close method... featuresNode.close(iteratorNode);
         }
 		
         //Reading Links
@@ -728,7 +728,7 @@ public class ImportModelShapeWizard implements ActionListener {
         }
         finally   {
         	int i2 = 0;
-        	featuresLink.close(iteratorLink);
+        	// there is no longer a close method... featuresLink.close(iteratorLink);
         }
         
 
