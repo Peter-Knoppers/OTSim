@@ -123,7 +123,7 @@ public class Main extends JFrame implements ActionListener {
     public javax.swing.JMenuItem menuItemExportModel;
     
     /** Name of the OpenTraffic application */
-    public final String myName = "Open Traffic";
+    public final String myName = "Open Traffic Simulator";
   //shape
     private JTable table;
   //shape
