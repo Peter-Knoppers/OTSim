@@ -26,8 +26,12 @@ Go to <a href="http://eclipse.org/downloads/">Eclipse Downloads (http://eclipse.
 <li>Select the Eclipse IDE for Java EE Developers (32 bit or 64 bit version depending on your CPU)</li>
 <li>Unpack the zip file in a suitable place on your hard disk; this creates a directory "eclipse" with some sub directories</li>
 <li>Run <i>eclipse.exe</i> from that directory</li>
-<li>Set the directory that will contain (or already contains) your Java projects</li>
-<li>Optionally: make a desktop or taskbar shortcut pointing to <i>eclipse.exe</i></li>
+<li>In the "Select a workspace" dialog set (create) the workspace directory that will contain (or already contains) your Java projects</li>
+<li>Check the check box "Use this as the default and do not ask again" (unless you want to see this dialog every time you start Eclipse)</li>
+<li>Click the "OK" button to close the "Select a workspace" dialog</li>
+<li>Wait until Eclipse has set it's initial configuration</li>
+<li>In the "Welcome" screen click on the "Workbench" button to get into the Java EE perspective</li>
+<li>Optional: make a desktop or task-bar shortcut pointing to <i>eclipse.exe</i></li>
 </ol>
 If Eclipse complains that it cannot find a Java runtime you may have to fix the PATH environment variable. This varies by Windows version. Google is your friend.
 <br />The first time Eclipse starts up correctly, it will ask to set a workspace. Select a place on a disk that has some room.
@@ -35,7 +39,7 @@ If Eclipse complains that it cannot find a Java runtime you may have to fix the 
 <h1>Installing GIT support in Eclipse</h1>
 <a href="http://en.wikipedia.org/wiki/Git_%28software%29">GIT</a> is a revision control system.
 OTSim sources are stored at <a href="https://github.com/OTSim/OTSim">GitHub.com/OTSim/OTSim</a>.
-To install GIT support in Eclipse (current versions have this already installed)
+Current versions of Eclipse come with GIT support pre-installed. If your version does not have it:
 <ol>
 <li>Start Eclipse</li>
 <li>Click "Help" in the main menu bar</li>
@@ -47,7 +51,7 @@ To install GIT support in Eclipse (current versions have this already installed)
 <li>If there is a license to agree to do so</li>
 <li>Let Eclipse restart if it wants to</li>
 </ol>
-TODO: check the procedure above and add instructions to pull the master repository.
+If you have GIT support already installed, the items EGit and JGit may be invisible because Eclipse hides already installed software by default.
 <h1>Clone the OTSim GIT repository</h1>
 GIT repositories are supposed to be cloned (copied) by everyone that wants to see or edit the code in the repository.
 <br />To clone the OTSim project and load it in Eclipse:
@@ -67,14 +71,14 @@ GIT repositories are supposed to be cloned (copied) by everyone that wants to se
 <li>Click "Next"</li>
 <li>Change the destination directory into something that suits you</li>
 <li>Click "Next"</li>
-<li>In the "Select a wizard to use for importing projects" select "Import existing projects"</li>
+<li>In the "Select a wizard to use for importing projects" select "Import existing projects" (this should already be selected)</li>
 <li>The Working Directory should be the destination directory selected above</li>
 <li>Click "Next"</li>
 <li>The OTSim project should aleady be selected</li>
 <li>Click "Finish"</li>
 </ol>
 Eclipse will try to compile the software and find a couple of problems that it will describe as "Build Path Problems".
-OTSim depends on a few libraries that are not included in the GIT repository.
+OTSim depends on a few libraries that are not included in the GIT repository. The chapter below explains how to fix this.
 <h1>Downloading the external libraries</h1>
 <h2>Creating a directory for the external libraries</h2>
 Create a folder in a suitable place before downloading the external libraries.
@@ -83,33 +87,28 @@ The GeoTools project is hosted on SourceForge. To down-load it:
 <ol>
 <li>Go to <a href="http://sourceforge.net/projects/geotools/files/">http://sourceforge.net/projects/geotools/files/</a></li>
 <li>Click on the link after "Looking for the latest version?"</li>
-<li>Open the zip file, find and copy "jts-XXX.jar" to the directory you created for the external libraries</li>
-<li>From the same directory in the zip file copy "gt-api-XXX.jar" to the directory you created for the external libraries</li>
-<li>From the same directory in the zip file copy "gt-main-XXX.jar" to the directory you created for the external libraries</li>
-<li>From the same directory in the zip file copy "gt-swing-XXX.jar" to the directory you created for the external libraries</li>
-</ol>
-<h2>Downloading the gt-opengis-8.0-MO library</h2>
-<ol>
-<li>Go to <a href="http://www.java2s.com/Code/Jar/g/Downloadgtopengis80M0jar.htm">http://www.java2s.com/Code/Jar/g/Downloadgtopengis80M0jar.htm</a></li>
-<li>Scroll to the bottom of the page and click on the link on the right of the floppy disk icon</li>
-<li>Open the zip file and copy the embedded jar file to the directory you created for the external libraries</li> 
+<li>Open the zip file and navigate to the directory with the "jar" files and copy the following files to the directory you created for the external libraries (XXX denotes the version number):</li>
+<ul> 
+<li>gt-api-XXX.jar</li>
+<li>gt-main-XXX.jar</li>
+<li>gt-metadata-XXX.jar</li>
+<li>gt-opengis-XXX.jar</li>
+<li>gt-swing-XXX.jar</li>
+<li>jts-XXX.jar</li>
+
+</ul>
 </ol>
 <h2>Editing the Java Build Path</h2>
 The Java Build Path describes where external libraries are to be found and which ones should be included.
 <br />
-Initially you will have to add all the external JARs that were down-loaded to the set of available libraries. Then you must enable the use of those libraries.
+Initially you will have to add all the external JARs that were down-loaded to the set of available libraries.
 <h3>Changing the set of available libraries</h3>
-To edit the Java Build Path:
+To edit the Java Build Path open the "Properties for OTSim" dialog:
 <ol>
 <li>In the Project Explorer right-click on the OTSim project</li>
 <li>Click "Properties"</li>
 <li>Click "Java Build Path"</li>
 <li>Select tab "Libraries"</li>
-</ol>
-To remove a library from the list (for instance when it is to be replaced by a newer version or one stored in a different directory):
-<ol start="4">
-<li>Click on the library name</li>
-<li>Click the "Remove" button</li>
 </ol>
 To add a library to the list:
 <ol start="4">
@@ -117,6 +116,14 @@ To add a library to the list:
 <li>Navigate to the JAR file and select it</li>
 <li>Click the "Open" button to add it</li> 
 </ol>
+You can repeat these steps for each library, but you can also select all libraries and add them in one action.
+<br /><br />
+To remove a library from the list (for instance when it is to be replaced by a newer version or one stored in a different directory):
+<ol start="4">
+<li>Click on the library name</li>
+<li>Click the "Remove" button</li>
+</ol>
+To close the Properties for OTSim dialog click the OK button. Eclipse will now rebuild the project.
 <h3>Changing the set of used libraries</h3>
 To (de-)activate a library in the project:
 <ol>
@@ -126,6 +133,18 @@ To (de-)activate a library in the project:
 <li>Select the tab "Order and Export"</li>
 <li>(Un-)check the check box in front of the library</li>
 </ol>
+<h1>Compiling and running OTSim for the first time</h1>
+After completing the steps above:
+<ol>
+<li>In the "Project Explorer" click on the OTSim project to select it</li>
+<li>In the main menu of Eclipse click "Run"</li>
+<li>In the dropped down menu click "Run"</li>
+<li>In the opened "Run As" window click "Java Application"</li>
+<li>Click on the "OK" button</li>
+<li>In the "Select Java Application" window click on "Main - nl.tudelft.otsim.GUI"</li>
+<li>Click on the "OK" button</li>
+</ol>
+The main window of OTSim should now appear. The application can be closed by clicking on the close box in the title bar of the OTSim application.
 <h1>Software installed in Eclipse Juno</h1>
 The list of installed software can be shown by:
 <ol>
@@ -139,22 +158,9 @@ The table should contain something like this:
 <tr><td>Eclipse IDE for Java EE Developers</td><td>1.5.2.20130211-1820</td><td>epp.package.jee</td><td>&nbsp;</td></tr>
 <tr><td>&nbsp;&nbsp;Eclipse Platform</td><td>4.2.2.M20130204-1200</td><td>org.eclipse.platform.ide</td><td>&nbsp;</td></tr>
 <tr><td>&nbsp;&nbsp;Java EE IDE Feature</td><td>1.5.2.20130211-1820</td><td>org.eclipse.epp.package.jee.feature.feature.group</td><td>Eclipse Packaging Project</td></tr>
-<tr><td>Eclipse EGit</td><td>2.3.1.201302201838-r</td><td>org.eclipse.egit.feature.group</td><td>Eclipse EGit</td></tr>
-<tr><td>&nbsp;&nbsp;Eclipse JGit</td><td>2.3.1.201302201838-r</td><td>org.eclipse.jgit.feature.group</td><td>Eclipse JGit</td></tr>
 <tr><td>Web Page Editor</td><td>2.4.0.v201301161500-479-9oB58E588N8K55</td><td>org.eclipse.jst.webpageeditor.feature.feature.group</td><td>Eclipse.org</td></tr>
 </table>
 <h1>Configuring Eclipse Juno</h1>
-<h2>Changing the number error or warnings shown in the Problems View</h2>
-The first three steps are only needed if the Problems tab is not currently visible.
-<ol>
-<li>Click "Window" in the main menu bar</li>
-<li>Expand "Show View"</li>
-<li>Click "Problems"</li>
-<li>Click the tiny triangle in the right of the tab control holding the Problems View</li>
-<li>Click "Configure contents ..."</li>
-<li>Uncheck "Use item limits", or change "Number of items visible per group:" to some large value</li> 
-</ol>
-Source: <a href="http://stackoverflow.com/questions/6786660/how-to-find-complete-list-of-warnings-in-eclipse-ide">Stack Overflow</a>.
 <h2>Setting up editing of HTML documents</h2>
 This is needed to modify documents like this one. If "Web Page Editor" is not shown in the list of installed software you can install it by following these instructions.
 <ol>
@@ -168,6 +174,18 @@ This is needed to modify documents like this one. If "Web Page Editor" is not sh
 </ol>
 Source: <a href="http://stackoverflow.com/questions/54868/what-is-the-best-html-editor-for-eclipse">Stack Overflow</a>;
 which describes the actions for Eclipse Indigo, but it works virtually the same way for Eclipse Juno.
+<br />In Eclipse Kepler the web page editor comes pre-installed.
+<h2>Changing the number error or warnings shown in the Problems View</h2>
+The first three steps are only needed if the Problems tab is not currently visible.
+<ol>
+<li>Click "Window" in the main menu bar</li>
+<li>Expand "Show View"</li>
+<li>Click "Problems"</li>
+<li>Click the tiny triangle in the right of the tab control holding the Problems View</li>
+<li>Click "Configure contents ..."</li>
+<li>Uncheck "Use item limits", or change "Number of items visible per group:" to some large value</li> 
+</ol>
+Source: <a href="http://stackoverflow.com/questions/6786660/how-to-find-complete-list-of-warnings-in-eclipse-ide">Stack Overflow</a>.
 <h2>Generating documentation using Javadoc</h2>
 Javadoc is a program that extract particular comments from the source code files and generates a set of HTML files to be used as documentation.
 The <i>javadoc.exe</i> program is included with the JDK (java development kit).

@@ -2,10 +2,9 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry exported="true" kind="lib" path="D:/Java/Java_lib/gt-api-9.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="D:/Java/Java_lib/gt-main-9.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="D:/Java/Java_lib/gt-opengis-8.0-M0.jar"/>
-	<classpathentry exported="true" kind="lib" path="D:/Java/Java_lib/gt-swing-9.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="D:/Java/Java_lib/jts-1.13.jar"/>
+	<classpathentry kind="lib" path="D:/Java/Java_lib/gt-api-9.3.jar"/>
+	<classpathentry kind="lib" path="D:/Java/Java_lib/gt-main-9.3.jar"/>
+	<classpathentry kind="lib" path="D:/Java/Java_lib/gt-swing-9.3.jar"/>
+	<classpathentry kind="lib" path="D:/Java/Java_lib/gt-opengis-9.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
