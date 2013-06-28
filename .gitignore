@@ -13,3 +13,4 @@
 /doc/stylesheet.css
 /doc/package-list
 *.zip
+.classpath
