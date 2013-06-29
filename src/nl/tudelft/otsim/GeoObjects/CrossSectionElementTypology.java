@@ -330,12 +330,24 @@ public class CrossSectionElementTypology implements XML_IO {
 	 */
 	public Color getColor_r() {
     	if (getDrivable())
-    		return Color.GRAY;
+    		return Color.LIGHT_GRAY;
     	if (getName_r().equals("barrier"))
     		return Color.RED;
     	return Color.GREEN;
 	}
-
+	/**
+	 * Retrieve the Color to use to paint CrossSectionElements that have this
+	 * CrossSectionElementTypology.
+	 * @return Color; the color to paint CrossSectionElements with that have
+	 * this CrossSectionElementTypology 
+	 */
+	public Color getColor_Vertex_r() {
+    	if (getDrivable())
+    		return Color.CYAN;
+    	if (getName_r().equals("barrier"))
+    		return Color.PINK;
+    	return Color.ORANGE;
+	}
 	/**
 	 * Write this CrossSectionElementTypology to an XML file.
 	 * @param staXWriter {@link StaXWriter}; the writer for the XML file

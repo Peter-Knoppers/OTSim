@@ -1,5 +1,8 @@
 package nl.tudelft.otsim.GeoObjects;
 
+import java.awt.Color;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -10,6 +13,7 @@ import nl.tudelft.otsim.FileIO.StaXWriter;
 import nl.tudelft.otsim.FileIO.XML_IO;
 import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.SpatialTools.Planar;
+import nl.tudelft.otsim.Utilities.Reversed;
 
 /**
  * A CrossSectionElement describes the surface of one lateral component in a
@@ -388,8 +392,6 @@ public class CrossSectionElement implements XML_IO {
         int myRank = crossSection.getLink().getCrossSections_r().indexOf(crossSection);
         if (adjust && (null != connectedFrom) && (myRank >= 0)) {
         	previousLateralPosition = connectedFrom.getLateralPosition(lateralReference);
-        	if ( crossSection.getLongitudinalPosition_r() == 0)
-        		System.out.println(crossSection.getLink().toString() + "crosssection number " + crossSection.getLongitudinalPosition_r());
         }
         else if (adjust && (myRank >= 0)) {
         	ArrayList<CrossSectionElement> cseList = crossSection.getCrossSectionElementList_r();
@@ -411,8 +413,8 @@ public class CrossSectionElement implements XML_IO {
             			break;
             		}
         		}
-    		if (otherIndex >= cseList.size())
-        		System.out.println("No connected CrossSectionElement found");
+    		//if (otherIndex >= cseList.size())
+        	//	System.out.println("No connected CrossSectionElement found");
         }
         ArrayList<Vertex> result = Planar.createParallelVertices(referenceVertices, prevReferenceVertices, previousLateralPosition, myLateralPosition);
         ArrayList<CrossSection> csList = crossSection.getLink().getCrossSections_r();
@@ -421,8 +423,8 @@ public class CrossSectionElement implements XML_IO {
         //&& ! csList.get(csList.size() - 1).getLink().getToNodeExpand().equals(csList.get(csList.size() - 1).getLink().getToNode_r())
         if (crossSection == csList.get(csList.size() - 1)  && ! adjustLink)  {
         	result = crossSection.getLink().getToNode_r().truncateAtConflictArea(result);
-        	if (crossSection.getLongitudinalPosition_r()== 0)
-        		System.out.println("Node at start");       		
+        	//if (crossSection.getLongitudinalPosition_r()== 0)
+        		//System.out.println("Node at start");       		
         }
 
         if (result.size() < 2)
@@ -787,7 +789,7 @@ public class CrossSectionElement implements XML_IO {
 		int narrowLanesToConnect = narrow.size();
 		// Loop through all lanes of the widest crossSection (upstream)
     	for (int wideLaneIndex = 1; wideLaneIndex < wide.size(); wideLaneIndex++) {
-    		System.out.format("decreasing number of lanes: wideLaneIndex=%d of %d, narrowLaneIndex=%d of %d\r\n", wideLaneIndex, wide.size(), narrowLaneIndex, narrow.size());
+    		//System.out.format("decreasing number of lanes: wideLaneIndex=%d of %d, narrowLaneIndex=%d of %d\r\n", wideLaneIndex, wide.size(), narrowLaneIndex, narrow.size());
     		if (narrowLaneIndex >= narrow.size()) 
 	        	break; // All lanes of the current link are now connected. Break from this loop
     		if (wideLanesToConnect == narrowLanesToConnect) {
@@ -945,7 +947,7 @@ public class CrossSectionElement implements XML_IO {
 					System.out.println("    rma: " + Planar.verticesToString(rma.getVertices()));
 					for (int i = 0; i < rma.getVertices().size(); i++)
 						designLine.add(Vertex.weightedVertex(0.5,  rma.getVertices().get(i), prevRMA.getVertices().get(i)));
-					System.out.println(" center:" + Planar.verticesToString(designLine));
+					//System.out.println(" center:" + Planar.verticesToString(designLine));
 					lane.setDesignLine(designLine);
 				}
     			index++;
@@ -1012,7 +1014,7 @@ public class CrossSectionElement implements XML_IO {
 						System.err.println("rma and prevRMA have different sizes");
 					for (int i = 0; i < rma.getVertices().size(); i++)
 						lineVertices.add(Vertex.weightedVertex(0.5,  rma.getVertices().get(i), rmaPrev.getVertices().get(i)));
-					System.out.println(" center:" + Planar.verticesToString(lineVertices));
+					//System.out.println(" center:" + Planar.verticesToString(lineVertices));
 					lane.setDesignLine(lineVertices);
 					lineVertices = new ArrayList<Vertex>();
 					
@@ -1095,41 +1097,67 @@ public class CrossSectionElement implements XML_IO {
 		return lane;
     }
 
-   
+	public  GeneralPath createCSEPolygon()   {
+    	ArrayList<Vertex> inner = getVerticesInner();
+    	ArrayList<Vertex> outer = getVerticesOuter();
+    	if ((null == inner) || (null == outer)) {
+    		System.err.println("CSE.paint: CSEVertices is null");
+    		return null;
+    	}
+		GeneralPath polygon = new GeneralPath(Path2D.WIND_EVEN_ODD);
+		boolean firstPoint = true;
+		for (Vertex v : inner)  {
+			if (firstPoint)
+				polygon.moveTo(v.getX(), v.getY());
+			else
+				polygon.lineTo(v.getX(), v.getY());
+			firstPoint = false;
+		}
+		for (Vertex v : Reversed.reversed(outer))	// reverse the outer point list
+			 polygon.lineTo(v.getX(), v.getY());
+		polygon.closePath();
+/*		if (GeometryTools.GeneralPathToString(polygon).startsWith("m 89.759,-100.562") || GeometryTools.GeneralPathToString(polygon).startsWith("m 88.440,-88.285")) {
+	    	System.out.println("inner: " + GeometryTools.verticesToString(inner));
+	    	System.out.println("outer: " + GeometryTools.verticesToString(outer));
+	    	System.out.println(GeometryTools.GeneralPathToString(polygon));
+	    	getLaneVerticesInner();
+		}*/
+		return polygon;
+	}
     /**
      * Draw this CrossSectionElement on a {@link GraphicsPanel}
      * @param graphicsPanel {@link GraphicsPanel} to draw on
      */
 
     public void paint(GraphicsPanel graphicsPanel) {
-    	ArrayList<Vertex> inner = getVerticesInner();
-    	ArrayList<Vertex> outer = getVerticesOuter();
-    	if (inner != null && outer != null )  {
-	    	Point2D.Double[] outline = new Point2D.Double[inner.size() + outer.size()];
-	    	int nextPoint = 0;
-	    	for (Vertex v : inner)
-	    		outline[nextPoint++] = v.getPoint();
-	    	nextPoint = outline.length;
-	    	for (Vertex v : outer)	// reverse the outer point list
-	    		outline[--nextPoint] = v.getPoint();
-    		graphicsPanel.setColor(getCrossSectionElementTypology().getColor_r());
-    		graphicsPanel.drawPolygon(outline);
-    		System.out.println("Link " + crossSection.getLink().toString() + " from " + crossSection.getLink().getFromNode_r().toString() + " to " + crossSection.getLink().getToNode_r().toString());
-    		System.out.println("Link design line is " + Planar.verticesToString(crossSection.getLink().getVertices()));
-    		System.out.println("polygon: " + Planar.pointsToString(outline));
-    		System.out.println("inner:   " + inner.toString());
-    		System.out.println("outer:   " + outer.toString());
-    	}
-    	//if (getCrossSectionElementTypology().getDrivable())
-    	//	System.out.println("drivable polygon" + GeometryTools.pointsToString(outline));
-    	for (CrossSectionObject cso : getCrossSectionObjects(Lane.class))
-    		cso.paint(graphicsPanel);
-		for (CrossSectionObject cso : getCrossSectionObjects(RoadMarkerAlong.class))
-			cso.paint(graphicsPanel);
-		// Paint everything else
-		for (CrossSectionObject cso : objects)
-			if ((! (cso instanceof RoadMarkerAlong)) && (! (cso instanceof Lane)))
+    	//if ( this.crossSection.getLink().isAutoGenerated()) {
+    		GeneralPath polygon = this.createCSEPolygon();  	
+/*	    	ArrayList<Vertex> inner = getVerticesInner();
+	    	ArrayList<Vertex> outer = getVerticesOuter();*/
+	    	graphicsPanel.setStroke(1F);
+	    	if (polygon != null)  {
+	    		graphicsPanel.setColor(getCrossSectionElementTypology().getColor_r());	
+	    		Color lineColor = Color.BLUE;
+	    		Color fillColor = getCrossSectionElementTypology().getColor_r();
+	    		graphicsPanel.drawGeneralPath(polygon, lineColor, fillColor);
+	    		//graphicsPanel.drawPolygon(outline);
+	    		Color color = getCrossSectionElementTypology().getColor_Vertex_r();
+	        	for (Vertex v : this.getVerticesInner() ) {
+	        		v.paint(graphicsPanel, color);
+	        	}
+	        	for (Vertex v : this.getVerticesOuter() ) {
+	        		v.paint(graphicsPanel, color);
+	        	}
+	    	}
+	    	for (CrossSectionObject cso : getCrossSectionObjects(Lane.class))
+	    		cso.paint(graphicsPanel);
+			for (CrossSectionObject cso : getCrossSectionObjects(RoadMarkerAlong.class))
 				cso.paint(graphicsPanel);
+			// Paint everything else
+			for (CrossSectionObject cso : objects)
+				if ((! (cso instanceof RoadMarkerAlong)) && (! (cso instanceof Lane)))
+					cso.paint(graphicsPanel);
+    	//}
 
     }
     private boolean writeCrossSectionObjectsXML(StaXWriter staXWriter) {

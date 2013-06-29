@@ -198,7 +198,7 @@ public class Link implements XML_IO {
 	 */
 	public ArrayList<Vertex> getVertices() {
 		ArrayList<Vertex> result = new ArrayList<Vertex>(intermediateVertices);
-		System.out.println("intermediatevertices is " + Planar.verticesToString(result));
+		//System.out.println("intermediatevertices is " + Planar.verticesToString(result));
 		//result.add(0, getFromNodeExpand());	// insert from node Vertex at head
 		result.add(0, getFromNode_r());
 		//result.add(getToNodeExpand());		// append to node Vertex at tail
@@ -212,7 +212,7 @@ public class Link implements XML_IO {
 			if (distanceFromP1 < distanceP1P2) {
 				Vertex v = Vertex.weightedVertex(distanceFromP1 / distanceP1P2, result.get(result.size() - 2), result.get(result.size() - 1));
 				result.add(result.size() - 1, v);
-				System.out.println("inserting vertex " + v.toString() + " before end");
+				//System.out.println("inserting vertex " + v.toString() + " before end");
 			} // else link ends before entering the circle
 		}
 		if (null != fromNode.getCircle()) {
@@ -224,7 +224,7 @@ public class Link implements XML_IO {
 			if (distanceFromP1 < distanceP1P2) {
 				Vertex v = Vertex.weightedVertex(distanceFromP1 / distanceP1P2, result.get(1), result.get(0));
 				result.add(1, v);
-				System.out.println("inserting vertex " + v.toString() + " after start");
+				//System.out.println("inserting vertex " + v.toString() + " after start");
 			} // else link ends before entering the circle
 		}
 		return result;

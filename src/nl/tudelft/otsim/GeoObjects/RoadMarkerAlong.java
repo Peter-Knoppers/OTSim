@@ -114,8 +114,8 @@ public class RoadMarkerAlong extends CrossSectionObject implements XML_IO {
 		ArrayList<Vertex> outerVertices = cse.createAndCleanLinkPointListOuter(false, true, false);
 		while (innerVertices.size() != outerVertices.size()) {
 			System.out.println("RMA: createVertices: inner and outer vertices have unequal length:");
-			System.out.println("inner: " + Planar.verticesToString(innerVertices));
-			System.out.println("outer: " + Planar.verticesToString(outerVertices));
+			//System.out.println("inner: " + Planar.verticesToString(innerVertices));
+			//System.out.println("outer: " + Planar.verticesToString(outerVertices));
 			// This it not perfect, but it probably does nicely
 			if (innerVertices.size() > outerVertices.size())
 				innerVertices.remove(1);

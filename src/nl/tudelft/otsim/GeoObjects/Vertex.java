@@ -265,7 +265,6 @@ public class Vertex {
      */
 	public void paint(GraphicsPanel graphicsPanel) {
         final int nonSelectedNodeDiameter = (int) (0.2 *  graphicsPanel.getZoom());
-
     	Point2D.Double point = getPoint();            
         final Color color = Color.RED;
         graphicsPanel.setColor(color);
@@ -274,6 +273,19 @@ public class Vertex {
         graphicsPanel.setStroke(3f);
 	}
 
+    /**
+     * Draw this Node with a specific color on a GraphicsPanel.
+     * @param graphicsPanel GraphicsPanel; graphicsPanel to draw onto
+     * @param color Color; color to draw
+     */
+	public void paint(GraphicsPanel graphicsPanel, Color color) {
+        final int nonSelectedNodeDiameter = (int) (0.2 *  graphicsPanel.getZoom());
+    	Point2D.Double point = getPoint();            
+        graphicsPanel.setColor(color);
+        graphicsPanel.setStroke(1f);
+        graphicsPanel.drawCircle(point, color, nonSelectedNodeDiameter);
+        graphicsPanel.setStroke(3f);
+	}
 	/**
 	 * Check if the projection of this Vertex is equal to the projection of another Vertex
 	 * @param other {@link Vertex}; the other Vertex

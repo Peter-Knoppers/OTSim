@@ -819,13 +819,18 @@ public class Node extends Vertex implements XML_IO {
 	            				angleDif = 2 * Math.PI - incoming.angle + leaving.angle ;
 	            			else
 	            				angleDif = leaving.angle - incoming.angle;
-		    	    		CrossSection outCs = leaving.link.getCrossSections_r().get(0);
-	    	    			// collect information on the index of the leaving link, its lanes and 
-	    	    			// the angle with the entering lane
-		    	    		for (Lane lane : outCs.collectLanesReversed())
-		    	            	outLanesAndLinkList.add(new OutLaneInfo(lane, angleDif, linkRank));
-		    	    		// increase the leaving link index
-		    	    		linkRank++;
+	            			// only if it is not a U-turn!
+	            			if (Math.abs(angleDif) > 0.5)  {
+			    	    		CrossSection outCs = leaving.link.getCrossSections_r().get(0);
+		    	    			// collect information on the index of the leaving link, its lanes and 
+		    	    			// the angle with the entering lane
+			    	    		for (Lane lane : outCs.collectLanesReversed())
+			    	            	outLanesAndLinkList.add(new OutLaneInfo(lane, angleDif, linkRank));
+			    	    		// increase the leaving link index
+			    	    		linkRank++;
+	            			}
+	            			else
+	            				System.out.println("U-turn");
 		    			}
 		    		}
     				
@@ -853,7 +858,7 @@ public class Node extends Vertex implements XML_IO {
 	            			if (currentInLane.getTurnArrow().getOutLinkNumbers() != null)  {
 	            				// retrieve the index of the outgoing links (one by one)
 	            				int outLinkRank = inLanesAll.get(indexInlane).getTurnArrow().getOutLinkNumbers()[turnCount];
-	            				System.out.print("test  " + outLinkRank );
+	            				//System.out.print("test  " + outLinkRank );
 	            				// we look for the connecting outLane by looping through all outlanes at this node
 	            				OutLaneInfo currentOutlaneInfo = outLanesAndLinkList.get(outLaneIndex);
 	            				// connect to the lane of a leaving arm

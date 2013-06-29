@@ -502,13 +502,12 @@ public class Lane extends CrossSectionObject {
     	if (turnArrow != null)
     		turnArrow.paint(graphicsPanel);
     	
-    	for (Vertex v : this.getLaneVerticesInner() ) {
+/*    	for (Vertex v : this.getLaneVerticesInner() ) {
     		v.paint(graphicsPanel);
-    	}
-    	
+    	}    	
     	for (Vertex v : this.getLaneVerticesOuter() ) {
     		v.paint(graphicsPanel);
-    	}
+    	}*/
     	
         if (this.getCse().getCrossSection().getLink().network.selectedLane == this)   {
         	fillColor = Color.BLACK;

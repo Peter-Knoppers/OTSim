@@ -2,9 +2,13 @@ package nl.tudelft.otsim.GeoObjects;
 
 import java.awt.Color;
 import java.awt.Polygon;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 
 import nl.tudelft.otsim.GUI.GraphicsPanel;
+import nl.tudelft.otsim.Utilities.Reversed;
 
 
 /**
@@ -99,6 +103,23 @@ public class PriorityConflict {
 		this.conflictArea = conflictArea;
 	}
 
+	public  GeneralPath createPolygon()   {
+    	double x;
+    	double y;
+		GeneralPath polygon = new GeneralPath(Path2D.WIND_EVEN_ODD);
+		boolean firstPoint = true;
+    	for (int i=0; i < getConflictArea().npoints; i++ )  {
+        	x = getConflictArea().xpoints[i];
+        	y = getConflictArea().ypoints[i];
+			if (firstPoint)
+				polygon.moveTo(x, y);
+			else
+				polygon.lineTo(x, y);
+			firstPoint = false;
+    	}
+		polygon.closePath();
+		return polygon;
+	}
 	
 	/**
 	 * Paint this PolyZone on a {@link GraphicsPanel}.
@@ -106,20 +127,15 @@ public class PriorityConflict {
 	 * this PolyZone on
 	 */
 	public void paint(GraphicsPanel graphicsPanel) {
-    	Point2D.Double[] outline = new Point2D.Double[getConflictArea().npoints];
-    	double[] x = new double[getConflictArea().npoints];
-    	double[] y = new double[getConflictArea().npoints];
-
-    	for (int i=0; i < getConflictArea().npoints; i++ )  {
-        	x[i] = getConflictArea().xpoints[i];
-        	y[i] = getConflictArea().ypoints[i];
-        	Point2D.Double p = new Point2D.Double(x[i],y[i]);
-        	outline[i] = p;
-    	}
-    	graphicsPanel.setStroke(1F);
     	Color color = new Color(1f, 0f, 0f, 0.2f);
-    	graphicsPanel.setColor(color);
-    	graphicsPanel.drawPolygon(outline);
+		GeneralPath polygon = this.createPolygon();  	
+    	graphicsPanel.setStroke(1F);
+    	if (polygon != null)  {
+    		graphicsPanel.setColor(color);	
+    		Color lineColor = color;
+    		Color fillColor = color;
+    		graphicsPanel.drawGeneralPath(polygon, lineColor, fillColor);
+    	}
 	}
 	/**
      * Enumeration of conflict types.
@@ -132,5 +148,6 @@ public class PriorityConflict {
         /** Crossing conflict. */
         CROSSING,
     }
+    
 	
 }

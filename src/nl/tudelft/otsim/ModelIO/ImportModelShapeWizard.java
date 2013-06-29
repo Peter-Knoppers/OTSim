@@ -787,7 +787,7 @@ public class ImportModelShapeWizard implements ActionListener {
     	cs.setCrossSectionElementList_w(cseList);
     	String name = String.valueOf(linkID);       	
     	// if turnlanes are defined, we create an intermediate crossSection at a certain pre-defined distance from the junction (toNode)
-    	if (turnLanes != null  && turnLanes.length() > 0)  {
+    	if (turnLanes != null  && ! turnLanes.isEmpty())  {
     		boolean newCs = false;
     		ArrayList<Vertex> pointListAll = new ArrayList<Vertex>();
     		pointListAll.addAll(pointList);
@@ -835,28 +835,28 @@ public class ImportModelShapeWizard implements ActionListener {
 		for (int i = 0; i < lanes; i++)   {
 			char turn = turnLanes.charAt(i);
 			switch (turn)   {
-				case 'R': // Right turn only
+				case 'r': // Right turn only
 					outLinkNumber = new int[] {0};
 					break;
-				case 'S': // Main (straight on) lane 
+				case 's': // Main (straight on) lane 
 					outLinkNumber = new int[] {1};
 					break;
-				case 'L': // Left turn only 
+				case 'l': // Left turn only 
 					outLinkNumber = new int[] {2};
 					break;
-				case 'Q': // Left turn and straight on 
+				case 'q': // Left turn and straight on 
 					outLinkNumber = new int[] {1, 2};
 					break;
-				case 'P': // Right turn and straight on
+				case 'p': // Right turn and straight on
 					outLinkNumber = new int[] {0, 1};
 					break;
-				case 'U': // Left turn and right turn 
+				case 'u': // Left turn and right turn 
 					outLinkNumber = new int[] {0, 1};
 					break;
-				case 'A': // Any turn lane 
+				case 'a': // Any turn lane 
 					outLinkNumber = new int[] {0, 1, 2};
 					break;
-				case 'B': // Bus lane (straight on 
+				case 'b': // Bus lane (straight on 
 					outLinkNumber = new int[] {1};
 					break;
 			}

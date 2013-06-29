@@ -20,7 +20,7 @@ public class TurnArrow extends CrossSectionObject {
 	
 	public TurnArrow(CrossSectionElement cse, int[] outLinkNumbers, double lateralPosition, double longitudinalPosition) {
 		super();
-		System.out.println("Creating new turn arrow at longitudinalPosition " + longitudinalPosition);
+		//System.out.println("Creating new turn arrow at longitudinalPosition " + longitudinalPosition);
 		this.crossSectionElement = cse;
 		this.lateralReference = CrossSectionElement.LateralReferenceLeft;
 		this.setLateralPosition(lateralPosition);
