@@ -720,7 +720,7 @@
     </roadMarkerType>
     <TrafficLightController>
       <ID>TLC_0</ID>
-      <ControlURL>d:/cppb/trafcod/trafcod.exe d:/cppb/trafcod/OTSim/simpel.tfc sumo://localhost:6789</ControlURL>
+      <ControlURL>d:/cppb/trafcod/trafcod.exe d:/cppb/trafcod/Simple/simpel.tfc sumo://localhost:6789</ControlURL>
       <Detector>VD_1081</Detector>
       <Detector>VD_1082</Detector>
       <Detector>VD_1111</Detector>
