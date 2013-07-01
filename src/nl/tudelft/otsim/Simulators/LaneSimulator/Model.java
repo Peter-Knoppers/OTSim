@@ -117,14 +117,12 @@ public class Model {
         lcVehicles = new java.util.ArrayList<LCVehicle>();
 
         // Initialize lanes
-        for (int i=0; i<network.length; i++) {
+        for (int i=0; i<network.length; i++)
             network[i].init();
-        }
         
         // Initialize controllers
-        for (int i=0; i<controllers.size(); i++) {
+        for (int i=0; i<controllers.size(); i++)
             controllers.get(i).init();
-        }
     }
 
     /**
@@ -143,50 +141,40 @@ public class Model {
 
             // Vehicle generation
             generating = true;
-            for (int i=0; i<network.length; i++) {
-                if (network[i].generator!=null) {
+            for (int i=0; i<network.length; i++)
+                if (network[i].generator!=null)
                     network[i].generator.run();
-                }
-            }
             generating = false;
 
             // Drive
             // copy pointer array as vehicles may be deleted
             java.util.ArrayList<Vehicle> tmp = new java.util.ArrayList<Vehicle>(vehicles.size());
-            for (int i=0; i<vehicles.size(); i++) {
+            for (int i=0; i<vehicles.size(); i++)
                 tmp.add(i, vehicles.get(i));
-            }
             for (int i=0; i<tmp.size(); i++) {
                 tmp.get(i).driver.drive(); // sets a and dy
-                if (tmp.get(i).dy!=0 && tmp.get(i).lcProgress==0) {
+                if (tmp.get(i).dy!=0 && tmp.get(i).lcProgress==0)
                     tmp.get(i).startLaneChange();
-                }
             }
 
             // Move
             // copy pointer array as vehicles may be deleted
             tmp.clear();
-            for (int i=0; i<vehicles.size(); i++) {
+            for (int i=0; i<vehicles.size(); i++)
                 tmp.add(i, vehicles.get(i));
-            }
-            for (int i=0; i<tmp.size(); i++) {
+            for (int i=0; i<tmp.size(); i++)
                 tmp.get(i).move(); // performs a and dy
-            }
 
             // Update all neighbour references (overtaking)
-            for (int i=0; i<vehicles.size(); i++) {
+            for (int i=0; i<vehicles.size(); i++)
                 vehicles.get(i).updateNeighbours();
-            }
-            for (int i=0; i<lcVehicles.size(); i++) {
+            for (int i=0; i<lcVehicles.size(); i++)
                 lcVehicles.get(i).updateNeighbours();
-            }
 
             // End lane changes
-            for (int i=0; i<vehicles.size(); i++) {
-                if (vehicles.get(i).lcProgress>=1) {
+            for (int i=0; i<vehicles.size(); i++)
+                if (vehicles.get(i).lcProgress>=1)
                     vehicles.get(i).endLaneChange();
-                }
-            }
             
             // Check for collisions
             if (debug) {
@@ -194,9 +182,8 @@ public class Model {
                 for (int i=0; i<vehicles.size(); i++) {
                     veh = vehicles.get(i);
                     if (veh.down!=null && veh.getHeadway(veh.down)<0 &&
-                            (veh.lane==veh.down.lane || !veh.down.lane.isMerge())) {
+                            (veh.lane==veh.down.lane || !veh.down.lane.isMerge()))
                         System.err.println("Collision: "+veh.x+"@"+veh.lane.id);
-                    }
                 }
             }
 
@@ -217,21 +204,16 @@ public class Model {
      */
     protected void runUnits() {
         // Run road-side units
-        for (int i=0; i<network.length; i++) {
-            for (int j=0; j<network[i].RSUcount(); j++) {
+        for (int i=0; i<network.length; i++)
+            for (int j=0; j<network[i].RSUcount(); j++)
                 network[i].getRSU(j).run();
-            }
-        }
         // Run on-board units
-        for (int i=0; i<vehicles.size(); i++) {
-            if (vehicles.get(i).isEquipped()) {
+        for (int i=0; i<vehicles.size(); i++)
+            if (vehicles.get(i).isEquipped())
                 vehicles.get(i).OBU.run();
-            }
-        }
         // Run controllers
-        for (int i=0; i<controllers.size(); i++) {
+        for (int i=0; i<controllers.size(); i++)
             controllers.get(i).run();
-        }
     }
 
     /** 
@@ -248,11 +230,9 @@ public class Model {
      * @return Class with given id.
      */
     public VehicleDriver getClass(int id) {
-        for (int i=0; i<classes.size(); i++) {
-            if (classes.get(i).id() == id) {
+        for (int i=0; i<classes.size(); i++)
+            if (classes.get(i).id() == id)
                 return classes.get(i);
-            }
-        }
         return null;
     }
     
@@ -261,11 +241,10 @@ public class Model {
      * @param vehicle Vehicle to add.
      */
     public void addVehicle(Movable vehicle) {
-        if (vehicle instanceof Vehicle) {
+        if (vehicle instanceof Vehicle)
             vehicles.add((Vehicle) vehicle);
-        } else if (vehicle instanceof LCVehicle) {
+        else if (vehicle instanceof LCVehicle)
             lcVehicles.add((LCVehicle) vehicle);
-        }
     }
     
     /**
@@ -273,11 +252,10 @@ public class Model {
      * @param vehicle Vehicle to remove.
      */
     public void removeVehicle(Movable vehicle) {
-        if (vehicle instanceof Vehicle) {
+        if (vehicle instanceof Vehicle)
             vehicles.remove(vehicle);
-        } else if (vehicle instanceof LCVehicle) {
+        else if (vehicle instanceof LCVehicle)
             lcVehicles.remove(vehicle);
-        }
     }
     
     /**
@@ -288,11 +266,9 @@ public class Model {
      * @return Whether vehicle exists in simulation.
      */
     public boolean exists(Movable vehicle) {
-        if (vehicle instanceof Vehicle) {
+        if (vehicle instanceof Vehicle)
             return vehicles.contains(vehicle);
-        } else {
-            return lcVehicles.contains(vehicle);
-        }
+        return lcVehicles.contains(vehicle);
     }
     
     /**
@@ -356,11 +332,9 @@ public class Model {
      * @return Absolute current time.
      */
     public java.util.Date currentTime() {
-        if (startTime==null) {
+        if (startTime==null)
             return null;    
-        } else {
-            return new java.util.Date(startTime.getTime() + (long) (t*1000));
-        }
+        return new java.util.Date(startTime.getTime() + (long) (t*1000));
     }
     
     /**
@@ -423,22 +397,17 @@ public class Model {
         
         // Store remaining vehicles
         if (settings.getBoolean("storeTrajectoryData")) {
-            for (int i=0; i<vehicles.size(); i++) {
-                if (vehicles.get(i).trajectory!=null) {
+            for (int i=0; i<vehicles.size(); i++)
+                if (vehicles.get(i).trajectory!=null)
                     saveTrajectoryData(vehicles.get(i).trajectory);
-                }
-            }
             saveTrajectoryBufferToDisk();
         }
         if (settings.getBoolean("storeDetectorData")) {
             // Store detector data
-            for (int i=0; i<network.length; i++) {
-                for (int j=0; j<network[i].RSUcount(); j++) {
-                    if (network[i].getRSU(j) instanceof Detector) {
+            for (int i=0; i<network.length; i++)
+                for (int j=0; j<network[i].RSUcount(); j++)
+                    if (network[i].getRSU(j) instanceof Detector)
                         saveDetectorData((Detector) network[i].getRSU(j));
-                    }
-                }
-            }
         }
     }
 
@@ -448,9 +417,8 @@ public class Model {
      */
     public synchronized void saveTrajectoryData(Trajectory trajectory) {
         trajectories.add(trajectory.asSerializable());
-        if (trajectories.size() >= settings.getInteger("trajectoryBuffer")) {
+        if (trajectories.size() >= settings.getInteger("trajectoryBuffer"))
             saveTrajectoryBufferToDisk();
-        }
     }
     
     /**
@@ -515,20 +483,16 @@ public class Model {
     public void saveData(Object obj, String subPath, String fileName) {
         try {
             java.io.File f;
-            if (subPath==null || subPath.isEmpty()) {
+            if (subPath==null || subPath.isEmpty())
                 f = new java.io.File(settings.getString("outputDir"));
-            } else {
+            else
                 f = new java.io.File(settings.getString("outputDir"), subPath);
-            }
             boolean ok = f.mkdir();
             java.io.FileOutputStream fos;
-            if (subPath==null || subPath.isEmpty()) {
-                fos = new java.io.FileOutputStream(
-                    settings.getString("outputDir")+"/"+fileName);
-            } else {
-                fos = new java.io.FileOutputStream(
-                    settings.getString("outputDir")+"/"+subPath+"/"+fileName);
-            }
+            if (subPath==null || subPath.isEmpty())
+                fos = new java.io.FileOutputStream(settings.getString("outputDir")+"/"+fileName);
+            else
+                fos = new java.io.FileOutputStream(settings.getString("outputDir")+"/"+subPath+"/"+fileName);
             java.io.BufferedOutputStream bos = new java.io.BufferedOutputStream(fos);
             java.io.ObjectOutputStream oos = new java.io.ObjectOutputStream(bos);
             oos.writeObject(obj.getClass().cast(obj));

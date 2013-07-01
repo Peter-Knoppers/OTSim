@@ -95,15 +95,13 @@ public class Generator extends Controller {
         // Dynamic demand
         if (dynamicDemand!=null) {
             int lastIndex = dynamicDemand.length-1;
-            if (lane.model.t>=dynamicDemand[lastIndex][0] && demand!=dynamicDemand[lastIndex][1]) {
-                // set latest demand value
-                setDemand(dynamicDemand[lastIndex][1]);
-            } else if (lane.model.t<dynamicDemand[lastIndex][0]) {
+            if (lane.model.t>=dynamicDemand[lastIndex][0] && demand!=dynamicDemand[lastIndex][1])
+                setDemand(dynamicDemand[lastIndex][1]);	// set latest demand value
+            else if (lane.model.t<dynamicDemand[lastIndex][0]) {
                 // find index of latest demand
                 int index = 0;
-                while (lane.model.t>=dynamicDemand[index][0]) {
+                while (lane.model.t>=dynamicDemand[index][0])
                     index++;
-                }
                 index--; // subtract one as we found index of first upcoming demand
                 if (interpDemand) {
                     // interpolate demand
@@ -112,16 +110,13 @@ public class Generator extends Controller {
                     double d1 = dynamicDemand[index][1];
                     double d2 = dynamicDemand[index+1][1];
                     double d;
-                    if (d1!=d2) {
+                    if (d1!=d2)
                         d = ((lane.model.t-t1)*d2 + (t2-lane.model.t)*d1)/(t2-t1);
-                    } else {
+                    else
                         d = d1;
-                    }
                     setDemand(d);
-                } else if (demand!=dynamicDemand[index][1]) {
-                    // update demand stepwise
-                    setDemand(dynamicDemand[index][1]);
-                }
+                } else if (demand!=dynamicDemand[index][1])
+                    setDemand(dynamicDemand[index][1]); // update demand stepwise
             }
         }
 
@@ -148,9 +143,8 @@ public class Generator extends Controller {
         } else {
             // Regular vehicle generation
             // a vehicle is needed
-            if (nextVehicle==null) {
+            if (nextVehicle==null)
                 randomNextVehicle();
-            }
             boolean success = true; // to have a first attempt
             while (queue>0 && success) {
                 // while there is a queue and the last vehicle could be
@@ -175,13 +169,11 @@ public class Generator extends Controller {
      */
     @Override
 	public void init() {
-        if (dist==distribution.PREDEFINED && preTime!=null) {
+        if (dist==distribution.PREDEFINED && preTime!=null)
             tNext = preTime[0];
-        } else if (probabilities!=null) {
-            for (int i=0; i<probabilities.length; i++) {
+        else if (probabilities!=null)
+            for (int i=0; i<probabilities.length; i++)
                 classProbs.put(lane.model.classes.get(i).id(), probabilities[i]);
-            }
-        }
     }
     
     /**
@@ -227,9 +219,8 @@ public class Generator extends Controller {
             if (down!=null) {
                 s = nextVehicle.getHeadway(down);
                 // acceleration ok?
-                if (s>=0) {
+                if (s>=0)
                     nextVehicle.driver.drive();
-                }
             }
             // If there is no down, generate always, otherwise check acceleration
             if (down!=null && (s<0 || nextVehicle.a<0 || x>downX)) {
@@ -274,9 +265,8 @@ public class Generator extends Controller {
                 downX = down.x+genLane.xAdj(down.lane);
                 nextVehicle.v = Math.min(down.v, nextVehicle.driver.desiredVelocity());
                 downL = down.l;
-            } else {
+            } else
                 throw new java.lang.RuntimeException("Trying to generate queue vehicle without downstream vehicle.");
-            }
             if (downX-downL > nextVehicle.driver.desiredEquilibriumHeadway()) {
                 double x = downX-downL-nextVehicle.driver.desiredEquilibriumHeadway();
                 // check that x<=v*t            
@@ -383,9 +373,8 @@ public class Generator extends Controller {
             dem2[dem.length][0] = lane.model.period;
             dem2[dem.length][1] = dem[dem.length-1][1];
             dynamicDemand = dem2;
-        } else {
+        } else
             dynamicDemand = dem;
-        }
     }
 
     /**
@@ -398,27 +387,19 @@ public class Generator extends Controller {
             if (generated>=preTime.length) {
                 // all vehicles were generated
                 headway = Double.POSITIVE_INFINITY;
-            } else if (generated==0) {
-                // first vehicle
-                headway = preTime[0];
-            } else {
-                // headway is time difference between 2 consecutive vehicles
-                headway = preTime[generated] - preTime[generated-1];
-            }
+            } else if (generated==0)
+                headway = preTime[0]; // first vehicle
+            else
+                headway = preTime[generated] - preTime[generated-1]; // headway is time difference between 2 consecutive vehicles
         } else {
             if (demand>0) {
                 double dt = 3600/demand; // average headway
-                if (dist==distribution.UNIFORM) {
-                    // always the average headway
-                    headway = dt;
-                } else if (dist==distribution.EXPONENTIAL) {
-                    // note: r = -log(uniform)/gamma & mean = 1/gamma
-                    headway = -Math.log(lane.model.random().nextDouble()) * dt;
-                }
-            } else {
-                // no demand
-                headway = Double.POSITIVE_INFINITY;
-            }
+                if (dist==distribution.UNIFORM)
+                    headway = dt; // always the average headway
+                else if (dist==distribution.EXPONENTIAL)
+                    headway = -Math.log(lane.model.random().nextDouble()) * dt; // note: r = -log(uniform)/gamma & mean = 1/gamma
+            } else
+                headway = Double.POSITIVE_INFINITY; // no demand
         }
         return headway;
     }
@@ -451,19 +432,15 @@ public class Generator extends Controller {
         	if (l.marked)
         		break;
         	l.marked = true;
-            for (int i=0; i<l.RSUcount(); i++) {
-                if (l.getRSU(i).passable) {
+            for (int i=0; i<l.RSUcount(); i++)
+                if (l.getRSU(i).passable)
                     l.getRSU(i).pass(veh);
-                }
-            }
             l = l.up;
         }
         // lane itself
-        for (int i=0; i<veh.lane.RSUcount(); i++) {
-            if (veh.lane.getRSU(i).x <= veh.x && veh.lane.getRSU(i).passable) {
+        for (int i=0; i<veh.lane.RSUcount(); i++)
+            if (veh.lane.getRSU(i).x <= veh.x && veh.lane.getRSU(i).passable)
                 veh.lane.getRSU(i).pass(veh);
-            }
-        }
         for (l = veh.lane.up; l!= null && l.marked; l = l.up)
         	l.marked = false;
     }

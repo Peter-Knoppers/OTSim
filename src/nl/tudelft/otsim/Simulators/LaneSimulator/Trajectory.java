@@ -117,11 +117,9 @@ public class Trajectory {
      * @return Field, <tt>null</tt> if not found.
      */
     protected java.lang.reflect.Field getField(String field) {
-        for (java.lang.reflect.Field f : FCDclass.getFields()) {
-            if (f.getName().equals(field)) {
+        for (java.lang.reflect.Field f : FCDclass.getFields())
+            if (f.getName().equals(field))
                 return f;
-            }
-        }
         return null;
     }
     
@@ -134,134 +132,106 @@ public class Trajectory {
      */
     protected Object get(java.lang.reflect.Field field, boolean asPrimitive) {
         int n = FCD.size();
-        if (n==0) {
+        if (n==0)
             return null;
-        }
         try {
             if (!asPrimitive || field.getType().isPrimitive()) {
                 if (field.get(FCD.get(0)) instanceof Double) {
                     double[] dat = new double[n];
-                    for (int i=0; i<n; i++) {
+                    for (int i=0; i<n; i++)
                         dat[i] = field.getDouble(FCD.get(i));
-                    }
                     return dat;
                 } else if (field.get(FCD.get(0)) instanceof Integer) {
                     int[] dat = new int[n];
-                    for (int i=0; i<n; i++) {
+                    for (int i=0; i<n; i++)
                         dat[i] = field.getInt(FCD.get(i));
-                    }
                     return dat;
                 } else if (field.get(FCD.get(0)) instanceof Boolean) {
                     boolean[] dat = new boolean[n];
-                    for (int i=0; i<n; i++) {
+                    for (int i=0; i<n; i++)
                         dat[i] = field.getBoolean(FCD.get(i));
-                    }
                     return dat;
                 } else if (field.get(FCD.get(0)) instanceof Character) {
                     char[] dat = new char[n];
-                    for (int i=0; i<n; i++) {
+                    for (int i=0; i<n; i++)
                         dat[i] = field.getChar(FCD.get(i));
-                    }
-                    return dat;
+                     return dat;
                 } else if (field.get(FCD.get(0)) instanceof Long) {
                     long[] dat = new long[n];
-                    for (int i=0; i<n; i++) {
+                    for (int i=0; i<n; i++)
                         dat[i] = field.getLong(FCD.get(i));
-                    }
                     return dat;
                 } else if (field.get(FCD.get(0)) instanceof Float) {
                     float[] dat = new float[n];
-                    for (int i=0; i<n; i++) {
+                    for (int i=0; i<n; i++)
                         dat[i] = field.getFloat(FCD.get(i));
-                    }
                     return dat;
                 } else if (field.get(FCD.get(0)) instanceof Byte) {
                     byte[] dat = new byte[n];
-                    for (int i=0; i<n; i++) {
+                    for (int i=0; i<n; i++)
                         dat[i] = field.getByte(FCD.get(i));
-                    }
-                    return dat;
+                     return dat;
                 } else if (field.get(FCD.get(0)) instanceof Short) {
                     short[] dat = new short[n];
-                    for (int i=0; i<n; i++) {
+                    for (int i=0; i<n; i++)
                         dat[i] = field.getShort(FCD.get(i));
-                    }
                     return dat;
                 } else {
                     // Non primitive, original form requested
                     java.util.ArrayList<Object> dat = new java.util.ArrayList<Object>();
-                    for (int i=0; i<n; i++) {
+                    for (int i=0; i<n; i++)
                         dat.add(field.get(FCD.get(i)));
-                    }
                     Object b = java.lang.reflect.Array.newInstance(dat.get(0).getClass(), 0);
                     return dat.toArray((Object[]) b);
                 }
-            } else {
-                // get method 'asPrimitive'
-                java.lang.reflect.Method method = FCDclass.getMethod("asPrimitive", 
-                        String.class, Object.class);
-                // get first output
-                Object out = method.invoke(FCD.get(0), field.getName(), field.get(FCD.get(0)));
-
-                if (out instanceof Double) {
-                    double[] dat = new double[n];
-                    for (int i=0; i<n; i++) {
-                        dat[i] = (Double) method.invoke(FCD.get(i), 
-                                field.getName(), field.get(FCD.get(i)));
-                    }
-                    return dat;
-                } else if (out instanceof Integer) {
-                    int[] dat = new int[n];
-                    for (int i=0; i<n; i++) {
-                        dat[i] = (Integer) method.invoke(FCD.get(i), 
-                                field.getName(), field.get(FCD.get(i)));
-                    }
-                    return dat;
-                } else if (out instanceof Boolean) {
-                    boolean[] dat = new boolean[n];
-                    for (int i=0; i<n; i++) {
-                        dat[i] = (Boolean) method.invoke(FCD.get(i), 
-                                field.getName(), field.get(FCD.get(i)));
-                    }
-                    return dat;
-                } else if (out instanceof Character) {
-                    char[] dat = new char[n];
-                    for (int i=0; i<n; i++) {
-                        dat[i] = (Character) method.invoke(FCD.get(i), 
-                                field.getName(), field.get(FCD.get(i)));
-                    }
-                    return dat;
-                } else if (out instanceof Long) {
-                    long[] dat = new long[n];
-                    for (int i=0; i<n; i++) {
-                        dat[i] = (Long) method.invoke(FCD.get(i), 
-                                field.getName(), field.get(FCD.get(i)));
-                    }
-                    return dat;
-                } else if (out instanceof Float) {
-                    float[] dat = new float[n];
-                    for (int i=0; i<n; i++) {
-                        dat[i] = (Float) method.invoke(FCD.get(i), 
-                                field.getName(), field.get(FCD.get(i)));
-                    }
-                    return dat;
-                } else if (out instanceof Byte) {
-                    byte[] dat = new byte[n];
-                    for (int i=0; i<n; i++) {
-                        dat[i] = (Byte) method.invoke(FCD.get(i), 
-                                field.getName(), field.get(FCD.get(i)));
-                    }
-                    return dat;
-                } else if (out instanceof Short) {
-                    short[] dat = new short[n];
-                    for (int i=0; i<n; i++) {
-                        dat[i] = (Short) method.invoke(FCD.get(i), 
-                                field.getName(), field.get(FCD.get(i)));
-                    }
-                    return dat;
-                }
             }
-            
+            // get method 'asPrimitive'
+            java.lang.reflect.Method method = FCDclass.getMethod("asPrimitive", 
+                    String.class, Object.class);
+            // get first output
+            Object out = method.invoke(FCD.get(0), field.getName(), field.get(FCD.get(0)));
+
+            if (out instanceof Double) {
+                double[] dat = new double[n];
+                for (int i=0; i<n; i++)
+                    dat[i] = (Double) method.invoke(FCD.get(i), field.getName(), field.get(FCD.get(i)));
+                return dat;
+            } else if (out instanceof Integer) {
+                int[] dat = new int[n];
+                for (int i=0; i<n; i++)
+                    dat[i] = (Integer) method.invoke(FCD.get(i), field.getName(), field.get(FCD.get(i)));
+                return dat;
+            } else if (out instanceof Boolean) {
+                boolean[] dat = new boolean[n];
+                for (int i=0; i<n; i++)
+                    dat[i] = (Boolean) method.invoke(FCD.get(i), field.getName(), field.get(FCD.get(i)));
+                return dat;
+            } else if (out instanceof Character) {
+                char[] dat = new char[n];
+                for (int i=0; i<n; i++)
+                    dat[i] = (Character) method.invoke(FCD.get(i), field.getName(), field.get(FCD.get(i)));
+                return dat;
+            } else if (out instanceof Long) {
+                long[] dat = new long[n];
+                for (int i=0; i<n; i++)
+                    dat[i] = (Long) method.invoke(FCD.get(i), field.getName(), field.get(FCD.get(i)));
+                return dat;
+            } else if (out instanceof Float) {
+                float[] dat = new float[n];
+                for (int i=0; i<n; i++)
+                    dat[i] = (Float) method.invoke(FCD.get(i), field.getName(), field.get(FCD.get(i)));
+                return dat;
+            } else if (out instanceof Byte) {
+                byte[] dat = new byte[n];
+                for (int i=0; i<n; i++)
+                    dat[i] = (Byte) method.invoke(FCD.get(i), field.getName(), field.get(FCD.get(i)));
+                return dat;
+            } else if (out instanceof Short) {
+                short[] dat = new short[n];
+                for (int i=0; i<n; i++)
+                    dat[i] = (Short) method.invoke(FCD.get(i), field.getName(), field.get(FCD.get(i)));
+                return dat;
+            }            
         } catch (java.lang.IllegalAccessException iae) {
             throw new java.lang.RuntimeException("Field "+field+" or method asPrimitive() has limited access.", iae);
         } catch (java.lang.reflect.InvocationTargetException ite) {

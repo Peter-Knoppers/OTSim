@@ -217,10 +217,9 @@ public class Lane {
         downSplit = split;
         if (up!=null && !up.isSplit())
             up.setDownstreamSplit(split);
-        for (Lane j : ups) {
+        for (Lane j : ups)
             if (!j.isSplit())
                 j.setDownstreamSplit(split);
-        }
     }
     
     /**
@@ -230,14 +229,11 @@ public class Lane {
      */
     protected void setUpstreamMerge(Lane merge) {
         upMerge = merge;
-        if (down!=null && !down.isMerge()) {
+        if (down!=null && !down.isMerge())
             down.setUpstreamMerge(merge);
-        }
-        for (Lane j : downs) {
-            if (!j.isMerge()) {
+        for (Lane j : downs)
+            if (!j.isMerge())
                 j.setUpstreamMerge(merge);
-            }
-        }
     }
     
     /**
@@ -335,13 +331,11 @@ public class Lane {
         // order of RSUs is maintained
         int index = 0;
         if (!RSUs.isEmpty()) {
-            if (rsu.x <= RSUs.get(0).x) {
-                // RSU before first
-                index = 0;
-            } else if (RSUs.get(RSUs.size()-1).x <= rsu.x) {
-                // RSU after last
-                index = RSUs.size();
-            } else {
+            if (rsu.x <= RSUs.get(0).x)
+                index = 0; // RSU before first
+            else if (RSUs.get(RSUs.size()-1).x <= rsu.x)
+                index = RSUs.size(); // RSU after last
+            else {
                 // RSU in between
                 for (int i=0; i<RSUs.size()-1; i++) {
                     if (RSUs.get(i).x<= rsu.x && rsu.x <= RSUs.get(i+1).x) {
@@ -417,13 +411,13 @@ public class Lane {
         Movable veh = null;
         if (updown==Model.longDirection.UP) {
             // if there are vehicles on the lane, pick any vehicle
-            if (!vehicles.isEmpty()) {
+            if (!vehicles.isEmpty())
                 veh = vehicles.get(0);
-            } else {
+            else {
                 // search for upstream lane with vehicles
                 Lane j = up;
                 while (j!=null && j.vehicles.isEmpty()) {
-                	if (j.marked){
+                	if (j.marked) {
                 		j = null;
                 		System.out.println("Loop detected in \"up\" links");
                 	} else {
@@ -432,27 +426,24 @@ public class Lane {
                 	}	
                 }
                 // pick any vehicle
-                if (j!=null && !j.vehicles.isEmpty()) {
+                if (j!=null && !j.vehicles.isEmpty())
                     veh = j.vehicles.get(0);
-                }
                 // remove the marks
                 for (j = up; j!= null && j.marked; j = j.up)
                 	j.marked = false;
             }
             // search up/downstream to match x
             if (veh != null) {
-                while (veh.down != null && veh.down.x + xAdj(veh.down.lane) <= x) {
+                while (veh.down != null && veh.down.x + xAdj(veh.down.lane) <= x)
                     veh = veh.down;
-                }
-                while (veh != null && veh.x + xAdj(veh.lane) > x) {
+                while (veh != null && veh.x + xAdj(veh.lane) > x)
                     veh = veh.up;
-                }
             }
         } else if (updown==Model.longDirection.DOWN) {
             // if there are vehicle on the lane, pick any vehicle
-            if (!vehicles.isEmpty()) {
+            if (!vehicles.isEmpty())
                 veh = vehicles.get(0);
-            } else {
+            else {
                 // search for downstream lane with vehicles
                 Lane j = down;
                 while (j!=null && j.vehicles.isEmpty()) {
@@ -465,21 +456,18 @@ public class Lane {
                 	}
                 }
                 // pick any vehicle
-                if (j!=null && !j.vehicles.isEmpty()) {
+                if (j!=null && !j.vehicles.isEmpty())
                     veh = j.vehicles.get(0);
-                }
                 // remove the marks
                 for (j = down; j!= null && j.marked; j = j.down)
                 	j.marked = false;
             }
             // search up/downstream to match x
             if (veh != null) {
-                while (veh.up != null && veh.up.x + xAdj(veh.up.lane) >= x) {
+                while (veh.up != null && veh.up.x + xAdj(veh.up.lane) >= x)
                     veh = veh.up;
-                }
-                while (veh != null && veh.x + xAdj(veh.lane) < x) {
+                while (veh != null && veh.x + xAdj(veh.lane) < x)
                     veh = veh.down;
-                }
             }
         }
         return veh;
@@ -521,9 +509,8 @@ public class Lane {
             // If no RSUs, move to next lane
             atLane = atLane.down;
             // Update searchrange at start of new lane
-            if (atLane!=null) {
+            if (atLane!=null)
                 searchRange = xAdj(atLane)-x;
-            }
         }
         return out;
     }
@@ -556,16 +543,14 @@ public class Lane {
                 }
                 // Update search range and quit if possible
                 searchRange = xAdj(atLane)+atLane.getRSU(i).x-x;
-                if (searchRange>range) {
+                if (searchRange>range)
                     return out;
-                }
             }
             // If no noticable RSUs, move to next lane
             atLane = atLane.down;
             // Update searchrange at start of new lane
-            if (atLane!=null) {
+            if (atLane!=null)
                 searchRange = xAdj(atLane)-x;
-            }
         }
         return out;
     }
@@ -629,19 +614,18 @@ public class Lane {
                                 if (lane==otherLane) {
                                     found = true;
                                     break;
-                                } else {
-                                	if (lane.marked)
-                                		continue;
-                                	lane.marked = true;
-                                    dx2 = lane.xAdj(otherLane, Model.longDirection.DOWN);
-                                    if (dx2>0) {
-                                        dx = dx + dx2;
-                                        found = true;
-                                        lane.marked = false;
-                                        break;
-                                    }
-                                    lane.marked = false;
                                 }
+                            	if (lane.marked)
+                            		continue;
+                            	lane.marked = true;
+                                dx2 = lane.xAdj(otherLane, Model.longDirection.DOWN);
+                                if (dx2>0) {
+                                    dx = dx + dx2;
+                                    found = true;
+                                    lane.marked = false;
+                                    break;
+                                }
+                                lane.marked = false;
                             }
                         }
                         j = j.down;
@@ -653,12 +637,11 @@ public class Lane {
                     j = this;
                     while (j!=null && !found) {
                         // reduce upstream distance
-                        if (j.up != null) {
+                        if (j.up != null)
                             dx = dx - j.up.l;
-                        }
-                        if (j.up == otherLane) {
+                        if (j.up == otherLane)
                             found = true;
-                        } else if (j.isMerge()) {
+                        else if (j.isMerge()) {
                             // at merge, forward request to upstream lanes
                             double dx2;
                             for (Lane lane : j.ups) {
@@ -666,22 +649,20 @@ public class Lane {
                                 if (lane==otherLane) {
                                     found = true;
                                     break;
-                                } else {
-                                	if (lane.marked)
-                                		continue;
-                                	lane.marked = true;
-                                    dx2 = lane.xAdj(otherLane, Model.longDirection.UP);
-                                    if (dx2<0) {
-                                        dx = dx + dx2;
-                                        found = true;
-                                        lane.marked = false;
-                                        break;
-                                    }
+                                }
+                            	if (lane.marked)
+                            		continue;
+                            	lane.marked = true;
+                                dx2 = lane.xAdj(otherLane, Model.longDirection.UP);
+                                if (dx2<0) {
+                                    dx = dx + dx2;
+                                    found = true;
                                     lane.marked = false;
+                                    break;
                                 }
-                                if (!found) {
+                                lane.marked = false;
+                                if (!found)
                                     dx += lane.l;
-                                }
                             }
                         }
                         j = j.up;
@@ -710,13 +691,12 @@ public class Lane {
      * @return <tt>true</tt> if the lanes are in the same physical lane.
      */
     public boolean isSameLane(Lane otherLane) {
-        if (otherLane==this) {
+        if (otherLane==this)
             return true;
-        } else if (otherLane==null) {
+        else if (otherLane==null)
             return false;
-        } else {
+        else
             return xAdj(otherLane)!=0 && downSplit==otherLane.downSplit && upMerge==otherLane.upMerge;
-        }
     }
 
     /**
@@ -740,13 +720,11 @@ public class Lane {
      */
     public double getAdjacentX(double x, Model.latDirection dir) {
 
-        if (dir==Model.latDirection.LEFT && !goLeft && !left.goRight) {
-            // maybe not physically adjacent, use total length only
-            return x * left.l/l;
-        } else if (dir==Model.latDirection.RIGHT && !goRight && !right.goLeft) {
-            // maybe not physically adjacent, use total length only
-            return x * right.l/l;
-        } else {
+        if (dir==Model.latDirection.LEFT && !goLeft && !left.goRight)
+            return x * left.l/l; // maybe not physically adjacent, use total length only
+        else if (dir==Model.latDirection.RIGHT && !goRight && !right.goLeft)
+            return x * right.l/l; // maybe not physically adjacent, use total length only
+        else {
             // get appropriate section, and fraction within section
             double xCumul = 0; // length at end of appropriate section
             int section = 0;
@@ -777,11 +755,10 @@ public class Lane {
             double fSection = 1-(xCumul-x)/lSection; // fraction within appropriate section
             // loop appropriate adjacent lane
             Lane lane = null;
-            if (dir==Model.latDirection.LEFT) {
+            if (dir==Model.latDirection.LEFT)
                 lane = left;
-            } else if (dir==Model.latDirection.RIGHT) {
+            else if (dir==Model.latDirection.RIGHT)
                 lane = right;
-            }
             // loop preceding sections
             double xStart = 0;
             for (int i=0; i<section; i++) {
@@ -1015,9 +992,8 @@ public class Lane {
                     } else if (lan.down!=null) {
                         atX = atX - lan.l;
                         lan = lan.down;
-                    } else {
+                    } else
                         break;
-                    }
                 }
                 vehicle.cut();
                 vehicle.paste(lan, atX);
@@ -1036,11 +1012,9 @@ public class Lane {
          * @return Downstream lane for the given route, <tt>null</tt> if none applies.
          */
         public Lane getLaneForRoute(Route route) {
-            for (Lane lan : downs) {
-                if (route.canBeFollowedFrom(lan)) {
+            for (Lane lan : downs)
+                if (route.canBeFollowedFrom(lan))
                     return lan;
-                }
-            }
             return null;
         }
 

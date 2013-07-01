@@ -36,15 +36,12 @@ public class Route {
      */
     public Route subRouteAfter(int destination) {
         int i = 0;
-        for (int j=0; j<destinations.length; j++) {
-            if (destinations[j]==destination) {
+        for (int j=0; j<destinations.length; j++)
+            if (destinations[j]==destination)
                 i = j+1; // +1 for 'after'
-            }
-        }
         int[] newRoute = new int[destinations.length-i];
-        for (int j=i; j<destinations.length; j++) {
+        for (int j=i; j<destinations.length; j++)
             newRoute[j-i] = destinations[j];
-        }
         return new Route(newRoute);
     }
     
@@ -54,9 +51,8 @@ public class Route {
      * @return Whether this route can be followed from the given lane.
      */
     public boolean canBeFollowedFrom(Lane lane) {
-        if (lane==null) {
+        if (lane==null)
             return false;
-        }
         // Check and handling added by PK
         // TODO: check correctness of this handling with Wouter Schakel
         if (destinations.length == 0)
@@ -71,9 +67,8 @@ public class Route {
      * @return Number of lane changes that needs to be performed for this route.
      */
     public int nLaneChanges(Lane lane) {
-        if (lane.leadsTo(destinations[0])) {
+        if (lane.leadsTo(destinations[0]))
             return lane.nLaneChanges(destinations[0]);
-        }
         return 0;
     }
     
@@ -84,9 +79,8 @@ public class Route {
      * @return Distance [m] within which a number of lane changes has to be performed.
      */
     public double xLaneChanges(Lane lane) {
-        if (lane.leadsTo(destinations[0])) {
+        if (lane.leadsTo(destinations[0]))
             return lane.xLaneChanges(destinations[0]);
-        }
         return 0;
     }
     

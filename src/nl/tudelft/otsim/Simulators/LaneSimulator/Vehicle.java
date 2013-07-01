@@ -81,16 +81,13 @@ public class Vehicle extends Movable {
      */
     public void move() {
     	// skip if moved
-    	if (moved >= lane.model.k)  {
+    	if (moved >= lane.model.k)
     		return;
-    	}
     	// move leaders first
-    	if (down!= null) {
+    	if (down!= null)
     		down.getDriver().vehicle.move();
-    	}
-    	if (lcVehicle != null && lcVehicle.down != null) {
+    	if (lcVehicle != null && lcVehicle.down != null)
     		lcVehicle.down.getDriver().vehicle.move();
-    	}
     	//tag as moved
     	moved  = lane.model.k;
         // lateral
@@ -170,9 +167,8 @@ public class Vehicle extends Movable {
             rsu = it.next();
             s = getDistanceToRSU(rsu) - dx;
             if (s<0) {
-                if (rsu.passable || rsu.noticeable) {
+                if (rsu.passable || rsu.noticeable)
                     rsu.pass(this);
-                }
                 it.remove();
             }
         }
@@ -249,8 +245,7 @@ public class Vehicle extends Movable {
             if (lcDirection==Model.latDirection.LEFT) {
                 xNew = getAdjacentX(Model.latDirection.LEFT);
                 xAdj = lcVehicle.lane.xAdj(lane.left);
-            }
-            else {
+            } else {
                 xNew = getAdjacentX(Model.latDirection.RIGHT);
                 xAdj = lcVehicle.lane.xAdj(lane.right);
             }
@@ -281,11 +276,10 @@ public class Vehicle extends Movable {
         lcVehicle = new LCVehicle(this);//
         model.addVehicle(lcVehicle);//
         Lane atLane;
-        if (lcDirection==Model.latDirection.LEFT) {
+        if (lcDirection==Model.latDirection.LEFT)
             atLane = lane.left;
-        } else {
+        else
             atLane = lane.right;
-        }
         double atX = getAdjacentX(lcDirection);
         lcVehicle.paste(atLane, atX);
     }
@@ -298,11 +292,10 @@ public class Vehicle extends Movable {
         lcVehicle.delete();
         Lane targetLane;
         double targetX = getAdjacentX(lcDirection);
-        if (lcDirection==Model.latDirection.LEFT) {
+        if (lcDirection==Model.latDirection.LEFT)
             targetLane = lane.left;
-        } else {
+        else
             targetLane = lane.right;
-        }
         cut();
         paste(targetLane, targetX);
         lcProgress = 0;
@@ -352,15 +345,13 @@ public class Vehicle extends Movable {
             // interpolate between own and lcVehicle global X and Y
             globalX = coord.x*(1-lcProgress) + lcVehicle.globalX*lcProgress;
             globalY = coord.y*(1-lcProgress) + lcVehicle.globalY*lcProgress;
-        }
-        else {
+        } else {
             globalX = coord.x;
             globalY = coord.y;
         }
         setHeading();
-        if (lcVehicle!=null) {
+        if (lcVehicle!=null)
             lcVehicle.heading = heading;
-        }
     }
     
     /**

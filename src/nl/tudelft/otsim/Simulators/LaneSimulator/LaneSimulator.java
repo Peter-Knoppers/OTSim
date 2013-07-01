@@ -356,7 +356,7 @@ public class LaneSimulator extends Simulator {
         try {
             veh.trajectory = new Trajectory(veh, "microModel.jFCD");
         } catch (ClassNotFoundException cnfe) {
-            
+            System.err.println("failed to make a new Trajectory");
         }
         Driver driver = new Driver(veh);
         VehicleDriver clazz = new VehicleDriver(jmodel, veh, 1);

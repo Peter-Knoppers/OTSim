@@ -88,21 +88,16 @@ public class Conflict {
                 pLane.y[pLane.y.length-1]==yLane.y[yLane.y.length-1]) {
             // equal end coordinates
             intersect = new coord(pLane.l, yLane.l, pLane.x[pLane.x.length-1], pLane.y[pLane.y.length-1]);
-        } else {
-            // find intersect
+        } else	// find intersect
             intersect = intersect(pLane, yLane);
-        }
-        if (intersect==null) {
+        if (intersect==null)
             return null;
-        } else {
-            coord[] clearance = findClearanceSpace(pLane, yLane, intersect, false);
-            if (clearance!=null && clearance[0]!=null) {
-                return new Conflict(pLane, intersect.x1, yLane, intersect.x2,  
-                        false, conflictType.MERGE, intersect.x1-clearance[0].x1);
-            } else {
-                return null;
-            }
+        coord[] clearance = findClearanceSpace(pLane, yLane, intersect, false);
+        if (clearance!=null && clearance[0]!=null) {
+            return new Conflict(pLane, intersect.x1, yLane, intersect.x2,  
+                    false, conflictType.MERGE, intersect.x1-clearance[0].x1);
         }
+        return null;
     }
     
     /**
@@ -130,21 +125,16 @@ public class Conflict {
         if (lane1.x[0]==lane2.x[0] && lane1.y[0]==lane2.y[0]) {
             // equal start coordinates
             intersect = new coord(0, 0, lane1.x[0], lane2.y[0]);
-        } else {
-            // find intersect
+        } else	// find intersect
             intersect = intersect(lane1, lane2);
-        }
-        if (intersect==null) {
+        if (intersect==null)
             return null;
-        } else {
-            coord[] clearance = findClearanceSpace(lane1, lane2, intersect, false);
-            if (clearance!=null && clearance[1]!=null) {
-                return new Conflict(lane1, clearance[1].x1, lane2, clearance[1].x2,
-                        false, conflictType.SPLIT, clearance[1].x1);
-            } else {
-                return null;
-            }
+        coord[] clearance = findClearanceSpace(lane1, lane2, intersect, false);
+        if (clearance!=null && clearance[1]!=null) {
+            return new Conflict(lane1, clearance[1].x1, lane2, clearance[1].x2,
+                    false, conflictType.SPLIT, clearance[1].x1);
         }
+        return null;
     }
     
     /**
@@ -156,17 +146,14 @@ public class Conflict {
      */
     public static Conflict createCrossing(Lane pLane, Lane yLane, boolean clear) {
         coord intersect = intersect(pLane, yLane);
-        if (intersect==null) {
+        if (intersect==null)
             return null;
-        } else {
-            coord[] clearance = findClearanceSpace(pLane, yLane, intersect, true);
-            if (clearance!=null && clearance[0]!=null && clearance[1]!=null) {
-                return new Conflict(pLane, clearance[1].x1, yLane, clearance[1].x2,  
-                        clear, conflictType.CROSSING, clearance[1].x1-clearance[0].x1);
-            } else {
-                return null;
-            }
+        coord[] clearance = findClearanceSpace(pLane, yLane, intersect, true);
+        if (clearance!=null && clearance[0]!=null && clearance[1]!=null) {
+            return new Conflict(pLane, clearance[1].x1, yLane, clearance[1].x2,  
+                    clear, conflictType.CROSSING, clearance[1].x1-clearance[0].x1);
         }
+        return null;
     }
     
     /**
@@ -528,11 +515,9 @@ public class Conflict {
          * @return First (partially) upstream vehicle of the coupled RSU. 
          */
         public Movable otherUp() {
-            if (this==p) {
+            if (this==p)
                 return y.up();
-            } else {
-                return p.up();
-            }
+            return p.up();
         }
         
         /**
@@ -540,15 +525,15 @@ public class Conflict {
          * @return Coupled RSU on the other lane of this conflict.
          */
         public conflictRSU otherRSU() {
-            if (this==p) {
+            if (this==p)
                 return y;
-            } else {
-                return p;
-            }
+            return p;
         }
         
         /** 
          * Returns whether traffic on this lane has priority. 
+         * @return Boolean; true if this lane has priority; false if this lane
+         * does not have priority
          */
         public boolean isPriority() {
             return priority;

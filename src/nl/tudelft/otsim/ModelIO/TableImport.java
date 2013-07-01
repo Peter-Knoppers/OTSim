@@ -87,7 +87,7 @@ public class TableImport  extends JFrame {
                                  TableColumn dropDownColumn, String[] names) {
     	if (dropDownColumn != null)   {
 	        //Set up the editor for the cells.
-	        JComboBox comboBox = new JComboBox();
+	        JComboBox<String> comboBox = new JComboBox<String>();
 	        comboBox.addItem(EMPTYCOLUMN);
 	        for (int i = 0; i < names.length; i++)   {
 	        	comboBox.addItem(names[i]);
@@ -148,7 +148,7 @@ public class TableImport  extends JFrame {
          * rather than a check box.
          */
         @Override
-		public Class getColumnClass(int c) {
+		public Class<? extends Object> getColumnClass(int c) {
             return getValueAt(0, c).getClass();
         }
  
@@ -160,11 +160,9 @@ public class TableImport  extends JFrame {
 		public boolean isCellEditable(int row, int col) {
             //Note that the data/cell address is constant,
             //no matter where the cell appears onscreen.
-            if (col < 1) {
+            if (col < 1)
                 return false;
-            } else {
-                return true;
-            }
+            return true;
         }
  
         /*

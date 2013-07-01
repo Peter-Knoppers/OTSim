@@ -78,9 +78,8 @@ public abstract class Controller {
         } else if (model.t >= t + period) {
             t = t + period; // increase t until t>start
             noControl();
-        } else {
+        } else
             noControl();
-        }
     }
 
     /**

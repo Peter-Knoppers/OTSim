@@ -154,9 +154,8 @@ public class TrafficLight extends RSU implements SimulatedTrafficLight {
             if (tPhase<0 || tPhase>tGreen+tYellow+tRed) {
                 throw new RuntimeException("Phase time "+tPhase+" outside of phase duration.");
             }
-            if (tGreen<0 || tYellow<0 || tRed<0) {
+            if (tGreen<0 || tYellow<0 || tRed<0)
                 throw new RuntimeException("Negative time defined for traffic light.");
-            }
             // Set phase
             if (tPhase<=tGreen) {
                 setGreen();

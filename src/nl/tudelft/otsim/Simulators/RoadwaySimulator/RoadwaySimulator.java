@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JCheckBox;
-import javax.swing.JPanel;
 
 import nl.tudelft.otsim.Events.Scheduler;
 import nl.tudelft.otsim.Events.Step;

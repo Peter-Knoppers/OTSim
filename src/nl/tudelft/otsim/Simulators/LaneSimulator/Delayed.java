@@ -27,9 +27,8 @@ public class Delayed<E> {
         int n = (int) Math.round(delay/dt);
         memory = new java.util.ArrayList<E>(n);
         // fill memory with null
-        for (int i=0; i<n; i++) {
+        for (int i=0; i<n; i++)
             memory.add(null);
-        }
     }
 
     /**

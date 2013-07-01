@@ -25,8 +25,6 @@ import nl.tudelft.otsim.SpatialTools.Planar;
  * @author gtamminga
  */
 public class Node extends Vertex implements XML_IO {
-	private static final long serialVersionUID = 1L;
-	
 	/** Name for a Node element when stored in XML format */
 	public static final String XMLTAG = "node";
 	
