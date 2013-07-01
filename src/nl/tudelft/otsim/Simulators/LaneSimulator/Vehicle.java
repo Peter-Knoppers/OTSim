@@ -318,20 +318,20 @@ public class Vehicle extends Movable {
 
     /**
      * Initiates a lateral movement to the left.
-     * @param dy Initial speed of the lateral movement in 'amount of lane per time step'.
+     * @param newDY Initial speed of the lateral movement in 'amount of lane per time step'.
      */
-    public void changeLeft(double dy) {
+    public void changeLeft(double newDY) {
         lcDirection = Model.latDirection.LEFT;
-        this.dy = dy;
+        this.dy = newDY;
     }
 
     /**
      * Initiates a lateral movement to the right.
-     * @param dy Initial speed of the lateral movement in 'amount of lane per time step'.
+     * @param newDY Initial speed of the lateral movement in 'amount of lane per time step'.
      */
-    public void changeRight(double dy) {
+    public void changeRight(double newDY) {
         lcDirection = Model.latDirection.RIGHT;
-        this.dy = dy;
+        this.dy = newDY;
     }
 
     /**
@@ -428,38 +428,74 @@ public class Vehicle extends Movable {
     	return String.format(Main.locale, "at (%.3f, %.3f), route %s", globalX, globalY, route.toString());
     }
     
+    /**
+     * Retrieve the length of this Vehicle
+     * @return String; the length of this Vehicle
+     */
     public String getLength_r() {
     	return String.format(Main.locale, "%.2f m", l);
     }
     
+    /**
+     * Retrieve the speed of this Vehicle
+     * @return String; the speed of this Vehicle
+     */
     public String getSpeed_r() {
     	return String.format(Main.locale, "%.2f km/h", v);
     }
     
+    /**
+     * Retrieve the acceleration of this Vehicle.
+     * @return String; the acceleration of this vehicle
+     */
     public String getAcceleration_r() {
     	return String.format(Main.locale, "%.2f m/s/s", a);
     }
     
+    /**
+     * Retrieve the maximum acceleration of this Vehicle
+     * @return String; the maximum acceleration of this Vehicle
+     */
     public String getMaximumDeceleration_r () {
     	return String.format(Main.locale, "%.2f m/s/s", aMin);
     }
     
+    /**
+     * Retrieve the leader of this Vehicle.
+     * @return Movable; the leader of this Vehicle
+     */
     public Movable getLeader_r() {
     	return down;
     }
     
+    /**
+     * Retrieve the follower of this Vehicle.
+     * @return Movable; the follower of this Vehicle
+     */
     public Movable getFollower_r() {
     	return up;
     }
     
+    /**
+     * Retrieve the {@link Driver} of this Vehicle.
+     * @return {@link Driver}; the Driver of this Vehicle 
+     */
     public Driver getDriver_r() {
     	return driver;
     }
     
+    /**
+     * Retrieve the maximum speed of this Vehicle.
+     * @return String; the maximum speed of this Vehicle
+     */
     public String getMaximumSpeed_r() {
     	return String.format(Main.locale, "%.2f km/h", vMax);
     }
     
+    /**
+     * Retrieve the list of {@link RSU RSUs} of this Vehicle.
+     * @return ArrayList&lt;{@link RSU}&gt;; the list of {@link RSU RSUs} of this Vehicle
+     */
     public java.util.ArrayList<RSU> getRSUsInRange_r() {
     	return RSUsInRange;
     }

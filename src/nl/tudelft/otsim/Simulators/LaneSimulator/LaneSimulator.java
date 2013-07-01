@@ -19,16 +19,25 @@ import nl.tudelft.otsim.Simulators.Simulator;
 import nl.tudelft.otsim.SpatialTools.Planar;
 import nl.tudelft.otsim.TrafficDemand.ExportTripPattern;
 
+/**
+ * This class holds all data of a laneSimulator.
+ * 
+ * @author Wouter J Schakel
+ */
 public class LaneSimulator extends Simulator {
 	
-	private final Model jmodel = new Model();
+	private final Model model = new Model();
 	private ArrayList<LaneGraphic> laneGraphics = new ArrayList<LaneGraphic>();
 	private final Scheduler scheduler;
 	/** Type of this Simulator */
 	public static final String simulatorType = "Lane simulator";
 
-	public final Model getJModel() {
-		return jmodel;
+	/**
+	 * Retrieve the {@link Model} of this laneSimulator.
+	 * @return {@link Model}; the model of this laneSimulator
+	 */
+	public final Model getModel() {
+		return model;
 	}
 
 	/**
@@ -42,11 +51,11 @@ public class LaneSimulator extends Simulator {
 	public LaneSimulator(String definition, GraphicsPanel graphicsPanel, Scheduler scheduler) throws Exception {
 		this.scheduler = scheduler;
 		// STUB set reasonable defaults
-		jmodel.period = 1860;
-        jmodel.dt = .2;
-        jmodel.debug = true;
-        jmodel.setSeed(1);
-        jmodel.settings.putBoolean("storeDetectorData", true);
+		model.period = 1860;
+        model.dt = .2;
+        model.debug = true;
+        model.setSeed(1);
+        model.settings.putBoolean("storeDetectorData", true);
         ArrayList<Lane> microNetwork = new ArrayList<Lane>(); 
     	ArrayList<ExportTripPattern> tripList = new ArrayList<ExportTripPattern>(); 
 
@@ -73,8 +82,8 @@ public class LaneSimulator extends Simulator {
         			y[i] = Double.parseDouble(subFields[1]);
         		}
         		// Add it to the network
-        		System.out.println(String.format("microNetwork.add(new jLane(jmodel, %s, %s, %d", x.toString(), y.toString(), id));
-        		Lane newLane = new Lane(jmodel, x, y, id);
+        		System.out.println(String.format("microNetwork.add(new jLane(model, %s, %s, %d", x.toString(), y.toString(), id));
+        		Lane newLane = new Lane(model, x, y, id);
         		// set origin and destination as default to -999
         		newLane.destination = -999;
         		newLane.origin = -999;        		
@@ -191,7 +200,7 @@ public class LaneSimulator extends Simulator {
         		}
         	} else if (fields[0].equals("Path:")) {
         		int i = 1;
-        		int pathNo = Integer.parseInt(fields[i]);
+        		//int pathNo = Integer.parseInt(fields[i]);
         		i++;
         		ArrayList<Integer> route = new ArrayList<Integer>(); 
         		while (i < fields.length){
@@ -216,13 +225,13 @@ public class LaneSimulator extends Simulator {
         			Lane lane = lookupLane(Integer.parseInt(subFields[0]), microNetwork);
         			if (null == lane)
         				throw new Exception("TrafficLight " + fields[1] + " lies on undefined lane " + subFields[0]);
-        			jmodel.addController(new TrafficLight(lane, Double.parseDouble(subFields[1]), fields[1], Planar.coordinatesToPoints(fields, 3, fields.length)));
+        			model.addController(new TrafficLight(lane, Double.parseDouble(subFields[1]), fields[1], Planar.coordinatesToPoints(fields, 3, fields.length)));
         		}
         	} else if (fields[0].equals("TrafficLightController")) {
         		// This depends on all TrafficLights and Detectors to be created BEFORE the SimulatedTrafficLightController
         		SimulatedTrafficLightController tlc = new SimulatedTrafficLightController(scheduler, fields[4]);
         		for (String tlName : fields[2].split(",")) {
-        			for (Controller controller : jmodel.controllers)
+        			for (Controller controller : model.controllers)
         				if (controller instanceof TrafficLight) {
         					TrafficLight tl = (TrafficLight) controller;
         					if (tl.name().equals(tlName))
@@ -230,7 +239,7 @@ public class LaneSimulator extends Simulator {
         				}
         		}
         		for (String dName : fields[3].split(",")) {
-        			for (Controller controller : jmodel.controllers)
+        			for (Controller controller : model.controllers)
         				if (controller instanceof OccupancyDetector) {
         					OccupancyDetector detector = (OccupancyDetector) controller;
         					if (detector.name().equals(dName))
@@ -243,7 +252,7 @@ public class LaneSimulator extends Simulator {
         			Lane lane = lookupLane(Integer.parseInt(subFields[0]), microNetwork);
         			if (null == lane)
         				throw new Exception("Detector " + fields[1] + " lies on undefined lane " + subFields[0]);
-        			jmodel.addController(new OccupancyDetector(lane, Double.parseDouble(subFields[1]), fields[1], Double.parseDouble(subFields[2]), Planar.coordinatesToPoints(fields, 3, fields.length)));
+        			model.addController(new OccupancyDetector(lane, Double.parseDouble(subFields[1]), fields[1], Double.parseDouble(subFields[2]), Planar.coordinatesToPoints(fields, 3, fields.length)));
         		}
         	} else
         		throw new Error("Unknown object in LaneSimulator: \"" + fields[0] + "\"");        	
@@ -338,17 +347,17 @@ public class LaneSimulator extends Simulator {
         for (Lane lane : microNetwork)
         	lane.vLim = 50;
         
-        jmodel.network = microNetwork.toArray(new Lane[0]);
+        model.network = microNetwork.toArray(new Lane[0]);
         // Add the tapers to the list of lane objects
-        for (Lane lane : jmodel.network)
+        for (Lane lane : model.network)
         	if (lane.taper == lane)
         		laneGraphics.add(new LaneGraphic(lane));
         // Then add the non-tapers
-        for (Lane lane : jmodel.network)
+        for (Lane lane : model.network)
         	if (lane.taper != lane)
         		laneGraphics.add(new LaneGraphic(lane));
         // class
-        Vehicle veh = new Vehicle(jmodel);
+        Vehicle veh = new Vehicle(model);
         veh.l = 4;
         veh.vMax = 160;
         veh.marker = "o";
@@ -359,10 +368,10 @@ public class LaneSimulator extends Simulator {
             System.err.println("failed to make a new Trajectory");
         }
         Driver driver = new Driver(veh);
-        VehicleDriver clazz = new VehicleDriver(jmodel, veh, 1);
+        VehicleDriver clazz = new VehicleDriver(model, veh, 1);
         clazz.addStochasticDriverParameter("fSpeed", VehicleDriver.distribution.GAUSSIAN, 123.7/120, 12.0/120);
         
-        veh = new Vehicle(jmodel);
+        veh = new Vehicle(model);
         veh.l = 15;
         veh.marker = "s";
         veh.aMin = -6;
@@ -373,12 +382,12 @@ public class LaneSimulator extends Simulator {
         }
         driver = new Driver(veh);
         driver.a = 0.4;
-        clazz = new VehicleDriver(jmodel, veh, 2);
+        clazz = new VehicleDriver(model, veh, 2);
         clazz.addStochasticVehicleParameter("vMax", VehicleDriver.distribution.GAUSSIAN, 85, 2.5);
-        ConsistencyCheck.checkPreInit(jmodel);
+        ConsistencyCheck.checkPreInit(model);
         System.out.println("model.init()");
-        jmodel.init();
-        ConsistencyCheck.checkPostInit(jmodel);
+        model.init();
+        ConsistencyCheck.checkPostInit(model);
         System.out.println("model created");
         scheduler.enqueueEvent(0d, new Stepper(this));
 	}
@@ -907,6 +916,7 @@ public class LaneSimulator extends Simulator {
          * @return Whether the vehicle is still in the simulation.
          */
         public boolean exists(Model model) {
+        	// FIXME: can the supplied argument "model" really be different from this.model???
             return model.getVehicles().contains(vehicle);
         }
         
@@ -1001,7 +1011,7 @@ public class LaneSimulator extends Simulator {
         double bestDistance = Double.MAX_VALUE;
         Vehicle prevSelectedVehicle = selectedVehicle;
 
-        for (Vehicle vehicle : jmodel.getVehicles()) {
+        for (Vehicle vehicle : model.getVehicles()) {
         	Point2D.Double[] vehiclePolygon = (new VehicleGraphic(vehicle)).outline();
         	for (Point2D.Double pp : vehiclePolygon) {
         		Point2D.Double translated = graphicsPanel.translate(pp);
@@ -1063,14 +1073,14 @@ public class LaneSimulator extends Simulator {
 
 	@Override
 	public void repaintGraph(GraphicsPanel graphicsPanel) {
-		for (Controller controller : jmodel.controllers)
+		for (Controller controller : model.controllers)
 			if (controller instanceof SimulatedObject)
-				((SimulatedObject) controller).paint(jmodel.t, graphicsPanel);
+				((SimulatedObject) controller).paint(model.t, graphicsPanel);
 		for (LaneGraphic lg : laneGraphics)
 			lg.paint(graphicsPanel);
 		boolean showLeader = Main.mainFrame.checkBoxShowLeader.isSelected();
 		boolean showFollower = Main.mainFrame.checkBoxShowFollower.isSelected();
-		for (Vehicle vehicle : jmodel.getVehicles())
+		for (Vehicle vehicle : model.getVehicles())
 			new VehicleGraphic(vehicle).paint(graphicsPanel, showLeader, showFollower);
 	}
 
@@ -1113,20 +1123,20 @@ class Stepper implements Step {
 	@Override
 	public boolean step(double now) {
     	//System.out.println("step entered");
-    	Model jmodel = laneSimulator.getJModel();
-    	if (now >= jmodel.period)
+    	Model model = laneSimulator.getModel();
+    	if (now >= model.period)
     		return false;
-    	while (jmodel.t < now) {
+    	while (model.t < now) {
     		//System.out.println("step calling run(1)");
     		try {
-    			jmodel.run(1);
+    			model.run(1);
     		} catch (RuntimeException e) {
     			WED.showProblem(WED.ENVIRONMENTERROR, "Error in LaneSimulator:\r\n%s", WED.exeptionStackTraceToString(e));
     			return false;
     		}
     	}
     	// re-schedule myself
-    	laneSimulator.getScheduler().enqueueEvent(jmodel.t + jmodel.dt, this);
+    	laneSimulator.getScheduler().enqueueEvent(model.t + model.dt, this);
     	//System.out.println("step returning true");
 		return true;
 	}

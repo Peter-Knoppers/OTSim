@@ -528,11 +528,11 @@ public class Driver {
     /**
      * Sets the acceleration of the vehicle only if the given value is lower 
      * than the current value or in case of a new time step.
-     * @param a Vehicle acceleration [m/s^2].
+     * @param proposedA Vehicle acceleration [m/s^2].
      */
-    public void lowerAcceleration(double a) {
-        if (isNewTimeStepForAction("lower_acceleration") || a<vehicle.a)
-            vehicle.setAcceleration(a);
+    public void lowerAcceleration(double proposedA) {
+        if (isNewTimeStepForAction("lower_acceleration") || proposedA<vehicle.a)
+            vehicle.setAcceleration(proposedA);
     }
     
     /**
@@ -540,11 +540,11 @@ public class Driver {
      * safe according to a >= -bSafe. This limit can be used for synchronization
      * with an adjacent lane and not for car-following as 'safe' does not mean
      * collision free, but safe with regard to upstream followers.
-     * @param a Acceleration as calculated for an adjacent leader [m/s^2].
+     * @param otherA Acceleration as calculated for an adjacent leader [m/s^2].
      * @return Limited safe acceleration [m/s^2].
      */
-    public double safe(double a) {
-        return a >= -bSafe ? a : -bSafe;
+    public double safe(double otherA) {
+        return otherA >= -bSafe ? otherA : -bSafe;
     }
 
     /**
@@ -1463,14 +1463,26 @@ public class Driver {
     	return String.format("s0=%.2fm", s0);
     }
     
+    /**
+     * Retrieve the stopping distance for this Driver.
+     * @return Double; the stopping distance for this Driver
+     */
     public double getStoppingDistance_r() {
     	return s0;
     }
     
+    /**
+     * Retrieve the desire to change to the right adjacent {@link Lane} of this Driver
+     * @return Double; the desire to change to the right adjacent {@link Lane}
+     */
     public double getLaneChangeDesireRight_r() {
     	return dRight;
     }
     
+    /**
+     * Retrieve the desire to change to the left adjacent {@link Lane} of this Driver
+     * @return Double; the desire to change to the left adjacent {@link Lane}
+     */
     public double getLaneChangeDesireLeft_r() {
     	return dLeft;
     }

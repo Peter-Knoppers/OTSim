@@ -842,6 +842,10 @@ public abstract class Movable  {
      */
     public abstract Driver getDriver();
 
+    /**
+     * Retrieve the {@link Lane} of this Movable.
+     * @return {@Link Lane}; the current Lane of this Movable
+     */
     public Lane getLane_r() {
     	return lane;
     }

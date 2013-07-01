@@ -16,7 +16,7 @@ public class ConsistencyCheck {
 	 * @throws Exception 
 	 */
 	public static void checkPreInit(Model model) throws Exception {
-		// Currently only checks the relations between jLanes
+		// Check the relations between jLanes
 		for (Lane lane : model.network) {
 			// Check shape
 			if (lane.x.length != lane.y.length)
@@ -110,6 +110,26 @@ public class ConsistencyCheck {
 			} else if (lane.goRight)
 				throw new Exception("lane " + describeLane(lane) + " has goRight set but has no right neighbor lane");
 		}
+		// Check the locations of OccupancyDetectors and TrafficLights
+		for (Lane lane : model.network) {
+			int count = lane.RSUcount();
+			for (int index = 0; index < count; index++) {
+				RSU rsu = lane.getRSU(index);
+				if (rsu instanceof OccupancyDetector)
+					checkPosition(lane, rsu, "OccupancyDetector");
+				else if (rsu instanceof TrafficLight)
+					checkPosition(lane, rsu, "TrafficLight");
+			}
+				
+		}
+	}
+	
+	private static void checkPosition(Lane lane, RSU rsu, String rsuTypeName) throws Exception {
+		System.out.println("lane " + describeLane(lane) + " has " + rsuTypeName + " at " + rsu.x + " range is 0.." + lane.l);
+		if (rsu.x < 0)
+			throw new Exception("lane " + describeLane(lane) + " has " + rsuTypeName + " at position " + rsu.x);
+		if (rsu.x >= lane.l)
+			throw new Exception("Lane " + describeLane(lane) + " has " + rsuTypeName + " at position " + rsu.x + " length of lane is only " + lane.l);
 	}
 	
 	/**

@@ -141,12 +141,15 @@ public class Lane {
         calculateLength();
     }
     
+    /* Never used
     public Lane(double[] x, double[] y, int id) {
         this.x = x;
         this.y = y;
         this.id = id;
         calculateLength();
-    }   
+    } 
+    */
+    
     /**
      * Sets the lane length based on the x and y coordinates. This method is 
      * called within the constructor and should only be used if coordinates are
@@ -210,7 +213,7 @@ public class Lane {
     
     /**
      * Sets the downstream split to the given lane for this and upstream lanes, 
-     * also past a merge, untill the next split.
+     * also past a merge, until the next split.
      * @param split Splitting lane.
      */
     protected void setDownstreamSplit(Lane split) {
@@ -224,7 +227,7 @@ public class Lane {
     
     /**
      * Sets the upstream merge to the given lane for this and downstream lanes, 
-     * also past a split, untill the next merge.
+     * also past a split, until the next merge.
      * @param split Merging lane.
      */
     protected void setUpstreamMerge(Lane merge) {
@@ -403,11 +406,11 @@ public class Lane {
      * downstream. The search will not pass merging or splitting lanes in the
      * direction where multiple lanes become available (i.e. only the 
      * <tt>up</tt> and <tt>down</tt> field of lanes are used).
-     * @param x Start location [m] for the search.
+     * @param startX Double; Start location [m] for the search.
      * @param updown Whether to search up or downstream.
      * @return Found movable, <tt>null</tt> if none found.
      */
-    public Movable findVehicle(double x, Model.longDirection updown) {
+    public Movable findVehicle(double startX, Model.longDirection updown) {
         Movable veh = null;
         if (updown==Model.longDirection.UP) {
             // if there are vehicles on the lane, pick any vehicle
@@ -434,9 +437,9 @@ public class Lane {
             }
             // search up/downstream to match x
             if (veh != null) {
-                while (veh.down != null && veh.down.x + xAdj(veh.down.lane) <= x)
+                while (veh.down != null && veh.down.x + xAdj(veh.down.lane) <= startX)
                     veh = veh.down;
-                while (veh != null && veh.x + xAdj(veh.lane) > x)
+                while (veh != null && veh.x + xAdj(veh.lane) > startX)
                     veh = veh.up;
             }
         } else if (updown==Model.longDirection.DOWN) {
@@ -464,9 +467,9 @@ public class Lane {
             }
             // search up/downstream to match x
             if (veh != null) {
-                while (veh.up != null && veh.up.x + xAdj(veh.up.lane) >= x)
+                while (veh.up != null && veh.up.x + xAdj(veh.up.lane) >= startX)
                     veh = veh.up;
-                while (veh != null && veh.x + xAdj(veh.lane) < x)
+                while (veh != null && veh.x + xAdj(veh.lane) < startX)
                     veh = veh.down;
             }
         }
@@ -476,11 +479,11 @@ public class Lane {
     /**
      * Finds the first RSU downstream of a location (not at) within a certain 
      * range.
-     * @param x Start location of search [m].
+     * @param startX Double; Start location of search [m].
      * @param range Range of search [m].
      * @return Next RSU, multiple if multiple at the same location.
      */
-    public java.util.ArrayList<RSU> findRSU(double x, double range) {
+    public java.util.ArrayList<RSU> findRSU(double startX, double range) {
         java.util.ArrayList<RSU> out = new java.util.ArrayList<RSU>();
         Lane atLane = this;
         double searchRange = 0;
@@ -488,8 +491,8 @@ public class Lane {
             // Loop all RSUs on this lane
             for (int i=0; i<atLane.RSUcount(); i++) {
                 double xAdj = xAdj(atLane);
-                if (xAdj+atLane.getRSU(i).x>x 
-                        && xAdj+atLane.getRSU(i).x-x<=range) {
+                if (xAdj+atLane.getRSU(i).x>startX 
+                        && xAdj+atLane.getRSU(i).x-startX<=range) {
                     out.add(atLane.getRSU(i));
                     // Add additional RSUs at the same location
                     double xRsu = atLane.getRSU(i).x();
@@ -501,16 +504,16 @@ public class Lane {
                     return out;
                 }
                 // Update search range and quit if possible
-                searchRange = xAdj+atLane.getRSU(i).x-x;
+                searchRange = xAdj+atLane.getRSU(i).x-startX;
                 if (searchRange>range) {
                     return out;
                 }
             }
             // If no RSUs, move to next lane
             atLane = atLane.down;
-            // Update searchrange at start of new lane
+            // Update searchRange at start of new lane
             if (atLane!=null)
-                searchRange = xAdj(atLane)-x;
+                searchRange = xAdj(atLane)-startX;
         }
         return out;
     }
@@ -518,19 +521,19 @@ public class Lane {
     /**
      * Finds the first noticeable RSU downstream of a location (not at) within 
      * a certain range.
-     * @param x Start location of search [m].
+     * @param startX Double; Start location of search [m].
      * @param range Range of search [m].
      * @return Next noticeable RSU, multiple if multiple at the same location.
      */
-    public java.util.ArrayList<RSU> findNoticeableRSU(double x, double range) {
+    public java.util.ArrayList<RSU> findNoticeableRSU(double startX, double range) {
         java.util.ArrayList<RSU> out = new java.util.ArrayList<RSU>();
         Lane atLane = this;
         double searchRange = 0;
         while (atLane!=null && searchRange<=range) {
             // Loop all RSUs on this lane
             for (int i=0; i<atLane.RSUcount(); i++) {
-                if (atLane.getRSU(i).noticeable && xAdj(atLane)+atLane.getRSU(i).x>x 
-                        && xAdj(atLane)+atLane.getRSU(i).x-x<=range) {
+                if (atLane.getRSU(i).noticeable && xAdj(atLane)+atLane.getRSU(i).x>startX 
+                        && xAdj(atLane)+atLane.getRSU(i).x-startX<=range) {
                     out.add(atLane.getRSU(i));
                     // Add additional RSUs at the same location
                     double xRsu = atLane.getRSU(i).x();
@@ -542,15 +545,15 @@ public class Lane {
                     return out;
                 }
                 // Update search range and quit if possible
-                searchRange = xAdj(atLane)+atLane.getRSU(i).x-x;
+                searchRange = xAdj(atLane)+atLane.getRSU(i).x-startX;
                 if (searchRange>range)
                     return out;
             }
-            // If no noticable RSUs, move to next lane
+            // If no noticeable RSUs, move to next lane
             atLane = atLane.down;
-            // Update searchrange at start of new lane
+            // Update searchRange at start of new lane
             if (atLane!=null)
-                searchRange = xAdj(atLane)-x;
+                searchRange = xAdj(atLane)-startX;
         }
         return out;
     }
@@ -714,36 +717,36 @@ public class Lane {
      * lanes is defined in adjacent straight sub-sections. If neither lane 
      * change is possible, the lanes may not be physically adjacent and only 
      * total length is considered.
-     * @param x Location on this lane [m].
+     * @param myX Location on this lane [m].
      * @param dir Left or right.
      * @return Adjacent location [m].
      */
-    public double getAdjacentX(double x, Model.latDirection dir) {
+    public double getAdjacentX(double myX, Model.latDirection dir) {
 
         if (dir==Model.latDirection.LEFT && !goLeft && !left.goRight)
-            return x * left.l/l; // maybe not physically adjacent, use total length only
+            return myX * left.l/l; // maybe not physically adjacent, use total length only
         else if (dir==Model.latDirection.RIGHT && !goRight && !right.goLeft)
-            return x * right.l/l; // maybe not physically adjacent, use total length only
+            return myX * right.l/l; // maybe not physically adjacent, use total length only
         else {
             // get appropriate section, and fraction within section
             double xCumul = 0; // length at end of appropriate section
             int section = 0;
             double dx = 0;
             double dy = 0;
-            if (x>l) {
+            if (myX>l) {
                 // last section
                 section = this.x.length-2;
                 dx = this.x[section+1]-this.x[section];
                 dy = this.y[section+1]-this.y[section];
                 xCumul = l;
-            } else if (x<=0) {
+            } else if (myX<=0) {
                 // first section
                 dx = this.x[section+1]-this.x[section];
                 dy = this.y[section+1]-this.y[section];
                 xCumul = Math.sqrt(dx*dx + dy*dy);
             } else {
                 // find section by looping
-                while (xCumul<x) {
+                while (xCumul<myX) {
                     dx = this.x[section+1]-this.x[section];
                     dy = this.y[section+1]-this.y[section];
                     xCumul = xCumul + Math.sqrt(dx*dx + dy*dy);
@@ -752,7 +755,7 @@ public class Lane {
                 section--;
             }
             double lSection = Math.sqrt(dx*dx + dy*dy); // length of appropriate section
-            double fSection = 1-(xCumul-x)/lSection; // fraction within appropriate section
+            double fSection = 1-(xCumul-myX)/lSection; // fraction within appropriate section
             // loop appropriate adjacent lane
             Lane lane = null;
             if (dir==Model.latDirection.LEFT)
@@ -777,29 +780,29 @@ public class Lane {
     }
 
     /**
-     * Utility to connect this lane with the right lane.
-     * @param goRight Whether change from this lane to right is possible.
-     * @param right The right lane.
-     * @param goLeft Whether change from right to this lane is possible.
+     * Method to connect this lane with the right lane.
+     * @param newGoRight Whether change from this lane to right is possible.
+     * @param rightLane The right lane.
+     * @param newGoLeft Whether change from right to this lane is possible.
      */
-    public void connectLat(boolean goRight, Lane right, boolean goLeft) {
-        this.right = right;
-        this.goRight = goRight;
-        right.left = this;
-        right.goLeft = goLeft;
+    public void connectLat(boolean newGoRight, Lane rightLane, boolean newGoLeft) {
+        this.right = rightLane;
+        this.goRight = newGoRight;
+        rightLane.left = this;
+        rightLane.goLeft = newGoLeft;
     }
 
     /**
-     * Utility to connect this lane with the upstream lane.
-     * @param up The upstream lane.
+     * Method to connect this lane with the upstream lane.
+     * @param upLane The upstream lane.
      */
-    public void connectLong(Lane up) {
-        up.down = this;
-        this.up = up;
+    public void connectLong(Lane upLane) {
+        upLane.down = this;
+        this.up = upLane;
     }
 
     /**
-     * Returns the global x and y at the lane centre.
+     * Returns the global x and y at the lane center.
      * @param pos Position [m] on the lane.
      * @return Point with x and y coordinate.
      */
@@ -809,7 +812,7 @@ public class Lane {
         double dx; // section distance in x
         double dy; // section distance in y
         int section = -1; // current section of vehicle
-        // calculate cumulative lengths untill x of vehicle is passed
+        // calculate cumulative lengths until x of vehicle is passed
         for (int i=1; i<x.length; i++) {
             dx = x[i] - x[i-1];
             dy = y[i] - y[i-1];
@@ -873,30 +876,30 @@ public class Lane {
     
     /**
      * Returns whether the destination can be reached from this lane.
-     * @param destination Destination of interest.
+     * @param whichDestination Destination of interest.
      * @return Whether this lane leads to the given destination.
      */
-    public boolean leadsTo(int destination) {
-        return lanechanges.containsKey(destination);
+    public boolean leadsTo(int whichDestination) {
+        return lanechanges.containsKey(whichDestination);
     }
     
     /**
      * Returns the number of lane changes required to go to the given destination.
-     * @param destination Destination of interest.
+     * @param whichDestination Destination of interest.
      * @return The number of lane changes for the destination.
      */
-    public int nLaneChanges(int destination) {
-        return lanechanges.get(destination);
+    public int nLaneChanges(int whichDestination) {
+        return lanechanges.get(whichDestination);
     }
     
     /**
      * Returns the number of lane changes that need to be performed to go to
      * the destination from this lane.
-     * @param destination Destination of interest.
+     * @param whichDestination Destination of interest.
      * @return Number of lane changes that needs to be performed for this destination.
      */
-    public double xLaneChanges(int destination) {
-        return endpoints.get(destination);
+    public double xLaneChanges(int whichDestination) {
+        return endpoints.get(whichDestination);
     }
     
     /**
@@ -1035,38 +1038,78 @@ public class Lane {
     	return result + "]";
     }
     
+    /**
+     * Retrieve the upstream connected Lane of this Lane.
+     * @return Lane; the upstream connected Lane of this Lane
+     */
     public Lane getUp_r() {
     	return up;
     }
     
+    /**
+     * Retrieve the downstream connected Lane of this Lane.
+     * @return Lane; the downstream connected Lane of this Lane
+     */
     public Lane getDown_r() {
     	return down;
     }
     
+    /**
+     * Retrieve the left Lane of this Lane.
+     * @return Lane; the left Lane of this Lane
+     */
     public Lane getLeft_r() {
     	return left;
     }
     
+    /**
+     * Retrieve the right Lane of this Lane.
+     * @return Lane; the right Lane of this Lane
+     */
     public Lane getRight_r() {
     	return right;
     }
     
+    /**
+     * Return the destination of this Lane.
+     * @return Integer; the destination of this Lane, or a negative value if
+     * this Lane is not a destination
+     */
     public int getDestination_r() {
     	return destination;
     }
     
+    /**
+     * Return the origin of this Lane.
+     * @return Integer; the origin of this Lane or a negative value if this
+     * Lane is not an origin
+     */
     public int getOrigin_r() {
     	return origin;
     }
     
+    /**
+     * Retrieve the speed limit on this Lane.
+     * @return Double; the speed limit on this Lane in m/s
+     */
     public double getSpeedLimit_r() {
     	return vLim;
     }
     
+    /**
+     * Return whether it is possible to change to the left from this Lane
+     * @return Boolean; true if it is possible to change to the left from this
+     * Lane; false if it is not possible to change to the left from this Lane
+     */
     public boolean getCanMergeLeft_r() {
     	return goLeft;
     }
     
+    /**
+     * Return whether it is possible to change to the right from this Lane
+     * @return Boolean; true if it is possible to change to the right from this
+     * Lane; false if it is not possible to change to the right from this Lane
+     */
     public boolean getCanMergeRight_r() {
     	return goRight;
     }

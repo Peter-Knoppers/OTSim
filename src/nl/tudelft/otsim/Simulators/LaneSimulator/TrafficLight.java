@@ -42,7 +42,10 @@ public class TrafficLight extends RSU implements SimulatedTrafficLight {
      * @param vehicle Passing vehicle.
      */
     @Override
-	public void pass(Vehicle vehicle) {}
+	public void pass(Vehicle vehicle) {
+    	if (isRed())
+    		System.err.println("Vehicle " + vehicle.toString() + " drives through red trafficlight");
+    }
 
     /** Empty, needs to be implemented. */
     @Override
