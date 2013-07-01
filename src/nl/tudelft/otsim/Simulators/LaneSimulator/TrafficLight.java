@@ -31,6 +31,7 @@ public class TrafficLight extends RSU implements SimulatedTrafficLight {
         this.name = name;
         this.outline = outline;
         System.out.println("Created traffic light " + count);
+        noticeable = true;
     }
     
     /** Empty, needs to be implemented. */

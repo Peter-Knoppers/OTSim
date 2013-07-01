@@ -1421,11 +1421,14 @@ public class Driver {
             // should stop vehicles or let them pass the yellow light before it 
             // turns red.
             double s = vehicle.getDistanceToRSU(trafficLight);
+            System.out.println("Vehicle sees red light at " + s + " m");
             double bTmp = b;
             b = bYellow;
             double acc = longitudinal(vehicle.v, vehicle.v, desiredVelocity(), s);
-            if (acc>-bYellow)
+            if (acc>-bYellow) {
+            	System.out.println("Vehicle slowing down for traffic light");
                 lowerAcceleration(acc);
+            }
             b = bTmp;
         }
     }
