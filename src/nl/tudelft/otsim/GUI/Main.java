@@ -782,9 +782,10 @@ public class Main extends JFrame implements ActionListener {
 			model.trafficDemand = new TrafficDemand(model);
 		else if (storable instanceof MeasurementPlan)
 			model.addMeasurementPlan(new MeasurementPlan(model));
-		else if (storable instanceof Model)
+		else if (storable instanceof Model) {
 			model = new Model();
-		else
+			setTitle(myName);
+		} else
 			throw new Error("Cannot happen");
 		setActiveGraph();
 	}
@@ -828,6 +829,8 @@ public class Main extends JFrame implements ActionListener {
 			setActiveGraph();
 			if ((storable instanceof Network) || (storable instanceof Model))
 				zoomToScene();
+			if ((storable instanceof Model))
+				this.setTitle(myName + " - " + fileName);
 			storable.setStorageName(fileName);
 			initialDirectory = new File(fileName).getParent();
 		} catch (Exception e) {
@@ -893,7 +896,7 @@ public class Main extends JFrame implements ActionListener {
 		model = new Model();
 		model.network = new Network();
         fileSelectedNetwork = "";
-        mainFrame.setTitle(myName + " - " + fileSelectedNetwork);
+        mainFrame.setTitle(myName);
     	setActiveGraph();
         System.out.println("created new empty network");
 		menuItemSaveModel.setEnabled(true);
