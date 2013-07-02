@@ -500,7 +500,7 @@ public class Scheduler extends JPanel implements ActionListener, PropertyChangeL
 		
 		@Override
 		public void paintComponent (Graphics g) {
-			double time = scheduler.getSimulatedTime();
+			double time = scheduler.getSimulatedTime() + 0.0005;
 			int seconds = (int) Math.floor(time);
 			int milliSeconds = (int) Math.floor((time - seconds) * 1000);
 			String caption = String.format("%02d:%02d:%02d.%03d", seconds / 3600, seconds / 60 % 60, seconds % 60, milliSeconds);
