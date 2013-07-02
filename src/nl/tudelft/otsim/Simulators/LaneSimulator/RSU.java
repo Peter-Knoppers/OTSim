@@ -1,5 +1,7 @@
 package nl.tudelft.otsim.Simulators.LaneSimulator;
 
+import nl.tudelft.otsim.GUI.Main;
+
 /**
  * Abstract shell for road-side units (RSUs). Besides controller functionality a
  * RSU can be passable, in which case passing vehicles will call the 
@@ -90,4 +92,12 @@ public abstract class RSU extends Controller {
      * @param vehicle Vehicle that passes the RSU.
      */
     public abstract void pass(Vehicle vehicle);
+    
+    /**
+     * Return a decent textual description of this RSU.
+     */
+    @Override
+	public String toString() {
+    	return String.format(Main.locale, " at %.2fm (of %.2fm)", x, lane.l);
+    }
 }

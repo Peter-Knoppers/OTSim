@@ -259,7 +259,7 @@ public class TrafficLight extends RSU implements SimulatedTrafficLight {
 	
 	@Override
 	public String toString() {
-		System.out.println("jTrafficLicht " + count + "," + mycount + " toString returns: " + name + "/" + getColor_r());
-		return name + "/" + getColor_r();
+		//System.out.println("jTrafficLicht " + count + "," + mycount + " toString returns: " + name + "/" + getColor_r());
+		return name + "/" + getColor_r() + super.toString();
 	}
 }

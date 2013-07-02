@@ -1032,7 +1032,7 @@ public class Lane {
     
     @Override
 	public String toString() {
-    	String result = String.format("Main.locale, %d: Length %.2fm, [", id, l);
+    	String result = String.format(Main.locale, "%d: Length %.2fm, [", id, l);
     	for (int i = 0; i < x.length; i++)
     		result += String.format(Main.locale, "%s(%.3f,%.3f)", i > 0 ? " " : "", x[i], y[i]);
     	return result + "]";
@@ -1112,5 +1112,13 @@ public class Lane {
      */
     public boolean getCanMergeRight_r() {
     	return goRight;
+    }
+    
+    /**
+     * Retrieve the list of {@link RSU RSUs} on this Lane.
+     * @return ArrayList&lt;{@link RSU}&gt;; the list of RSUs on this Lane
+     */
+    public java.util.ArrayList<RSU> getRSUs_r() {
+    	return RSUs;
     }
 }

@@ -1,5 +1,7 @@
 package nl.tudelft.otsim.Simulators.LaneSimulator;
 
+import nl.tudelft.otsim.GUI.Main;
+
 /**
  * This class has the common functionality of regular vehicles and temporary
  * lane change vehicles. This is the position on the network and relative to
@@ -848,6 +850,14 @@ public abstract class Movable  {
      */
     public Lane getLane_r() {
     	return lane;
+    }
+    
+    /**
+     * Retrieve the longitudinal position in the current {@link Lane}.
+     * @return String; the longitudinal position in the current {@link Lane}
+     */
+    public String getLongitudinalPositionInLane_r() {
+    	return String.format(Main.locale, "%.2fm (of %.2fm)", x, lane.l);
     }
     
 }

@@ -115,7 +115,7 @@ public class OccupancyDetector extends RSU implements SimulatedDetector {
 	
 	@Override
 	public String toString() {
-		return "VehicleDetector " + name;
+		return "VehicleDetector " + name + super.toString();
 	}
 
 	@Override

@@ -228,8 +228,11 @@ public class LaneSimulator extends Simulator {
         			model.addController(new TrafficLight(lane, Double.parseDouble(subFields[1]), fields[1], Planar.coordinatesToPoints(fields, 3, fields.length)));
         		}
         	} else if (fields[0].equals("TrafficLightController")) {
+        		String controllerURL = null;
+        		if (fields.length > 4)
+        			controllerURL = fields[4];
         		// This depends on all TrafficLights and Detectors to be created BEFORE the SimulatedTrafficLightController
-        		SimulatedTrafficLightController tlc = new SimulatedTrafficLightController(scheduler, fields[4]);
+        		SimulatedTrafficLightController tlc = new SimulatedTrafficLightController(scheduler, controllerURL);
         		for (String tlName : fields[2].split(",")) {
         			for (Controller controller : model.controllers)
         				if (controller instanceof TrafficLight) {
@@ -1006,7 +1009,7 @@ public class LaneSimulator extends Simulator {
 	Vehicle selectedVehicle = null;
 	
 	double selectVehicle(GraphicsPanel graphicsPanel, Point2D.Double p) {
-    	System.out.println(String.format("Searching vehicle near %f,%f (rev %f,%f", p.x, p.y, graphicsPanel.reverseTranslate(p).getX(), graphicsPanel.reverseTranslate(p).getY()));
+    	//System.out.println(String.format("Searching vehicle near %f,%f (rev %f,%f", p.x, p.y, graphicsPanel.reverseTranslate(p).getX(), graphicsPanel.reverseTranslate(p).getY()));
         final int maxDistance = 10;	// pixels
         double bestDistance = Double.MAX_VALUE;
         Vehicle prevSelectedVehicle = selectedVehicle;

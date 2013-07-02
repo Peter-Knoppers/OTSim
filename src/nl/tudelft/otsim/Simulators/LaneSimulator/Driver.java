@@ -1,5 +1,7 @@
 package nl.tudelft.otsim.Simulators.LaneSimulator;
 
+import nl.tudelft.otsim.GUI.Main;
+
 /**
  * Default wrapper for a driver. The drive method is the main method and should
  * set <tt>a</tt> and <tt>dy</tt> of the vehicle. The longitudinal model is 
@@ -1421,14 +1423,20 @@ public class Driver {
             // should stop vehicles or let them pass the yellow light before it 
             // turns red.
             double s = vehicle.getDistanceToRSU(trafficLight);
-            System.out.println("Vehicle sees red light at " + s + " m");
             double bTmp = b;
             b = bYellow;
+            if ((vehicle.lane.id == 26) || (vehicle.lane.id == 28) || (vehicle.lane.id == 29))
+            	System.out.format(Main.locale, "Vehicle %s notices trafficLight %s: longitudinal(%.2f m/s, %.2f m/s, %.2f m/s, %.2f m", vehicle.toString(), trafficLight.toString(), vehicle.v, vehicle.v, desiredVelocity(), s);
             double acc = longitudinal(vehicle.v, vehicle.v, desiredVelocity(), s);
+            if ((vehicle.lane.id == 26) || (vehicle.lane.id == 28) || (vehicle.lane.id == 29))
+            	System.out.format(Main.locale, " -> %.2f m/s/s bYellow is %.2f", acc, bYellow);
             if (acc>-bYellow) {
-            	System.out.println("Vehicle slowing down for traffic light");
+                if ((vehicle.lane.id == 26) || (vehicle.lane.id == 28) || (vehicle.lane.id == 29))
+                	System.out.println(" slowing down for traffic light");
                 lowerAcceleration(acc);
-            }
+            } else
+                if ((vehicle.lane.id == 26) || (vehicle.lane.id == 28) || (vehicle.lane.id == 29))
+                	System.out.println(" NOT slowing down for traffic light");
             b = bTmp;
         }
     }
