@@ -93,6 +93,8 @@ public class TurnArrow extends CrossSectionObject {
 					referencePos += crossSectionElement.getCrossSection().getLongitudinalLength();
 				for (int repeat = 0; ; repeat++) {
 					double fromDistance = referencePos + longitudinalRepeat * repeat;
+					if (crossSectionElement.getVerticesInner() == null)
+						System.out.println("turn???");
 					ArrayList<Vertex> slice = Planar.slicePolyline(crossSectionElement.getVerticesInner(), fromDistance, longitudinalLength);
 					if (slice.size() < 2)
 						return;	// improper slice

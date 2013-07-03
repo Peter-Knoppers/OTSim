@@ -545,7 +545,7 @@ public class ImportModelShapeWizard implements ActionListener {
 				else if (i == 4)  {
 					 propertyLanes = attr2.toString();
 					 propertyLanesBA = propertyLanes.replaceAll("AB", "BA");
-					 booleanLanes = (Boolean) attr3;
+					 //booleanLanes = (Boolean) attr3;
 				}
 				else if (i == 5)  {
 					propertyTurnLanes = attr2.toString();
@@ -579,12 +579,12 @@ public class ImportModelShapeWizard implements ActionListener {
 				double length = -1;
 				double capacity = -1;
 				String turnLanes = "";
-				double exitLanes = -1;
+				int exitLanes = -1;
 				double maxSpeed = -1;
 				int lanes = -1;
 				double capacityBA = -1;
 				String turnLanesBA = "";
-				double exitLanesBA = -1;
+				int exitLanesBA = -1;
 				double maxSpeedBA = -1;
 				int direction = -1; 
 				int lanesBA = -1;
@@ -634,7 +634,8 @@ public class ImportModelShapeWizard implements ActionListener {
 		        	}
 		        	if (! (propertyExitLanes.equals("") || feature.getProperty(propertyExitLanes)==null))   {
 			        	property = feature.getProperty(propertyExitLanes);
-			        	exitLanes = Double.parseDouble(property.getValue().toString());
+			        	// exitLanes are defined for the opposite direction!!!
+			        	exitLanesBA = Integer.parseInt(property.getValue().toString());
 		        	}
 		        	if (! (propertyMaxSpeed.equals("") || feature.getProperty(propertyMaxSpeed)==null))   {
 			        	property = feature.getProperty(propertyMaxSpeed);
@@ -648,11 +649,11 @@ public class ImportModelShapeWizard implements ActionListener {
 		        		property = feature.getProperty(propertyLanes);
 			        	lanes = Integer.parseInt(property.getValue().toString());
 		        	}
-		        	else {
+/*		        	else {
 		        		if (capacity > 0) {
 		        			lanes = 0;
 		        		}
-		        	}
+		        	}*/
 	        	}
 
 	        	if (direction == valueDirectionBA  || direction == valueDirectionABBA)  {
@@ -670,7 +671,8 @@ public class ImportModelShapeWizard implements ActionListener {
 		        	}
 		        	if (! (propertyExitLanesBA.equals("") || feature.getProperty(propertyExitLanesBA)==null))   {
 			        	property = feature.getProperty(propertyExitLanesBA);
-			        	exitLanesBA = Double.parseDouble(property.getValue().toString());
+			        	// exitLanes are defined for the opposite direction!!!
+			        	exitLanes = Integer.parseInt(property.getValue().toString());
 		        	}
 		        	if (! (propertyMaxSpeedBA.equals("") || feature.getProperty(propertyMaxSpeedBA)==null))   {
 			        	property = feature.getProperty(propertyMaxSpeedBA);
@@ -680,25 +682,22 @@ public class ImportModelShapeWizard implements ActionListener {
 		        		property = feature.getProperty(propertyLanesBA);
 			        	lanesBA = Integer.parseInt(property.getValue().toString());
 		        	}
-		        	else {
+/*		        	else {
 		        		lanes = 0;
-		        	}
-	        	}  	
-	        	lanes = deriveLanes(capacity, maxSpeed);
-	        	lanesBA =  deriveLanes(capacityBA, maxSpeedBA);
+		        	}*/
+	        	}  
+	        	if (lanes <= 0)
+	        		lanes = deriveLanes(capacity, maxSpeed);
+	        	if (lanesBA <= 0)
+	        		lanesBA =  deriveLanes(capacityBA, maxSpeedBA);
 	        	if (lanes == 0)   {
 	        		System.out.print("geen lanes??????");
 	        	}		
 	        	
-	        	
-	        	
 	        	double defaultLaneWidth = 3.5;
-	        	ArrayList<RoadMarkerAlong> rmaList = createRMA(lanes, defaultLaneWidth);
-	        	ArrayList<RoadMarkerAlong> rmaListBA = createRMA(lanesBA, defaultLaneWidth);
-
 	        	if (voedingsLinkAB == false)  {
 		        	if (direction == valueDirectionAB  || direction == valueDirectionABBA)  {
-		        		addImportedLink(linkID, typologyName, fromNodeID, toNodeID, defaultLaneWidth, rmaList, pointList, turnLanes, maxSpeed, length, zoneID);
+		        		addImportedLink(linkID, typologyName, fromNodeID, toNodeID, defaultLaneWidth, lanes, exitLanes, pointList, turnLanes, maxSpeed, length, zoneID);
 			        	linkID++;
 		        	}
 	        	}
@@ -717,7 +716,7 @@ public class ImportModelShapeWizard implements ActionListener {
 	        		
 	        	if (voedingsLinkBA == false)  {
 		        	if (direction == valueDirectionBA  || direction == valueDirectionABBA)   {
-		        		addImportedLink(linkID, typologyName, toNodeID, fromNodeID, defaultLaneWidth, rmaListBA, pointListBA, turnLanesBA, maxSpeed, length, zoneID);
+		        		addImportedLink(linkID, typologyName, toNodeID, fromNodeID, defaultLaneWidth, lanesBA, exitLanesBA, pointListBA, turnLanesBA, maxSpeed, length, zoneID);
 			        	linkID++;
 		        	}
 	        	}
@@ -772,51 +771,85 @@ public class ImportModelShapeWizard implements ActionListener {
         System.out.printf("User selected network file \"%s\"", fileImportedMatrix);
 
     }
-	private void addImportedLink(int linkID, String typologyName, int fromNodeID, int toNodeID,  double laneWidth, ArrayList<RoadMarkerAlong> rmaList, 
-			ArrayList<Vertex> pointList, String turnLanes, double maxSpeed, double length, int zoneID)   {
-    	CrossSection cs = new CrossSection(0.0, 0.5, null);
-    	ArrayList<CrossSection> csList = new ArrayList<CrossSection>();
-    	csList.add(cs);
-    	//String typologyName = "road";
+	private void addImportedLink(int linkID, String typologyName, int fromNodeID, int toNodeID,  double laneWidth, int lanes, 
+			int exitLanes, ArrayList<Vertex> pointList, String turnLanes, double maxSpeed, double length, int zoneID)   {
 		if (null == typologyName)
 			typologyName = "road";
 			//throw new Error ("CrossSectionElement has null typologyName");
-		CrossSectionElement cse = new CrossSectionElement(cs, typologyName, laneWidth * (rmaList.size()-1), rmaList, null);
+    	ArrayList<RoadMarkerAlong> rmaList = createRMA(lanes, laneWidth);
+    	ArrayList<CrossSection> csList = new ArrayList<CrossSection>();
+    	CrossSection cs = new CrossSection(0.0, 0.0, null);
+    	csList.add(cs);
+    	CrossSectionElement cse = new CrossSectionElement(cs, typologyName, laneWidth * lanes, rmaList, null);
     	ArrayList<CrossSectionElement> cseList = new ArrayList<CrossSectionElement>();
     	cseList.add(cse);
     	cs.setCrossSectionElementList_w(cseList);
-    	String name = String.valueOf(linkID);       	
+		ArrayList<Vertex> pointListAll = new ArrayList<Vertex>();
+		pointListAll.addAll(pointList);
+		for (Node node : importedModel.network.getNodeList(false)) {
+			if (node.getNodeID() == fromNodeID)
+				pointListAll.add(0, node);
+			if (node.getNodeID() == toNodeID)
+				pointListAll.add(node);
+		}
+    	double calculatedLength = calculateLength(pointListAll);
     	// if turnlanes are defined, we create an intermediate crossSection at a certain pre-defined distance from the junction (toNode)
     	if (turnLanes != null  && ! turnLanes.isEmpty())  {
-    		boolean newCs = false;
-    		ArrayList<Vertex> pointListAll = new ArrayList<Vertex>();
-    		pointListAll.addAll(pointList);
-			for (Node node : importedModel.network.getNodeList(false)) {
-				if (node.getNodeID() == fromNodeID)
-					pointListAll.add(0, node);
-				if (node.getNodeID() == toNodeID)
-					pointListAll.add(node);
-			}
-    		double calculatedLength = calculateLength(pointListAll);
-    		length = calculatedLength;
-    		if (length > 70 && calculatedLength > 70) {
-    			newCs = true;
-    		}
-    		if (newCs == true) {
-    			double longPosition = calculatedLength - 50;
-    			CrossSection cs1 = new CrossSection(longPosition, 0.5, null);
-    			longPosition = calculatedLength - 35;
-    			CrossSection cs2 = new CrossSection(longPosition, 0.5, null);
+    		ArrayList<TurnArrow> turnArrowList = analyseTurns(turnLanes, laneWidth);
+    		if (!(lanes == turnArrowList.size()) ) {
+    			double longPosition1 = 0;
+    			double longPosition2 = 0;
+    			if (calculatedLength > 70)   {
+    				longPosition1 = calculatedLength - 50;
+    				longPosition2 = calculatedLength - 35;
+    			}
+    			else  {
+    				longPosition1 = 3.0/5 * calculatedLength;
+    				longPosition2 = 3.1/5 * calculatedLength;				
+    			}
+    			CrossSection cs1 = new CrossSection(longPosition1, 0.0, null);    			
+    			CrossSection cs2 = new CrossSection(longPosition2, 0.0, null);
     	    	csList.add(cs1);
-            	csList.add(cs2);
-    			ArrayList<TurnArrow> turnArrowList = analyseTurns(turnLanes);
+            	csList.add(cs2);	
     			ArrayList<RoadMarkerAlong> newRmaList = new ArrayList<RoadMarkerAlong>();
-    			int newLanes = turnLanes.length();
+    			int newLanes = turnArrowList.size();
     			newRmaList = createRMA(newLanes, laneWidth);	
-        		/*CrossSectionElement cse1 = new CrossSectionElement(cs, typologyName, laneWidth * (rmaList.size() - 1), rmaList, null);
-        		CrossSectionElement cse2 = new CrossSectionElement(cs, typologyName, laneWidth * (rmaList.size() - 1), rmaList, null);*/
-    			CrossSectionElement cse1 = new CrossSectionElement(cs1, typologyName, laneWidth * (newRmaList.size()-1) , newRmaList, turnArrowList);
-    			CrossSectionElement cse2 = new CrossSectionElement(cs2, typologyName, laneWidth * (newRmaList.size()-1) , newRmaList, turnArrowList);
+    			CrossSectionElement cse1 = new CrossSectionElement(cs1, typologyName, laneWidth * newLanes , newRmaList, turnArrowList);
+    			CrossSectionElement cse2 = new CrossSectionElement(cs2, typologyName, laneWidth * newLanes , newRmaList, turnArrowList);
+        		ArrayList<CrossSectionElement> cse1List = new ArrayList<CrossSectionElement>();
+            	cse1List.add(cse1);
+            	cs1.setCrossSectionElementList_w(cse1List);
+        		ArrayList<CrossSectionElement> cse2List = new ArrayList<CrossSectionElement>();
+            	cse2List.add(cse2);
+            	cs2.setCrossSectionElementList_w(cse2List);
+    		}
+    		else  {
+    			cse = new CrossSectionElement(cs, typologyName, laneWidth * lanes, rmaList, turnArrowList);
+    		}
+    	}
+    	if (exitLanes > 0)  {
+    		if (!(lanes == exitLanes) ) {
+    			double longPosition1 = 0;
+    			double longPosition2 = 0;
+    			if (calculatedLength > 70)   {
+    				longPosition1 = 0;
+    				longPosition2 = 50;
+    				cs.setLongitudalPosition_w(65);
+    			}
+    			else  {
+    				longPosition1 = 0;
+    				longPosition2 = (2.0/5) * calculatedLength;
+    				cs.setLongitudalPosition_w( 2.1/5 * calculatedLength);
+    			}
+    			CrossSection cs1 = new CrossSection(longPosition1, 0.0, null);    			
+    			CrossSection cs2 = new CrossSection(longPosition2, 0.0, null);
+    	    	csList.add(0, cs1);
+            	csList.add(1, cs2);	
+    			ArrayList<RoadMarkerAlong> newRmaList = new ArrayList<RoadMarkerAlong>();
+    			int newLanes = exitLanes;
+    			newRmaList = createRMA(newLanes, laneWidth);	
+    			CrossSectionElement cse1 = new CrossSectionElement(cs1, typologyName, laneWidth * newLanes , newRmaList, null);
+    			CrossSectionElement cse2 = new CrossSectionElement(cs2, typologyName, laneWidth * newLanes , newRmaList, null);
         		ArrayList<CrossSectionElement> cse1List = new ArrayList<CrossSectionElement>();
             	cse1List.add(cse1);
             	cs1.setCrossSectionElementList_w(cse1List);
@@ -825,10 +858,12 @@ public class ImportModelShapeWizard implements ActionListener {
             	cs2.setCrossSectionElementList_w(cse2List);
     		}
     	}
+
+    	String name = String.valueOf(linkID);
     	importedModel.network.addLink(name, fromNodeID, toNodeID, length, true, csList, pointList);
     }
 	
-	private static ArrayList<TurnArrow> analyseTurns(String turnLanes) {
+	private static ArrayList<TurnArrow> analyseTurns(String turnLanes, Double laneWidth) {
 		int lanes = turnLanes.length();
 		int[] outLinkNumber = null;
 		ArrayList<TurnArrow> turnArrowList = new ArrayList<TurnArrow>();
@@ -836,31 +871,32 @@ public class ImportModelShapeWizard implements ActionListener {
 			char turn = turnLanes.charAt(i);
 			switch (turn)   {
 				case 'r': // Right turn only
-					outLinkNumber = new int[] {0};
+					outLinkNumber = new int[] {1};
 					break;
 				case 's': // Main (straight on) lane 
-					outLinkNumber = new int[] {1};
-					break;
-				case 'l': // Left turn only 
 					outLinkNumber = new int[] {2};
 					break;
+				case 'l': // Left turn only 
+					outLinkNumber = new int[] {3};
+					break;
 				case 'q': // Left turn and straight on 
-					outLinkNumber = new int[] {1, 2};
+					outLinkNumber = new int[] {2, 3};
 					break;
 				case 'p': // Right turn and straight on
-					outLinkNumber = new int[] {0, 1};
+					outLinkNumber = new int[] {1, 2};
 					break;
 				case 'u': // Left turn and right turn 
-					outLinkNumber = new int[] {0, 1};
+					outLinkNumber = new int[] {1, 2};
 					break;
 				case 'a': // Any turn lane 
-					outLinkNumber = new int[] {0, 1, 2};
+					outLinkNumber = new int[] {1, 2, 3};
 					break;
 				case 'b': // Bus lane (straight on 
-					outLinkNumber = new int[] {1};
+					outLinkNumber = new int[] {2};
 					break;
 			}
-			TurnArrow turnArrow = new TurnArrow(null, outLinkNumber, 0, 0);
+			Double lateralPosition = (i * laneWidth) + laneWidth / 2;
+			TurnArrow turnArrow = new TurnArrow(null, outLinkNumber, lateralPosition, 0);
 			turnArrowList.add(turnArrow);
 		}
 		return turnArrowList;
@@ -868,7 +904,7 @@ public class ImportModelShapeWizard implements ActionListener {
 
 	private static int deriveLanes(double capacity, double maxSpeed)   {
 		int lanes = 0;
-    	int periodHours = 2;
+    	int periodHours = 1;
 		if (maxSpeed < 95)   {
 			if ( (capacity / periodHours < 2200))
 				lanes = 1;

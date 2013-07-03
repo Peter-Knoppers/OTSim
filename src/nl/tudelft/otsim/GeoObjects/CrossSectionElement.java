@@ -1081,7 +1081,8 @@ public class CrossSectionElement implements XML_IO {
     		int origin, int destination) {
 		double laneWidth = rightRMA.getLateralPosition() - (leftRMA.getLateralPosition() + leftRMA.getMarkerWidth());
         double lateralStart = getLateralPosition(CrossSectionElement.LateralReferenceLeft) + leftRMA.getLateralPosition() + leftRMA.getMarkerWidth();
-        turn.setCrossSectionElement(this);
+        if (turn.crossSectionElement == null)
+        	turn.setCrossSectionElement(this);
 		Lane lane = new Lane(this, turn, stopLine, lateralStart, laneWidth, origin, destination);
 		//System.out.println("created lane at " + lateralStart + " + " + laneWidth + "; left is " + rightRMA.getType() + " right is " + leftRMA.getType() + ": " + lane.toString());
 		if (leftRMA.getType().endsWith(RoadMarkerAlongTemplate.ALONG_STRIPED))

@@ -83,17 +83,17 @@ public class Curves {
 		Vertex start = up.get(up.size() - 1);
 		Vertex prevStart = up.get(up.size() - 2);
 		//when distance between vertices the angle is not robust. Choose a vertex further away
-		int i = 0;
-		while (start.distance(prevStart) < 3) {
+		int i = 2;
+		while (start.distance(prevStart) < 3  && up.size() - i - 1 >= 0) {
+			prevStart = up.get(up.size() - i - 1);
 			i++;
-			prevStart = up.get(up.size() - 2 - i);
 		}
 		Vertex end = down.get(0);
 		Vertex endNext = down.get(1);
-		i = 0;
-		while (end.distance(endNext) < 3) {
+		i = 2; // third (next) vertex
+		while (end.distance(endNext) < 3 && i < down.size()) {
+			endNext = down.get(i);
 			i++;
-			endNext = down.get(1 + i);
 		}
 		
 		Line2D.Double line1 = new Line2D.Double(prevStart.getX(), prevStart.getY(), start.getX(), start.getY());

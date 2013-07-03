@@ -783,7 +783,27 @@ public class Node extends Vertex implements XML_IO {
 
 		ArrayList<Link> newLinks = new ArrayList<Link>();
 		// the simple case: two links 
-
+		
+		if ((inCount == 2) && (outCount == 2))  {
+			int incomingArm = 0; // index of the incoming arm: start at zero
+			for (DirectionalLink incoming : dlList)   {
+/*				if (incoming.link.getToNode_r().nodeID == 6649)
+					System.out.println("debug junction");*/
+				if (incoming.incoming) {
+					for (int arm = 1; arm < dlList.size(); arm++) {
+						int itel = arm + incomingArm;
+						if (arm + incomingArm > dlList.size() - 1)
+							itel  = arm + incomingArm - dlList.size();
+						DirectionalLink leaving = dlList.get(itel);
+						// select all leaving lanes from this junction
+						if (! leaving.incoming && incoming.link.getFromNode_r().equals(leaving.link.getToNode_r())) {
+							outCount--;
+						}
+					}
+				}
+				incomingArm++;
+			}
+		}
 		// a type of junction 
 		if ((inCount >= 1) && (outCount >= 1) && (inCount + outCount > 2)) {
 			// Expand nodes and create junction connecting links/lanes (connectors)
@@ -793,6 +813,8 @@ public class Node extends Vertex implements XML_IO {
 				// if turning arrows are provided: connect by that information
 				// else an automated search
 				if (incoming.incoming) {
+/*					if (incoming.link.getFromNode_r().nodeID == 6650 && incoming.link.getToNode_r().nodeID == 6649)
+						System.out.println("debug junction");*/
 					// automated search: uses some logic to define turning movements from one lane to another 
 					// select the lanes from the incoming link into the junction
 		    		int size = incoming.link.getCrossSections_r().size();
@@ -820,7 +842,13 @@ public class Node extends Vertex implements XML_IO {
 	            			else
 	            				angleDif = leaving.angle - incoming.angle;
 	            			// only if it is not a U-turn!
-	            			if (Math.abs(angleDif) > 0.5)  {
+	            			if (Math.abs(angleDif) >= 0.0)  {
+	            				if ( angleDif > 0.75 * Math.PI  && angleDif < 1.25 * Math.PI && linkRank == 1)  {
+	            					linkRank = 2;
+	            				}
+	            				if ( angleDif > 1.25 * Math.PI  && linkRank < 3)  {
+	            					linkRank = 3;
+	            				}
 			    	    		CrossSection outCs = leaving.link.getCrossSections_r().get(0);
 		    	    			// collect information on the index of the leaving link, its lanes and 
 		    	    			// the angle with the entering lane
@@ -858,7 +886,6 @@ public class Node extends Vertex implements XML_IO {
 	            			if (currentInLane.getTurnArrow().getOutLinkNumbers() != null)  {
 	            				// retrieve the index of the outgoing links (one by one)
 	            				int outLinkRank = inLanesAll.get(indexInlane).getTurnArrow().getOutLinkNumbers()[turnCount];
-	            				//System.out.print("test  " + outLinkRank );
 	            				// we look for the connecting outLane by looping through all outlanes at this node
 	            				OutLaneInfo currentOutlaneInfo = outLanesAndLinkList.get(outLaneIndex);
 	            				// connect to the lane of a leaving arm
@@ -873,10 +900,13 @@ public class Node extends Vertex implements XML_IO {
 									// retrieve the index of the current outlane
 									if (outLaneIndex >= outLanesAndLinkList.size())
 										break;
+									if (outLaneIndex < 0)
+										System.out.println("strange: less than zero");
 									currentOutlaneInfo = outLanesAndLinkList.get(outLaneIndex);
 								}
 								// for an inlane, all outlanes of the corresponding outLink are checked:
 								while (outLinkRank == currentOutlaneInfo.getLinkRank() && outLaneIndex < outLanesAndLinkList.size()) {
+									// next line away????
 									currentOutlaneInfo = outLanesAndLinkList.get(outLaneIndex);
 									int inlaneNext = 1;
 									boolean connectOnlyOneLane = false;
@@ -896,6 +926,9 @@ public class Node extends Vertex implements XML_IO {
 									}
 									outLaneIndex++;
 								}
+								if (currentOutlaneInfo.getInLane() == null)   {
+									System.out.println("strange: no inLane");
+								}
 								// connect the inlane to the outlane
 								// later on we will loop through the outLanesAndLinkList to generate new junction connectors 
 								// but first continue to inspect the other in lanes and their turns!
@@ -910,7 +943,7 @@ public class Node extends Vertex implements XML_IO {
 	            					// go to the next inLane and reset turncount to zero
 	            					turnCount = 0;
 	            				}
-								
+	            				outLaneIndex = 0;
 	            			}
 	            			
 				    		// else if no turning movements are defined, construct the movements with some simple rules
@@ -971,14 +1004,14 @@ public class Node extends Vertex implements XML_IO {
 										outLaneIndex++;  // in case there are more outlanes connected to one incoming lane
 								}
 	            				currentOutlaneInfo.setInLane(currentInLane);
-	            				
+	            				if (outLaneIndex > outLanesAndLinkList.size() - 1) 
+	            					break;
 		            		}	
 							// finished after all outlanes have passed!
-							if (outLaneIndex > outLanesAndLinkList.size()-1) 
-								break;
+
+	            			
 	            		}
-	            	
-            		
+	            			
 	            		outLaneIndex = 0;
 						ArrayList<Lane> newLanes = new ArrayList<Lane>();
 						Lane newLane = null;
@@ -1002,6 +1035,8 @@ public class Node extends Vertex implements XML_IO {
 			        					sameOutLink = true;
 			    				
 			    				if (addLink) {
+			    			    	if (newLanes.size() == 0) 
+			    			    		System.out.println("strange");
 		            				Link newLink = createJunctionLink(incoming, newLanes, rmaList);
 		            				newLinks.add(newLink);
 				            		rmaList = new ArrayList<RoadMarkerAlong>();
@@ -1020,6 +1055,8 @@ public class Node extends Vertex implements XML_IO {
 			    				newLanes.add(0, newLane);
 		    				}
 		    				if (outLaneIndex == outLanesAndLinkList.size() - 1)  {
+		    			    	if (newLanes.size() == 0) 
+		    			    		System.out.println("strange");
 	            				Link newLink = createJunctionLink(incoming, newLanes, rmaList);
 	            				newLinks.add(newLink);
 		    				}
@@ -1339,6 +1376,8 @@ public class Node extends Vertex implements XML_IO {
 			Point2D.Double ctrlPoint = 	Curves.createControlPoint(up, down);
 			newLane.setCtrlPointCenter(ctrlPoint);
 			ArrayList<Vertex> laneVerticesCenter = new ArrayList<Vertex>();
+			if (ctrlPoint == null)
+				System.out.println("stop");
 			laneVerticesCenter = Curves.connectVerticesCurve(up, down, ctrlPoint, 0.3);
 			// laneVerticesCenter.get(0).setPoint(up.get(up.size()-1).getX(), up.get(up.size()-1).getY(), up.get(up.size()-1).getZ());
 			// laneVerticesCenter.get(laneVerticesCenter.size()-1).setPoint(down.get(0).getX(), down.get(0).getY(), down.get(0).getZ());
@@ -1384,7 +1423,8 @@ public class Node extends Vertex implements XML_IO {
      * @param rmaList
      * @return {@link Link}; the newly created Link
      */
-    private Link createJunctionLink(DirectionalLink incoming, ArrayList<Lane> newLanes, ArrayList<RoadMarkerAlong> rmaList)  {    	
+    private Link createJunctionLink(DirectionalLink incoming, ArrayList<Lane> newLanes, ArrayList<RoadMarkerAlong> rmaList)  { 
+
 		CrossSectionElement inCse = newLanes.get(0).getUp().get(0).getCse();
 		Node expandNode1 = expandNode(true, incoming.link, inCse);
 		CrossSectionElement outCse = newLanes.get(0).getDown().get(0).getCse();

@@ -115,7 +115,7 @@ public abstract class CrossSectionObject implements XML_IO {
 	 */
 	public void setCrossSectionElement(CrossSectionElement crossSectionElement) {
 		if ((null != this.crossSectionElement) && (this.crossSectionElement != crossSectionElement))
-			throw new Error ("This CrossSectionObject alread has crossSectionElement set");
+			throw new Error ("This CrossSectionObject already has crossSectionElement set");
 		this.crossSectionElement = crossSectionElement;		
 	}
 	

@@ -131,7 +131,7 @@ public class TableModelImport extends JPanel implements TableModelListener {
     		{"fromNode", "ANODE", false},
     		{"toNode", "BNODE", false},
     		{"capacity", "CAPACITYAB", false},
-    		{"lanes", "", true},
+    		{"lanes", "LANESAB", false},
     		{"turnLanes", "LANESMASAB", false},
     		{"exitLanes", "EXITLANEAB", false},
     		{"maxSpeed", "SPEEDAB", false},       		
