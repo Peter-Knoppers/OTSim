@@ -34,13 +34,14 @@ public class Node extends Vertex implements XML_IO {
 	private static final String XML_ID = "ID";
 	
 	private int nodeCount = 0;
-	private String name;
-    private int nodeID;
+	private String name = null;
+    private int nodeID = -1;
     private boolean sink = false;
     private boolean source = false;
 	private TreeSet<DirectionalLink> links = null;
 	ArrayList<Vertex> conflictArea;
 	ArrayList<ArrayList<Vertex>> closingLines = new ArrayList<ArrayList<Vertex>>();
+	private TrafficLightController trafficLightController = null;
 	private Network network;
 	Circle circle;
 
@@ -83,16 +84,19 @@ public class Node extends Vertex implements XML_IO {
 	 */
     public Node(Network network, ParsedNode pn) throws Exception {
     	// Initialize everything to some invalid value
-    	name = null;
-    	nodeID = -1;
     	this.network = network;
     	x = y = z = Double.NaN;
 		for (String fieldName : pn.getKeys()) {
 			if (pn.size(fieldName) != 1)
 				throw new Exception("Field " + fieldName + " has " + pn.size(fieldName) + "elements (should be 1)");
+			if (fieldName.equals(TrafficLightController.XMLTAG)) {
+				trafficLightController = new TrafficLightController(network, pn.getSubNode(TrafficLightController.XMLTAG, 0));
+				continue;
+			} 
 			String value = pn.getSubNode(fieldName, 0).getValue();
 			if (null == value)
 				throw new Exception("Value of " + fieldName + " is null");
+			System.out.println("fieldName is " + fieldName + " value is " + value);
 			if (fieldName.equals(XML_NAME))
 				name = value;
 			else if (fieldName.equals(XML_ID))
@@ -125,6 +129,7 @@ public class Node extends Vertex implements XML_IO {
 				&& staXWriter.writeNode(XML_NAME, getName_r())
 				&& staXWriter.writeNode(XML_ID, Integer.toString(getNodeID()))
 				&& writeVertexXML(staXWriter)
+				&& ((null == trafficLightController) || trafficLightController.writeXML(staXWriter))
 				&& staXWriter.writeNodeEnd(XMLTAG);
     }
     
@@ -681,10 +686,20 @@ public class Node extends Vertex implements XML_IO {
 	
 	private ArrayList<DirectionalLink> getLinks() {
 		ArrayList<DirectionalLink> result = new ArrayList<DirectionalLink> ();
+		if (null == links) {
+			System.err.println("Links is null (this is node " + toString() + ")");
+			return result;
+		}
 		for (DirectionalLink dl : links)
 			result.add(dl);
 		return result;
 	}
+	
+	/*
+	public ArrayList<DirectionalLink> getDirectionalLinks_r() {
+		return getLinks();
+	}
+	*/
 	
     public void determineSinkOrSource() {
     	sink = false;
@@ -1506,6 +1521,60 @@ public class Node extends Vertex implements XML_IO {
 		return vertices;
     }
 
+    /**
+     * Return a caption for the pop up menu of the {@link nl.tudelft.otsim.GUI.ObjectInspector}.
+     * @return String; caption for the pop up menu of the {@link nl.tudelft.otsim.GUI.ObjectInspector}
+     */
+    @SuppressWarnings("static-method")
+	public String itemizeTrafficLightController_caption() {
+    	return "Traffic light controller";
+    }
+    
+    /**
+     * We need this one too for the caption of the pop up menu of the 
+     * {@link nl.tudelft.otsim.GUI.ObjectInspector}.
+     * @return String; caption for the pop up menu of the {@link nl.tudelft.otsim.GUI.ObjectInspector}
+     */
+    public String getTrafficLightController_r() {
+    	return "Click twice to create or remove a Traffic light controller at node " + name;
+    }
+    
+    private static final String addTrafficLightController = "Create a traffic light controller at node ";
+    private static final String deleteTrafficLightController = "Delete the traffic light controller at node ";
+    
+    /**
+     * Create or remove a {@link TrafficLightController} at this Node.
+     * @param object Object; should be a String
+     */
+    public void setTrafficLightController_w (Object object) {
+    	System.out.println("setTrafficLightController_w called; object is " + object.toString());
+    	if (object instanceof String) {
+    		String value = (String) object;
+    		if (value.startsWith(addTrafficLightController))
+    			this.trafficLightController = new TrafficLightController(network, "TL_" + name);
+    		else if (value.startsWith(deleteTrafficLightController)) {
+    			trafficLightController.deleteAllLightsAndDetectors();
+    			trafficLightController = null;
+    		} else
+    			throw new Error("setTrafficLightController does not know what \"" + value + "\" means");
+    	} else
+    		throw new Error("setTrafficLightController should be called with a String object");
+    }
+    
+    /**
+     * Return a list of items (actually only one) for the pop up menu of the
+     * {@link nl.tudelft.otsim.GUI.ObjectInspector}.
+     * @return ArrayList&lt;String&gt;; the list of one item for the pop up
+     * menu of the {@link nl.tudelft.otsim.GUI.ObjectInspector}
+     */
+    public ArrayList<String> itemizeTrafficLightController_i() {
+    	ArrayList<String> result = new ArrayList<String>();
+    	if (null == trafficLightController)
+    		result.add(addTrafficLightController + name);
+    	else
+    		result.add(deleteTrafficLightController + name);
+    	return result;
+    }
     
     private Node expandNode(boolean in, Link link, CrossSectionElement inCse) {
     	Node expandedNode = null;
@@ -1540,6 +1609,7 @@ public class Node extends Vertex implements XML_IO {
      * Draw this Node on a GraphicsPanel.
      * @param graphicsPanel GraphicsPanel; graphicsPanel to draw onto
      */
+	@Override
 	public void paint(GraphicsPanel graphicsPanel) {
         final int nonSelectedNodeDiameter = 6;
         final int selectedNodeDiameter = 20;
@@ -1573,6 +1643,15 @@ public class Node extends Vertex implements XML_IO {
         	double r = graphicsPanel.translate(new Point2D.Double(circle.radius(), 0)).distance(graphicsPanel.translate(new Point2D.Double(0, 0)));
         	graphicsPanel.drawCircle(circle.center(), Color.CYAN, (int) (2 * r));
         }
+	}
+
+	/**
+	 * Retrieve the {@link TrafficLightController} of this Node
+	 * @return {@link TrafficLightController}; the TrafficLightController of
+	 * this Node, or null if this Node does not have a TrafficLightController
+	 */
+	public TrafficLightController getTrafficLightController() {
+		return trafficLightController;
 	}
 
 }

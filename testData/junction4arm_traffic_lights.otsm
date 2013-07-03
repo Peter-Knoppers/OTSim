@@ -14,6 +14,24 @@
       <X>100.0</X>
       <Y>-100.0</Y>
       <Z>0.0</Z>
+      <trafficLightController>
+        <ID>TLC_1</ID>
+        <ControlURL>d:/cppb/trafcod/trafcod.exe d:/cppb/trafcod/4Arm/4Arm.tfc sumo://localhost:6789</ControlURL>
+        <Detector>VD_1051</Detector>
+        <Detector>VD_1052</Detector>
+        <Detector>VD_1053</Detector>
+        <Detector>VD_1083</Detector>
+        <Detector>VD_1054</Detector>
+        <Detector>VD_1111</Detector>
+        <Detector>VD_1112</Detector>
+        <Detector>VD_1113</Detector>
+        <Detector>VD_1114</Detector>
+        <Detector>VD_1115</Detector>
+        <Detector>VD_1116</Detector>
+        <Light>TL_11</Light>
+        <Light>TL_05</Light>
+        <Light>TL_08</Light>
+      </trafficLightController>
     </node>
     <node>
       <name>twee</name>
@@ -967,24 +985,6 @@
       <type>|</type>
       <width>0.2</width>
     </roadMarkerType>
-    <TrafficLightController>
-      <ID>TLC_1</ID>
-      <ControlURL>d:/cppb/trafcod/trafcod.exe d:/cppb/trafcod/4Arm/4Arm.tfc sumo://localhost:6789</ControlURL>
-      <Detector>VD_1051</Detector>
-      <Detector>VD_1052</Detector>
-      <Detector>VD_1053</Detector>
-      <Detector>VD_1083</Detector>
-      <Detector>VD_1054</Detector>
-      <Detector>VD_1111</Detector>
-      <Detector>VD_1112</Detector>
-      <Detector>VD_1113</Detector>
-      <Detector>VD_1114</Detector>
-      <Detector>VD_1115</Detector>
-      <Detector>VD_1116</Detector>
-      <Light>TL_11</Light>
-      <Light>TL_05</Light>
-      <Light>TL_08</Light>
-    </TrafficLightController>
   </Network>
   <Demand>
     <tripPattern>

@@ -162,6 +162,7 @@ public class Vehicle extends Movable {
                 s = RSURange; // stop loop
             }
         }
+        // Pass RSUs
         java.util.Iterator<RSU> it = RSUsInRange.iterator();
         while (it.hasNext()) {
             rsu = it.next();

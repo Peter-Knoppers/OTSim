@@ -284,6 +284,7 @@ public class ObjectInspector extends JFrame implements TreeSelectionListener, Fo
 				return returnedObject;
 			} catch (Exception e) {
 				System.err.println(String.format("%s: object is %s,  method is %s", e.toString(), methodObject.getClass().getCanonicalName(), getter.getName()));
+				e.printStackTrace();
 				return "Caught exception in getValue " + e.toString();
 			}
 		}

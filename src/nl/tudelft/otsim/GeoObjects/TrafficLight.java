@@ -33,8 +33,6 @@ public class TrafficLight extends CrossSectionObject {
 	/** Label of width in XML representation of a TrafficLight */
 	private static final String XML_WIDTH = "width";
 	
-	private static final String ADD_CONTROLLER = "Create new traffic light controller";
-	
 	private TrafficLightController trafficLightController = null;
 	
 	/**
@@ -222,8 +220,9 @@ public class TrafficLight extends CrossSectionObject {
 	 * @return ArrayList&lt;String&gt;; the items for the menu
 	 */
 	public ArrayList<String> itemizeTrafficLightController_i() {
-		ArrayList<String> result = new ArrayList<String> (crossSectionElement.getCrossSection().getLink().network.trafficControllerList());
-		result.add(0, ADD_CONTROLLER);
+		ArrayList<String> result = new ArrayList<String>();
+		for (TrafficLightController tlc : crossSectionElement.getCrossSection().getLink().network.trafficLightControllerList())
+			result.add(tlc.getName_r());
 		return result;
 	}
 	
@@ -259,10 +258,7 @@ public class TrafficLight extends CrossSectionObject {
 			trafficLightController.deleteLight(this);	// delete current association
 		if (object instanceof String) {
 			String tlcName = (String) object;
-			if (tlcName.equals(ADD_CONTROLLER))	// create a new TrafficLightController
-				trafficLightController = crossSectionElement.getCrossSection().getLink().network.addTrafficLightController();
-			else	// lookup an existing TrafficLightController
-				trafficLightController = crossSectionElement.getCrossSection().getLink().network.lookupTrafficLightController(tlcName);
+			trafficLightController = crossSectionElement.getCrossSection().getLink().network.lookupTrafficLightController(tlcName);
 		} else if (object instanceof TrafficLightController)
 			trafficLightController = (TrafficLightController) object;
 		if (null != trafficLightController)

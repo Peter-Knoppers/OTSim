@@ -306,6 +306,10 @@ public class Link implements XML_IO {
 		return fromNode;
 	}
 	
+	public Node getExpandedFromNode_r() {
+		return fromNodeExpand;
+	}
+	
 	/**
 	 * Change the starting {@link Node} of the Link.
 	 * @param fromNode New starting {@link Node} of the Link
@@ -320,6 +324,10 @@ public class Link implements XML_IO {
 	 */
 	public Node getToNode_r() {
 		return toNode;
+	}
+	
+	public Node getExpandedToNode_r() {
+		return toNodeExpand;
 	}
 
 	/**
