@@ -1090,11 +1090,13 @@ public class Planar {
     	ArrayList<Vertex> result = new ArrayList<Vertex>();
     	Vertex prevVertex = null;
     	Line2D.Double prevParallel = null;
+    	double prevDirection = Double.NEGATIVE_INFINITY;
     	if (prevReferenceVertices != null) {
     		int size = prevReferenceVertices.size();
-    	    Vertex Vertex1 = prevReferenceVertices.get(size-2);
-    		Vertex vertex2 = prevReferenceVertices.get(size-1);
-			prevParallel = new Line2D.Double(Vertex1.getX(), Vertex1.getY(), vertex2.getX(), vertex2.getY());
+    	    Vertex prevVertex1 = prevReferenceVertices.get(size-2);
+    		Vertex vertex1 = prevReferenceVertices.get(size-1);
+			prevParallel = new Line2D.Double(prevVertex1.getX(), prevVertex1.getY(), vertex1.getX(), vertex1.getY());
+			prevDirection = Math.atan2(vertex1.getY() - prevVertex1.getY(), vertex1.getX() - prevVertex1.getX());
     	}
     	for (Vertex vertex : referenceVertices) {		
     		if (null != prevVertex)	{
@@ -1111,13 +1113,20 @@ public class Planar {
     			} else {
     				// We have a previous parallel and a current parallel.
     				// Compute the intersection
-    				Point2D.Double p = intersection(prevParallel, parallel);
+    				Point2D.Double p = null;
+    				if (Math.abs(direction - prevDirection) < 0.3 * Math.PI)   {
+    					p = new Point2D.Double(parallel.x1 + (prevParallel.getX2()-parallel.x1)/2 , parallel.y1 + (prevParallel.getY2()-parallel.y1)/2 );
+    				}
+    				else	
+    					p = intersection(prevParallel, parallel);
+    				
     				if (null == p)	// probably an (almost) straight line; use the previous point
     					result.add(new Vertex(parallel.x1, parallel.y1, vertex.getZ()));
     				else
     					result.add(new Vertex(p, vertex.getZ()));
     			}    			
     			prevParallel = parallel;
+    			prevDirection = direction;
     			firstLateralPosition = subsequentLateralPosition;
     		}
 			prevVertex = vertex;

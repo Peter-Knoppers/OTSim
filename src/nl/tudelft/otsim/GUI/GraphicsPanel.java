@@ -312,7 +312,7 @@ public class GraphicsPanel extends JPanel implements MouseListener, MouseMotionL
     	g2.setColor(fillColor);
     	g2.fill(drawPath);
     	g2.setColor(lineColor);
-    	g2.draw(drawPath);
+    	//g2.draw(drawPath);
     }
     
     /**

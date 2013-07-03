@@ -2,7 +2,9 @@ package nl.tudelft.otsim.GeoObjects;
 
 import java.awt.Color;
 import java.awt.Polygon;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
+import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,6 +21,7 @@ import nl.tudelft.otsim.GeoObjects.PriorityConflict.conflictType;
 import nl.tudelft.otsim.SpatialTools.Circle;
 import nl.tudelft.otsim.SpatialTools.Curves;
 import nl.tudelft.otsim.SpatialTools.Planar;
+import nl.tudelft.otsim.Utilities.Reversed;
 
 /**
  *
@@ -1021,7 +1024,8 @@ public class Node extends Vertex implements XML_IO {
 		    				boolean sameOutLink = false;
 		    				if (!(currentInLane == null) && !(currentOutLane == null) )  {
 		    				//create a new lane that connect this incoming lane and this leaving lane		
-		    						    				
+		    					if (currentInLane.getCse().getCrossSection().getLink().getToNode_r().getNodeID() == 6649)	
+		    						System.out.println("test vertices lanes");
 			    				boolean addLink = false;
 			    				// add a new link if...	
 			    				if (outLaneIndex > 0)
@@ -1535,6 +1539,20 @@ public class Node extends Vertex implements XML_IO {
 			expandedNode = link.getFromNodeExpand();
 		return expandedNode;
     }
+    
+	public  GeneralPath createJunctionPolygon()   {
+		GeneralPath polygon = new GeneralPath(Path2D.WIND_EVEN_ODD);
+		boolean firstPoint = true;
+		for (Vertex v : conflictArea)  {
+			if (firstPoint)
+				polygon.moveTo(v.getX(), v.getY());
+			else
+				polygon.lineTo(v.getX(), v.getY());
+			firstPoint = false;
+		}
+		polygon.closePath();
+		return polygon;
+	}
     
     /**
      * Draw this Node on a GraphicsPanel.

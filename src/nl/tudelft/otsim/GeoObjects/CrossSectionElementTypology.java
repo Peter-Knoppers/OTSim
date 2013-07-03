@@ -330,7 +330,7 @@ public class CrossSectionElementTypology implements XML_IO {
 	 */
 	public Color getColor_r() {
     	if (getDrivable())
-    		return Color.LIGHT_GRAY;
+    		return Color.DARK_GRAY;
     	if (getName_r().equals("barrier"))
     		return Color.RED;
     	return Color.GREEN;
