@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JCheckBox;
-import javax.swing.JPanel;
 
 import nl.tudelft.otsim.Events.Scheduler;
 import nl.tudelft.otsim.Events.Step;
@@ -83,8 +82,11 @@ public class RoadwaySimulator extends Simulator implements ActionListener {
 	}
 	
 	private void loadTrafficLightController(String fields[]) {
+		String controllerURL = null;
+		if (fields.length > 4)
+			controllerURL = fields[4];
 		// This depends on all TrafficLights and Detectors to be created BEFORE the SimulatedTrafficLightController
-		SimulatedTrafficLightController tlc = new SimulatedTrafficLightController(scheduler, fields[4]);
+		SimulatedTrafficLightController tlc = new SimulatedTrafficLightController(scheduler, controllerURL);
 		for (String tlName : fields[2].split(","))
 			tlc.addTrafficLight((SimulatedTrafficLight) trafficLights.get(tlName));
 		for (String dName : fields[3].split(","))

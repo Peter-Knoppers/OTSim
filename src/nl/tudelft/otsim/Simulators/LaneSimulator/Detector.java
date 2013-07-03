@@ -82,12 +82,10 @@ public class Detector extends RSU {
      */
     @Override
 	public void pass(Vehicle veh) {
-        if (qCur == 0) {
+        if (qCur == 0)
             vCur = veh.v;
-        } else {
-            // add velocity to average
-            vCur = ((vCur*qCur)+veh.v)/(qCur+1);
-        }
+        else
+            vCur = ((vCur*qCur)+veh.v)/(qCur+1);	// add velocity to average
         qCur++;
     }
 

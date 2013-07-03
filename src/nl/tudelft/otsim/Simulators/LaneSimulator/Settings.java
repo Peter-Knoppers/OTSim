@@ -161,9 +161,7 @@ public class Settings {
      * if not.
      */
     protected static void check(java.util.HashMap<?, ?> map, String key) {
-        if (!map.containsKey(key)) {
-            throw new java.lang.RuntimeException("Setting '"+key
-                    +"' does not exist as the requested type.");
-        }
+        if (!map.containsKey(key))
+            throw new java.lang.RuntimeException("Setting '"+key+"' does not exist as the requested type.");
     }
 }

@@ -1,5 +1,7 @@
 package nl.tudelft.otsim.Simulators.LaneSimulator;
 
+import nl.tudelft.otsim.GUI.Main;
+
 /**
  * Default wrapper for a driver. The drive method is the main method and should
  * set <tt>a</tt> and <tt>dy</tt> of the vehicle. The longitudinal model is 
@@ -196,9 +198,8 @@ public class Driver {
     protected boolean isNewTimeStepForAction(String action) {
         boolean out = true;
         try {
-            if (vehicle.model.k<=kForActions.get(action)) {
+            if (vehicle.model.k<=kForActions.get(action))
                 out =  false;
-            }
         } catch (NullPointerException npe) {
             // action never performed, so true
         }
@@ -285,10 +286,8 @@ public class Driver {
                     double xLeft = vehicle.route.xLaneChanges(vehicle.lane.left)
                             - vehicle.getAdjacentX(Model.latDirection.LEFT);
                     // We can always include a taper on the left lane if it's there
-                    if (!isTaper(vehicle.lane.left)) {
-                        dLeftRoute = Math.max(Math.max(1-(xLeft/(nLeft*x0)),
-                                1-((xLeft/vehicle.v)/(nLeft*t0))), 0);
-                    }
+                    if (!isTaper(vehicle.lane.left))
+                        dLeftRoute = Math.max(Math.max(1-(xLeft/(nLeft*x0)), 1-((xLeft/vehicle.v)/(nLeft*t0))), 0);
                     
                     /* We now have the desire to leave the current, and to leave
                      * the left lane. 'dLeftRoute' will now become the actual
@@ -300,17 +299,14 @@ public class Driver {
                      * left lane. In this way we have symmetry which prevents
                      * lane hopping.
                      */
-                    if (dLeftRoute<dCurRouteFL) {
+                    if (dLeftRoute<dCurRouteFL)
                         dLeftRoute = dCurRouteFL;
-                    } else if (dLeftRoute>dCurRouteFL) {
+                    else if (dLeftRoute>dCurRouteFL)
                         dLeftRoute = -dLeftRoute;
-                    } else {
+                    else
                         dLeftRoute = 0;
-                    }
-                } else {
-                    // Destination becomes unreachable after lane change
-                    dLeftRoute = Double.NEGATIVE_INFINITY;
-                }
+                } else
+                    dLeftRoute = Double.NEGATIVE_INFINITY;	// Destination becomes unreachable after lane change
                 // Idem. for right lane
                 double dRightRoute = 0;
                 if (vehicle.lane.right!=null && vehicle.route.canBeFollowedFrom(vehicle.lane.right)) {
@@ -321,16 +317,14 @@ public class Driver {
                     dRightRoute = Math.max(Math.max(1-(xRight/(nRight*x0)),
                             1-((xRight/vehicle.v)/(nRight*t0))), 0);
                     
-                    if (dRightRoute<dCurRouteFR) {
+                    if (dRightRoute<dCurRouteFR)
                         dRightRoute = dCurRouteFR;
-                    } else if (dRightRoute>dCurRouteFR) {
+                    else if (dRightRoute>dCurRouteFR)
                         dRightRoute = -dRightRoute;
-                    } else {
+                    else
                         dRightRoute = 0;
-                    }
-                } else {
+                } else
                     dRightRoute = Double.NEGATIVE_INFINITY;
-                }
 
                 /* === SPEED GAIN ===
                  * Drivers may change lane to gain speed. They assess an
@@ -353,9 +347,8 @@ public class Driver {
                  * it is prohibited or impossible to go there.
                  */
                 double dLeftSpeed = 0;
-                if (vehicle.lane.goLeft) {
+                if (vehicle.lane.goLeft)
                     dLeftSpeed = aGain*(vAntLeft-vAntCur)/vGain;
-                }
                 /* For the right lane, desire due to a speed gain is slightly
                  * different. As one is not allowed to overtake on the right, a
                  * speed gain is reduced to 0. A speed loss is still considered.
@@ -364,11 +357,10 @@ public class Driver {
                  */
                 double dRightSpeed = 0;
                 if (vehicle.lane.goRight) {
-                    if (vAntCur>=vCong) {
+                    if (vAntCur>=vCong)
                         dRightSpeed = aGain*Math.min(vAntRight-vAntCur, 0)/vGain;
-                    } else {
+                    else
                         dRightSpeed = aGain*(vAntRight-vAntCur)/vGain;
-                    }
                 }
      
                 /* === LANE CHANGE BIAS ===
@@ -383,9 +375,8 @@ public class Driver {
                  */
                 double dLeftBias = 0;
                 double dRightBias = 0;
-                if (vAntRight==desiredVelocity() && dRightRoute>=0) {
+                if (vAntRight==desiredVelocity() && dRightRoute>=0)
                     dRightBias = dFree;
-                }
                 
                 /* === TOTAL DESIRE ===
                  * Depending on the level of desire from the route (mandatory),
@@ -399,24 +390,18 @@ public class Driver {
                  */
                 double thetaLeft = 0; // Assume not included
                 double dVoluntary = dLeftSpeed+dLeftBias+dLeftIntersection;
-                if (dLeftRoute*dVoluntary>=0 || Math.abs(dLeftRoute)<=dSync) {
-                    // Same direction or low mandatory desire
-                    thetaLeft = 1;
-                } else if (dLeftRoute*dVoluntary<0 && 
-                        dSync<Math.abs(dLeftRoute) && Math.abs(dLeftRoute)<dCoop) {
-                    // Voluntary incentives paritally included
-                    thetaLeft = (dCoop-Math.abs(dLeftRoute)) / (dCoop-dSync);
-                }
+                if (dLeftRoute*dVoluntary>=0 || Math.abs(dLeftRoute)<=dSync)
+                    thetaLeft = 1;	// Same direction or low mandatory desire
+                else if (dLeftRoute*dVoluntary<0 && dSync<Math.abs(dLeftRoute) && Math.abs(dLeftRoute)<dCoop)
+                    thetaLeft = (dCoop-Math.abs(dLeftRoute)) / (dCoop-dSync); // Voluntary incentives paritally included
                 dLeft = dLeftRoute + thetaLeft*dVoluntary;
                 // Idem. for right
                 double thetaRight = 0;
                 dVoluntary = dRightSpeed+dRightBias+dRightIntersection;
-                if (dRightRoute*dVoluntary>=0 || Math.abs(dRightRoute)<=dSync) {
+                if (dRightRoute*dVoluntary>=0 || Math.abs(dRightRoute)<=dSync)
                     thetaRight = 1;
-                } else if (dRightRoute*dVoluntary<0 &&
-                        dSync<Math.abs(dRightRoute) && Math.abs(dRightRoute)<dCoop) {
+                else if (dRightRoute*dVoluntary<0 && dSync<Math.abs(dRightRoute) && Math.abs(dRightRoute)<dCoop)
                     thetaRight = (dCoop-Math.abs(dRightRoute)) / (dCoop-dSync);
-                }
                 dRight = dRightRoute + thetaRight*dVoluntary;
 
                 /* === GAP ACCEPTANCE ===
@@ -430,10 +415,8 @@ public class Driver {
                     setT(dLeft);
                     aSelf = calculateAcceleration(vehicle, vehicle.leftDown);
                     resetT();
-                } else if (vehicle.leftDown!=null) {
-                    // Negative headway, reject gap
-                    aSelf = Double.NEGATIVE_INFINITY;
-                }
+                } else if (vehicle.leftDown!=null)
+                    aSelf = Double.NEGATIVE_INFINITY; // Negative headway, reject gap
                 // Determine follower acceleration
                 double aFollow = 0; // assume ok
                 if (vehicle.leftUp != null) {
@@ -441,40 +424,35 @@ public class Driver {
                         vehicle.leftUp.getDriver().setT(dLeft);
                         aFollow = calculateAcceleration(vehicle.leftUp, vehicle);
                         vehicle.leftUp.getDriver().resetT();
-                    } else {
+                    } else
                         aFollow = Double.NEGATIVE_INFINITY;
-                    }
                 }
                 /* The gap is accepted if both accelerations are larger than a
                  * desire depedant threshold.
                  */
                 boolean acceptLeft = false;
-                if (aSelf >= -bSafe*dLeft && aFollow >= -bSafe*dLeft && vehicle.lane.goLeft) {
+                if (aSelf >= -bSafe*dLeft && aFollow >= -bSafe*dLeft && vehicle.lane.goLeft)
                     acceptLeft = true;
-                }
                 // Idem. for right gap
                 aSelf = 0;
                 if (vehicle.rightDown!=null && vehicle.getHeadway(vehicle.rightDown)>0) {
                     setT(dRight);
                     aSelf = calculateAcceleration(vehicle, vehicle.rightDown);
                     resetT();
-                } else if (vehicle.rightDown!=null) {
+                } else if (vehicle.rightDown!=null)
                     aSelf = Double.NEGATIVE_INFINITY;
-                }
                 aFollow = 0;
                 if (vehicle.rightUp != null) {
                     if (vehicle.rightUp.getHeadway(vehicle)>0) {
                         vehicle.rightUp.getDriver().setT(dRight);
                         aFollow = calculateAcceleration(vehicle.rightUp, vehicle);
                         vehicle.rightUp.getDriver().resetT();
-                    } else {
+                    } else
                         aFollow = Double.NEGATIVE_INFINITY;
-                    }
                 }
                 boolean acceptRight = false;
-                if (aSelf >= -bSafe*dRight && aFollow >= -bSafe*dRight && vehicle.lane.goRight) {
+                if (aSelf >= -bSafe*dRight && aFollow >= -bSafe*dRight && vehicle.lane.goRight)
                     acceptRight = true;
-                }
 
                 /* LANE CHANGE DECISION
                  * A lane change is initiated towards the largest desire if that
@@ -488,25 +466,20 @@ public class Driver {
                     // Set headway
                     setT(dLeft);
                     // Set response headway of new follower
-                    if (vehicle.leftUp != null && vehicle.leftUp.rightDown==vehicle) {
+                    if (vehicle.leftUp != null && vehicle.leftUp.rightDown==vehicle)
                         vehicle.leftUp.getDriver().setT(dLeft);
-                    }
                 } else if (dRight>=dLeft && dRight>=dFree && acceptRight) {
                     // Set dy to the right
                     double dur = Math.min((vehicle.route.xLaneChanges(vehicle.lane)-vehicle.x)/(180/3.6), duration);
                     vehicle.changeRight(vehicle.model.dt/dur);
                     // Set headway
                     setT(dRight);
-                    if (vehicle.rightUp != null && vehicle.rightUp.leftDown==vehicle) {
+                    if (vehicle.rightUp != null && vehicle.rightUp.leftDown==vehicle)
                         vehicle.rightUp.getDriver().setT(dRight);
-                    }
-                } else if (dLeft>=dRight && dLeft>=dCoop) {
-                    // Indicate need to left
-                    vehicle.leftIndicator = true;
-                } else if (dRight>=dLeft && dRight>=dCoop) {
-                    // Indicate need to right
-                    vehicle.rightIndicator = true;
-                }
+                } else if (dLeft>=dRight && dLeft>=dCoop)
+                    vehicle.leftIndicator = true;	// Indicate need to left
+                else if (dRight>=dLeft && dRight>=dCoop)
+                    vehicle.rightIndicator = true;	// Indicate need to right
             } // not on first 100m
             
             /* === LONGITUDINAL ===
@@ -557,12 +530,11 @@ public class Driver {
     /**
      * Sets the acceleration of the vehicle only if the given value is lower 
      * than the current value or in case of a new time step.
-     * @param a Vehicle acceleration [m/s^2].
+     * @param proposedA Vehicle acceleration [m/s^2].
      */
-    public void lowerAcceleration(double a) {
-        if (isNewTimeStepForAction("lower_acceleration") || a<vehicle.a) {
-            vehicle.setAcceleration(a);
-        }
+    public void lowerAcceleration(double proposedA) {
+        if (isNewTimeStepForAction("lower_acceleration") || proposedA<vehicle.a)
+            vehicle.setAcceleration(proposedA);
     }
     
     /**
@@ -570,11 +542,11 @@ public class Driver {
      * safe according to a >= -bSafe. This limit can be used for synchronization
      * with an adjacent lane and not for car-following as 'safe' does not mean
      * collision free, but safe with regard to upstream followers.
-     * @param a Acceleration as calculated for an adjacent leader [m/s^2].
+     * @param otherA Acceleration as calculated for an adjacent leader [m/s^2].
      * @return Limited safe acceleration [m/s^2].
      */
-    public double safe(double a) {
-        return a >= -bSafe ? a : -bSafe;
+    public double safe(double otherA) {
+        return otherA >= -bSafe ? otherA : -bSafe;
     }
 
     /**
@@ -600,11 +572,10 @@ public class Driver {
         if (d>0 && d<1) {
             double Tint = d*Tmin + (1-d)*Tmax;
             T = T <= Tint ? T : Tint;
-        } else if (d<=0) {
+        } else if (d<=0)
             T = T <= Tmax ? T : Tmax;
-        } else {
+        else
             T = T <= Tmin ? T : Tmin;
-        }
     }
 
     /**
@@ -625,18 +596,16 @@ public class Driver {
      * @return Anticipated speed on lanes [left, current, right].
      */
     protected double anticipatedSpeed(Lane lane) {
-        if (lane==null) {
+        if (lane==null)
             return 0;
-        }
         // Be sure we exclude the vehicle itself
         double x = vehicle.x+0.001;
         // In case of an adjacent lane, get the adjacent x
         if (lane!=vehicle.lane) {
-            if (lane.right!=null && lane.right==vehicle.lane) {
+            if (lane.right!=null && lane.right==vehicle.lane)
                 x = vehicle.getAdjacentX(Model.latDirection.LEFT); // lane = left lane of vehicle
-            } else {
+            else
                 x = vehicle.getAdjacentX(Model.latDirection.RIGHT); // lane = right lane of vehicle
-            }
         }
         // Clear bookkeeping in case of new time step
         if (isNewTimeStepForAction("anticipation_speed")) {
@@ -649,9 +618,8 @@ public class Driver {
         double vCur = Double.POSITIVE_INFINITY;
         double vRight = Double.POSITIVE_INFINITY;
         // Calculate anticipation speed in current lane
-        if (!antInLane.containsKey(lane)) {
+        if (!antInLane.containsKey(lane))
             anticipatedSpeedFromLane(lane, x);
-        }
         vCur = antInLane.get(lane); // all in lane
         // Calculate anticipation speed in left lane
         if (lane.left!=null) {
@@ -713,23 +681,20 @@ public class Driver {
                  * a slow queue adjacent to an empty lane, where the anticipated
                  * speeds are then consequently low.
                  */
-                if (down.leftIndicator && !lane.isSameLane(vehicle.lane)) {
+                if (down.leftIndicator && !lane.isSameLane(vehicle.lane))
                     vLeft = Math.min(vLeft, v);
-                } else if (down.rightIndicator && !lane.isSameLane(vehicle.lane)) {
+                else if (down.rightIndicator && !lane.isSameLane(vehicle.lane))
                     vRight = Math.min(vRight, v);
-                }
             }
             // go to next vehicle
             down = down.down;
         }
         // store anticipated speeds
-        if (lane.right!=null) {
+        if (lane.right!=null)
             antFromLeft.put(lane.right, vRight); // this lane is the left lane of lane.right
-        }
         antInLane.put(lane, vCur);
-        if (lane.left!=null) {
+        if (lane.left!=null)
             antFromRight.put(lane.left, vLeft); // this lane is the right lane of lane.left
-        }
     }
 
     /**
@@ -771,22 +736,20 @@ public class Driver {
         double acc = 0;
         if (follower.getDriver()==this || (vehicle.lcProgress!=0 && follower==vehicle.lcVehicle)) {
             // reset stored accelerations each time step
-            if (isNewTimeStepForAction("calculate_acceleration")) {
+            if (isNewTimeStepForAction("calculate_acceleration"))
                 accelerations.clear();
-            }
-            if (!vehicle.model.isGenerating() && accelerations.containsKey(leader) && accelerations.get(leader).containsKey(label)) {
-                // get acceleration that has allready been calculated
-                acc = accelerations.get(leader).get(label);
-            } else if (vehicle.model.isGenerating()) {
+            if (!vehicle.model.isGenerating() && accelerations.containsKey(leader) && accelerations.get(leader).containsKey(label))
+                acc = accelerations.get(leader).get(label);	// get acceleration that has already been calculated
+            else if (vehicle.model.isGenerating()) {
                 // calculate and do not store acceleration as vehicle generation
                 // may just be testing the current location
                 acc = calculateAcceleration(leader);
             } else {
                 // calculate and store acceleration
                 acc = calculateAcceleration(leader);
-                if (accelerations.containsKey(leader)) {
+                if (accelerations.containsKey(leader))
                     accelerations.get(leader).put(label, acc); // may include 'null' as leader
-                } else {
+                else {
                     java.util.HashMap<java.lang.String, Double> submap =
                             new java.util.HashMap<java.lang.String, Double>();
                     submap.put(label, acc);
@@ -795,10 +758,9 @@ public class Driver {
              }
         } else {
             // acceleration from other vehicle, find correct driver
-            if (follower.getDriver()==null) {
+            if (follower.getDriver()==null)
                 throw new java.lang.RuntimeException("No driver found: "+follower.x+"@"+
                         follower.lane.id+" - "+leader.x+"@"+leader.lane.id+", vehicle was deleted.");
-            }
             acc = follower.getDriver().getAcceleration(follower, leader);
         }
         return acc;
@@ -889,9 +851,8 @@ public class Driver {
      * @return Desired velocity [m/s]
      */
     public double desiredVelocity() {
-        if (isNewTimeStepForAction("desired_velocity")) {
+        if (isNewTimeStepForAction("desired_velocity"))
             vDes = desiredVelocity(vehicle.lane);
-        }
         return vDes;
     }
     
@@ -918,11 +879,9 @@ public class Driver {
         // Reset acceleration
         a = aMin;
         // Notice RSUs in range
-        for (RSU rsu : vehicle.RSUsInRange) {
-            if (rsu.noticeable) {
+        for (RSU rsu : vehicle.RSUsInRange)
+            if (rsu.noticeable)
                 notice(rsu);
-            }
-        }
     }
 
     /**
@@ -974,9 +933,8 @@ public class Driver {
             if (lane!=null) {
                 // follow downstream vehicle
                 Movable down = lane.findVehicle(0, Model.longDirection.DOWN);
-                if (down!=null) {
+                if (down!=null)
                     lowerAcceleration(calculateAcceleration(down));
-                }
             }
         }
     }
@@ -998,24 +956,21 @@ public class Driver {
         }
         
         // Ignore further conflicts
-        if (ignoreFurtherConflicts) {
+        if (ignoreFurtherConflicts)
             return;
-        }
         
         // Queue lane change desire
         noticeIntersection(conflict);
         
         // Register conflict as one to keep clear if a later conflict forces a stop
         double sSelf = vehicle.getDistanceToRSU(conflict);
-        if (conflict.keepClear() && sSelf>conflict.length()) {
+        if (conflict.keepClear() && sSelf>conflict.length())
             keepClearConflicts.add(conflict);
-        }
         
         // Conflict is only valid with conflict vehicle
         Movable up = conflict.otherUp();
-        if (up==null) {
+        if (up==null)
             return;
-        }
         
         // Calculate and preallocate a few often used parameters
         double v0 = desiredVelocity();
@@ -1053,13 +1008,10 @@ public class Driver {
                                 conflict.otherRSU().lane.l, Model.longDirection.UP);
                         // Nullify if same vehicle (i.e. it was not partially past the conflict)
                         up = up2!=up ? up2 : null;
-                    } else {
+                    } else
                         up = up.up; // next upstream vehicle
-                    }
-                } else {
-                    // Vehicle upstream of self or not on the conflict, stop loop
-                    loop = false;
-                }
+                } else
+                    loop = false;	// Vehicle upstream of self or not on the conflict, stop loop
             }
 
             // Follow selected vehicle (or stop for merge)
@@ -1190,9 +1142,9 @@ public class Driver {
                         if (tte_o<ttc_c && up.v>0) {
                             boolean stop = false;
                             double acc = 0;
-                            if (Double.isInfinite(ttc_c)) {
+                            if (Double.isInfinite(ttc_c))
                                 stop = true;
-                            } else {
+                            else {
                                 // Solve using parabolic speed profile: s = v*t+.5*a*t^2
                                 acc = 2*(s-s0conflict-vehicle.v*ttc_c)/(ttc_c*ttc_c);
                                 // Time until v=0
@@ -1203,10 +1155,8 @@ public class Driver {
                                 // Need to come to a full stop in s as parabolic  
                                 // profile includes a negative speed part
                                 stopForConflict(conflict, false, false);
-                            } else {
-                                // Regular reduction of speed (not till zero)
-                                lowerAcceleration(acc);
-                            }
+                            } else
+                                lowerAcceleration(acc); // Regular reduction of speed (not till zero)
                         }
                         
                         // Register as being blocked if crossing vehicle or downstream
@@ -1217,7 +1167,6 @@ public class Driver {
                     }
                 }
             }
-            
         } else {
             
             // NO PRIORITY AT MERGE OR CROSSING
@@ -1228,13 +1177,11 @@ public class Driver {
             if (vehicle.down!=null) {
                 s = vehicle.down.getDistanceToRSU(conflict)+vehicle.l+s0+vehicle.down.l+dMerge;
                 // ttp_d is only of interest on conflicts that need to be kept clear
-                if (conflict.keepClear()) {
+                if (conflict.keepClear())
                     ttp_d = anticipateConflictMovement(s, vehicle.down.v, 0);
-                }
                 // ttp_d2 is only of interest at a crossing
-                if (conflict.isCrossing()) {
+                if (conflict.isCrossing())
                     ttp_d2 = anticipateConflictMovement(s, vehicle.down.v, -b);
-                }
             }
             
             // Derive time untill conflict can be passed if downstream vehicle
@@ -1253,13 +1200,9 @@ public class Driver {
             boolean gapOK = false;
             if (conflict.visibility()<sSelf) {
                 // If major road not visible, reject gap
-                
-            } else if (!up.getDriver().vehicle.route.canBeFollowedFrom(conflict.otherRSU().lane)) {
-                
-                // Crossing vehicle's route does not pass the conflict
-                gapOK = true;
-                
-            } else {
+            } else if (!up.getDriver().vehicle.route.canBeFollowedFrom(conflict.otherRSU().lane))                
+                gapOK = true;	// Crossing vehicle's route does not pass the conflict
+            else {
                 
                 // Add time for speed difference at merge, as simply clearing
                 // the conflict is not sufficient with a speed difference
@@ -1315,11 +1258,8 @@ public class Driver {
                 // Register as being blocked if downstream vehicle is 
                 // blocking and not moving and own speed is zero.
                 double ttc_c = anticipateConflictMovement(sOther-conflict.length(), up.v, 0);
-                if (conflict.isCrossing() && vehicle.v==0 && 
-                        (Double.isInfinite(ttp_d) || Double.isInfinite(ttc_c))) {
+                if (conflict.isCrossing() && vehicle.v==0 && (Double.isInfinite(ttp_d) || Double.isInfinite(ttc_c)))
                     conflictBlocked = true;
-                }
-                
             }
         }
     }
@@ -1337,28 +1277,19 @@ public class Driver {
      * @return Time to travel over a distance of <tt>s</tt> [s].
      */
     protected static double anticipateConflictMovement(double s, double v, double a) {
-        if (s<=0) {
-            // Distance is negative, e.g. has been covered already
-            return 0;
-        } else if (a==0) {
+        if (s<=0)
+            return 0;	// Distance is negative, e.g. has been covered already
+        else if (a==0) {
             // No acceleration
-            if (v>0) {
-                // Simple distance over speed
-                return s/v;
-            } else {
-                // Standing still
-                return Double.POSITIVE_INFINITY;
-            }
+            if (v>0)
+                return s/v;	// Simple distance over speed	
+            return Double.POSITIVE_INFINITY;	// Standing still
         } else {
             // Constant acceleration, use parabolic profile: s = v*t+.5*a*t^2
             double tmp = v*v+2*a*s;
-            if (tmp<0) {
-                // Sqrt of negative means distance will never be covered
-                return Double.POSITIVE_INFINITY;
-            } else {
-                // Finish parabolic method
-                return (Math.sqrt(tmp)-v)/a;
-            }
+            if (tmp<0)
+                return Double.POSITIVE_INFINITY; // Sqrt of negative means distance will never be covered
+            return (Math.sqrt(tmp)-v)/a;	// Finish parabolic method
         }
     }
     
@@ -1440,9 +1371,8 @@ public class Driver {
     public void noticeIntersection(RSU rsu) {
         
         // Clear bookkeeping in a new time step
-        if (!isNewTimeStepForAction("intersection_desire")) {
+        if (!isNewTimeStepForAction("intersection_desire"))
             return;
-        }
         
         // Set acceleration for intersection
         a = aInter;
@@ -1495,10 +1425,18 @@ public class Driver {
             double s = vehicle.getDistanceToRSU(trafficLight);
             double bTmp = b;
             b = bYellow;
+            if ((vehicle.lane.id == 26) || (vehicle.lane.id == 28) || (vehicle.lane.id == 29))
+            	System.out.format(Main.locale, "Vehicle %s notices trafficLight %s: longitudinal(%.2f m/s, %.2f m/s, %.2f m/s, %.2f m", vehicle.toString(), trafficLight.toString(), vehicle.v, vehicle.v, desiredVelocity(), s);
             double acc = longitudinal(vehicle.v, vehicle.v, desiredVelocity(), s);
+            if ((vehicle.lane.id == 26) || (vehicle.lane.id == 28) || (vehicle.lane.id == 29))
+            	System.out.format(Main.locale, " -> %.2f m/s/s bYellow is %.2f", acc, bYellow);
             if (acc>-bYellow) {
+                if ((vehicle.lane.id == 26) || (vehicle.lane.id == 28) || (vehicle.lane.id == 29))
+                	System.out.println(" slowing down for traffic light");
                 lowerAcceleration(acc);
-            }
+            } else
+                if ((vehicle.lane.id == 26) || (vehicle.lane.id == 28) || (vehicle.lane.id == 29))
+                	System.out.println(" NOT slowing down for traffic light");
             b = bTmp;
         }
     }
@@ -1536,14 +1474,26 @@ public class Driver {
     	return String.format("s0=%.2fm", s0);
     }
     
+    /**
+     * Retrieve the stopping distance for this Driver.
+     * @return Double; the stopping distance for this Driver
+     */
     public double getStoppingDistance_r() {
     	return s0;
     }
     
+    /**
+     * Retrieve the desire to change to the right adjacent {@link Lane} of this Driver
+     * @return Double; the desire to change to the right adjacent {@link Lane}
+     */
     public double getLaneChangeDesireRight_r() {
     	return dRight;
     }
     
+    /**
+     * Retrieve the desire to change to the left adjacent {@link Lane} of this Driver
+     * @return Double; the desire to change to the left adjacent {@link Lane}
+     */
     public double getLaneChangeDesireLeft_r() {
     	return dLeft;
     }

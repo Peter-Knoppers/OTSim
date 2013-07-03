@@ -367,7 +367,7 @@ public class Planar {
 	}
 	
 	// TODO: Move this function out of GeometryTools
-	// Things like "ActivityLocation" and "CrossSection" should not be known about this class
+	// Things like "ActivityLocation" and "CrossSection" should not be known about within this class
 	/**
 	 * Find the line/link that is nearest to a certain point
 	 * - first selects lines within a certain search distance
@@ -1022,6 +1022,7 @@ public class Planar {
 	 * the result may be malformed.
 	 * @param prevVertices ArrayList&lt;{@link Vertex}&gt;; the previous
 	 * polyline
+	 * @param curVertices ArrayList&lt;{@link Vertex}&gt;; the reference list
 	 * @param sameUp boolean; start at prevVertices
 	 * @param sameDown boolean; end at prevVertices
 	 * @return ArrayList&lt;{@link Vertex}&gt;; the new polyline
@@ -1032,9 +1033,8 @@ public class Planar {
     	Vertex prevV = null;
     	double distLaneTotal = 0.0;
     	for (Vertex v : prevVertices)  {
-    		if (prevV != null) {
+    		if (null != prevV)
     			distLaneTotal = distLaneTotal + v.distanceTo(prevV); 
-    		}
     		prevV = new Vertex(v);		
     	}
     	prevV = null;    	
@@ -1042,9 +1042,8 @@ public class Planar {
     	int i = 0;
     	for (Vertex v : prevVertices)  {
         	double weight = 0.0;
-    		if (prevV != null) {
+    		if (prevV != null)
     			distLane = distLane + v.distanceTo(prevV); 
-    		}
 			if (sameUp == true)
 				weight = (distLane / distLaneTotal); 
 			else if (sameDown == true)

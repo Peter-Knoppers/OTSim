@@ -81,16 +81,13 @@ public class Vehicle extends Movable {
      */
     public void move() {
     	// skip if moved
-    	if (moved >= lane.model.k)  {
+    	if (moved >= lane.model.k)
     		return;
-    	}
     	// move leaders first
-    	if (down!= null) {
+    	if (down!= null)
     		down.getDriver().vehicle.move();
-    	}
-    	if (lcVehicle != null && lcVehicle.down != null) {
+    	if (lcVehicle != null && lcVehicle.down != null)
     		lcVehicle.down.getDriver().vehicle.move();
-    	}
     	//tag as moved
     	moved  = lane.model.k;
         // lateral
@@ -170,9 +167,8 @@ public class Vehicle extends Movable {
             rsu = it.next();
             s = getDistanceToRSU(rsu) - dx;
             if (s<0) {
-                if (rsu.passable || rsu.noticeable) {
+                if (rsu.passable || rsu.noticeable)
                     rsu.pass(this);
-                }
                 it.remove();
             }
         }
@@ -249,8 +245,7 @@ public class Vehicle extends Movable {
             if (lcDirection==Model.latDirection.LEFT) {
                 xNew = getAdjacentX(Model.latDirection.LEFT);
                 xAdj = lcVehicle.lane.xAdj(lane.left);
-            }
-            else {
+            } else {
                 xNew = getAdjacentX(Model.latDirection.RIGHT);
                 xAdj = lcVehicle.lane.xAdj(lane.right);
             }
@@ -281,11 +276,10 @@ public class Vehicle extends Movable {
         lcVehicle = new LCVehicle(this);//
         model.addVehicle(lcVehicle);//
         Lane atLane;
-        if (lcDirection==Model.latDirection.LEFT) {
+        if (lcDirection==Model.latDirection.LEFT)
             atLane = lane.left;
-        } else {
+        else
             atLane = lane.right;
-        }
         double atX = getAdjacentX(lcDirection);
         lcVehicle.paste(atLane, atX);
     }
@@ -298,11 +292,10 @@ public class Vehicle extends Movable {
         lcVehicle.delete();
         Lane targetLane;
         double targetX = getAdjacentX(lcDirection);
-        if (lcDirection==Model.latDirection.LEFT) {
+        if (lcDirection==Model.latDirection.LEFT)
             targetLane = lane.left;
-        } else {
+        else
             targetLane = lane.right;
-        }
         cut();
         paste(targetLane, targetX);
         lcProgress = 0;
@@ -325,20 +318,20 @@ public class Vehicle extends Movable {
 
     /**
      * Initiates a lateral movement to the left.
-     * @param dy Initial speed of the lateral movement in 'amount of lane per time step'.
+     * @param newDY Initial speed of the lateral movement in 'amount of lane per time step'.
      */
-    public void changeLeft(double dy) {
+    public void changeLeft(double newDY) {
         lcDirection = Model.latDirection.LEFT;
-        this.dy = dy;
+        this.dy = newDY;
     }
 
     /**
      * Initiates a lateral movement to the right.
-     * @param dy Initial speed of the lateral movement in 'amount of lane per time step'.
+     * @param newDY Initial speed of the lateral movement in 'amount of lane per time step'.
      */
-    public void changeRight(double dy) {
+    public void changeRight(double newDY) {
         lcDirection = Model.latDirection.RIGHT;
-        this.dy = dy;
+        this.dy = newDY;
     }
 
     /**
@@ -352,15 +345,13 @@ public class Vehicle extends Movable {
             // interpolate between own and lcVehicle global X and Y
             globalX = coord.x*(1-lcProgress) + lcVehicle.globalX*lcProgress;
             globalY = coord.y*(1-lcProgress) + lcVehicle.globalY*lcProgress;
-        }
-        else {
+        } else {
             globalX = coord.x;
             globalY = coord.y;
         }
         setHeading();
-        if (lcVehicle!=null) {
+        if (lcVehicle!=null)
             lcVehicle.heading = heading;
-        }
     }
     
     /**
@@ -437,38 +428,74 @@ public class Vehicle extends Movable {
     	return String.format(Main.locale, "at (%.3f, %.3f), route %s", globalX, globalY, route.toString());
     }
     
+    /**
+     * Retrieve the length of this Vehicle
+     * @return String; the length of this Vehicle
+     */
     public String getLength_r() {
     	return String.format(Main.locale, "%.2f m", l);
     }
     
+    /**
+     * Retrieve the speed of this Vehicle
+     * @return String; the speed of this Vehicle
+     */
     public String getSpeed_r() {
     	return String.format(Main.locale, "%.2f km/h", v);
     }
     
+    /**
+     * Retrieve the acceleration of this Vehicle.
+     * @return String; the acceleration of this vehicle
+     */
     public String getAcceleration_r() {
     	return String.format(Main.locale, "%.2f m/s/s", a);
     }
     
+    /**
+     * Retrieve the maximum acceleration of this Vehicle
+     * @return String; the maximum acceleration of this Vehicle
+     */
     public String getMaximumDeceleration_r () {
     	return String.format(Main.locale, "%.2f m/s/s", aMin);
     }
     
+    /**
+     * Retrieve the leader of this Vehicle.
+     * @return Movable; the leader of this Vehicle
+     */
     public Movable getLeader_r() {
     	return down;
     }
     
+    /**
+     * Retrieve the follower of this Vehicle.
+     * @return Movable; the follower of this Vehicle
+     */
     public Movable getFollower_r() {
     	return up;
     }
     
+    /**
+     * Retrieve the {@link Driver} of this Vehicle.
+     * @return {@link Driver}; the Driver of this Vehicle 
+     */
     public Driver getDriver_r() {
     	return driver;
     }
     
+    /**
+     * Retrieve the maximum speed of this Vehicle.
+     * @return String; the maximum speed of this Vehicle
+     */
     public String getMaximumSpeed_r() {
     	return String.format(Main.locale, "%.2f km/h", vMax);
     }
     
+    /**
+     * Retrieve the list of {@link RSU RSUs} of this Vehicle.
+     * @return ArrayList&lt;{@link RSU}&gt;; the list of {@link RSU RSUs} of this Vehicle
+     */
     public java.util.ArrayList<RSU> getRSUsInRange_r() {
     	return RSUsInRange;
     }

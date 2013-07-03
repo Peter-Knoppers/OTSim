@@ -40,11 +40,10 @@ public class FCD {
         v = veh.v;
         a = veh.a;
         lane = veh.lane;
-        if (veh.lcDirection==Model.latDirection.LEFT) {
+        if (veh.lcDirection==Model.latDirection.LEFT)
             lcProgress = -veh.lcProgress; // [-1...0]
-        } else {
+        else
             lcProgress = veh.lcProgress; // [0...1]
-        }
     }
     
     /**
@@ -67,9 +66,8 @@ public class FCD {
      * @return Primitive representation of non-primitive field.
      */
     public Object asPrimitive(java.lang.String field, Object obj) {
-        if (field.equals("lane")) {
+        if (field.equals("lane"))
             return ((Lane) obj).id;
-        }
         return null;
     }
 }

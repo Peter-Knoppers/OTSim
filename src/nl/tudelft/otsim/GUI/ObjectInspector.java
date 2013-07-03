@@ -79,7 +79,7 @@ public class ObjectInspector extends JFrame implements TreeSelectionListener, Fo
 	
 	private InspectorTreeNode parseObject(String callName, Object object) {
     	java.lang.Class<?> c = object.getClass();
-	    System.out.format("Adding object: class is %s%n", c.getCanonicalName());
+	    //System.out.format("Adding object: class is %s%n", c.getCanonicalName());
 	    String caption = c.getCanonicalName();
 	    int index = caption.lastIndexOf(".");
 	    if (index >= 0)
@@ -100,7 +100,7 @@ public class ObjectInspector extends JFrame implements TreeSelectionListener, Fo
     	setMinimumSize(new Dimension(500, 800));
     	setTitle("Object inspector");
     	setLayout(new BorderLayout());
-    	System.out.println("ObjectInspector: calling parseObject for root of tree");
+    	//System.out.println("ObjectInspector: calling parseObject for root of tree");
     	root = parseObject(null, object);
     	root.resultObject = object;
     	//System.out.println("ObjectInspector: root node created");

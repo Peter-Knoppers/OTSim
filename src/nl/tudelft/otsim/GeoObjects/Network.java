@@ -1692,7 +1692,7 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 		String result = "";
 		for (TrafficLightController tlc : trafficLightControllers.values())
 			result += String.format(Locale.US, "TrafficLightController\t%s\t%s\t%s\t%s\n",
-					tlc.getName_r(), tlc.getLights(), tlc.getDetectors(), tlc.getControlProgramURL_r());
+					tlc.getName_r(), tlc.getLights(), tlc.getDetectors(), null == tlc.getControlProgramURL_r() ? "" : tlc.getControlProgramURL_r());
 		return result;
 	}
 

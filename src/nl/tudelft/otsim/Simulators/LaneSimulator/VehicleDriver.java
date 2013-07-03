@@ -61,9 +61,8 @@ public class VehicleDriver {
         // set any stochastic parameters
         setStochasticParameters(veh);
         // initialize OBU
-        if (veh.isEquipped()) {
+        if (veh.isEquipped())
             veh.OBU.init();
-        }
         return veh;
     }
 
@@ -117,23 +116,22 @@ public class VehicleDriver {
             for (int i=0; i<fields.length; i++) {
                 if (fields[i].getType().isPrimitive()) {
                     try {
-                        if (fields[i].get(defaultVehicle.OBU) instanceof Double) {
+                        if (fields[i].get(defaultVehicle.OBU) instanceof Double)
                             fields[i].setDouble(veh.OBU, fields[i].getDouble(defaultVehicle.OBU));
-                        } else if (fields[i].get(defaultVehicle.OBU) instanceof Integer) {
+                        else if (fields[i].get(defaultVehicle.OBU) instanceof Integer)
                             fields[i].setInt(veh.OBU, fields[i].getInt(defaultVehicle.OBU));
-                        } else if (fields[i].get(defaultVehicle.OBU) instanceof Boolean) {
+                        else if (fields[i].get(defaultVehicle.OBU) instanceof Boolean)
                             fields[i].setBoolean(veh.OBU, fields[i].getBoolean(defaultVehicle.OBU));
-                        } else if (fields[i].get(defaultVehicle.OBU) instanceof Character) {
+                        else if (fields[i].get(defaultVehicle.OBU) instanceof Character)
                             fields[i].setChar(veh.OBU, fields[i].getChar(defaultVehicle.OBU));
-                        } else if (fields[i].get(defaultVehicle.OBU) instanceof Long) {
+                        else if (fields[i].get(defaultVehicle.OBU) instanceof Long)
                             fields[i].setLong(veh.OBU, fields[i].getLong(defaultVehicle.OBU));
-                        } else if (fields[i].get(defaultVehicle.OBU) instanceof Float) {
+                        else if (fields[i].get(defaultVehicle.OBU) instanceof Float)
                             fields[i].setFloat(veh.OBU, fields[i].getFloat(defaultVehicle.OBU));
-                        } else if (fields[i].get(defaultVehicle.OBU) instanceof Byte) {
+                        else if (fields[i].get(defaultVehicle.OBU) instanceof Byte)
                             fields[i].setByte(veh.OBU, fields[i].getByte(defaultVehicle.OBU));
-                        } else if (fields[i].get(defaultVehicle.OBU) instanceof Short) {
+                        else if (fields[i].get(defaultVehicle.OBU) instanceof Short)
                             fields[i].setShort(veh.OBU, fields[i].getShort(defaultVehicle.OBU));
-                        }
                     } catch (IllegalAccessException e) {
                         
                     }
@@ -146,23 +144,22 @@ public class VehicleDriver {
         for (int i=0; i<fields.length; i++) {
             if (fields[i].getType().isPrimitive()) {
                 try {
-                    if (fields[i].get(defaultVehicle.driver) instanceof Double) {
+                    if (fields[i].get(defaultVehicle.driver) instanceof Double)
                         fields[i].setDouble(veh.driver, fields[i].getDouble(defaultVehicle.driver));
-                    } else if (fields[i].get(defaultVehicle.driver) instanceof Integer) {
+                    else if (fields[i].get(defaultVehicle.driver) instanceof Integer)
                         fields[i].setInt(veh.driver, fields[i].getInt(defaultVehicle.driver));
-                    } else if (fields[i].get(defaultVehicle.driver) instanceof Boolean) {
+                    else if (fields[i].get(defaultVehicle.driver) instanceof Boolean)
                         fields[i].setBoolean(veh.driver, fields[i].getBoolean(defaultVehicle.driver));
-                    } else if (fields[i].get(defaultVehicle.driver) instanceof Character) {
+                    else if (fields[i].get(defaultVehicle.driver) instanceof Character)
                         fields[i].setChar(veh.driver, fields[i].getChar(defaultVehicle.driver));
-                    } else if (fields[i].get(defaultVehicle.driver) instanceof Long) {
+                    else if (fields[i].get(defaultVehicle.driver) instanceof Long)
                         fields[i].setLong(veh.driver, fields[i].getLong(defaultVehicle.driver));
-                    } else if (fields[i].get(defaultVehicle.driver) instanceof Float) {
+                    else if (fields[i].get(defaultVehicle.driver) instanceof Float)
                         fields[i].setFloat(veh.driver, fields[i].getFloat(defaultVehicle.driver));
-                    } else if (fields[i].get(defaultVehicle.driver) instanceof Byte) {
+                    else if (fields[i].get(defaultVehicle.driver) instanceof Byte)
                         fields[i].setByte(veh.driver, fields[i].getByte(defaultVehicle.driver));
-                    } else if (fields[i].get(defaultVehicle.driver) instanceof Short) {
+                    else if (fields[i].get(defaultVehicle.driver) instanceof Short)
                         fields[i].setShort(veh.driver, fields[i].getShort(defaultVehicle.driver));
-                    }
                 } catch (IllegalAccessException e) {
                     
                 }
@@ -244,13 +241,12 @@ public class VehicleDriver {
      */
     public void addStochasticVehicleParameter(java.lang.String param,
             distribution distr, double mean, double std) {
-        if (distr==distribution.GAUSSIAN) {
+        if (distr==distribution.GAUSSIAN)
             stochasticVehicleParameters.put(param, new gaussian(mean, std));
-        } else if (distr==distribution.EXPONENTIAL) {
+        else if (distr==distribution.EXPONENTIAL)
             stochasticVehicleParameters.put(param, new exponential(mean));
-        } else if (distr==distribution.LOGNORMAL) {
+        else if (distr==distribution.LOGNORMAL)
             stochasticVehicleParameters.put(param, new lognormal(mean, std));
-        }
     }
     
     /**
@@ -262,13 +258,12 @@ public class VehicleDriver {
      */
     public void addStochasticDriverParameter(java.lang.String param,
             distribution distr, double mean, double std) {
-        if (distr==distribution.GAUSSIAN) {
+        if (distr==distribution.GAUSSIAN)
             stochasticDriverParameters.put(param, new gaussian(mean, std));
-        } else if (distr==distribution.EXPONENTIAL) {
+        else if (distr==distribution.EXPONENTIAL)
             stochasticDriverParameters.put(param, new exponential(mean));
-        } else if (distr==distribution.LOGNORMAL) {
+        else if (distr==distribution.LOGNORMAL)
             stochasticDriverParameters.put(param, new lognormal(mean, std));
-        }
     }
     
     /** Enumeration of possible parameter distributions. */

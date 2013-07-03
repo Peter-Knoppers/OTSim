@@ -31,6 +31,7 @@ public class TrafficLight extends RSU implements SimulatedTrafficLight {
         this.name = name;
         this.outline = outline;
         System.out.println("Created traffic light " + count);
+        noticeable = true;
     }
     
     /** Empty, needs to be implemented. */
@@ -42,7 +43,10 @@ public class TrafficLight extends RSU implements SimulatedTrafficLight {
      * @param vehicle Passing vehicle.
      */
     @Override
-	public void pass(Vehicle vehicle) {}
+	public void pass(Vehicle vehicle) {
+    	if (isRed())
+    		System.err.println("Vehicle " + vehicle.toString() + " drives through red trafficlight");
+    }
 
     /** Empty, needs to be implemented. */
     @Override
@@ -154,9 +158,8 @@ public class TrafficLight extends RSU implements SimulatedTrafficLight {
             if (tPhase<0 || tPhase>tGreen+tYellow+tRed) {
                 throw new RuntimeException("Phase time "+tPhase+" outside of phase duration.");
             }
-            if (tGreen<0 || tYellow<0 || tRed<0) {
+            if (tGreen<0 || tYellow<0 || tRed<0)
                 throw new RuntimeException("Negative time defined for traffic light.");
-            }
             // Set phase
             if (tPhase<=tGreen) {
                 setGreen();
@@ -256,7 +259,7 @@ public class TrafficLight extends RSU implements SimulatedTrafficLight {
 	
 	@Override
 	public String toString() {
-		System.out.println("jTrafficLicht " + count + "," + mycount + " toString returns: " + name + "/" + getColor_r());
-		return name + "/" + getColor_r();
+		//System.out.println("jTrafficLicht " + count + "," + mycount + " toString returns: " + name + "/" + getColor_r());
+		return name + "/" + getColor_r() + super.toString();
 	}
 }

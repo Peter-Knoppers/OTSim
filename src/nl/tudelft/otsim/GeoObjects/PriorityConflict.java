@@ -4,11 +4,8 @@ import java.awt.Color;
 import java.awt.Polygon;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;
-import java.awt.geom.Point2D;
-import java.util.ArrayList;
 
 import nl.tudelft.otsim.GUI.GraphicsPanel;
-import nl.tudelft.otsim.Utilities.Reversed;
 
 
 /**

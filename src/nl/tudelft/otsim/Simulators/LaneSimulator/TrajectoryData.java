@@ -14,9 +14,8 @@ public class TrajectoryData implements java.io.Serializable {
      */
     public TrajectoryData(Trajectory trajectory) {
         // Get FCD fields as array
-        for (java.lang.reflect.Field field : trajectory.getFCDclass().getFields()) {
+        for (java.lang.reflect.Field field : trajectory.getFCDclass().getFields())
             data.put(field.getName(), trajectory.getAsPrimitive(field));
-        }
         // Add scalar fields
         trajectory.addScalars(this);
     }
@@ -33,10 +32,10 @@ public class TrajectoryData implements java.io.Serializable {
     /**
      * Adds an object in the data memory. The data should be serializable.
      * @param field Name of data field.
-     * @param data Data to add.
+     * @param additionalData Data to add.
      */
-    public void put(String field, Object data) {
-        this.data.put(field, data);
+    public void put(String field, Object additionalData) {
+        this.data.put(field, additionalData);
     }
     
     /**
