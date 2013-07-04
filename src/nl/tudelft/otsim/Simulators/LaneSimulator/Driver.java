@@ -1369,7 +1369,6 @@ public class Driver {
      * @param rsu RSU that triggers intersection lane change desire.
      */
     public void noticeIntersection(RSU rsu) {
-        
         // Clear bookkeeping in a new time step
         if (!isNewTimeStepForAction("intersection_desire"))
             return;
@@ -1419,7 +1418,7 @@ public class Driver {
         noticeIntersection(trafficLight);
         // Ignore green
         if (!trafficLight.isGreen()) {
-            // Stop for yellow (and red) using a deceleration of bYellow. This 
+             // Stop for yellow (and red) using a deceleration of bYellow. This 
             // should stop vehicles or let them pass the yellow light before it 
             // turns red.
             double s = vehicle.getDistanceToRSU(trafficLight);

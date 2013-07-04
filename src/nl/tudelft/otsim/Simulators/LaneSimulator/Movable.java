@@ -278,7 +278,7 @@ public abstract class Movable  {
         // The conflict should deal with the situation.
         if (leader==down && leader.lane.upMerge!=null && 
                 leader.lane.upMerge!=lane.upMerge &&
-                !leader.lane.upMerge.mergeOrigin.isSameLane(lane) && 
+                ((null == leader.lane.upMerge.mergeOrigin) || !leader.lane.upMerge.mergeOrigin.isSameLane(lane)) && 
                 leader.lane.upMerge.xAdj(leader.lane)+leader.x<leader.l) {
             return Double.POSITIVE_INFINITY;
         }
