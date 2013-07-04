@@ -1426,20 +1426,21 @@ public class Driver {
             double tTmp = T;
             b = bYellow;
             T = Tmax;
-            if (((vehicle.lane.id == 30)) && (null == vehicle.down)) {
-            	System.out.format(Main.locale, "Vehicle %s currently acc-/decelerates at %.2f m/s/s\r\n",  vehicle.toString(), vehicle.a);
-            	System.out.format(Main.locale, "    and notices trafficLight %s: longitudinal(%.2f m/s, %.2f m/s, %.2f m/s, %.2f m", trafficLight.toString(), vehicle.v, vehicle.v, desiredVelocity(), s);
-            }
+            //if (((vehicle.lane.id == 30)) && (null == vehicle.down)) {
+            //	System.out.format(Main.locale, "Vehicle %s currently acc-/decelerates at %.2f m/s/s\r\n",  vehicle.toString(), vehicle.a);
+            //	System.out.format(Main.locale, "    and notices trafficLight %s: longitudinal(%.2f m/s, %.2f m/s, %.2f m/s, %.2f m", trafficLight.toString(), vehicle.v, vehicle.v, desiredVelocity(), s);
+            //}
             double acc = longitudinal(vehicle.v, vehicle.v, desiredVelocity(), s);
-            if (((vehicle.lane.id == 30)) && (null == vehicle.down))
-            	System.out.format(Main.locale, " -> %.2f m/s/s bYellow is %.2f", acc, bYellow);
+            //if (((vehicle.lane.id == 30)) && (null == vehicle.down))
+            //	System.out.format(Main.locale, " -> %.2f m/s/s bYellow is %.2f", acc, bYellow);
             if (acc>-bYellow) {
-                if (((vehicle.lane.id == 30)) && (null == vehicle.down))
-                	System.out.println(" slowing down for traffic light");
+                //if (((vehicle.lane.id == 30)) && (null == vehicle.down))
+                //	System.out.println(" slowing down for traffic light");
                 lowerAcceleration(acc);
-            } else
-                if (((vehicle.lane.id == 30)) && (null == vehicle.down))
-                	System.out.println(" NOT slowing down for traffic light");
+            } 
+            //else
+                //if (((vehicle.lane.id == 30)) && (null == vehicle.down))
+                //	System.out.println(" NOT slowing down for traffic light");
             b = bTmp;
             T = tTmp;
         }
