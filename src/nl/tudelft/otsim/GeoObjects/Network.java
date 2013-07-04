@@ -58,7 +58,7 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 	private HashMap<String, Link> links = new HashMap<String, Link>();
 	private HashMap<Integer, ActivityLocation> activityLocationList = new HashMap<Integer, ActivityLocation>();
 	private HashMap<Integer, PolyZone> polyZoneList = new HashMap<Integer,PolyZone>();
-	private HashMap<String, TrafficLightController> trafficLightControllers = new HashMap<String, TrafficLightController> ();
+	//private HashMap<String, TrafficLightController> trafficLightControllers = new HashMap<String, TrafficLightController> ();
 	private List<CrossSectionElementTypology> crossSectionElementTypologyList = new ArrayList<CrossSectionElementTypology>();
 	private List<RoadMarkerAlongTemplate> roadMarkerAlongTemplates = new ArrayList<RoadMarkerAlongTemplate>();
 	private boolean dirty = false;
@@ -150,12 +150,14 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 				throw new Exception("Microzone with id " + newActivityLocation.getActivityLocationID_r() + " already defined");
 			activityLocationList.put(newActivityLocation.getActivityLocationID_r(), newActivityLocation);
 		}
+		/* TrafficLightControllers are now embedded in a Node.
 		for (int index = 0; index < networkRoot.size(TrafficLightController.XMLTAG); index++) {
 			TrafficLightController newTLC = new TrafficLightController(this, networkRoot.getSubNode(TrafficLightController.XMLTAG, index));
 			if (null != trafficLightControllers.get(newTLC.getName_r()))
 				throw new Exception("TrafficLightController with name " + newTLC.getName_r() + " already defined");
 			trafficLightControllers.put(newTLC.getName_r(), newTLC);
 		}
+		*/
 		/*
 		for (String key : networkRoot.getKeys()) {
 			else if (key.equals(MicroZone.XMLTAG))
@@ -168,6 +170,8 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 		*/
 		dirty = true;
 		rebuild();
+		for (TrafficLightController tlc : trafficLightControllerList())
+			tlc.fix();
 		modified = false;
 	}
 
@@ -213,9 +217,11 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 			if (! rmat.writeXML(staXWriter))
 				return false;
 		// Write the TrafficLightControllers
+		/*
 		for (TrafficLightController tlc : trafficLightControllers.values())
 			if (! tlc.writeXML(staXWriter))
 				return false;
+		*/
 		if (! staXWriter.writeNodeEnd(XMLTAG))
 			return false;
 		// TODO write PolyZones
@@ -811,9 +817,10 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 				fixCSEVertices();				
 				// Still unused: calculate link length
 				fixLinkLengths();
-				
+				/*
 				for (TrafficLightController tlc : trafficLightControllers.values())
 					tlc.fixClients();
+				*/
 			} catch (Exception e) {
 				System.err.println("Network rebuild failed");
 				e.printStackTrace();
@@ -1611,17 +1618,26 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 	 * this Network
 	 */
 	public TrafficLightController lookupTrafficLightController (String id) {
-		return trafficLightControllers.get(id);
+		for (TrafficLightController tlc : trafficLightControllerList())
+			if (tlc.getName_r().equals(id))
+				return tlc;
+		return null;
 	}
 	
 	/**
-	 * Retrieve the set of the names of all {@link TrafficLightController 
+	 * Retrieve the set of all {@link TrafficLightController 
 	 * Controllers} in this Network
-	 * @return Set&lt;String&gt;; the set of names of all 
+	 * @return ArrayList&lt;{@link TrafficLightController}&gt;; the set of names of all 
 	 * {@link TrafficLightController TrafficLightControllers} in this Network
 	 */
-	public Set<String> trafficControllerList () {
-		return trafficLightControllers.keySet();
+	public ArrayList<TrafficLightController> trafficLightControllerList () {
+		ArrayList<TrafficLightController> result = new ArrayList<TrafficLightController>();
+		for (Node node : nodes.values()) {
+			TrafficLightController tlc = node.getTrafficLightController();
+			if (null != tlc)
+				result.add(tlc);
+		}
+		return result;
 	}
 
 	/**
@@ -1631,6 +1647,7 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 	 * @return {@link TrafficLightController}; the newly created
 	 * TrafficLightController.
 	 */
+	/*
 	public TrafficLightController addTrafficLightController() {
 		String prefix = "TLC_";
 		int rank = 1;
@@ -1639,7 +1656,7 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 		TrafficLightController result = new TrafficLightController(this, prefix + rank);
 		trafficLightControllers.put(result.getName_r(), result);
 		return result;
-	}
+	}*/
 
 	/**
 	 * Create a text description of all {@link TrafficLight TrafficLights} in
@@ -1690,7 +1707,7 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 	 */
 	public String exportTrafficLightControllers() {
 		String result = "";
-		for (TrafficLightController tlc : trafficLightControllers.values())
+		for (TrafficLightController tlc : trafficLightControllerList())
 			result += String.format(Locale.US, "TrafficLightController\t%s\t%s\t%s\t%s\n",
 					tlc.getName_r(), tlc.getLights(), tlc.getDetectors(), null == tlc.getControlProgramURL_r() ? "" : tlc.getControlProgramURL_r());
 		return result;

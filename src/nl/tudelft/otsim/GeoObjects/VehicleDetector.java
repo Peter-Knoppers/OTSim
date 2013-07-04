@@ -37,10 +37,8 @@ public class VehicleDetector extends CrossSectionObject {
 	/** Label of width in XML representation of a VehicleDetector */
 	private static final String XML_WIDTH = "width";
 	
-	private static final String ADD_CONTROLLER = "Create new traffic light controller";
-	
 	private String ID;
-	private TrafficLightController trafficLightController;
+	private Node node;
 
 	/**
 	 * Create a new VehicleDetector
@@ -163,9 +161,12 @@ public class VehicleDetector extends CrossSectionObject {
 				if (proposedValue.equals(originalValue))
 					return true;	// current name is OK
 				// Anything else must be unique among the TrafficLights of the TrafficLightController
-				if (null == trafficLightController)
+				if (null == node)
 					return true;	// no TrafficLightController; no conflict
-				return trafficLightController.lookupDetector(proposedValue) == null;
+				TrafficLightController tc = node.getTrafficLightController();
+				if (null == tc)
+					return true;
+				return tc.lookupDetector(proposedValue) == null;
 			}
 		});
 	}
@@ -176,8 +177,9 @@ public class VehicleDetector extends CrossSectionObject {
 	 * @return ArrayList&lt;String&gt;; the items for the menu
 	 */
 	public ArrayList<String> itemizeTrafficLightController_i() {
-		ArrayList<String> result = new ArrayList<String> (crossSectionElement.getCrossSection().getLink().network.trafficControllerList());
-		result.add(0, ADD_CONTROLLER);
+		ArrayList<String> result = new ArrayList<String>();
+		for (TrafficLightController tlc : crossSectionElement.getCrossSection().getLink().network.trafficLightControllerList())
+			result.add(tlc.getName_r());
 		return result;
 	}
 	
@@ -190,15 +192,22 @@ public class VehicleDetector extends CrossSectionObject {
 		return "Select or create a traffic light controller for this detector";
 	}
 	
+	private TrafficLightController getTrafficLightController() {
+		if (null == node)
+			return null;
+		return node.getTrafficLightController();
+	}
+	
 	/**
 	 * Return the {@link TrafficLightController} associated with this VehicleDetector.
 	 * @return {@link TrafficLightController}; the controller that operates 
 	 * this VehicleDetector, or null if no TrafficLightController has been set
 	 */
 	public Object getTrafficLightController_r() {
-		if (null == trafficLightController)
+		TrafficLightController tc = getTrafficLightController();
+		if (null == tc)
 			return "None; click to select or create a traffic light controller";
-		return trafficLightController;
+		return tc;
 	}
 	
 	/**
@@ -209,18 +218,16 @@ public class VehicleDetector extends CrossSectionObject {
 	 * {@link TrafficLightController} or the string ADD_CONTROLLER
 	 */
 	public void setTrafficLightController_w(Object object) {
-		if (null != trafficLightController)
-			trafficLightController.deleteDetector(this);	// delete current association
+		TrafficLightController tc = getTrafficLightController();
+		if (null != tc)
+			tc.deleteDetector(this);	// delete current association
 		if (object instanceof String) {
 			String tlcName = (String) object;
-			if (tlcName.equals(ADD_CONTROLLER))	// create a new TrafficLightController
-				trafficLightController = crossSectionElement.getCrossSection().getLink().network.addTrafficLightController();
-			else	// lookup an existing TrafficLightController
-				trafficLightController = crossSectionElement.getCrossSection().getLink().network.lookupTrafficLightController(tlcName);
+			tc = crossSectionElement.getCrossSection().getLink().network.lookupTrafficLightController(tlcName);
 		} else if (object instanceof TrafficLightController)
-			trafficLightController = (TrafficLightController) object;
-		if (null != trafficLightController)
-			trafficLightController.addDetector(this);	// associate with the (new) TrafficLightController
+			tc = (TrafficLightController) object;
+		if (null != tc)
+			tc.addDetector(this);	// associate with the (new) TrafficLightController
 	}
 	
 	/**

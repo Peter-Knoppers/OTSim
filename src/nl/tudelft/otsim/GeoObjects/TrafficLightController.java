@@ -1,5 +1,6 @@
 package nl.tudelft.otsim.GeoObjects;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import nl.tudelft.otsim.FileIO.ParsedNode;
@@ -16,7 +17,7 @@ import nl.tudelft.otsim.GUI.WED;
  */
 public class TrafficLightController implements XML_IO {
 	/** Tag for a TrafficLightController in an XML file */
-	public static String XMLTAG = "TrafficLightController";
+	public static String XMLTAG = "trafficLightController";
 	private static String XML_NAME = "ID";
 	private static String XML_TRAFFICLIGHT = "Light";
 	private static String XML_TRAFFICDETECTOR = "Detector";
@@ -24,6 +25,8 @@ public class TrafficLightController implements XML_IO {
 	
 	private Map<String, TrafficLight> trafficLights = new HashMap<String, TrafficLight> ();
 	private Map<String, VehicleDetector> vehicleDetectors = new HashMap<String, VehicleDetector> ();
+	private ArrayList<String> detectorNames;
+	private ArrayList<String> trafficLightNames;
 	private String name = null;
 	String controlProgramURL = null;
 	final Network network;
@@ -46,27 +49,17 @@ public class TrafficLightController implements XML_IO {
 	 */
 	public TrafficLightController (Network network, ParsedNode pn) throws Exception {
 		this.network = network;
+		trafficLightNames = new ArrayList<String>();
+		detectorNames = new ArrayList<String>();
 		for (String fieldName : pn.getKeys()) {
 			String value = pn.getSubNode(fieldName, 0).getValue();
-			if (fieldName.equals(XML_TRAFFICLIGHT)) {
-				for (int index = 0; index < pn.size(XML_TRAFFICLIGHT); index++) {
-					String trafficLightName = pn.getSubNode(XML_TRAFFICLIGHT, index).getValue();
-					TrafficLight tl = network.lookupTrafficLight(trafficLightName);
-					if (null == tl)
-						WED.showProblem(WED.ENVIRONMENTERROR, "No traffic light with ID %s found", value);
-					else
-						tl.setTrafficLightController_w(this);
-				}
-			} else if (fieldName.equals(XML_TRAFFICDETECTOR)) {
-				for (int index = 0; index < pn.size(XML_TRAFFICDETECTOR); index++) {
-					String detectorName = pn.getSubNode(XML_TRAFFICDETECTOR, index).getValue();
-					VehicleDetector vd = network.lookupVehicleDetector(detectorName);
-					if (null == vd)
-						WED.showProblem(WED.ENVIRONMENTERROR, "No vehicle detector with ID %s found", value);
-					else
-						vd.setTrafficLightController_w(this);
-				}
-			} else if (fieldName.equals(XML_CONTROL_URL))
+			if (fieldName.equals(XML_TRAFFICLIGHT))
+				for (int index = 0; index < pn.size(XML_TRAFFICLIGHT); index++)
+					trafficLightNames.add(pn.getSubNode(XML_TRAFFICLIGHT, index).getValue());
+			else if (fieldName.equals(XML_TRAFFICDETECTOR))
+				for (int index = 0; index < pn.size(XML_TRAFFICDETECTOR); index++)
+					detectorNames.add(pn.getSubNode(XML_TRAFFICDETECTOR, index).getValue());
+			else if (fieldName.equals(XML_CONTROL_URL))
 				controlProgramURL = value;
 			else if (fieldName.equals(XML_NAME))
 				name = value;
@@ -77,6 +70,31 @@ public class TrafficLightController implements XML_IO {
 		//	throw new Exception("No " + XML_CONTROL_URL + " defined for TrafficLightController at " + pn.lineNumber + ", " + pn.columnNumber);
 		if (null == name)
 			throw new Exception("No " + XML_NAME + " defined for TrafficLightController at " + pn.lineNumber + ", " + pn.columnNumber);
+	}
+	
+	/**
+	 * Link this TrafficLightController with its 
+	 * {@link VehicleDetector VehicleDetectors} and 
+	 * {@link TrafficLight TrafficLights}. 
+	 * @throws Exception
+	 */
+	public void fix() throws Exception {
+		if (null != trafficLightNames) {
+			for (String trafficLightName : trafficLightNames) {
+				TrafficLight tl = network.lookupTrafficLight(trafficLightName);
+				if (null == tl)
+					throw new Exception("Undefined traffic light name " + trafficLightName + " for TrafficLightController " + trafficLightName);
+				tl.setTrafficLightController_w(this);
+			}
+			for (String detectorName : detectorNames) {
+				VehicleDetector vd = network.lookupVehicleDetector(detectorName);
+				if (null == vd)
+					throw new Exception("Undefined vehicle detector name " + detectorName + " for TrafficLightController " + detectorName);
+				vd.setTrafficLightController_w(this);
+			}
+			trafficLightNames = null;
+			detectorNames = null;
+		}
 	}
 	
 	private boolean writeDetectors (StaXWriter staXWriter) {
@@ -293,6 +311,19 @@ public class TrafficLightController implements XML_IO {
 			result += trafficLightName;
 		}
 		return result;
+	}
+	
+	/**
+	 * Disassociate all {@link VehicleDetector VehicleDetectoes} and 
+	 * {@link TrafficLight TrafficLights} from this TrafficLightController.
+	 */
+	public void deleteAllLightsAndDetectors() {
+		Object objects[] = vehicleDetectors.values().toArray();
+		for (Object vd : objects)
+			((VehicleDetector) vd).setTrafficLightController_w(null);
+		objects = trafficLights.values().toArray();
+		for (Object tl : objects)
+			((TrafficLight) tl).setTrafficLightController_w(null);
 	}
 
 }
