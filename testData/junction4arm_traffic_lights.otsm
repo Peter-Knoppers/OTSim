@@ -16,11 +16,11 @@
       <Z>0.0</Z>
       <trafficLightController>
         <ID>TLC_1</ID>
-        <ControlURL>d:/cppb/trafcod/trafcod.exe d:/cppb/trafcod/4Arm/4Arm.tfc sumo://localhost:6789</ControlURL>
+        <ControlURL>d:/cppb/trafcod/trafcod.exe d:/cppb/trafcod/4Arm/4Arm.tfc sumo://localhost:6789</ControlURL> 
         <Detector>VD_1051</Detector>
         <Detector>VD_1052</Detector>
-        <Detector>VD_1053</Detector>
         <Detector>VD_1083</Detector>
+        <Detector>VD_1053</Detector>
         <Detector>VD_1054</Detector>
         <Detector>VD_1111</Detector>
         <Detector>VD_1112</Detector>
@@ -43,15 +43,15 @@
     <node>
       <name>drie</name>
       <ID>3</ID>
-      <X>110.0</X>
-      <Y>0.0</Y>
+      <X>132.19989493039137</X>
+      <Y>158.92237982663517</Y>
       <Z>0.0</Z>
     </node>
     <node>
       <name>vier</name>
       <ID>4</ID>
-      <X>50.0</X>
-      <Y>-200.0</Y>
+      <X>-37.07249802994489</X>
+      <Y>-375.05516154452334</Y>
       <Z>0.0</Z>
     </node>
     <node>
@@ -144,7 +144,7 @@
       <name>drie_1_3</name>
       <fromNode>1</fromNode>
       <toNode>3</toNode>
-      <distance>100.49875621120891</distance>
+      <distance>260.916906329614</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -585,7 +585,7 @@
       <name>twee_3_1</name>
       <fromNode>3</fromNode>
       <toNode>1</toNode>
-      <distance>100.49875621120891</distance>
+      <distance>260.916906329614</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -639,21 +639,28 @@
             <lateralCenter>-5.0</lateralCenter>
             <width>3.0</width>
             <length>1.0</length>
-            <longitudinalPosition>22.0</longitudinalPosition>
+            <longitudinalPosition>180.0</longitudinalPosition>
           </vehicleDetector>
           <vehicleDetector>
             <ID>VD_1114</ID>
-            <lateralCenter>-3.0</lateralCenter>
+            <lateralCenter>-4.0</lateralCenter>
             <width>3.0</width>
             <length>10.0</length>
-            <longitudinalPosition>0.0</longitudinalPosition>
+            <longitudinalPosition>150.0</longitudinalPosition>
+          </vehicleDetector>
+          <vehicleDetector>
+            <ID>VD_1115</ID>
+            <lateralCenter>0.0</lateralCenter>
+            <width>3.0</width>
+            <length>10.0</length>
+            <longitudinalPosition>150.0</longitudinalPosition>
           </vehicleDetector>
           <vehicleDetector>
             <ID>VD_1112</ID>
             <lateralCenter>0.0</lateralCenter>
             <width>3.0</width>
             <length>1.0</length>
-            <longitudinalPosition>22.0</longitudinalPosition>
+            <longitudinalPosition>180.0</longitudinalPosition>
           </vehicleDetector>
           <trafficLight>
             <ID>TL_11</ID>
@@ -667,25 +674,18 @@
             <lateralPosition>0.2</lateralPosition>
           </roadMarkerAlong>
           <vehicleDetector>
-            <ID>VD_1115</ID>
-            <lateralCenter>1.0</lateralCenter>
-            <width>3.0</width>
-            <length>10.0</length>
-            <longitudinalPosition>0.0</longitudinalPosition>
-          </vehicleDetector>
-          <vehicleDetector>
             <ID>VD_1116</ID>
-            <lateralCenter>5.0</lateralCenter>
+            <lateralCenter>4.0</lateralCenter>
             <width>3.0</width>
             <length>10.0</length>
-            <longitudinalPosition>0.0</longitudinalPosition>
+            <longitudinalPosition>150.0</longitudinalPosition>
           </vehicleDetector>
           <vehicleDetector>
             <ID>VD_1113</ID>
             <lateralCenter>5.0</lateralCenter>
             <width>3.0</width>
             <length>1.0</length>
-            <longitudinalPosition>22.0</longitudinalPosition>
+            <longitudinalPosition>180.0</longitudinalPosition>
           </vehicleDetector>
           <roadMarkerAlong>
             <type>:</type>
@@ -710,10 +710,43 @@
       <name>vier_4_1</name>
       <fromNode>4</fromNode>
       <toNode>1</toNode>
-      <distance>111.80339887498948</distance>
+      <distance>307.3177697570596</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
+        <elementOffsetLateral>1.0</elementOffsetLateral>
+        <element>
+          <name>grass</name>
+          <width>5.0</width>
+        </element>
+        <element>
+          <name>barrier</name>
+          <width>1.0</width>
+        </element>
+        <element>
+          <name>road</name>
+          <width>11.0</width>
+          <roadMarkerAlong>
+            <type>|</type>
+            <lateralPosition>0.2</lateralPosition>
+          </roadMarkerAlong>
+          <roadMarkerAlong>
+            <type>:</type>
+            <lateralPosition>5.5</lateralPosition>
+          </roadMarkerAlong>
+          <roadMarkerAlong>
+            <type>|</type>
+            <lateralPosition>10.5</lateralPosition>
+          </roadMarkerAlong>
+        </element>
+        <element>
+          <name>grass</name>
+          <width>5.0</width>
+        </element>
+      </crossSection>
+      <crossSection>
+        <ID>1</ID>
+        <crossSectionPositionLongitudinal>150.0</crossSectionPositionLongitudinal>
         <elementOffsetLateral>1.0</elementOffsetLateral>
         <element>
           <name>grass</name>
@@ -731,54 +764,14 @@
             <lateralCenter>-3.0</lateralCenter>
             <width>3.0</width>
             <length>10.0</length>
-            <longitudinalPosition>20.0</longitudinalPosition>
+            <longitudinalPosition>80.0</longitudinalPosition>
           </vehicleDetector>
-          <roadMarkerAlong>
-            <type>|</type>
-            <lateralPosition>0.2</lateralPosition>
-          </roadMarkerAlong>
-          <vehicleDetector>
-            <ID>VD_1053</ID>
-            <lateralCenter>2.5</lateralCenter>
-            <width>3.0</width>
-            <length>10.0</length>
-            <longitudinalPosition>20.0</longitudinalPosition>
-          </vehicleDetector>
-          <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>5.5</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>|</type>
-            <lateralPosition>10.5</lateralPosition>
-          </roadMarkerAlong>
-        </element>
-        <element>
-          <name>grass</name>
-          <width>5.0</width>
-        </element>
-      </crossSection>
-      <crossSection>
-        <ID>1</ID>
-        <crossSectionPositionLongitudinal>50.0</crossSectionPositionLongitudinal>
-        <elementOffsetLateral>1.0</elementOffsetLateral>
-        <element>
-          <name>grass</name>
-          <width>5.0</width>
-        </element>
-        <element>
-          <name>barrier</name>
-          <width>1.0</width>
-        </element>
-        <element>
-          <name>road</name>
-          <width>11.0</width>
           <vehicleDetector>
             <ID>VD_1052</ID>
             <lateralCenter>-3.0</lateralCenter>
             <width>3.0</width>
             <length>1.0</length>
-            <longitudinalPosition>20.0</longitudinalPosition>
+            <longitudinalPosition>115.0</longitudinalPosition>
           </vehicleDetector>
           <trafficLight>
             <ID>TL_05</ID>
@@ -792,11 +785,18 @@
             <lateralPosition>0.25</lateralPosition>
           </roadMarkerAlong>
           <vehicleDetector>
+            <ID>VD_1053</ID>
+            <lateralCenter>2.5</lateralCenter>
+            <width>3.0</width>
+            <length>10.0</length>
+            <longitudinalPosition>80.0</longitudinalPosition>
+          </vehicleDetector>
+          <vehicleDetector>
             <ID>VD_1051</ID>
             <lateralCenter>2.5</lateralCenter>
             <width>3.0</width>
             <length>1.0</length>
-            <longitudinalPosition>20.0</longitudinalPosition>
+            <longitudinalPosition>115.0</longitudinalPosition>
           </vehicleDetector>
           <roadMarkerAlong>
             <type>|</type>
@@ -817,7 +817,7 @@
       <name>vijf_1_4</name>
       <fromNode>1</fromNode>
       <toNode>4</toNode>
-      <distance>111.80339887498948</distance>
+      <distance>307.3177697570596</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>

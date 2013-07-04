@@ -442,7 +442,7 @@ public class Vehicle extends Movable {
      * @return String; the speed of this Vehicle
      */
     public String getSpeed_r() {
-    	return String.format(Main.locale, "%.2f km/h", v);
+    	return String.format(Main.locale, "%.2f km/h", v * 3.6);
     }
     
     /**

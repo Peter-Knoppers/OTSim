@@ -252,6 +252,8 @@ public class LaneSimulator extends Simulator {
         	} else if (fields[0].equals("Detector")) {
         		for (String location : fields[2].split(",")) {
         			String[] subFields = location.split(" ");
+        			if ((null == subFields[0]) || (subFields[0].equals("")))
+        				throw new Exception("Detector " + fields[1] + " lies on no lane");
         			Lane lane = lookupLane(Integer.parseInt(subFields[0]), microNetwork);
         			if (null == lane)
         				throw new Exception("Detector " + fields[1] + " lies on undefined lane " + subFields[0]);
@@ -1132,6 +1134,7 @@ class Stepper implements Step {
     	while (model.t < now) {
     		//System.out.println("step calling run(1)");
     		try {
+    			//System.out.format(Main.locale, "Time is %.3f\r\n", now);
     			model.run(1);
     		} catch (RuntimeException e) {
     			WED.showProblem(WED.ENVIRONMENTERROR, "Error in LaneSimulator:\r\n%s", WED.exeptionStackTraceToString(e));
