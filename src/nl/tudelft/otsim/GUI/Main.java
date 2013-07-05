@@ -292,7 +292,8 @@ public class Main extends JFrame implements ActionListener {
         measurementPlanIndex = tabbedPaneProperties.indexOfComponent(scrollPaneMeasurementPlans);
         
         measurementPlanPopup = new JPopupMenu();
-        measurementPlanPopup.add(makeMenuItem("Edit name", "EditMeasurementPlanName", null));
+        measurementPlanPopup.add(makeMenuItem("Edit name", "EditMeasurementPlanName", "Bubble.png"));
+        measurementPlanPopup.add(makeMenuItem("Delete measurement plan", "DeleteMeasurementPlan", "Delete.png"));
         comboBoxMeasurementPlans.add(measurementPlanPopup);
         comboBoxMeasurementPlans.addMouseListener(new MouseAdapter() {
 			@Override
@@ -611,13 +612,13 @@ public class Main extends JFrame implements ActionListener {
 	 * Update the save measurement plan menu item so it expands to show the
 	 * names of all measurement plans in the Model.
 	 */
-	public void measurementPlanListChanged() {
+	private void measurementPlanListChanged() {
+		MeasurementPlan currentMeasurementPlan = (MeasurementPlan) comboBoxMeasurementPlans.getSelectedItem();
 		while (saveMeasurementPlan.getItemCount() > 0)
 			saveMeasurementPlan.remove(0);
 		for (int i = 0; i < model.measurementPlanCount(); i++)
 			saveMeasurementPlan.add(makeMenuItem (model.getMeasurementPlan(i).getName(), "save measurementPlan", null));
 		saveMeasurementPlan.setEnabled(saveMeasurementPlan.getItemCount() > 0);
-		MeasurementPlan currentMeasurementPlan = (MeasurementPlan) comboBoxMeasurementPlans.getSelectedItem();
 		comboBoxMeasurementPlans.removeAllItems();
 		for (int i = 0; i < model.measurementPlanCount(); i++) {
 			MeasurementPlan mp = model.getMeasurementPlan(i);
@@ -799,9 +800,10 @@ public class Main extends JFrame implements ActionListener {
 			model.network = new Network();
 		else if (storable instanceof TrafficDemand)
 			model.trafficDemand = new TrafficDemand(model);
-		else if (storable instanceof MeasurementPlan)
+		else if (storable instanceof MeasurementPlan) {
 			model.addMeasurementPlan(new MeasurementPlan(model));
-		else if (storable instanceof Model) {
+			measurementPlanListChanged();
+		} else if (storable instanceof Model) {
 			model = new Model();
 			setTitle(myName);
 		} else
@@ -839,12 +841,13 @@ public class Main extends JFrame implements ActionListener {
 					storable = model.network = new Network(subNode);
 				else if (storable instanceof TrafficDemand)
 					storable = model.trafficDemand = new TrafficDemand(model, subNode);
-				else if (storable instanceof MeasurementPlan)
+				else if (storable instanceof MeasurementPlan) {
 					model.addMeasurementPlan((MeasurementPlan)(storable = new MeasurementPlan(model, subNode)));
-				else if (storable instanceof Model) {
+					measurementPlanListChanged();
+				} else if (storable instanceof Model) {
 					storable = model = new Model(pn);
 					measurementPlanListChanged();
-				}else
+				} else
 					throw new Error("Cannot happen");
 			setActiveGraph();
 			if ((storable instanceof Network) || (storable instanceof Model))

@@ -72,7 +72,6 @@ public class Model implements Storable {
 	 */
 	public void addMeasurementPlan(MeasurementPlan mp) {
 		measurementPlans.add(mp);
-		Main.mainFrame.measurementPlanListChanged();
 	}
 	
 	/**
@@ -83,7 +82,6 @@ public class Model implements Storable {
 		if (! measurementPlans.contains(mp))
 			throw new Error("MeasurementPlane " + mp.toString() + " is not stored in this Model");
 		measurementPlans.remove(mp);
-		Main.mainFrame.measurementPlanListChanged();
 	}
 
 	/**
