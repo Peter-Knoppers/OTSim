@@ -760,7 +760,7 @@ public class Main extends JFrame implements ActionListener {
 		// If/when Population becomes a Storable; add that too.
 		if (null == model)
 			return true;
-		return mayDiscardChanges(model.network) && mayDiscardChanges(model.trafficDemand);  
+		return mayDiscardChanges(model);  
 	}
 	
 	private Storable identifyStorable(String name) {
@@ -1038,6 +1038,10 @@ public class Main extends JFrame implements ActionListener {
 			graphicsPanel.setZoom(graphicsPanel.getZoom() / 2, new Point2D.Double(graphicsPanel.getWidth() / 2, graphicsPanel.getHeight() / 2));
 		else if ("MeasurementPlanChanged".equals(command))
 			switchMeasurementPlan();
+		else if ("EditMeasurementPlanName".equals(command))
+			editMeasurementPlanName();
+		else if ("DeleteMeasurementPlan".equals(command))
+			deleteMeasurementPlan();
 		else if ("statusBarClicked".equals(command)) {
 			testStep();
 			return;
@@ -1046,6 +1050,16 @@ public class Main extends JFrame implements ActionListener {
 			System.out.println("Unhandled actionevent " + command);
 		showDrivable.setEnabled(showLinks.isSelected());
 		graphicsPanel.repaint();
+	}
+
+	private void deleteMeasurementPlan() {
+		model.deleteMeasurementPlan((MeasurementPlan) comboBoxMeasurementPlans.getSelectedItem());
+		measurementPlanListChanged();
+	}
+
+	private void editMeasurementPlanName() {
+		// TODO: write the editor...
+		measurementPlanListChanged();
 	}
 
 	private void switchMeasurementPlan() {

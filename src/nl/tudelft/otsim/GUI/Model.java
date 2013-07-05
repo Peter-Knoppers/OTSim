@@ -32,6 +32,7 @@ public class Model implements Storable {
 	public TrafficDemand trafficDemand = new TrafficDemand(this);
 	private ArrayList<MeasurementPlan> measurementPlans = new ArrayList<MeasurementPlan>();
 	private String fileName = null;
+	private boolean modified = false;
 	
 	/**
 	 * Create a new Model from a {@link ParsedNode}.
@@ -64,6 +65,7 @@ public class Model implements Storable {
     	activities.rebuild();
     	population.rebuild();
     	trafficDemand.rebuild();
+    	clearModified();
 	}
 	
 	/**
@@ -72,6 +74,7 @@ public class Model implements Storable {
 	 */
 	public void addMeasurementPlan(MeasurementPlan mp) {
 		measurementPlans.add(mp);
+		modified = true;
 	}
 	
 	/**
@@ -82,6 +85,7 @@ public class Model implements Storable {
 		if (! measurementPlans.contains(mp))
 			throw new Error("MeasurementPlane " + mp.toString() + " is not stored in this Model");
 		measurementPlans.remove(mp);
+		modified = true;
 	}
 
 	/**
@@ -149,6 +153,7 @@ public class Model implements Storable {
     	activities.rebuild();
     	population.rebuild();
     	trafficDemand.rebuild();
+    	clearModified();
 	}
 	
 	/**
@@ -219,11 +224,12 @@ public class Model implements Storable {
 
 	@Override
 	public boolean isModified() {
-		return network.isModified() || trafficDemand.isModified();
+		return modified || network.isModified() || trafficDemand.isModified();
 	}
 
 	@Override
 	public void clearModified() {
+		modified = false;
 		network.clearModified();
 		trafficDemand.clearModified();
 	}
