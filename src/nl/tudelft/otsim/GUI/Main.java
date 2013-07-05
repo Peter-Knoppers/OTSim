@@ -206,17 +206,17 @@ public class Main extends JFrame implements ActionListener {
         javax.swing.JMenu menuFile = new javax.swing.JMenu();
         menuFile.setText("File");
         
-        makeMenuItem ("New model", "newModel", menuFile, "New.png");
-        makeMenuItem ("Open model ...", "openDialogLoadModel", menuFile, "Briefcase.png");
-        makeMenuItem ("Import model ...", "openDialogImportModel", menuFile, "Back.png");
+        menuFile.add(makeMenuItem ("New model", "newModel", "New.png"));
+        menuFile.add(makeMenuItem ("Open model ...", "openDialogLoadModel", "Briefcase.png"));
+        menuFile.add(makeMenuItem ("Import model ...", "openDialogImportModel", "Back.png"));
         
-        menuItemExportModel = makeMenuItem("Export model ...", "openDialogExportModel", menuFile, "Forward.png");
+        menuFile.add(menuItemExportModel = makeMenuItem("Export model ...", "openDialogExportModel", "Forward.png"));
         menuItemExportModel.setEnabled(false);  
         
-        menuItemSaveModel = makeMenuItem("Save model ...", "openDialogSaveModel", menuFile, "Save.png");
+        menuFile.add(menuItemSaveModel = makeMenuItem("Save model ...", "openDialogSaveModel", "Save.png"));
         menuItemSaveModel.setEnabled(false);
         
-        makeMenuItem("Exit", "Exit", menuFile, "Exit.png");
+        menuFile.add(makeMenuItem("Exit", "Exit", "Exit.png"));
         
         menuBar = new javax.swing.JMenuBar();
         menuBar.add(menuFile);
@@ -226,11 +226,11 @@ public class Main extends JFrame implements ActionListener {
         JMenu menuFile2 = new JMenu();
         menuFile2.setText("File2");
         
-        makeMenu("New", "new", menuFile2, "New.png");
-        makeMenu("Open", "load", menuFile2, "Briefcase.png");
-        makeMenu("Save", "save", menuFile2, "Save.png");
-        makeMenuItem("Import model ...", "openDialogImportModel", menuFile2, "Back.png");
-        makeMenuItem("Exit", "Exit", menuFile2, "Exit.png");
+        menuFile2.add(makeMenu("New", "new", "New.png"));
+        menuFile2.add(makeMenu("Open", "load", "Briefcase.png"));
+        menuFile2.add(makeMenu("Save", "save", "Save.png"));
+        menuFile2.add(makeMenuItem("Import model ...", "openDialogImportModel", "Back.png"));
+        menuFile2.add(makeMenuItem("Exit", "Exit", "Exit.png"));
         
         menuBar.add(menuFile2);
         
@@ -240,9 +240,9 @@ public class Main extends JFrame implements ActionListener {
         menuBar.add(menuView);
         
         // View zoom to scene (bounding box)
-        makeMenuItem("Entire network", "zoomToScene", menuView, "Expand.png");
-        makeMenuItem("Zoom in", "zoomIn", menuView, "Zoom.png");
-        makeMenuItem("Zoom out", "zoomOut", menuView, "Earth.png");
+        menuView.add(makeMenuItem("Entire network", "zoomToScene", "Expand.png"));
+        menuView.add(makeMenuItem("Zoom in", "zoomIn", "Zoom.png"));
+        menuView.add(makeMenuItem("Zoom out", "zoomOut", "Earth.png"));
 
         // Charts menu
         javax.swing.JMenu menuCharts = new javax.swing.JMenu();
@@ -288,6 +288,9 @@ public class Main extends JFrame implements ActionListener {
         scrollPaneMeasurementPlans.setViewportView(controls);
         tabbedPaneProperties.add("Measurement plans", scrollPaneMeasurementPlans);
         measurementPlanIndex = tabbedPaneProperties.indexOfComponent(scrollPaneMeasurementPlans);
+        
+        JPopupMenu measurementPlanPopup = new JPopupMenu();
+        measurementPlanPopup.add(makeMenuItem("Edit name", "EditMeasurementPlanName", null));
         
         controls = new JPanel();
         controls.setLayout(new GridBagLayout());
@@ -357,10 +360,9 @@ public class Main extends JFrame implements ActionListener {
      * @param caption String; caption of the JMenu
      * @param actionCommand String; actionCommand of the JMenu. If non-null
      * <code>this</code> is added to the ActionListeners of the JMenuItem
-     * @param parent JMenu; parent of the JMenuItem
      * @return JMenuItem; the newly created JMenuItem
      */
-    javax.swing.JMenuItem makeMenuItem(String caption, String actionCommand, javax.swing.JMenu parent, String iconName) {
+    javax.swing.JMenuItem makeMenuItem(String caption, String actionCommand, String iconName) {
         javax.swing.JMenuItem menuItem = new javax.swing.JMenuItem();
         menuItem.setText(caption);
         if (null != actionCommand) {
@@ -368,33 +370,29 @@ public class Main extends JFrame implements ActionListener {
             menuItem.addActionListener(this);
         }
         // Try to load the image from the resources
-        String imgLocation = "/resources/" + iconName;
+        String imgLocation = "/nl/tudelft/otsim/resources/" + iconName;
         java.net.URL imageURL = Main.mainFrame.getClass().getResource(imgLocation);
         if (imageURL != null)
             menuItem.setIcon(new ImageIcon(imageURL, caption));
-        parent.add(menuItem);
         return menuItem;
     }
     
-    javax.swing.JMenu makeMenu(String caption, String actionCommandPrefix, javax.swing.JMenu parent, String iconName) {
+    javax.swing.JMenu makeMenu(String caption, String actionCommandPrefix, String iconName) {
     	javax.swing.JMenu menu = new javax.swing.JMenu();
     	menu.setText(caption);
-    	parent.add(menu);
         // Try to load the image from the resources
         String imgLocation = "/nl/tudelft/otsim/Resources/" + iconName;
         java.net.URL imageURL = Main.mainFrame.getClass().getResource(imgLocation);
         if (imageURL != null)
             menu.setIcon(new ImageIcon(imageURL, caption));
-    	makeMenuItem("network ...", actionCommandPrefix + " network", menu, null);
-    	makeMenuItem("demand ...", actionCommandPrefix + " demand", menu, null);
+    	menu.add(makeMenuItem("network ...", actionCommandPrefix + " network", null));
+    	menu.add(makeMenuItem("demand ...", actionCommandPrefix + " demand", null));
     	if (actionCommandPrefix.equals("save")) {
-    		saveMeasurementPlan = new javax.swing.JMenu("measurement plan");
+    		menu.add(saveMeasurementPlan = new javax.swing.JMenu("measurement plan"));
     		saveMeasurementPlan.setEnabled(false);
-    		menu.add(saveMeasurementPlan);
     	} else
-    		makeMenuItem("measurement plan ...", actionCommandPrefix + " measurementPlan", menu, null);
-    	makeMenuItem("model ...", actionCommandPrefix + " model", menu, null);
-    	//makeMenuItem("settings ...", actionCommandPrefix + " settings", menu);
+    		menu.add(makeMenuItem("measurement plan ...", actionCommandPrefix + " measurementPlan", null));
+    	menu.add(makeMenuItem("model ...", actionCommandPrefix + " model", null));
     	return menu;
     }
 
@@ -596,7 +594,7 @@ public class Main extends JFrame implements ActionListener {
 		while (saveMeasurementPlan.getItemCount() > 0)
 			saveMeasurementPlan.remove(0);
 		for (int i = 0; i < model.measurementPlanCount(); i++)
-			saveMeasurementPlan.add(makeMenuItem (model.getMeasurementPlan(i).getName(), "save measurementPlan", saveMeasurementPlan, null));
+			saveMeasurementPlan.add(makeMenuItem (model.getMeasurementPlan(i).getName(), "save measurementPlan", null));
 		saveMeasurementPlan.setEnabled(saveMeasurementPlan.getItemCount() > 0);
 		MeasurementPlan currentMeasurementPlan = (MeasurementPlan) comboBoxMeasurementPlans.getSelectedItem();
 		comboBoxMeasurementPlans.removeAllItems();

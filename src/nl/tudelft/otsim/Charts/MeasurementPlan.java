@@ -50,7 +50,7 @@ public class MeasurementPlan extends JPanel implements GraphicsPanelClient, Stor
 	private JScrollPane tablePane;
 	private final Model model;
 	private boolean modified = false;
-	private JPopupMenu popupMenu;
+	private JPopupMenu tablePopupMenu;
 	private JMenuItem deleteRow;
 	private JMenuItem moveDown;
 	private JMenuItem moveUp;
@@ -111,10 +111,10 @@ public class MeasurementPlan extends JPanel implements GraphicsPanelClient, Stor
 		routeTable.getColumnModel().getColumn(0).setMaxWidth(30);
 		tablePane = new JScrollPane(routeTable);
 		tablePane.setPreferredSize(new Dimension(200, 400));
-		popupMenu = new JPopupMenu();
-		popupMenu.add(moveUp = makeMenuItem("Move up", "moveUp"));
-		popupMenu.add(moveDown = makeMenuItem("Move down", "moveDown"));
-		popupMenu.add(deleteRow = makeMenuItem("Delete node from route", "delete"));
+		tablePopupMenu = new JPopupMenu();
+		tablePopupMenu.add(moveUp = makeMenuItem("Move up", "moveUp"));
+		tablePopupMenu.add(moveDown = makeMenuItem("Move down", "moveDown"));
+		tablePopupMenu.add(deleteRow = makeMenuItem("Delete node from route", "delete"));
 		routeTable.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
@@ -149,7 +149,7 @@ public class MeasurementPlan extends JPanel implements GraphicsPanelClient, Stor
 			deleteRow.setEnabled(tableModel.getRowCount() > 2);
 			moveUp.setEnabled(row > 0);
 			moveDown.setEnabled(row < tableModel.getRowCount() - 1);
-			popupMenu.show(routeTable, p.x, p.y);
+			tablePopupMenu.show(routeTable, p.x, p.y);
 		}
 	}
 	
