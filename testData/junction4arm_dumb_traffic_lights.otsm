@@ -1004,4 +1004,23 @@
       <trips>2800.000000</trips>
     </tripPattern>
   </Demand>
+  <MeasurementPlan>
+    <Name>Unnamed measurement plan</Name>
+    <Node>
+      <Rank>0</Rank>
+      <ID>4</ID>
+    </Node>
+    <Node>
+      <Rank>1</Rank>
+      <ID>1</ID>
+    </Node>
+    <Node>
+      <Rank>2</Rank>
+      <ID>2</ID>
+    </Node>
+    <Node>
+      <Rank>3</Rank>
+      <ID>5</ID>
+    </Node>
+  </MeasurementPlan>
 </model>

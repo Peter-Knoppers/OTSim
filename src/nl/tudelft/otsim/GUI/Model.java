@@ -192,12 +192,20 @@ public class Model implements Storable {
 		+ network.exportTrafficLights() 
 		+ network.exportTrafficLightControllers();
     }
+    
+    private boolean writeMeasurementPlans(StaXWriter staXWriter) {
+    	for (MeasurementPlan mp : measurementPlans)
+    		if (! mp.writeXML(staXWriter))
+    			return false;
+    	return true;
+    }
 
 	@Override
 	public boolean writeXML(StaXWriter staXWriter) {
 		return staXWriter.writeNodeStart(XMLTAG)
 				&& network.writeXML(staXWriter)
 				&& trafficDemand.writeXML(staXWriter)
+				&& writeMeasurementPlans(staXWriter)
 				&& staXWriter.writeNodeEnd(XMLTAG);
 	}
 

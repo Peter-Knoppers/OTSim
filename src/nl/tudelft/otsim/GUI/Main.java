@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -121,6 +122,7 @@ public class Main extends JFrame implements ActionListener {
     public javax.swing.JMenuItem menuItemSaveModel;
     /** JMenuItem of the Export Model ... menu */
     public javax.swing.JMenuItem menuItemExportModel;
+    private JPopupMenu measurementPlanPopup;
     
     /** Name of the OpenTraffic application */
     public final String myName = "Open Traffic Simulator";
@@ -289,8 +291,20 @@ public class Main extends JFrame implements ActionListener {
         tabbedPaneProperties.add("Measurement plans", scrollPaneMeasurementPlans);
         measurementPlanIndex = tabbedPaneProperties.indexOfComponent(scrollPaneMeasurementPlans);
         
-        JPopupMenu measurementPlanPopup = new JPopupMenu();
+        measurementPlanPopup = new JPopupMenu();
         measurementPlanPopup.add(makeMenuItem("Edit name", "EditMeasurementPlanName", null));
+        comboBoxMeasurementPlans.add(measurementPlanPopup);
+        comboBoxMeasurementPlans.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				maybeShowPopup(e);
+			}
+			
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				maybeShowPopup(e);
+			}
+		});
         
         controls = new JPanel();
         controls.setLayout(new GridBagLayout());
@@ -335,6 +349,13 @@ public class Main extends JFrame implements ActionListener {
         toolBar.add(buttonUndo);
         buttonRedo = makeButton("Redo", "Forward to something-or-other", "Redo", "redo16");
         toolBar.add(buttonRedo);
+    }
+    
+    private void maybeShowPopup (MouseEvent me) {
+		if ((! me.isPopupTrigger()) || (comboBoxMeasurementPlans.getItemCount() == 0))
+			return;
+		Point p = new Point(me.getX(), me.getY());
+			measurementPlanPopup.show(comboBoxMeasurementPlans, p.x, p.y);
     }
 
     /**
@@ -820,9 +841,10 @@ public class Main extends JFrame implements ActionListener {
 					storable = model.trafficDemand = new TrafficDemand(model, subNode);
 				else if (storable instanceof MeasurementPlan)
 					model.addMeasurementPlan((MeasurementPlan)(storable = new MeasurementPlan(model, subNode)));
-				else if (storable instanceof Model)
+				else if (storable instanceof Model) {
 					storable = model = new Model(pn);
-				else
+					measurementPlanListChanged();
+				}else
 					throw new Error("Cannot happen");
 			setActiveGraph();
 			if ((storable instanceof Network) || (storable instanceof Model))
