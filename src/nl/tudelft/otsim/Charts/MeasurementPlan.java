@@ -257,6 +257,11 @@ public class MeasurementPlan extends JPanel implements GraphicsPanelClient, Stor
 	}
 	
 	@Override
+	public void setName(String newName) {
+		name = newName;
+	}
+	
+	@Override
 	public String toString() {
 		return name;
 	}

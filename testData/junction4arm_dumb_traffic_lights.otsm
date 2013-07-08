@@ -19,8 +19,8 @@
         <ControlURL></ControlURL>
         <Detector>VD_1051</Detector>
         <Detector>VD_1052</Detector>
-        <Detector>VD_1083</Detector>
         <Detector>VD_1053</Detector>
+        <Detector>VD_1083</Detector>
         <Detector>VD_1054</Detector>
         <Detector>VD_1111</Detector>
         <Detector>VD_1112</Detector>
@@ -1005,7 +1005,7 @@
     </tripPattern>
   </Demand>
   <MeasurementPlan>
-    <Name>Unnamed measurement plan</Name>
+    <Name>Measurement plan 1</Name>
     <Node>
       <Rank>0</Rank>
       <ID>4</ID>

@@ -6,8 +6,14 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.KeyAdapter;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
@@ -16,6 +22,9 @@ import java.awt.geom.Point2D;
 import java.io.File;
 import javax.swing.table.DefaultTableModel;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -28,6 +37,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -283,9 +293,39 @@ public class Main extends JFrame implements ActionListener {
         controls = new JPanel();
         controls.setLayout(new BorderLayout());
         controls.add(comboBoxMeasurementPlans = new JComboBox<MeasurementPlan>(), BorderLayout.NORTH);
-        controls.add(panelMeasurementPlan = new JPanel());
         comboBoxMeasurementPlans.setActionCommand("MeasurementPlanChanged");
         comboBoxMeasurementPlans.addActionListener(this);
+        JPanel subPanel = new JPanel(new BorderLayout());
+        controls.add(subPanel, BorderLayout.CENTER);
+        subPanel.add(editMeasurementPlanName = new JTextField(), BorderLayout.NORTH);
+        editMeasurementPlanName.setVisible(false);
+        editMeasurementPlanName.addFocusListener(new FocusListener() {
+        	@Override
+        	public void focusGained(FocusEvent arg0) {
+        		// Do nothing
+        	}
+
+        	@Override
+        	public void focusLost(FocusEvent arg0) {
+        		System.out.println("Focus lost");
+				actionPerformed(new ActionEvent(statusBar, 0, "UpdateMeasurementPlanName"));
+        	}
+
+        });
+        editMeasurementPlanName.addKeyListener(new KeyAdapter() {
+        	@Override
+			public void keyTyped(KeyEvent e) {
+        		String key = "" + e.getKeyChar();
+        		Pattern pattern = Pattern.compile("[ a-zA-Z0-9-_\b]");
+        		Matcher matcher = pattern.matcher(key);
+        		if (! matcher.find()) {
+        			e.consume();
+        			Toolkit.getDefaultToolkit().beep();
+        		}
+        	}
+        	
+        });
+        subPanel.add(panelMeasurementPlan = new JPanel(), BorderLayout.CENTER);
         JScrollPane scrollPaneMeasurementPlans = new JScrollPane();
         scrollPaneMeasurementPlans.setViewportView(controls);
         tabbedPaneProperties.add("Measurement plans", scrollPaneMeasurementPlans);
@@ -607,6 +647,7 @@ public class Main extends JFrame implements ActionListener {
 	private final int laneSimulatorIndex;
 	private javax.swing.JMenu saveMeasurementPlan; 
 	private JComboBox<MeasurementPlan> comboBoxMeasurementPlans;
+	private JTextField editMeasurementPlanName;
 	
 	/**
 	 * Update the save measurement plan menu item so it expands to show the
@@ -1040,6 +1081,8 @@ public class Main extends JFrame implements ActionListener {
 			switchMeasurementPlan();
 		else if ("EditMeasurementPlanName".equals(command))
 			editMeasurementPlanName();
+		else if ("UpdateMeasurementPlanName".equals(command))
+			updateMeasurementPlanName();
 		else if ("DeleteMeasurementPlan".equals(command))
 			deleteMeasurementPlan();
 		else if ("statusBarClicked".equals(command)) {
@@ -1058,7 +1101,18 @@ public class Main extends JFrame implements ActionListener {
 	}
 
 	private void editMeasurementPlanName() {
-		// TODO: write the editor...
+		measurementPlanListChanged();
+		editMeasurementPlanName.setText(comboBoxMeasurementPlans.getSelectedItem().toString());
+		editMeasurementPlanName.setSelectionStart(0);
+		editMeasurementPlanName.setSelectionEnd(editMeasurementPlanName.getText().length());
+		editMeasurementPlanName.setVisible(true);
+		editMeasurementPlanName.grabFocus();
+	}
+	
+	private void updateMeasurementPlanName() {
+		String newName = editMeasurementPlanName.getText();
+		editMeasurementPlanName.setVisible(false);
+		((MeasurementPlan) comboBoxMeasurementPlans.getSelectedItem()).setName(newName);
 		measurementPlanListChanged();
 	}
 
@@ -1069,5 +1123,6 @@ public class Main extends JFrame implements ActionListener {
 		if (index >= 0)
 			panelMeasurementPlan.add(model.getMeasurementPlan(index));
 	}
+
 
 }
