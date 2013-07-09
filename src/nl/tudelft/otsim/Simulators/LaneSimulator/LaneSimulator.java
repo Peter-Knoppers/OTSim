@@ -425,8 +425,6 @@ public class LaneSimulator extends Simulator {
 		
 		public LaneGraphic(Lane lane) {
 			this.lane = lane;
-			if (lane.id == 34)
-				System.out.println("making pol for 34");
 			pol = new poly(lane);
 			if (lane.taper == lane)
 				drawLines = false;
