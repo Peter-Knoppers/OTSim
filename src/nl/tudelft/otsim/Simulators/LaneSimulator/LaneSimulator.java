@@ -367,7 +367,7 @@ public class LaneSimulator extends Simulator {
         veh.marker = "o";
         veh.aMin = -6;
         try {
-            veh.trajectory = new Trajectory(veh, "microModel.jFCD");
+            veh.trajectory = new Trajectory(veh, "nl.tudelft.otsim.Simulators.LaneSimulator.FCD");
         } catch (ClassNotFoundException cnfe) {
             System.err.println("failed to make a new Trajectory");
         }
@@ -380,9 +380,9 @@ public class LaneSimulator extends Simulator {
         veh.marker = "s";
         veh.aMin = -6;
         try {
-            veh.trajectory = new Trajectory(veh, "microModel.jFCD");
+            veh.trajectory = new Trajectory(veh, "nl.tudelft.otsim.Simulators.LaneSimulator.FCD");
         } catch (ClassNotFoundException cnfe) {
-            
+            System.err.println("failed to make a new Trajectory");
         }
         driver = new Driver(veh);
         driver.a = 0.4;

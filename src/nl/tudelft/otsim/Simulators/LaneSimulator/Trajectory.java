@@ -30,9 +30,8 @@ public class Trajectory {
      */
     public Trajectory(Vehicle veh, String FCDclass) throws ClassNotFoundException {
         vehicle = veh;
-        if (FCDclass!=null) {
+        if (FCDclass!=null)
             this.FCDclass = java.lang.Class.forName(FCDclass);
-        }
     }
 
     /**
