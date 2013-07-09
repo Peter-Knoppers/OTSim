@@ -61,15 +61,13 @@ public class LaneSimulator extends Simulator {
 
     	// Two passes; this is pass 1; extract the lane descriptions
         for(String line : definition.split("\n")) {
-    		System.out.println("description: " + line);
         	String[] fields = line.split("\t");
         	
         	if (null == fields[0])
         		continue;
         	if (fields[0].equals("Lane")) {	
+        		System.out.println("description: " + line);
         		int id = Integer.parseInt(fields[2]);
-        		if (id == 34)
-        			System.out.println("lane34");
         		int numberOfPoints = (fields.length - 4);
         		double[] x = new double[numberOfPoints];
         		double[] y = new double[numberOfPoints];
@@ -82,7 +80,7 @@ public class LaneSimulator extends Simulator {
         			y[i] = Double.parseDouble(subFields[1]);
         		}
         		// Add it to the network
-        		System.out.println(String.format("microNetwork.add(new jLane(model, %s, %s, %d", x.toString(), y.toString(), id));
+        		//System.out.println(String.format("microNetwork.add(new jLane(model, %s, %s, %d", x.toString(), y.toString(), id));
         		Lane newLane = new Lane(model, x, y, id);
         		// set origin and destination as default to -999
         		newLane.destination = -999;
@@ -94,8 +92,9 @@ public class LaneSimulator extends Simulator {
     	double numberOfTrips = 0;
     	// pass 2; extract everything else
         for(String line : definition.split("\n")) {
-    		System.out.println("description: " + line);
         	String[] fields = line.split("\t");
+        	if (! fields[0].equals("Lane"))	
+        		System.out.println("description: " + line);
         	
         	if (null == fields[0])
         		continue;

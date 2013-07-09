@@ -125,7 +125,6 @@ public class ConsistencyCheck {
 	}
 	
 	private static void checkPosition(Lane lane, RSU rsu, String rsuTypeName) throws Exception {
-		System.out.println("lane " + describeLane(lane) + " has " + rsuTypeName + " at " + rsu.x + " range is 0.." + lane.l);
 		if (rsu.x < 0)
 			throw new Exception("lane " + describeLane(lane) + " has " + rsuTypeName + " at position " + rsu.x);
 		if (rsu.x >= lane.l)

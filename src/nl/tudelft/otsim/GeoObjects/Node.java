@@ -99,7 +99,6 @@ public class Node extends Vertex implements XML_IO {
 			String value = pn.getSubNode(fieldName, 0).getValue();
 			if (null == value)
 				throw new Exception("Value of " + fieldName + " is null");
-			System.out.println("fieldName is " + fieldName + " value is " + value);
 			if (fieldName.equals(XML_NAME))
 				name = value;
 			else if (fieldName.equals(XML_ID))
@@ -520,11 +519,11 @@ public class Node extends Vertex implements XML_IO {
 	}
 	
 	public void fixGeometry () {
-		System.out.println(String.format("Entering fixGeometry: Directional links at node %d (%s) %s", nodeID, toString(), links.toString()));
+		//System.out.println(String.format("Entering fixGeometry: Directional links at node %d (%s) %s", nodeID, toString(), links.toString()));
 		//conflictArea = null;
 		closingLines = new ArrayList<ArrayList<Vertex>>();
 		if (links.size() <= 1) {
-			System.out.println("Returning from fixGeometry because links.size is " + links.size() + " which is <= 1");
+			//System.out.println("Returning from fixGeometry because links.size is " + links.size() + " which is <= 1");
 			return;	// that was the really easy case
 		}
 		DirectionalLink prevDL = links.last();
@@ -603,7 +602,7 @@ public class Node extends Vertex implements XML_IO {
 			for (CrossSectionElement cse : cs.getCrossSectionElementList_r())
 				sortedPriorities.add(cse.getCrossSectionElementTypology().getCouplingPriority());
 		}
-		System.out.println("Returning from fixGeometry; Done node " + name);
+		//System.out.println("Returning from fixGeometry; Done node " + name);
 	}
 	
 	/**
