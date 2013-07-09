@@ -50,7 +50,7 @@ public class TrafficDemand implements Storable {
 
 	public TrafficDemand(Model model, ParsedNode demandRoot) throws Exception {
 		this.model = model;
-		System.out.print(demandRoot.toString(""));
+		//System.out.print(demandRoot.toString(""));
 		for (int index = 0; index < demandRoot.size(TripPattern.XMLTAG); index++)
 			tripPatternList.add(new TripPattern(this, demandRoot.getSubNode(TripPattern.XMLTAG, index)));
 	}
@@ -92,9 +92,8 @@ public class TrafficDemand implements Storable {
 			int totalPathCombinations = 1;
 			for (int i=0; i < numberOfLocations; i++) {
 				String locationList = (String) tripPattern.getLocationList().get(i);
-				String[] splitted = locationList.split("\\s");
 				// Retrieve the separate locations 
-				for (String location: splitted) { 
+				for (String location: locationList.split("\\s")) { 
 					int n = 0;
 					ArrayList<Node> nodeList = new ArrayList<Node>();
 					/*
@@ -102,7 +101,7 @@ public class TrafficDemand implements Storable {
 					 * the associated nodes 
 					 * Else if the location is a ActivityLocation search the nearest node/link/lane
 					 */
-					if (location.startsWith(ZONE_PREFIX))  {
+					if (location.startsWith(ZONE_PREFIX)) {
 						int locationNumber = Integer.parseInt(location.substring(1));
 						MicroZone microZone = model.network.lookupMicroZone(locationNumber);
 						if (null == microZone)
@@ -113,12 +112,11 @@ public class TrafficDemand implements Storable {
 								nodeList.add(node);
 								n++;
 							}
-					}
-					else if (location.startsWith(ACTIVTITYLOCATION_PREFIX))  {
+					} else if (location.startsWith(ACTIVTITYLOCATION_PREFIX))  {
 						int locationNumber = Integer.parseInt(location.substring(1));
 						ActivityLocation activityLocation = model.network.lookupActivityLocation(locationNumber);									
 						double bound = 1000;
-						if (activityLocation != null)  {
+						if (activityLocation != null) {
 							double maxSpeed = 80;
 							double maxSearchDistance = 1000;
 							// find the nearest node 
@@ -139,45 +137,36 @@ public class TrafficDemand implements Storable {
 			int start = 0;
 			int next = 1;
 			int step = 1;
-			//int iter = 0;
 			TripPatternPath tripPatternPath = null;
 			tripPattern.setTripPatternPathList(new ArrayList<TripPatternPath>());
 			// for all combinations of nodes (associated to a tripPattern from A, B, C etc.) 
 			// the routes are being prepared
 			for (int i = 0; i < totalPathCombinations; i++) {				
 				ArrayList<Node> nodeList = new ArrayList<Node>();
-				String p = "test";	
 				// add the first combination of nodes (all index values are 0)
-				for (int j = 0; j < numberOfLocations; j++) {
+				for (int j = 0; j < numberOfLocations; j++)
 					nodeList.add(listNodeList.get(j).get(index[j]));
-					p = p +  index[j];
-				}
-				//Debug:
-				System.out.println(p);
-				
-				// increase the index[start]
 				index[start]++;
 				// when reaching the last item 
 				if (index[start] >= listNodeList.get(start).size()) {
 					// reset the index[start] to 0
 					index[start] = 0;
-					if (next > start + step)  {
+					if (next > start + step) {
 						index[start + step]++;
 						if (index[start + step] >= listNodeList.get(start + step).size())  {
 							index[start + step] = 0;
 							step++;
 							index[start + step]++;
-							if (next == start + step)   {
+							if (next == start + step) {
 								start = 0;
 								index[next] = 0;
 								next++;
 								index[next]++;
 								step = 1;
 							}
-							step = 1;//laatst
+							step = 1;
 						}
-					}
-					else {
+					} else {
 						start = 0;
 						index[next]++;
 						while (index[next] >= listNodeList.get(next).size()  && next < index.length) {
@@ -189,7 +178,6 @@ public class TrafficDemand implements Storable {
 								break;
 						}							
 					}
-					
 				}
 				
 				tripPatternPath = new TripPatternPath(tripPattern,  weight * numberOfTrips, nodeList);
@@ -211,11 +199,8 @@ public class TrafficDemand implements Storable {
 					oldNode = node;					
 				}
 				tripPattern.getTripPatternPathList().add(tripPatternPath);
-
 			}	
-			
 		}
-
 	}
 
 /*	public TripPattern createTripPatternList(PersonTripPlan personTripPlan) {

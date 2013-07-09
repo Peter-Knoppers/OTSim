@@ -175,7 +175,7 @@ public class Lane {
      */
     @SuppressWarnings("unused")
 	public void init() {
-    	System.out.println("init lane " + id);
+    	//System.out.println("init lane " + id);
     	if (19 == id)
     		System.out.println("opletten");
         // Merge

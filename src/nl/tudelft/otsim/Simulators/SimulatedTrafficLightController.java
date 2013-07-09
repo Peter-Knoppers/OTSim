@@ -80,7 +80,7 @@ public class SimulatedTrafficLightController implements Step {
 							} catch (IOException e) {
 								e.printStackTrace();
 							}
-					clientSocket = null;
+						clientSocket = null;
 					}
 				});
 				serverWriter = new PrintWriter(clientSocket.getOutputStream(), true);

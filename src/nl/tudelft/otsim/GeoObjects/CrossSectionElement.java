@@ -891,7 +891,6 @@ public class CrossSectionElement implements XML_IO {
 	    		if (prevLane.getDown()==null)  {
 	    			iLanePrev++;
 	    		}
-//	    			System.out.println("test");
 	    		else if (prevLane.getDown().size() > 0)  {
 		    		if (prevLane.getDown().get(0).equals(thisLanes.get(jLaneThis))) {
 		    			for (int i = 0; i < 2; i++)  {
