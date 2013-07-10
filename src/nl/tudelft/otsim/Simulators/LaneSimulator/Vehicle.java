@@ -1,11 +1,16 @@
 package nl.tudelft.otsim.Simulators.LaneSimulator;
 
+import java.awt.geom.Point2D;
+import java.awt.geom.Point2D.Double;
+
+import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GUI.Main;
+import nl.tudelft.otsim.Simulators.SimulatedObject;
 
 /**
  * Default wrapper for a vehicle. It contains a driver and possibly an OBU.
  */
-public class Vehicle extends Movable {
+public class Vehicle extends Movable implements SimulatedObject {
 
     /** OBU within the vehicle, may be <tt>null</tt>. */
     public OBU OBU;
@@ -388,6 +393,7 @@ public class Vehicle extends Movable {
         }
         double xx = p1.x-p2.x;
         double yy = p1.y-p2.y;
+        // Normalize
         double f = Math.sqrt(xx*xx + yy*yy);
         heading = new java.awt.geom.Point2D.Double(xx/f, yy/f);
     }
@@ -500,4 +506,30 @@ public class Vehicle extends Movable {
     public java.util.ArrayList<RSU> getRSUsInRange_r() {
     	return RSUsInRange;
     }
+
+	@Override
+	public void paint(double when, GraphicsPanel graphicsPanel) {
+        Point2D.Double[] outline = outline(when);
+        graphicsPanel.drawPolygon(outline);
+	}
+
+	@Override
+	public Double[] outline(double when) {
+		double stepFraction = 0; 
+    	Point2D.Double[] result = new Point2D.Double[4];
+        double halfWidth = 1;	// m
+        double xFront = globalX + heading.x * stepFraction;
+        double yFront = globalY + heading.y * stepFraction;
+        
+        result[0] = new Point2D.Double(xFront + heading.y * halfWidth, yFront - heading.x * halfWidth);
+        result[1] = new Point2D.Double(xFront - heading.y * halfWidth, yFront + heading.x * halfWidth);
+
+        double xRear = xFront - heading.x * l;
+        double yRear = yFront - heading.y * l;
+        
+        result[2] = new Point2D.Double(xRear - heading.y * halfWidth, yRear + heading.x * halfWidth);
+        result[3] = new Point2D.Double(xRear + heading.y * halfWidth, yRear - heading.x * halfWidth);      	
+    	return result;
+	}
+
 }

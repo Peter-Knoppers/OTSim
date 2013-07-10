@@ -75,10 +75,10 @@ public class RoadwaySimulator extends Simulator implements ActionListener {
 			else
 				throw new Error("Bad line in networkDescription: " + line);
 		}
-		neighbors = new ArrayList<SimulatedObject>();
+		allVehicles = new ArrayList<SimulatedObject>();
 		// STUB Create some traffic
     	for (int i = 0; i < 15; i++)
-    		neighbors.add(new SimpleVehicle(scheduler, this, 8 * i, new Point2D.Double(98, -14), - Math.PI / 2));
+    		allVehicles.add(new SimpleVehicle(scheduler, this, 8 * i, new Point2D.Double(98, -14), - Math.PI / 2));
 	}
 	
 	private void loadTrafficLightController(String fields[]) {
@@ -98,7 +98,7 @@ public class RoadwaySimulator extends Simulator implements ActionListener {
 	}
 
 	// BEWARE: for now the list of neighbors equals the entire list of active vehicles
-	ArrayList<SimulatedObject> neighbors;
+	ArrayList<SimulatedObject> allVehicles;
 	
 	/**
 	 * Return a list of vehicles near a specified location.
@@ -108,7 +108,7 @@ public class RoadwaySimulator extends Simulator implements ActionListener {
 	 * @return ArrayList&lt;{@link SimpleVehicle}&gt; list of <b>all</b> vehicles in the simulation
 	 */
 	public ArrayList<SimulatedObject> nearbyVehicles(Point2D.Double location, double maxDistance) {
-		return neighbors;
+		return allVehicles;
 	}
 	
 	/**
@@ -138,32 +138,6 @@ public class RoadwaySimulator extends Simulator implements ActionListener {
 				((SimulatedObject) simObject).paint(time, gp);				
 	}
 
-	/**
-	 * Draw all simulated detectors on a {@link GraphicsPanel}.
-	 * @param time Double; simulated time at which the detectors must be drawn
-	 * (the color of the detector depends on its occupancy; hence it depends on
-	 * the simulated time)
-	 * @param gp {@link GraphicsPanel}; the output device to draw onto
-	 */
-	private void drawDetectors(double time, GraphicsPanel gp) {
-		for (Step simObject : scheduler.scheduledEvents())
-			if (simObject instanceof SimulatedDetector)
-				((SimulatedObject) simObject).paint(time, gp);				
-	}
-
-	/*
-	BufferedPolyLine head = null;
-	BufferedPolyLine last = null;
-	*/
-	/**
-	 * Remove the search beams that were created by simulated vehicles that
-	 * search the optimal steering etc.
-	 */
-	/*
-	public void clearTrails() {
-		head = last = null;	// this should make all that memory ready for garbage collection
-	}*/
-	
 	private static SimulatedObject loadPolyLine(String coordinates[], int start, int end) {
 		return new BorderOutLine (Planar.coordinatesToPoints(coordinates, start, end));
 	}
@@ -315,6 +289,11 @@ public class RoadwaySimulator extends Simulator implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		scheduler.getGraphicsPanel().repaint();
+	}
+
+	@Override
+	public ArrayList<SimulatedObject> SampleMovables() {
+		return allVehicles;
 	}
 
 }

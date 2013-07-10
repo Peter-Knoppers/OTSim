@@ -1,5 +1,7 @@
 package nl.tudelft.otsim.Simulators;
 
+import java.util.ArrayList;
+
 import nl.tudelft.otsim.Events.Scheduler;
 import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GUI.GraphicsPanelClient;
@@ -53,6 +55,14 @@ public abstract class Simulator implements GraphicsPanelClient {
 	 * @return {@link Scheduler}; the Scheduler of this Simulator
 	 */
 	abstract public Scheduler getScheduler();
+	
+	/**
+	 * Retrieve a list of all movable objects.
+	 * 
+	 * @return ArrayList&lt;{@link SimulatedObject}&gt;; the list of all movable objects
+	 */
+	abstract public ArrayList<SimulatedObject> SampleMovables();
+	
 	/**
 	 * A String that identifies the type of Simulator.
 	 */

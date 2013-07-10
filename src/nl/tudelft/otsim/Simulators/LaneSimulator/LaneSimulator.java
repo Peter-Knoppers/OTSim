@@ -930,19 +930,6 @@ public class LaneSimulator extends Simulator {
             return null;
         }
         
-        public Point2D.Double[] outline() {
-        	Point2D.Double[] result = new Point2D.Double[4];
-            double w = 2;
-            result[0] = new Point2D.Double(vehicle.globalX + vehicle.heading.y * w / 2, vehicle.globalY - vehicle.heading.x * w / 2);
-            result[1] = new Point2D.Double(vehicle.globalX - vehicle.heading.y * w / 2, vehicle.globalY + vehicle.heading.x * w / 2);
-
-            double x2 = vehicle.globalX - vehicle.heading.x * vehicle.l;
-            double y2 = vehicle.globalY - vehicle.heading.y * vehicle.l;
-            
-            result[2] = new Point2D.Double(x2 - vehicle.heading.y * w / 2, y2 + vehicle.heading.x * w / 2);
-            result[3] = new Point2D.Double(x2 + vehicle.heading.y * w / 2, y2 - vehicle.heading.x * w / 2);      	
-        	return result;
-        }
         
         /**
          * Paints the vehicle on a {@link GraphicsPanel}.
@@ -955,8 +942,9 @@ public class LaneSimulator extends Simulator {
         public void paint(GraphicsPanel graphicsPanel, boolean showDownStream, boolean showUpStream) {
             Color vehCol = Color.RED;
             graphicsPanel.setColor(vehCol);
-            Point2D.Double[] outline = outline();
-            graphicsPanel.drawPolygon(outline);
+            vehicle.paint(scheduler.getSimulatedTime(), graphicsPanel);
+            //Point2D.Double[] outline = vehicle.outline(scheduler.getSimulatedTime());
+            //graphicsPanel.drawPolygon(outline);
             if (showDownStream) {
             	Point2D.Double[] line = new Point2D.Double[2];
             	line[0] = new Point2D.Double(vehicle.globalX, vehicle.globalY);
@@ -1014,7 +1002,7 @@ public class LaneSimulator extends Simulator {
         Vehicle prevSelectedVehicle = selectedVehicle;
 
         for (Vehicle vehicle : model.getVehicles()) {
-        	Point2D.Double[] vehiclePolygon = (new VehicleGraphic(vehicle)).outline();
+        	Point2D.Double[] vehiclePolygon = vehicle.outline(scheduler.getSimulatedTime());
         	for (Point2D.Double pp : vehiclePolygon) {
         		Point2D.Double translated = graphicsPanel.translate(pp);
         		pp.x = translated.x;
@@ -1111,6 +1099,14 @@ public class LaneSimulator extends Simulator {
 		for (Step s : scheduler.scheduledEvents())
 			if (s instanceof SimulatedTrafficLightController)
 				((SimulatedTrafficLightController) s).shutdown();		
+	}
+
+	@Override
+	public ArrayList<SimulatedObject> SampleMovables() {
+		ArrayList<SimulatedObject> result = new ArrayList<SimulatedObject>();
+		for (Vehicle v : model.vehicles)
+			result.add(v);
+		return result;
 	}
 
 }

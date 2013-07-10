@@ -325,7 +325,7 @@ public class SimpleVehicle implements SimulatedObject, Step{
 		for (SimulatedObject detector : roadwaySimulator.detectors()) {
 			double detectorTTC = timeToCollision(time, ocattc.curvedness, stepTime, 0d, detector, true, null);
 			if (detectorTTC < stepTime) {
-				System.out.println("vehicle is about to be detected at " + (time + detectorTTC) + ", now is " + time + " stepTime is " + stepTime);
+				//System.out.println("vehicle is about to be detected at " + (time + detectorTTC) + ", now is " + time + " stepTime is " + stepTime);
 				activateDetector(time + detectorTTC, (Detector)detector);
 				//System.out.println("Vehicle should then be at " + GeometryTools.pointsToString(outline(time + detectorTTC)));
 			}
@@ -344,7 +344,7 @@ public class SimpleVehicle implements SimulatedObject, Step{
 		DetectorActivator(SimpleVehicle sv, Detector sd) {
 			this.sv = sv;
 			this.detector = sd;
-			System.out.println("Created DetectorActivator for vehicle " + sv.toString() + " to detector " + sd.toString());
+			//System.out.println("Created DetectorActivator for vehicle " + sv.toString() + " to detector " + sd.toString());
 		}
 
 		@Override
