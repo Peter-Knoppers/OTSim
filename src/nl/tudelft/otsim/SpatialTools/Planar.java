@@ -753,7 +753,7 @@ public class Planar {
 	}
 
 	/**
-	 * Return a String describing a Line2D.Double. (Used for debuggin.)
+	 * Return a String describing a Line2D.Double. (Used for debugging.)
 	 * @param l Line2D.Double; the line
 	 * @return String
 	 */
@@ -1029,16 +1029,12 @@ public class Planar {
 	 */
 	
 	public static ArrayList<Vertex> createPartlyParallelVertices(ArrayList<Vertex> prevVertices, ArrayList<Vertex> curVertices, boolean sameUp, boolean sameDown) {
+		if (prevVertices.size() != curVertices.size())
+			throw new Error ("prevVertices and curVertices have different sizes");
     	ArrayList<Vertex> result = new ArrayList<Vertex>();
-    	Vertex prevV = null;
-    	double distLaneTotal = 0.0;
-    	for (Vertex v : prevVertices)  {
-    		if (null != prevV)
-    			distLaneTotal = distLaneTotal + v.distanceTo(prevV); 
-    		prevV = new Vertex(v);		
-    	}
-    	prevV = null;    	
+    	double distLaneTotal = length(prevVertices);
     	double distLane = 0.0;
+    	Vertex prevV = null;
     	int i = 0;
     	for (Vertex v : prevVertices)  {
         	double weight = 0.0;
@@ -1049,7 +1045,7 @@ public class Planar {
 			else if (sameDown == true)
 				weight = 1 - (distLane / distLaneTotal); 
 			result.add(Vertex.weightedVertex(weight,  v, curVertices.get(i)));
-			prevV = new Vertex(v);
+			prevV = v;
     		i++;
     	}
 		return result;
