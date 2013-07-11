@@ -746,9 +746,26 @@ public class Planar {
 	 * of the vertices
 	 */
 	public static String verticesToString(ArrayList<Vertex> vertices) {
+		return verticesToString(vertices, false);
+	}
+	
+	/**
+	 * Convert Vertices to a String
+	 * @param vertices ArrayList&lt;{@link Vertex}&gt;; list of vertices to
+	 * convert 
+	 * @param ignoreZ Boolean; if true, the Z-component is not included in the 
+	 * result; if false, the Z-component is included in the result
+	 * @return String; space-separated list of the toString() representation
+	 * of the vertices
+	 */
+	public static String verticesToString(ArrayList<Vertex> vertices, boolean ignoreZ) {
 		String result = "";
 		for (Vertex v : vertices)
-			result += v.toString() + " ";
+			if (ignoreZ) {
+				Point2D.Double p = v.getPoint();
+				String.format(nl.tudelft.otsim.GUI.Main.locale, "(%.3fm, %.3fm)", p.x, p.y);
+			} else
+				result += v.toString() + " ";
 		return result;
 	}
 
