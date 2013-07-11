@@ -95,7 +95,7 @@ public class Scheduler extends JPanel implements ActionListener, PropertyChangeL
         gbc.gridy++;
         add(makeButton("Restart", "Reset the simulator", "Restart", "Rewind.png"), gbc);
         gbc.gridy++;
-        add(makeButton("Reload", "Reload the configuration and restart", "Reload", "Refresh.png"), gbc);
+        add(makeButton("Reload", "Reload the configuration and ", "Reload", "Refresh.png"), gbc);
         gbc.gridy++;
         add(clock = new Clock(this), gbc);
         gbc.gridy++;        

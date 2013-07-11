@@ -1419,10 +1419,9 @@ public class Node extends Vertex implements XML_IO {
 			// create parallel vertices
 			prevLaneVerticesCenter = oldLane.getLaneVerticesCenter();
 			laneVerticesCenter = Planar.createParallelVertices(prevLaneVerticesCenter, -oldLane.getLateralWidth());
-			// if same upLane: create weighted vertices inbetween
-			if (sameUp == true)  {
+			// if same upLane: create weighted vertices in between
+			if (sameUp == true)
 				laneVerticesCenter = Planar.createPartlyParallelVertices(prevLaneVerticesCenter, laneVerticesCenter, sameUp, sameDown);
-			}
 			newLane.setDesignLine(laneVerticesCenter);
 			newLane.setLaneVerticesInner(Planar.createParallelVertices(laneVerticesCenter, - newLane.getLateralWidth() / 2));
 			newLane.setLaneVerticesOuter(Planar.createParallelVertices(laneVerticesCenter, + newLane.getLateralWidth() / 2));

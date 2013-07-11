@@ -532,4 +532,9 @@ public class Vehicle extends Movable implements SimulatedObject {
     	return result;
 	}
 
+	@Override
+	public Point2D.Double center(double when) {
+		return new Point2D.Double(globalX, globalY);
+	}
+
 }

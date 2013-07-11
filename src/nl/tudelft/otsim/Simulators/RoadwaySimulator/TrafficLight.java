@@ -87,4 +87,9 @@ public class TrafficLight implements SimulatedTrafficLight {
 		return name;
 	}
 
+	@Override
+	public Point2D.Double center(double when) {
+		return null;
+	}
+
 }

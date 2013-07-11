@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -17,23 +18,30 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+import nl.tudelft.otsim.Events.Step;
 import nl.tudelft.otsim.FileIO.ParsedNode;
 import nl.tudelft.otsim.FileIO.StaXWriter;
 import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GUI.GraphicsPanelClient;
+import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.GUI.Model;
 import nl.tudelft.otsim.GUI.Storable;
 import nl.tudelft.otsim.GUI.WED;
+import nl.tudelft.otsim.GeoObjects.CrossSection;
+import nl.tudelft.otsim.GeoObjects.CrossSectionElement;
 import nl.tudelft.otsim.GeoObjects.Link;
 import nl.tudelft.otsim.GeoObjects.Network;
 import nl.tudelft.otsim.GeoObjects.Node;
+import nl.tudelft.otsim.GeoObjects.Vertex;
+import nl.tudelft.otsim.SpatialTools.Planar;
+import nl.tudelft.otsim.Utilities.Reversed;
 
 /**
  * This class holds the description for a measurement plan.
  * 
  * @author Peter Knoppers
  */
-public class MeasurementPlan extends JPanel implements GraphicsPanelClient, Storable, ActionListener {
+public class MeasurementPlan extends JPanel implements GraphicsPanelClient, Storable, ActionListener, Step {
 	private static final long serialVersionUID = 1L;
 	/** Name for a Network element when stored in XML format */
 	public static final String XMLTAG = "MeasurementPlan";
@@ -323,6 +331,76 @@ public class MeasurementPlan extends JPanel implements GraphicsPanelClient, Stor
 
 	@Override
 	public void mouseMoved(GraphicsPanel graphicsPanel, MouseEvent evt) {
+	}
+
+	@Override
+	public boolean step(double now) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	
+	private void appendPart(ArrayList<Vertex> existingPart, ArrayList<Vertex> newPart) {
+		int first = 0;
+		if ((existingPart.size() > 0) && (existingPart.get(existingPart.size() - 1).distanceTo(newPart.get(0)) < veryClose))
+			first = 1;
+		while (first < newPart.size())
+			existingPart.add(newPart.get(first++));
+	}
+	
+	final double veryClose = 0.1;	// m
+	private ArrayList<Vertex> exportBoundary(Node from, Node to, int lateralReference) throws Exception {
+		// Find the link connecting "from" to "to".
+		ArrayList<Vertex> boundary = new ArrayList<Vertex>();
+		boolean foundLink = false;
+		for (Link l : from.getLinks_r()) {
+			if (l.getToNode_r() == to) {
+				for (CrossSection cs : l.getCrossSections_r()) {
+					ArrayList<Vertex> part = null;
+					for (CrossSectionElement cse : cs.getCrossSectionElementList_r())
+						if (cse.getCrossSectionElementTypology().getDrivable())
+							if ((null == part) || (CrossSectionElement.LateralReferenceRight == lateralReference))
+								part = cse.getLinkPointList(lateralReference, true, true);
+					if (null == part)
+						throw new Exception("measurementPlan " + name + " cannot be applied to this network (no drivable CrossSectionElement)");
+					appendPart(boundary, part);
+				}
+				foundLink = true;
+				break;
+			}
+		}
+		if (! foundLink)
+			throw new Exception("measurementPlane " + name + " cannot be applied to this network (no link found)");
+		return boundary;
+	}
+	
+	private ArrayList<Vertex> exportBoundary (int lateralReference) throws Exception {
+		ArrayList<Vertex> result = new ArrayList<Vertex> ();
+		Node prevNode = null;
+		for (int nodeID : route) {
+			Node node = model.network.lookupNode(nodeID, true);
+			if (null == node)
+				throw new Exception("measurementPlan " + name + " cannot be applied to this network (node " + nodeID + " not found)");
+			if (null != prevNode) {
+				appendPart(result, exportBoundary(prevNode, node, lateralReference));
+			}
+			prevNode = node;
+		}
+		return result;
+	}
+
+	/**
+	 * Create a textual description of this MeasurementPlan for export to a simulator
+	 * @return String; the textual description of this MeasurementPlan
+	 * @throws Exception 
+	 */
+	public String export() throws Exception {
+		ArrayList<Vertex> area = exportBoundary(CrossSectionElement.LateralReferenceLeft);
+		// Append the right boundary in reverse order
+		int index = area.size();
+		for (Vertex v : exportBoundary(CrossSectionElement.LateralReferenceRight))
+			area.add(index, v);
+		ArrayList<Vertex> projectOnto = exportBoundary(CrossSectionElement.LateralReferenceCenter);
+		return "MeasurementPlan\t" + name + "\t" + Planar.verticesToString(area, true) + "\t" + Planar.verticesToString(projectOnto, true) + "\n";
 	}
 
 }

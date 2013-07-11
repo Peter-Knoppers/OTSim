@@ -29,4 +29,12 @@ public interface SimulatedObject {
 	 * @return Point2D.Double[]; array of points describing the outline. 
 	 */
 	abstract public Point2D.Double[] outline(double when);
+	
+	/**
+	 * Return a point that represents the position of the SimulatedObject.
+	 * This point should be somewhere inside the outline.
+	 * @param when Double; time for which the center point must be returned
+	 * @return Point2D.Double[]; point that represents the position of the SimulatedObject
+	 */
+	abstract public Point2D.Double center(double when);
 }

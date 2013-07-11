@@ -102,7 +102,7 @@ public class Detector implements SimulatedDetector {
 		gp.setStroke(0F);
 		gp.setColor(isOccupied() ? Color.CYAN : Color.BLUE);
 		gp.drawPolygon(polygon);
-		Point2D.Double position = new Point2D.Double((polygon[0].x + polygon[2].x) / 2, (polygon[0].y + polygon[2].y)/ 2);
+		Point2D.Double position = center (when);
 		gp.setColor(Color.BLACK);
 		gp.drawString("" + cumulativeCount, position);
 	}
@@ -168,6 +168,11 @@ public class Detector implements SimulatedDetector {
 	@Override
 	public void resetTotals() {
 		detections.clear();
+	}
+
+	@Override
+	public Point2D.Double center(double when) {
+		return new Point2D.Double((polygon[0].x + polygon[2].x) / 2, (polygon[0].y + polygon[2].y) / 2);
 	}
 	
 }

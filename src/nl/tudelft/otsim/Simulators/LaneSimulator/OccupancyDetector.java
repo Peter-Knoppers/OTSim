@@ -153,4 +153,9 @@ public class OccupancyDetector extends RSU implements SimulatedDetector {
 		detections.clear();
 	}
 
+	@Override
+	public Double center(double when) {
+		return null;
+	}
+
 }

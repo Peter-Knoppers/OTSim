@@ -13,6 +13,7 @@ import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.GUI.ObjectInspector;
 import nl.tudelft.otsim.GUI.WED;
+import nl.tudelft.otsim.Simulators.Measurement;
 import nl.tudelft.otsim.Simulators.SimulatedObject;
 import nl.tudelft.otsim.Simulators.SimulatedTrafficLightController;
 import nl.tudelft.otsim.Simulators.Simulator;
@@ -58,6 +59,7 @@ public class LaneSimulator extends Simulator {
         model.settings.putBoolean("storeDetectorData", true);
         ArrayList<Lane> microNetwork = new ArrayList<Lane>(); 
     	ArrayList<ExportTripPattern> tripList = new ArrayList<ExportTripPattern>(); 
+    	ArrayList<Measurement> measurements = new ArrayList<Measurement>();
 
     	// Two passes; this is pass 1; extract the lane descriptions
         for(String line : definition.split("\n")) {
@@ -258,7 +260,9 @@ public class LaneSimulator extends Simulator {
         				throw new Exception("Detector " + fields[1] + " lies on undefined lane " + subFields[0]);
         			model.addController(new OccupancyDetector(lane, Double.parseDouble(subFields[1]), fields[1], Double.parseDouble(subFields[2]), Planar.coordinatesToPoints(fields, 3, fields.length)));
         		}
-        	} else
+        	} else if (fields[0].equals("MeasurementPlan"))
+        		measurements.add(new Measurement(fields[1], fields[2], fields[3], this, scheduler));
+        	else
         		throw new Error("Unknown object in LaneSimulator: \"" + fields[0] + "\"");        	
     	}
         
@@ -1072,6 +1076,7 @@ public class LaneSimulator extends Simulator {
 		boolean showFollower = Main.mainFrame.checkBoxShowFollower.isSelected();
 		for (Vehicle vehicle : model.getVehicles())
 			new VehicleGraphic(vehicle).paint(graphicsPanel, showLeader, showFollower);
+		
 	}
 
 	@Override

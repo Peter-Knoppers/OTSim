@@ -180,8 +180,8 @@ public class Model implements Storable {
 				// + exportTripPattern(tripsByNode)
     			+ network.exportTrafficLights()
     			+ network.exportDetectors()
-    			+ network.exportTrafficLightControllers();
-		// TrafficLightControllers MUST come AFTER the lights and the detectors
+    			+ network.exportTrafficLightControllers()
+    			+ exportMeasurementPlans();
 	}
     
     /**
@@ -193,7 +193,23 @@ public class Model implements Storable {
 		return network.exportDrivableBoundaries() 
 		+ network.exportDetectors() 
 		+ network.exportTrafficLights() 
-		+ network.exportTrafficLightControllers();
+		+ network.exportTrafficLightControllers()
+		+ exportMeasurementPlans();
+    }
+    
+    private String exportMeasurementPlans() {
+    	String result = "";
+    	int exceptionCount = 0;
+    	for (MeasurementPlan mp : measurementPlans)
+			try {
+				result += mp.export();
+			} catch (Exception e) {
+				exceptionCount++;
+				e.printStackTrace();
+			}
+    	if (exceptionCount > 0)
+    		WED.showProblem(WED.WARNING, "%d measurement plan(s) can not be applied to the network", exceptionCount);
+    	return result;
     }
     
     private boolean writeMeasurementPlans(StaXWriter staXWriter) {

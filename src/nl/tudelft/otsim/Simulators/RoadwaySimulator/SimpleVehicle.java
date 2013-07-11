@@ -2,6 +2,7 @@ package nl.tudelft.otsim.Simulators.RoadwaySimulator;
 
 import java.awt.Color;
 import java.awt.geom.Point2D;
+import java.awt.geom.Point2D.Double;
 import java.util.ArrayList;
 
 import nl.tudelft.otsim.Events.Scheduler;
@@ -617,6 +618,11 @@ public class SimpleVehicle implements SimulatedObject, Step{
 	 */
 	public String getState_r() {
 		return state;
+	}
+
+	@Override
+	public Double center(double when) {
+		return (positionAndRotation(when, currentCurvedness).location);
 	}
 
 }

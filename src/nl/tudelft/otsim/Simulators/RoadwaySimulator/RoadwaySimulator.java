@@ -321,5 +321,10 @@ class BorderOutLine implements SimulatedObject, Step {
 	public java.awt.geom.Point2D.Double[] outline(double when) {
 		return outline;
 	}
+
+	@Override
+	public java.awt.geom.Point2D.Double center(double when) {
+		return null;
+	}
 	
 }
