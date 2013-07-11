@@ -176,10 +176,10 @@ public class Main extends JFrame implements ActionListener {
         tabbedPaneProperties = new javax.swing.JTabbedPane();
         tabbedPaneProperties.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
-        javax.swing.JToolBar toolBar = new javax.swing.JToolBar();
-        toolBar.setRollover(true);
-        toolBar.setPreferredSize(new java.awt.Dimension(13, 22));
-        getContentPane().add(toolBar, java.awt.BorderLayout.PAGE_START);
+        //javax.swing.JToolBar toolBar = new javax.swing.JToolBar();
+        //toolBar.setRollover(true);
+        //toolBar.setPreferredSize(new java.awt.Dimension(13, 22));
+        //getContentPane().add(toolBar, java.awt.BorderLayout.PAGE_START);
 
         // configure the event log
         textAreaLogging.setColumns(20);
@@ -384,12 +384,7 @@ public class Main extends JFrame implements ActionListener {
         JScrollPane scrollPaneLaneSimulator = new JScrollPane();
         scrollPaneLaneSimulator.setViewportView(controls);
         tabbedPaneProperties.add("Lane Simulator", scrollPaneLaneSimulator);
-        laneSimulatorIndex = tabbedPaneProperties.indexOfComponent(scrollPaneLaneSimulator);
-        
-        buttonUndo = makeButton("Undo", "Back to previous something-or-other", "Undo", "undo16");
-        toolBar.add(buttonUndo);
-        buttonRedo = makeButton("Redo", "Forward to something-or-other", "Redo", "redo16");
-        toolBar.add(buttonRedo);
+        laneSimulatorIndex = tabbedPaneProperties.indexOfComponent(scrollPaneLaneSimulator);       
     }
     
     private void maybeShowPopup (MouseEvent me) {
@@ -459,50 +454,6 @@ public class Main extends JFrame implements ActionListener {
     }
 
     /**
-     * Create a JButton and initialize some of its properties
-     * @param caption String; caption of the JButton
-     * @param toolTipText String toolTipText of the JButton. If null, no
-     * toolTipText is set
-     * @param actionCommand String; actionCommand of the JButton. If non-null
-     * <code>this</code> is added to the ActionListeners of the JButton
-     * @return JButton; the newly created JButton
-     */
-    private JButton makeButton (String caption, String toolTipText, String actionCommand) {
-    	JButton button = new JButton(caption);
-    	if (null != toolTipText)
-    		button.setToolTipText(toolTipText);
-    	if (null != actionCommand) {
-    		button.setActionCommand(actionCommand);
-    		button.addActionListener(this);
-    	}
-    	return button;
-    }
-  
-    /**
-     * Create a JButton and initialize some of its properties
-     * @param caption String; caption of the JButton
-     * @param toolTipText String toolTipText of the JButton. If null, no
-     * toolTipText is set
-     * @param actionCommand String; actionCommand of the JButton. If non-null
-     * <code>this</code> is added to the ActionListeners of the JButton
-     * @param iconName String; name of the icon for the JButton. This icon
-     * must be loaded in the resources directory of the jar file 
-     * @return JButton; the newly created JButton
-     */
-    private JButton makeButton(String caption, String toolTipText, String actionCommand, String iconName) {
-        JButton button = makeButton("", toolTipText, actionCommand);
-        // Try to load the image from the resources
-        String imgLocation = "/nl/tudelft/otsim/Resources/" + iconName + ".gif";
-        java.net.URL imageURL = Main.mainFrame.getClass().getResource(imgLocation);
-        if (imageURL != null) {                     // image found
-            button.setIcon(new ImageIcon(imageURL, caption));
-            button.setText("");						// clear caption
-        } else                                    // no image found
-            System.err.println("Resource not found: " + imgLocation);
-        return button;
-    }
-
-    /**
      * Load and display a traffic model.
      * @param filename String; file name of the model file
      * @return Boolean; true on success; false if some error occurred
@@ -563,6 +514,7 @@ public class Main extends JFrame implements ActionListener {
 	}
 
 	private SaveModel saveModel = null;
+	
     private boolean openDialogSaveModel() {
     	saveModel = new SaveModel();
 		return true;
@@ -573,6 +525,7 @@ public class Main extends JFrame implements ActionListener {
 	}
 	
 	private ExportModel exportModel = null;
+	
     private boolean openDialogExportModel() {
     	exportModel = new ExportModel();
 		return true;
@@ -581,7 +534,7 @@ public class Main extends JFrame implements ActionListener {
     public ExportModel getExportModel() {
 		return exportModel;
 	}
-  //shape
+
     private ImportModelShapeWizard importModelShapeWizard = null;    
     
     public boolean openDialogImportModel() {
@@ -633,8 +586,6 @@ public class Main extends JFrame implements ActionListener {
      */
     public JCheckBox showLaneIDs;
     
-    private JButton buttonUndo;
-    private JButton buttonRedo;
     private JPanel laneSimulatorControlPanel;
     private JPanel roadwaySimulatorControlPanel;
     /** Simulators must show the leader of a vehicle. */
@@ -1011,30 +962,8 @@ public class Main extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent actionEvent) {
 		System.out.println("actionPerformed: " + actionEvent.getActionCommand());
 		String command = actionEvent.getActionCommand();
-		if ("redrawMap".equals(command)) {
-			//TODO make this correct
-//            if (showPaths.isSelected())
-//                CreatePaths.CreatePathsAll(Main.mainFrame.model.network);
-		} else if ("Undo".equals(command))
-			System.out.println("undo not handled yet");
-        else if ("Redo".equals(command))
-			System.out.println("redo not handled yet"); 
-		/*
-        else if ("chartPie".equals(command))  {
-        	//System.out.println("ChartPie to be implemented");\
-        	
-        	DynamicTrajectoryBuilder dtb = new DynamicTrajectoryBuilder("Time Series");
-	        dtb.pack();
-	        dtb.setVisible(true);
-	        TrajectoryBuilder tb = new TrajectoryBuilder("Comparison", "Which operating system are you using?");
-	        tb.pack();
-	        tb.setVisible(true);
-	        PieChart demo = new PieChart("This is NO science", "Would you like to use Open Traffic?");
-	        demo.pack();
-	        demo.setVisible(true);
-
-        }
-        */
+		if ("redrawMap".equals(command))
+			;
         else if ("openDialogSaveModel".equals(command))
         	openDialogSaveModel();
         else if ("openDialogExportModel".equals(command))
