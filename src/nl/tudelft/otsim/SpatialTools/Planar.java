@@ -763,7 +763,7 @@ public class Planar {
 		for (Vertex v : vertices)
 			if (ignoreZ) {
 				Point2D.Double p = v.getPoint();
-				String.format(nl.tudelft.otsim.GUI.Main.locale, "(%.3fm, %.3fm)", p.x, p.y);
+				result += String.format(nl.tudelft.otsim.GUI.Main.locale, "(%.3fm, %.3fm) ", p.x, p.y);
 			} else
 				result += v.toString() + " ";
 		return result;
@@ -1104,10 +1104,10 @@ public class Planar {
     	Vertex prevVertex = null;
     	Line2D.Double prevParallel = null;
     	double prevDirection = Double.NEGATIVE_INFINITY;
-    	if (prevReferenceVertices != null) {
+    	if ((prevReferenceVertices != null)  && (prevReferenceVertices.size() >= 2)) {
     		int size = prevReferenceVertices.size();
-    	    Vertex prevVertex1 = prevReferenceVertices.get(size-2);
-    		Vertex vertex1 = prevReferenceVertices.get(size-1);
+    	    Vertex prevVertex1 = prevReferenceVertices.get(size - 2);
+    		Vertex vertex1 = prevReferenceVertices.get(size - 1);
 			prevParallel = new Line2D.Double(prevVertex1.getX(), prevVertex1.getY(), vertex1.getX(), vertex1.getY());
 			prevDirection = Math.atan2(vertex1.getY() - prevVertex1.getY(), vertex1.getX() - prevVertex1.getX());
     	}
