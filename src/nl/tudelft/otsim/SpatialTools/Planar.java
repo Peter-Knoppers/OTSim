@@ -39,6 +39,17 @@ public class Planar {
 	 * Convert a list of coordinates to an array of Point2D.Double. Any commas
 	 * in the coordinates are replaced by dots before conversion is attempted.
 	 * @param coordinates String[]; the list of coordinates
+	 * @return Point2D.Double[]; array of points
+	 * @throws NumberFormatException 
+	 */
+	public static Point2D.Double[] coordinatesToPoints (String coordinates[]) throws NumberFormatException {
+		return coordinatesToPoints (coordinates, 0, coordinates.length);
+	}
+	
+	/**
+	 * Convert a list of coordinates to an array of Point2D.Double. Any commas
+	 * in the coordinates are replaced by dots before conversion is attempted.
+	 * @param coordinates String[]; the list of coordinates
 	 * @param start Integer; index of first entry in coordinates to use
 	 * @param end Integer; the index of the last entry in coordinates to use <b>plus one</b>
 	 * @return Point2D.Double[]; array of points
