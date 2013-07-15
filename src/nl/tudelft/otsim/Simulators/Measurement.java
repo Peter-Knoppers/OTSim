@@ -9,6 +9,7 @@ import java.util.HashMap;
 
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
+import javax.swing.event.EventListenerList;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -18,6 +19,7 @@ import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.DomainOrder;
+import org.jfree.data.general.DatasetChangeEvent;
 import org.jfree.data.general.DatasetChangeListener;
 import org.jfree.data.general.DatasetGroup;
 import org.jfree.data.xy.XYDataset;
@@ -43,6 +45,7 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 	private final Scheduler scheduler;
 	private HashMap<SimulatedObject, Integer> indices = new HashMap<SimulatedObject, Integer>();
 	private ArrayList<Trajectory> trajectories = new ArrayList<Trajectory>();
+	private transient EventListenerList listenerList = new EventListenerList();
 	
 	/**
 	 * Create a new Measurement.
@@ -91,7 +94,7 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 
 	@Override
 	public boolean step(double now) {
-		for (SimulatedObject vehicle : simulator.SampleMovables())
+		for (SimulatedObject vehicle : simulator.SampleMovables()) {
 			if (Planar.polygonContainsPoint(area, vehicle.center(now))) {
 				Integer index = indices.get(vehicle);
 				Trajectory trajectory;
@@ -129,6 +132,8 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 				}
 				trajectory.extend(now, new Point2D.Double(bestLongitudinal, bestLateral));
 			}
+		}
+		notifyListeners(new DatasetChangeEvent(this, null));	// This guess work actually works!
 		scheduler.enqueueEvent(now + 1, this);
 		return true;
 	}
@@ -203,14 +208,19 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 
 	@Override
 	public void addChangeListener(DatasetChangeListener listener) {
-		// TODO Auto-generated method stub
-		
+		System.err.println("Registering " + listener.toString());
+		listenerList.add(DatasetChangeListener.class, listener);
 	}
 
 	@Override
 	public void removeChangeListener(DatasetChangeListener listener) {
-		// TODO Auto-generated method stub
-		
+		System.err.println("Unregistering " + listener.toString());
+		listenerList.remove(DatasetChangeListener.class, listener);
+	}
+	
+	private void notifyListeners(DatasetChangeEvent event) {
+		for (DatasetChangeListener dcl : listenerList.getListeners(DatasetChangeListener.class))
+			dcl.datasetChanged(event);
 	}
 
 	@Override
