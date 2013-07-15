@@ -280,13 +280,6 @@ public class RoadwaySimulator extends Simulator implements ActionListener {
 	}
 
 	@Override
-	public void Shutdown() {
-		for (Step s : scheduler.scheduledEvents())
-			if (s instanceof SimulatedTrafficLightController)
-				((SimulatedTrafficLightController) s).shutdown();		
-	}
-
-	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		scheduler.getGraphicsPanel().repaint();
 	}

@@ -35,6 +35,7 @@ import javax.swing.text.MaskFormatter;
 import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.GUI.WED;
+import nl.tudelft.otsim.Simulators.ShutDownAble;
 import nl.tudelft.otsim.Simulators.Simulator;
 
 /**
@@ -463,8 +464,7 @@ public class Scheduler extends JPanel implements ActionListener, PropertyChangeL
 	}
 	
 	private void restartSimulator() {
-		if (null != runningSimulation)
-			runningSimulation.Shutdown();
+		killSimulator();
 		clear();
         try {
 			runningSimulation = Main.createSimulator(simulatorType, configuration, this);
@@ -476,6 +476,15 @@ public class Scheduler extends JPanel implements ActionListener, PropertyChangeL
         graphicsPanel.setClient(runningSimulation);	// don't your forget it!
         graphicsPanel.repaint();
         clock.repaint();
+	}
+	
+	/**
+	 * Stop the running simulation and kill all sub-processes.
+	 */
+	public void killSimulator() {
+		for (Step step : scheduledEvents())
+			if (step instanceof ShutDownAble)
+				((ShutDownAble) step).ShutDown();
 	}
 	
 	private void reloadSimulator() {

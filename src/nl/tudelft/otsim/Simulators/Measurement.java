@@ -34,10 +34,7 @@ import nl.tudelft.otsim.SpatialTools.Planar;
  * 
  * @author Peter Knoppers
  */
-public class Measurement extends JFrame implements Step, SimulatedObject, XYDataset {
-	/**
-	 * 
-	 */
+public class Measurement extends JFrame implements Step, SimulatedObject, XYDataset, ShutDownAble {
 	private static final long serialVersionUID = 1L;
 	private final Point2D.Double[] area;
 	private final Point2D.Double[] projectionPath;
@@ -273,6 +270,11 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 		if ((series < 0) || (series >= trajectories.size()))
 			return Double.NaN;
 		return trajectories.get(series).getDistance(item);
+	}
+
+	@Override
+	public void ShutDown() {
+		dispose();
 	}
 }
 

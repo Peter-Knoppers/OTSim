@@ -16,11 +16,11 @@
       <Z>0.0</Z>
       <trafficLightController>
         <ID>TLC_1</ID>
-        <ControlURL>d:/cppb/trafcod/trafcod.exe d:/cppb/trafcod/4Arm/4Arm.tfc sumo://localhost:6789</ControlURL> 
+        <ControlURL>d:/cppb/trafcod/trafcod.exe d:/cppb/trafcod/4Arm/4Arm.tfc sumo://localhost:6789</ControlURL>
         <Detector>VD_1051</Detector>
         <Detector>VD_1052</Detector>
-        <Detector>VD_1083</Detector>
         <Detector>VD_1053</Detector>
+        <Detector>VD_1083</Detector>
         <Detector>VD_1054</Detector>
         <Detector>VD_1111</Detector>
         <Detector>VD_1112</Detector>
@@ -1004,4 +1004,23 @@
       <trips>2800.000000</trips>
     </tripPattern>
   </Demand>
+  <MeasurementPlan>
+    <Name>Measurement plan 1</Name>
+    <Node>
+      <Rank>0</Rank>
+      <ID>4</ID>
+    </Node>
+    <Node>
+      <Rank>1</Rank>
+      <ID>1</ID>
+    </Node>
+    <Node>
+      <Rank>2</Rank>
+      <ID>2</ID>
+    </Node>
+    <Node>
+      <Rank>3</Rank>
+      <ID>5</ID>
+    </Node>
+  </MeasurementPlan>
 </model>

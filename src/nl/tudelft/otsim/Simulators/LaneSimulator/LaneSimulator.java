@@ -14,6 +14,7 @@ import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.GUI.ObjectInspector;
 import nl.tudelft.otsim.GUI.WED;
 import nl.tudelft.otsim.Simulators.Measurement;
+import nl.tudelft.otsim.Simulators.ShutDownAble;
 import nl.tudelft.otsim.Simulators.SimulatedObject;
 import nl.tudelft.otsim.Simulators.SimulatedTrafficLightController;
 import nl.tudelft.otsim.Simulators.Simulator;
@@ -25,7 +26,7 @@ import nl.tudelft.otsim.TrafficDemand.ExportTripPattern;
  * 
  * @author Wouter J Schakel
  */
-public class LaneSimulator extends Simulator {
+public class LaneSimulator extends Simulator implements ShutDownAble {
 	
 	private final Model model = new Model();
 	private ArrayList<LaneGraphic> laneGraphics = new ArrayList<LaneGraphic>();
@@ -1100,18 +1101,15 @@ public class LaneSimulator extends Simulator {
 	}
 
 	@Override
-	public void Shutdown() {
-		for (Step s : scheduler.scheduledEvents())
-			if (s instanceof SimulatedTrafficLightController)
-				((SimulatedTrafficLightController) s).shutdown();		
-	}
-
-	@Override
 	public ArrayList<SimulatedObject> SampleMovables() {
 		ArrayList<SimulatedObject> result = new ArrayList<SimulatedObject>();
 		for (Vehicle v : model.vehicles)
 			result.add(v);
 		return result;
+	}
+
+	@Override
+	public void ShutDown() {
 	}
 
 }

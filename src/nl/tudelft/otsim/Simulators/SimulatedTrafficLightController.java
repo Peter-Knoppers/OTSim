@@ -22,7 +22,7 @@ import nl.tudelft.otsim.GUI.WED;
  * 
  * @author Peter Knoppers
  */
-public class SimulatedTrafficLightController implements Step {
+public class SimulatedTrafficLightController implements Step, ShutDownAble {
 	private final String controllerURL;
 	private ArrayList<SimulatedTrafficLight> trafficLights = new ArrayList<SimulatedTrafficLight>();
 	private Map<String, SimulatedDetector> detectors = new HashMap<String, SimulatedDetector>();
@@ -235,17 +235,9 @@ public class SimulatedTrafficLightController implements Step {
 		return false;
 	}
 
-	/**
-	 * Shutdown this SimulatedTrafficLightController
-	 */
-	public void shutdown() {
-		if (null != clientSocket)
-			try {
-				clientSocket.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		clientSocket = null;
+	@Override
+	public void ShutDown() {
+		killConnection();
 	}
 	
 }

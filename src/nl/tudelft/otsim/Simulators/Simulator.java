@@ -10,6 +10,10 @@ import nl.tudelft.otsim.GUI.GraphicsPanelClient;
 /**
  * Minimum set of methods to define a simulator for OpenTraffic.
  * 
+ * If a simulator required proper shutdown (instead of simply forgetting each
+ * and every reference so it can be garbage collected), it must implement
+ * ShutDownAble.
+ * 
  * @author Peter Knoppers
  */
 public abstract class Simulator implements GraphicsPanelClient {
@@ -28,16 +32,6 @@ public abstract class Simulator implements GraphicsPanelClient {
 	 */
 	public Simulator() {
 	}
-	/**
-	 * This method is called when the simulator is to be shut down. The
-	 * Simulator should close all files and sockets when this method is called.
-	 * <br /> All {@link nl.tudelft.otsim.Events.Step} events queued in the {@link Scheduler} of the
-	 * simulator are removed (by the Scheduler) <b>after</b? the call to Shutdown.
-	 * This ensures that the Simulator can call the 
-	 * {@link nl.tudelft.otsim.Events.Scheduler#scheduledEvents} method of the Scheduler inside ShutDown
-	 * to obtain a list of all pending events.
-	 */
-	abstract public void Shutdown ();
 	/**
 	 * This method is called before one or more calls to the 
 	 * {@link nl.tudelft.otsim.Events.Step#step} method of 
