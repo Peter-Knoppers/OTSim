@@ -731,4 +731,39 @@
   </Network>
   <Demand>
   </Demand>
+  <MeasurementPlan>
+    <Name>Measurement plan 1 for network 8</Name>
+    <Node>
+      <Rank>0</Rank>
+      <ID>6</ID>
+    </Node>
+    <Node>
+      <Rank>1</Rank>
+      <ID>7</ID>
+    </Node>
+    <Node>
+      <Rank>2</Rank>
+      <ID>3</ID>
+    </Node>
+    <Node>
+      <Rank>3</Rank>
+      <ID>1</ID>
+    </Node>
+    <Node>
+      <Rank>4</Rank>
+      <ID>4</ID>
+    </Node>
+    <Node>
+      <Rank>5</Rank>
+      <ID>8</ID>
+    </Node>
+    <Node>
+      <Rank>6</Rank>
+      <ID>9</ID>
+    </Node>
+    <Node>
+      <Rank>7</Rank>
+      <ID>10</ID>
+    </Node>
+  </MeasurementPlan>
 </model>

@@ -16,6 +16,7 @@ import nl.tudelft.otsim.Events.Step;
 import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.GUI.ObjectInspector;
+import nl.tudelft.otsim.Simulators.Measurement;
 import nl.tudelft.otsim.Simulators.SimulatedDetector;
 import nl.tudelft.otsim.Simulators.SimulatedObject;
 import nl.tudelft.otsim.Simulators.SimulatedTrafficLight;
@@ -39,6 +40,7 @@ public class RoadwaySimulator extends Simulator implements ActionListener {
 	public static final String simulatorType = "Roadway simulator";
 	private JCheckBox drawNetworkBackground;
 	private JCheckBox drawScans;
+	ArrayList<Measurement> measurements = new ArrayList<Measurement>();
 
 	/**
 	 * Create a new RoadwaySimulator from a textual description.
@@ -72,7 +74,9 @@ public class RoadwaySimulator extends Simulator implements ActionListener {
 				loadTrafficLight(fields);
 			else if (line.startsWith("TrafficLightController\t"))
 				loadTrafficLightController(fields);
-			else
+			else if (fields[0].equals("MeasurementPlan"))
+        		measurements.add(new Measurement(fields[1], fields[2], fields[3], this, scheduler));
+        	else
 				throw new Error("Bad line in networkDescription: " + line);
 		}
 		allVehicles = new ArrayList<SimulatedObject>();
