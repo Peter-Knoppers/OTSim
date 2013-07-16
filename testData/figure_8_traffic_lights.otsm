@@ -56,8 +56,8 @@
     <node>
       <name>node_zes</name>
       <ID>6</ID>
-      <X>300.0</X>
-      <Y>350.0</Y>
+      <X>295.0354609929078</X>
+      <Y>262.1985815602837</Y>
       <Z>0.0</Z>
     </node>
     <node>
@@ -77,8 +77,8 @@
     <node>
       <name>node_negen</name>
       <ID>9</ID>
-      <X>-400.0</X>
-      <Y>-150.0</Y>
+      <X>-346.09929078014187</X>
+      <Y>-184.8936170212766</Y>
       <Z>0.0</Z>
     </node>
     <node>
@@ -92,7 +92,7 @@
       <name>acht_6_7</name>
       <fromNode>6</fromNode>
       <toNode>7</toNode>
-      <distance>180.27756377319946</distance>
+      <distance>113.5799383440833</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -162,7 +162,7 @@
       <name>elf_8_9</name>
       <fromNode>8</fromNode>
       <toNode>9</toNode>
-      <distance>223.60679774997897</distance>
+      <distance>159.94950412874886</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -634,7 +634,7 @@
       <name>twaalf_9_10</name>
       <fromNode>9</fromNode>
       <toNode>10</toNode>
-      <distance>141.4213562373095</distance>
+      <distance>142.5532620584844</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -669,7 +669,7 @@
       <name>zeven_5_6</name>
       <fromNode>5</fromNode>
       <toNode>6</toNode>
-      <distance>223.60679774997897</distance>
+      <distance>153.64268987853282</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
