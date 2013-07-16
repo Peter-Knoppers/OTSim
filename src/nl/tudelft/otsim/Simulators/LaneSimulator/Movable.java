@@ -846,7 +846,7 @@ public abstract class Movable  {
 
     /**
      * Retrieve the {@link Lane} of this Movable.
-     * @return {@Link Lane}; the current Lane of this Movable
+     * @return {@link Lane}; the current Lane of this Movable
      */
     public Lane getLane_r() {
     	return lane;
