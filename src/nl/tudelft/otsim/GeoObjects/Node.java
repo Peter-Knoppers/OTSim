@@ -1555,9 +1555,8 @@ public class Node extends Vertex implements XML_IO {
     		String value = (String) object;
     		if (value.startsWith(addTrafficLightController))
     			this.trafficLightController = new TrafficLightController(network, "TL_" + name);
-    		else if (value.startsWith(editTrafficLightController)) {
+    		else if (value.startsWith(editTrafficLightController))
     			network.openObjectInspector(trafficLightController);
-    		}
     		else if (value.startsWith(deleteTrafficLightController)) {
     			trafficLightController.deleteAllLightsAndDetectors();
     			trafficLightController = null;
