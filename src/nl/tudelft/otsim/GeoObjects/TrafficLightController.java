@@ -172,7 +172,10 @@ public class TrafficLightController implements XML_IO {
 	 * for this TrafficLightController
 	 */
 	public void setControlProgramURL_w(String newURL) {
+		if (newURL.equals(controlProgramURL))
+			return;
 		controlProgramURL = newURL;
+		network.setModified();
 	}
 	
 	/**

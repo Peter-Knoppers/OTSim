@@ -1538,10 +1538,11 @@ public class Node extends Vertex implements XML_IO {
      * @return String; caption for the pop up menu of the {@link nl.tudelft.otsim.GUI.ObjectInspector}
      */
     public String getTrafficLightController_r() {
-    	return "Click twice to create or remove a Traffic light controller at node " + name;
+     	return "Click twice to create, edit, or remove a Traffic light controller at node " + name;
     }
     
     private static final String addTrafficLightController = "Create a traffic light controller at node ";
+    private static final String editTrafficLightController = "Edit the traffic light controller at node ";
     private static final String deleteTrafficLightController = "Delete the traffic light controller at node ";
     
     /**
@@ -1554,6 +1555,9 @@ public class Node extends Vertex implements XML_IO {
     		String value = (String) object;
     		if (value.startsWith(addTrafficLightController))
     			this.trafficLightController = new TrafficLightController(network, "TL_" + name);
+    		else if (value.startsWith(editTrafficLightController)) {
+    			network.openObjectInspector(trafficLightController);
+    		}
     		else if (value.startsWith(deleteTrafficLightController)) {
     			trafficLightController.deleteAllLightsAndDetectors();
     			trafficLightController = null;
@@ -1564,7 +1568,7 @@ public class Node extends Vertex implements XML_IO {
     }
     
     /**
-     * Return a list of items (actually only one) for the pop up menu of the
+     * Return a list of items for the pop up menu of the
      * {@link nl.tudelft.otsim.GUI.ObjectInspector}.
      * @return ArrayList&lt;String&gt;; the list of one item for the pop up
      * menu of the {@link nl.tudelft.otsim.GUI.ObjectInspector}
@@ -1573,8 +1577,10 @@ public class Node extends Vertex implements XML_IO {
     	ArrayList<String> result = new ArrayList<String>();
     	if (null == trafficLightController)
     		result.add(addTrafficLightController + name);
-    	else
+    	else {
+    		result.add(editTrafficLightController + name);
     		result.add(deleteTrafficLightController + name);
+    	}
     	return result;
     }
     

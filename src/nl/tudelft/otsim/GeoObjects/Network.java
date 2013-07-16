@@ -1744,4 +1744,17 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 		fileName = name;
 	}
 
+	/**
+	 * Open an {@link ObjectInspector} on the {@link TrafficLightController} of a {@link Node}.
+	 * @param trafficLightController {@link TrafficLightController}; the TrafficLightController to open with the {@link ObjectInspector}
+	 */
+	public void openObjectInspector(
+			TrafficLightController trafficLightController) {
+    	if (null != objectInspector) {
+    		objectInspector.dispose();
+    		objectInspector = null;
+    	}
+    	objectInspector = new ObjectInspector(trafficLightController, this);
+	}
+
 }
