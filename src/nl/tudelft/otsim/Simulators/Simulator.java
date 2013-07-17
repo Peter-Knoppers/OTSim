@@ -10,9 +10,9 @@ import nl.tudelft.otsim.GUI.GraphicsPanelClient;
 /**
  * Minimum set of methods to define a simulator for OpenTraffic.
  * 
- * If a simulator required proper shutdown (instead of simply forgetting each
- * and every reference so it can be garbage collected), it must implement
- * ShutDownAble.
+ * If a simulator requires a proper shutdown action (instead of simply 
+ * forgetting each and every reference so it can be garbage collected), it must 
+ * implement ShutDownAble.
  * 
  * @author Peter Knoppers
  */
