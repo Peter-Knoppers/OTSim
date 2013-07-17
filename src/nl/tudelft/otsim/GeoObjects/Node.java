@@ -24,8 +24,9 @@ import nl.tudelft.otsim.SpatialTools.Curves;
 import nl.tudelft.otsim.SpatialTools.Planar;
 
 /**
- *
- * @author gtamminga
+ * This class encapsulates the data that is specific to a node.
+ * 
+ * @author Peter Knoppers & gtamminga
  */
 public class Node extends Vertex implements XML_IO {
 	/** Name for a Node element when stored in XML format */
@@ -135,13 +136,6 @@ public class Node extends Vertex implements XML_IO {
 				&& staXWriter.writeNodeEnd(XMLTAG);
     }
     
-    /*
-    // Duplicate a node
-    public Node (Network network, Node aNode) {
-        this(network, aNode.getName_r(), aNode.getNodeID(), aNode.getX(), aNode.getY(), aNode.getZ());
-    }
-    */
-    
     /**
      * Retrieve the name of this Node.
      * @return String; the name of this Node
@@ -245,30 +239,6 @@ public class Node extends Vertex implements XML_IO {
 	}
 
 	/**
-	 * Retrieve the X-coordinate of this Node.
-	 * @return Double; X-coordinate of this Node
-	 */
-	public double X_r() {
-		return getX();
-	}
-	
-	/**
-	 * Retrieve the Y-coordinate of this Node.
-	 * @return Double; Y-coordinate of this Node
-	 */
-	public double Y_r() {
-		return getY();
-	}
-	
-	/**
-	 * Retrieve the Z-coordinate of this Node.
-	 * @return Double; Z-coordinate of this Node
-	 */
-	public double Z_r() {
-		return getZ();
-	}
-	
-	/**
 	 * Retrieve the {@link nl.tudelft.otsim.SpatialTools.Circle} that indicates the extent of this Node.
 	 * @return {@link nl.tudelft.otsim.SpatialTools.Circle}; circle that indicates the extent of this Node.
 	 */
@@ -349,48 +319,35 @@ public class Node extends Vertex implements XML_IO {
 		// Add all end points of (drive-able) crossSectionElements to the pointCloud
 		for (DirectionalLink dl : links) {
 			CrossSection cs = dl.link.getCrossSectionAtNode(dl.incoming);
-			//if (name.equals("node_een"))
-			//	Log.logToFile("d:/hull.txt", false, "selecting crosssection %s %s %s", cs.toString(), dl.incoming ? "from" : "to", dl.incoming ? dl.link.getFromNode_r().getName_r() : dl.link.getToNode_r().getName_r());
-			for (int index = 2 * cs.getCrossSectionElementList_r().size(); --index >= 0; )
+			for (int index = 2 * cs.getCrossSectionElementList_r().size(); --index >= 0; ) {
 				if ((! drivable) || cs.elementFromNode(dl.incoming, true, index).getCrossSectionElementTypology().getDrivable()) {
 					Line2D.Double dlLine = cs.vectorAtNode(dl.incoming, true, index, false);
 					if (null == dlLine)
 						continue;
 					pointCloud.add((Point2D.Double) dlLine.getP1());
-					//if (name.equals("node_een"))
-					//	Log.logToFile("d:/hull.txt", false, "added endpoint %d %.3f,%.3f", index, dlLine.x1, dlLine.y1);
-					// Add the intersections of the boundaries of different (drive-able) crossSectionElements
 					for (DirectionalLink otherDL : links) {
 						if (otherDL.angle >= dl.angle) // only search up to dl (and NEVER include dl itself)
 							break;	// this way we'll find each intersection only ONCE
 						CrossSection otherCS = otherDL.link.getCrossSectionAtNode(otherDL.incoming);
-						for (int otherIndex = 2 * otherCS.getCrossSectionElementList_r().size(); --otherIndex >= 0; )
+						for (int otherIndex = 2 * otherCS.getCrossSectionElementList_r().size(); --otherIndex >= 0; ) {
 							if ((! drivable) || (otherCS.elementFromNode(otherDL.incoming, true, otherIndex).getCrossSectionElementTypology().getDrivable())) {
 								Line2D.Double otherDLLine = otherCS.vectorAtNode(otherDL.incoming, true, otherIndex, false);
 								if (null == otherDLLine)
 									continue;
-								//if (name.equals("node_een"))
-								//	Log.logToFile("d:/hull.txt", false, "checking intersection between %s and %s", GeometryTools.Line2DToString(dlLine), GeometryTools.Line2DToString(otherDLLine));
-								if (Planar.lineIntersectsLine(dlLine, otherDLLine)) {
-									Point2D.Double intersection = Planar.intersection(dlLine, otherDLLine);
-									//System.out.println("Adding boundary intersection " + intersection);
-									pointCloud.add(intersection);
-									//if (name.equals("node_een"))
-									//	Log.logToFile("d:/hull.txt", false, "added boundary intersection %.3f,%.3f", intersection.x, intersection.y);
-								}
+								if (Planar.lineIntersectsLine(dlLine, otherDLLine))
+									pointCloud.add(Planar.intersection(dlLine, otherDLLine));
 							}
+						}
 					}
 				}
+			}
 		}
 
 		//System.out.println("pointCloud of " + name + " contains these points: " + pointCloud.toString());
 		if (0 == pointCloud.size())
 			pointCloud.add(getPoint());	// add design point of this node
 		circle = Planar.circleCoveringPoints(pointCloud);
-		//ArrayList<Point2D.Double> ppp = new ArrayList<Point2D.Double>();
-		//ppp.add(new Point2D.Double(this.x, this.y));
-		//circle = GeometryTools.circleCoveringPoints(ppp);
-		//System.out.format(Main.Locale, "covering circle is %s\r\n", circle.toString());
+		//System.out.format("covering circle is %s\r\n", circle.toString());
 		// Create the convex hull consisting of the points where the drive-able parts of the links enter the covering circle
 		ArrayList<Point2D.Double> points = new ArrayList<Point2D.Double>();
 		for (DirectionalLink dl : links) {
@@ -427,15 +384,11 @@ public class Node extends Vertex implements XML_IO {
 			return;
 		// Compute the convex hull (in 2D) and convert that into an ArrayList<Vertex>
 		//System.out.println("Computing convex hull of " + points.toString());
-		//if (name.equals("node_een"))
-		//	Log.logToFile("d:/hull.txt", false, "points is %s", points.toString());
 		conflictArea = new ArrayList<Vertex>();
 		for (Point2D.Double p : Planar.convexHull(points))
 			conflictArea.add(new Vertex(p, z));	// use Z-component of this node
 		conflictArea.add(conflictArea.get(0));	// close the polygon
 		//System.out.println("convex hull is " + conflictArea.toString());
-		//if (name.equals("node_een"))
-		//	Log.logToFile("d:/hull.txt", false, "hull is %s", conflictArea.toString());
 	}
 	
 	private ArrayList<Vertex> truncateHeadAtConflictArea(ArrayList<Vertex> vertices) {
@@ -518,6 +471,11 @@ public class Node extends Vertex implements XML_IO {
 		return vertices;
 	}
 	
+	/**
+	 * Fix the geometry of this Node. This method must be called when something 
+	 * in the {@link Network} (or at least in any the {@link Link Links} 
+	 * starting or ending at this Node has changed. 
+	 */
 	public void fixGeometry () {
 		//System.out.println(String.format("Entering fixGeometry: Directional links at node %d (%s) %s", nodeID, toString(), links.toString()));
 		//conflictArea = null;
@@ -703,7 +661,7 @@ public class Node extends Vertex implements XML_IO {
 	}
 	*/
 	
-    public void determineSinkOrSource() {
+    private void determineSinkOrSource() {
     	sink = false;
     	source = false;
     	int inCount = incomingCount();
@@ -762,8 +720,7 @@ public class Node extends Vertex implements XML_IO {
 
     }
     
-    
-	public ArrayList<DirectionalLink> getLinksFromJunction()  {
+	public ArrayList<DirectionalLink> getLinksFromJunction() {
 	    determineSinkOrSource();
 	    ArrayList<DirectionalLink> dlList = null;
 		if (0 == links.size())
@@ -774,10 +731,6 @@ public class Node extends Vertex implements XML_IO {
 		return dlList = getLinks();
 	}
 	
-	/**
-	 * Try to link {@link CrossSectionElement CrossSectionElements} of the
-	 * {@link Link Links} that meet at this Node. 
-	 */
     /**
      * Connect the {@link Link Links} at this Node.
      */
@@ -799,11 +752,9 @@ public class Node extends Vertex implements XML_IO {
 		ArrayList<Link> newLinks = new ArrayList<Link>();
 		// the simple case: two links 
 		
-		if ((inCount == 2) && (outCount == 2))  {
+		if ((inCount == 2) && (outCount == 2)) {
 			int incomingArm = 0; // index of the incoming arm: start at zero
-			for (DirectionalLink incoming : dlList)   {
-/*				if (incoming.link.getToNode_r().nodeID == 6649)
-					System.out.println("debug junction");*/
+			for (DirectionalLink incoming : dlList) {
 				if (incoming.incoming) {
 					for (int arm = 1; arm < dlList.size(); arm++) {
 						int itel = arm + incomingArm;
@@ -811,9 +762,8 @@ public class Node extends Vertex implements XML_IO {
 							itel  = arm + incomingArm - dlList.size();
 						DirectionalLink leaving = dlList.get(itel);
 						// select all leaving lanes from this junction
-						if (! leaving.incoming && incoming.link.getFromNode_r().equals(leaving.link.getToNode_r())) {
+						if (! leaving.incoming && incoming.link.getFromNode_r().equals(leaving.link.getToNode_r()))
 							outCount--;
-						}
 					}
 				}
 				incomingArm++;
@@ -823,7 +773,7 @@ public class Node extends Vertex implements XML_IO {
 		if ((inCount >= 1) && (outCount >= 1) && (inCount + outCount > 2)) {
 			// Expand nodes and create junction connecting links/lanes (connectors)
 			int incomingArm = 0; // index of the incoming arm: start at zero
-			for (DirectionalLink incoming : dlList)   {
+			for (DirectionalLink incoming : dlList) {
 				// for the incoming lanes: detect the turning movements and create turning lanes
 				// if turning arrows are provided: connect by that information
 				// else an automated search
@@ -858,12 +808,10 @@ public class Node extends Vertex implements XML_IO {
 	            				angleDif = leaving.angle - incoming.angle;
 	            			// only if it is not a U-turn!
 	            			if (Math.abs(angleDif) >= 0.0)  {
-	            				if ( angleDif > 0.75 * Math.PI  && angleDif < 1.25 * Math.PI && linkRank == 1)  {
+	            				if ( angleDif > 0.75 * Math.PI  && angleDif < 1.25 * Math.PI && linkRank == 1)
 	            					linkRank = 2;
-	            				}
-	            				if ( angleDif > 1.25 * Math.PI  && linkRank < 3)  {
+	            				if ( angleDif > 1.25 * Math.PI  && linkRank < 3)
 	            					linkRank = 3;
-	            				}
 			    	    		CrossSection outCs = leaving.link.getCrossSections_r().get(0);
 		    	    			// collect information on the index of the leaving link, its lanes and 
 		    	    			// the angle with the entering lane
@@ -879,7 +827,7 @@ public class Node extends Vertex implements XML_IO {
     				
     				//There are situations with two incoming links and one outgoing link (U-turn to incoming)
     				//In this case no junction is constructed
-    				if (outLanesAndLinkList.size() > 0)   {
+    				if (outLanesAndLinkList.size() > 0) {
 	            		int outLaneIndex = 0;
 	            		double shareOfOutLanes = 0;
 	            		double shareOfInLanes = 0;
@@ -889,11 +837,11 @@ public class Node extends Vertex implements XML_IO {
 			    		// loop through the lanes of the entering link
 			    		// sometimes a lane needs to be connected more than once (more turning movements per lane)
 			    		// in that case the index is reset minus 1
-	            		for (int indexInlane = 0; indexInlane < inLanesAll.size(); indexInlane++)	{
+	            		for (int indexInlane = 0; indexInlane < inLanesAll.size(); indexInlane++) {
 				    		Lane currentInLane = inLanesAll.get(indexInlane);
 				    		Lane currentOutLane = null;
 							// if a lane has got no stopLine (no priority defined) an "empty"  stopLine is added
-				    		if (currentInLane.getStopLine() == null)  {
+				    		if (currentInLane.getStopLine() == null) {
 				    			StopLine stopLine = new StopLine(currentInLane.getCse(), StopLine.NOSTOPLINE,-4.0, 2.0, 0.0); 
 				    			currentInLane.setStopLine(stopLine);
 				    		}
@@ -905,8 +853,8 @@ public class Node extends Vertex implements XML_IO {
 	            				OutLaneInfo currentOutlaneInfo = outLanesAndLinkList.get(outLaneIndex);
 	            				// connect to the lane of a leaving arm
 	            				// find the index of the outgoing link first
-								while ( outLinkRank != currentOutlaneInfo.getLinkRank() ) {
-									if (outLaneIndex >= 0)   {
+								while (outLinkRank != currentOutlaneInfo.getLinkRank()) {
+									if (outLaneIndex >= 0) {
 										if (outLinkRank < currentOutlaneInfo.getLinkRank())
 											outLaneIndex--;
 										else
@@ -925,7 +873,7 @@ public class Node extends Vertex implements XML_IO {
 									currentOutlaneInfo = outLanesAndLinkList.get(outLaneIndex);
 									int inlaneNext = 1;
 									boolean connectOnlyOneLane = false;
-									while (indexInlane + inlaneNext < inLanesAll.size())  {										
+									while (indexInlane + inlaneNext < inLanesAll.size()) {										
 										if (inLanesAll.get(indexInlane + inlaneNext).getTurnArrow().getOutLinkNumbers()[0] == outLinkRank)  {
 											connectOnlyOneLane = true;
 											break;
@@ -935,15 +883,14 @@ public class Node extends Vertex implements XML_IO {
 
 									if (currentOutlaneInfo.inLane == null && outLinkRank == currentOutlaneInfo.getLinkRank())  {
 										currentOutlaneInfo.setInLane(currentInLane);
-										if (connectOnlyOneLane) {	
+										if (connectOnlyOneLane)	
 											break;
-										}
 									}
 									outLaneIndex++;
 								}
-								if (currentOutlaneInfo.getInLane() == null)   {
+								if (currentOutlaneInfo.getInLane() == null)
 									System.out.println("strange: no inLane");
-								}
+
 								// connect the inlane to the outlane
 								// later on we will loop through the outLanesAndLinkList to generate new junction connectors 
 								// but first continue to inspect the other in lanes and their turns!
@@ -953,17 +900,13 @@ public class Node extends Vertex implements XML_IO {
 	            				if (turnCount < inLanesAll.get(indexInlane).getTurnArrow().getOutLinkNumbers().length)  {
 	            					indexInlane--;
 	            					outLaneIndex = 0;
-	            				}
-	            				else  {
-	            					// go to the next inLane and reset turncount to zero
+	            				} else // go to the next inLane and reset turncount to zero
 	            					turnCount = 0;
-	            				}
 	            				outLaneIndex = 0;
 	            			}
 	            			
 				    		// else if no turning movements are defined, construct the movements with some simple rules
 	            			else if (currentInLane.getTurnArrow().getOutLinkNumbers() == null) {
-	
 	            				OutLaneInfo currentOutlaneInfo = outLanesAndLinkList.get(outLaneIndex);  
 	            				currentOutLane = currentOutlaneInfo.getLane();
 		            			// compute share of outlanes per leaving CrossSectionElement
@@ -976,7 +919,7 @@ public class Node extends Vertex implements XML_IO {
 		            				// than the number of outlanes from that link is added to the shareOfOutLanes
 		            				if (outLaneIndex>0)
 		            					if (! currentOutLane.getCse().getCrossSection().getLink().equals(outLanesAndLinkList.
-			            					get(outLaneIndex - 1).getLane().getCse().getCrossSection().getLink()) )	
+		            							get(outLaneIndex - 1).getLane().getCse().getCrossSection().getLink()) )	
 		            						shareOfOutLanes = shareOfOutLanes + (double) currentOutLane.getCse().getCrossSectionObjects(Lane.class).size() / outLanesAndLinkList.size();		            			
 			            		}
 		            			// the share of this and previous inLanes to the total number of inLanes 
@@ -987,19 +930,16 @@ public class Node extends Vertex implements XML_IO {
 									boolean gotoNextOutlink = false; // go to the next Lane??
 									
 									// yes, when .. 
-									if (shareOfInLanes >= shareOfOutLanes && currentOutlaneInfo.getAngleDifference() < 0.75 * Math.PI) {
+									if (shareOfInLanes >= shareOfOutLanes && currentOutlaneInfo.getAngleDifference() < 0.75 * Math.PI)
 										gotoNextOutlink = true;
-									}
-									else if (shareOfInLanes > shareOfOutLanes  && currentOutlaneInfo.getAngleDifference() <= 1.25 * Math.PI)  {
+									else if (shareOfInLanes > shareOfOutLanes  && currentOutlaneInfo.getAngleDifference() <= 1.25 * Math.PI)
 										gotoNextOutlink = true;		
-									}
-									if (gotoNextOutlink && shareOfOutLanes < 1) {
+									if (gotoNextOutlink && shareOfOutLanes < 1)
 										indexInlane--;  // in this case more outgoing lanes are being connected to an incoming lane
-									}
 									if (gotoNextOutlink) {
 										OutLaneInfo exploreOutlaneInfo = outLanesAndLinkList.get(outLaneIndex); 
 										int outLinkRank = exploreOutlaneInfo.getLinkRank();
-										while ( outLinkRank == exploreOutlaneInfo.getLinkRank()  ) {
+										while ( outLinkRank == exploreOutlaneInfo.getLinkRank() ) {
 											//&& !(currentOutlaneInfo.getInLane() == null)
 											outLaneIndex++;
 											if (outLaneIndex >= outLanesAndLinkList.size()) {
@@ -1014,17 +954,14 @@ public class Node extends Vertex implements XML_IO {
 									
 								}
 								 // strange junction
-								if (inLanesAll.size() > outLanesAndLinkList.size())  {
+								if (inLanesAll.size() > outLanesAndLinkList.size())
 									if (((double) (indexInlane + 1) / inLanesAll.size() > shareOfOutLanes) && (shareOfOutLanes < 1)) 
 										outLaneIndex++;  // in case there are more outlanes connected to one incoming lane
-								}
 	            				currentOutlaneInfo.setInLane(currentInLane);
 	            				if (outLaneIndex > outLanesAndLinkList.size() - 1) 
 	            					break;
 		            		}	
 							// finished after all outlanes have passed!
-
-	            			
 	            		}
 	            			
 	            		outLaneIndex = 0;
@@ -1036,7 +973,7 @@ public class Node extends Vertex implements XML_IO {
 		    				Lane currentOutLane = outLaneInfo.getLane();
 		    				Lane currentInLane = outLaneInfo.getInLane();
 		    				boolean sameOutLink = false;
-		    				if (!(currentInLane == null) && !(currentOutLane == null) )  {
+		    				if (!(currentInLane == null) && !(currentOutLane == null) ) {
 		    				//create a new lane that connect this incoming lane and this leaving lane		
 		    					if (currentInLane.getCse().getCrossSection().getLink().getToNode_r().getNodeID() == 6649)	
 		    						System.out.println("test vertices lanes");
@@ -1064,9 +1001,8 @@ public class Node extends Vertex implements XML_IO {
 			    				Lane oldLane = null;
 			    				if (newLanes.isEmpty())
 			    					createCurve = true;
-			    				if (newLane != null)  {
+			    				if (newLane != null)
 			    					oldLane = new Lane(newLane);
-			    				}
 								newLane = newLaneConnection(currentInLane, currentOutLane, createCurve, oldLane, sameOutLink);				    					
 			    				newLanes.add(0, newLane);
 		    				}
@@ -1077,7 +1013,6 @@ public class Node extends Vertex implements XML_IO {
 	            				newLinks.add(newLink);
 		    				}
 		    				outLaneIndex++;	
-	
 	    				}
     				}
         		}
@@ -1088,26 +1023,24 @@ public class Node extends Vertex implements XML_IO {
 			// revisit the new Links to investigate conflicting lanes (merge, split, cross)
 			for (Link link : newLinks) {
 				for (Link compareToLink : newLinks) {
-					Point2D.Double p1 = link.getFromNode_r().getPoint();
-					Point2D.Double p2 = link.getToNode_r().getPoint();
-					Point2D.Double p3 = compareToLink.getFromNode_r().getPoint();
-					Point2D.Double p4 = compareToLink.getToNode_r().getPoint();
+					//Point2D.Double p1 = link.getFromNode_r().getPoint();
+					//Point2D.Double p2 = link.getToNode_r().getPoint();
+					//Point2D.Double p3 = compareToLink.getFromNode_r().getPoint();
+					//Point2D.Double p4 = compareToLink.getToNode_r().getPoint();
 					PriorityConflict priorityConflict = null;
 					conflictType cType;
-					//if ( !p1.equals(p3) && !p2.equals(p4))  {
+					//if ( !p1.equals(p3) && !p2.equals(p4)) {
 							// merging links
-							if (link.getToNode_r().getPoint().equals(compareToLink.getToNode_r().getPoint()))   {
+							if (link.getToNode_r().getPoint().equals(compareToLink.getToNode_r().getPoint())) {
 								cType =  conflictType.MERGE;
 								//System.err.println("fixLinkConnections: skipping null lane");
 							}
 							// splitting links
-							else if (link.getFromNode_r().getPoint().equals(compareToLink.getFromNode_r().getPoint()))  {
+							else if (link.getFromNode_r().getPoint().equals(compareToLink.getFromNode_r().getPoint()))
 								cType =  conflictType.SPLIT;
-							}
 							// conflicting links
-							else  {
+							else
 								cType =  conflictType.CROSSING;
-							}
 							for (CrossSectionObject lane1 : link.getCrossSections_r().get(0).getCrossSectionElementList_r().get(0).getCrossSectionObjects(Lane.class))   {
 								for (CrossSectionObject lane2 : compareToLink.getCrossSections_r().get(0).getCrossSectionElementList_r().get(0).getCrossSectionObjects(Lane.class))   {									
 									if (null == lane1)
@@ -1117,7 +1050,7 @@ public class Node extends Vertex implements XML_IO {
 										Lane laneB = (Lane) lane2;
 										// we only visit pairs of lanes ones 
 										// select only crossing conflicts
-										if (laneA.getID() > laneB.getID() & cType != conflictType.SPLIT)  {
+										if (laneA.getID() > laneB.getID() & cType != conflictType.SPLIT) {
 											// identify yield and priority lane
 											Lane pLane = new Lane();
 											Lane yLane = new Lane();										
@@ -1139,21 +1072,18 @@ public class Node extends Vertex implements XML_IO {
 											double turnAngleA = Double.NaN;
 											double turnAngleB = Double.NaN;
 											
-											if ((upA.getStopLine() != null)) {
+											if ((upA.getStopLine() != null))
 												if (upA.getStopLine().getType() == StopLine.PRIORITYSTOPLINE)
 													yieldA = false;
-											}
 											
-											if ((upB.getStopLine() != null)) {
+											if ((upB.getStopLine() != null))
 												if (upB.getStopLine().getType() == StopLine.PRIORITYSTOPLINE)
 													yieldB = false;
-											}
 	
-											if (yieldA == true && yieldB == false)   {
+											if (yieldA && (! yieldB)) {
 												yLane = laneA;
 												pLane = laneB;
-											}
-											else if (yieldA == false && yieldB == true)   {
+											} else if ((! yieldA) && yieldB) {
 												yLane = laneB;
 												pLane = laneA;
 											}
@@ -1162,21 +1092,16 @@ public class Node extends Vertex implements XML_IO {
 											else if ( (yieldA == false && yieldB == false) || (yieldA == true && yieldB == true) )   {
 												for (DirectionalLink incoming : dlList)  {
 													if (incoming.incoming) {
-														if (incoming.link.equals(linkUpA)) {
-															angleIncomingA = incoming.angle;															
-														}
-														else if (incoming.link.equals(linkUpB)) {
-															angleIncomingB = incoming.angle;															
-														}	
+														if (incoming.link.equals(linkUpA))
+															angleIncomingA = incoming.angle;
+														else if (incoming.link.equals(linkUpB))
+															angleIncomingB = incoming.angle;	
+													} else if (! incoming.incoming) {
+														if (incoming.link.equals(linkDownA))
+															angleLeavingA = incoming.angle;
+														else if (incoming.link.equals(linkDownB))
+															angleLeavingB = incoming.angle;
 													}
-														else if (! incoming.incoming) {
-															if (incoming.link.equals(linkDownA)) {
-																angleLeavingA = incoming.angle;															
-															}
-															else if (incoming.link.equals(linkDownB)) {
-																angleLeavingB = incoming.angle;															
-															}
-														}
 												}
 												double angleDif;
 						            			if (angleIncomingA > angleIncomingB)
@@ -1185,17 +1110,15 @@ public class Node extends Vertex implements XML_IO {
 						            				angleDif = angleIncomingA - angleIncomingB;
 						            			
 						            			//	lane B comes from right
-												if ( angleDif < 0.75 * Math.PI)  {
+												if (angleDif < 0.75 * Math.PI) {
 													yLane = laneA;
 													pLane = laneB;
 												}
 						            			//	lane B comes from left
-												else if ( angleDif > 1.25 * Math.PI)  {
+												else if ( angleDif > 1.25 * Math.PI) {
 													pLane = laneA;
 													yLane = laneB;
-												}
-												// opposing flows: turning movement determines priority rules
-												else {
+												} else { // opposing flows: turning movement determines priority rules
 							            			if (angleIncomingA > angleLeavingA)
 							            				turnAngleA = 2 * Math.PI - angleIncomingA + angleLeavingA;
 							            			else
@@ -1205,18 +1128,15 @@ public class Node extends Vertex implements XML_IO {
 							            			else
 							            				turnAngleB = angleIncomingB - angleLeavingB;
 							            			// turn with smallest angle has priority
-							            			if (turnAngleA < turnAngleB)  {
+							            			if (turnAngleA < turnAngleB) {
 														pLane = laneA;
 														yLane = laneB;
-							            			}
-							            			else {
+							            			} else {
 														yLane = laneA;
 														pLane = laneB;
-							            			}
-							            				
+							            			}	
 												}
 											}
-											
 											// Determine location at the lanes at the start of the conflict Area:
 											Point2D.Double pInIn = new Point2D.Double(); 
 											Point2D.Double pInOut = new Point2D.Double(); 
@@ -1248,66 +1168,54 @@ public class Node extends Vertex implements XML_IO {
 											verticesYield = yLane.getLaneVerticesOuter();
 											verticesPriority = pLane.getLaneVerticesOuter();
 											pOutOut = getConflictIntersectionPoint(verticesYield, verticesPriority, longitudinalOutOutYield, longitudinalOutOutPriority);
-											
-											if (! (pInIn == null & pInOut == null & pInIn == null & pInIn == null) )  {
-											
+											// TODO should that really be single &'s in the next line?
+											if (! (pInIn == null & pInOut == null & pInIn == null & pInIn == null) ) {
 												double longitudinalYield = 0;
 												double longitudinalPriority = 0;
 		
 												Polygon conflictArea = new Polygon();
-												if (longitudinalInInYield <= longitudinalInOutYield)  {
-													if (longitudinalInInYield <= longitudinalOutInYield)  {
+												if (longitudinalInInYield <= longitudinalInOutYield) {
+													if (longitudinalInInYield <= longitudinalOutInYield)
 														longitudinalYield = longitudinalInInYield;
-													}
-													else {
+													else
 														longitudinalYield = longitudinalOutInYield;
-													}
-												}
-												else if (longitudinalInOutYield < longitudinalInInYield)  {
-													if (longitudinalInOutYield <= longitudinalOutOutYield)  {
+												} else if (longitudinalInOutYield < longitudinalInInYield) {
+													if (longitudinalInOutYield <= longitudinalOutOutYield)
 														longitudinalYield = longitudinalInOutYield;
-													}
-													else {
+													else
 														longitudinalYield = longitudinalOutOutYield;
-													}
 												}
-												if (longitudinalInInPriority <= longitudinalInOutPriority)  {
-													if (longitudinalInInPriority <= longitudinalOutInPriority)  {
+												if (longitudinalInInPriority <= longitudinalInOutPriority) {
+													if (longitudinalInInPriority <= longitudinalOutInPriority)
 														longitudinalPriority = longitudinalInInPriority;
-													}
-													else {
+													else
 														longitudinalPriority = longitudinalOutInPriority;
-													}
-												}
-												else if (longitudinalInOutPriority < longitudinalInInPriority)  {
-													if (longitudinalInOutPriority <= longitudinalOutOutPriority)  {
+												} else if (longitudinalInOutPriority < longitudinalInInPriority) {
+													if (longitudinalInOutPriority <= longitudinalOutOutPriority)
 														longitudinalPriority = longitudinalInOutPriority;
-													}
-													else {
+													else
 														longitudinalPriority = longitudinalOutOutPriority;
-													}
 												}
-		
 												// determine the stopLines of the incoming Link
 												StopLine stopLine = yLane.getUp().get(0).getStopLine();
 												Double x = null;
 												Double y = null;
-												if (pInIn != null)  {
+												if (pInIn != null) {
 													x = pInIn.getX();
 													y = pInIn.getY();
 													conflictArea.addPoint(x.intValue(), y.intValue());
 												}
-												if (pInOut != null)  {
+												if (pInOut != null) {
 													x = pInOut.getX();
 													y = pInOut.getY();
 													conflictArea.addPoint(x.intValue(), y.intValue());
 												}
-												if (pOutIn != null)  {
+												if (pOutIn != null) {
 													x = pOutIn.getX();
 													y = pOutIn.getY();
 													conflictArea.addPoint(x.intValue(), y.intValue());
 												}
-												if (pOutOut != null)  {	
+												if (pOutOut != null) {	
 													x = pOutOut.getX();
 													y = pOutOut.getY();
 													conflictArea.addPoint(x.intValue(), y.intValue());
@@ -1336,8 +1244,7 @@ public class Node extends Vertex implements XML_IO {
 		}
     }
     
-    
-    public Point2D.Double getConflictIntersectionPoint(ArrayList<Vertex> verticesA, ArrayList<Vertex> verticesB, double longitudinalA, double longitudinalB)   {
+    private Point2D.Double getConflictIntersectionPoint(ArrayList<Vertex> verticesA, ArrayList<Vertex> verticesB, double longitudinalA, double longitudinalB)   {
 		Vertex prevA = null;
 		Vertex prevB = null;
 		Point2D.Double p = null; 
@@ -1514,6 +1421,7 @@ public class Node extends Vertex implements XML_IO {
 		return newLink;
     }
  
+    /*
     private static ArrayList<Vertex> connectVertices(ArrayList<Vertex> up, ArrayList<Vertex> down) {
 		ArrayList<Vertex> vertices = new ArrayList<Vertex>();	
 		Vertex start = up.get(up.size() - 1);
@@ -1522,6 +1430,7 @@ public class Node extends Vertex implements XML_IO {
 		vertices.add(end);
 		return vertices;
     }
+    */
 
     /**
      * Return a caption for the pop up menu of the {@link nl.tudelft.otsim.GUI.ObjectInspector}.
