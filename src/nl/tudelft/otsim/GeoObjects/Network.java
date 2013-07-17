@@ -267,14 +267,8 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 				}
     		}
 		}
-		for (Node node : getNodeList(true)) {
-			for (ArrayList<Vertex> alv : node.closingLines) {
-				polyLines += "Border\t";
-				for (Vertex v : alv)
-					polyLines += String.format(Locale.US, "%.2f\t%.2f\t", v.getX(), v.getY());
-            	polyLines += "\n";
-			}
-		}
+		for (Node node : getNodeList(true))
+			polyLines += node.getClosingLines();
 		//System.out.println("Polylines:\r\n" + polyLines);
 		return polyLines;
 	}

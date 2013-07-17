@@ -8,6 +8,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -41,7 +42,7 @@ public class Node extends Vertex implements XML_IO {
     private boolean sink = false;
     private boolean source = false;
 	private TreeSet<DirectionalLink> links = null;
-	private ArrayList<Vertex> conflictArea;
+	private ArrayList<Vertex> conflictArea = null;
 	private ArrayList<ArrayList<Vertex>> closingLines = new ArrayList<ArrayList<Vertex>>();
 	private TrafficLightController trafficLightController = null;
 	private Network network;
@@ -495,7 +496,7 @@ public class Node extends Vertex implements XML_IO {
 	public ArrayList<Vertex> truncateAtConflictArea(ArrayList<Vertex> vertices) {
 		if (vertices.size() < 2)
 			throw new Error("Malformed vertices");
-		if (null == conflictArea)
+		if (! hasConflictArea())
 			return vertices;	// First take care of the easy cases		
 		double distanceStart = vertices.get(0).getPoint().distance(circle.center());
 		double distanceEnd = vertices.get(vertices.size() - 1).getPoint().distance(circle.center());
@@ -1672,6 +1673,30 @@ public class Node extends Vertex implements XML_IO {
 	 */
 	public TrafficLightController getTrafficLightController() {
 		return trafficLightController;
+	}
+
+	/**
+	 * Retrieve the lines needed to make the drive-able boundaries of this node <i>water tight</i>.
+	 * @return String; the textual description of the closing lines at this Node
+	 */
+	public String getClosingLines() {
+		String result = "";
+		for (ArrayList<Vertex> alv : closingLines) {
+			result += "Border\t";
+			for (Vertex v : alv)
+				result += String.format(Locale.US, "%.2f\t%.2f\t", v.getX(), v.getY());
+        	result += "\n";
+		}
+		return result;
+	}
+
+	/**
+	 * Determine if this Node has a conflict area.
+	 * @return Boolean; true if this Node has a real conflict area; false if 
+	 * this Node does not have a real conflict area
+	 */
+	public boolean hasConflictArea() {
+		return (null != conflictArea) && (conflictArea.size() > 0);
 	}
 
 }
