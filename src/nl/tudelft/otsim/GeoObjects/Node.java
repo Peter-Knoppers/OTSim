@@ -41,11 +41,11 @@ public class Node extends Vertex implements XML_IO {
     private boolean sink = false;
     private boolean source = false;
 	private TreeSet<DirectionalLink> links = null;
-	ArrayList<Vertex> conflictArea;
-	ArrayList<ArrayList<Vertex>> closingLines = new ArrayList<ArrayList<Vertex>>();
+	private ArrayList<Vertex> conflictArea;
+	private ArrayList<ArrayList<Vertex>> closingLines = new ArrayList<ArrayList<Vertex>>();
 	private TrafficLightController trafficLightController = null;
 	private Network network;
-	Circle circle;
+	private Circle circle;
 
 	/**
 	 * Create a new Node.
@@ -1611,7 +1611,7 @@ public class Node extends Vertex implements XML_IO {
 		return expandedNode;
     }
     
-	public  GeneralPath createJunctionPolygon()   {
+	public GeneralPath createJunctionPolygon()   {
 		GeneralPath polygon = new GeneralPath(Path2D.WIND_EVEN_ODD);
 		boolean firstPoint = true;
 		for (Vertex v : conflictArea)  {
