@@ -21,7 +21,6 @@ import nl.tudelft.otsim.GeoObjects.PriorityConflict.conflictType;
 import nl.tudelft.otsim.SpatialTools.Circle;
 import nl.tudelft.otsim.SpatialTools.Curves;
 import nl.tudelft.otsim.SpatialTools.Planar;
-import nl.tudelft.otsim.Utilities.Reversed;
 
 /**
  *

@@ -7,7 +7,6 @@ import nl.tudelft.otsim.FileIO.ParsedNode;
 import nl.tudelft.otsim.FileIO.StaXWriter;
 import nl.tudelft.otsim.FileIO.XML_IO;
 import nl.tudelft.otsim.GUI.InputValidator;
-import nl.tudelft.otsim.GUI.WED;
 
 /**
  * This class connects a set of TrafficDetectors and a set of TrafficLights to 

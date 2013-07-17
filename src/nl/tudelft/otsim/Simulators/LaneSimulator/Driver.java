@@ -1,7 +1,5 @@
 package nl.tudelft.otsim.Simulators.LaneSimulator;
 
-import nl.tudelft.otsim.GUI.Main;
-
 /**
  * Default wrapper for a driver. The drive method is the main method and should
  * set <tt>a</tt> and <tt>dy</tt> of the vehicle. The longitudinal model is 

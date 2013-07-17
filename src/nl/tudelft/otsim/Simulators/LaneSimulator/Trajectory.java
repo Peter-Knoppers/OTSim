@@ -245,6 +245,7 @@ public class Trajectory {
     /**
      * Adds scalar fields to trajectory data by invoking underlying FCD 
      * <tt>addScalars</tt> method.
+     * @param t {@link TrajectoryData}; the TrajectoryData of which the addScalars method will be invoked
      */
     public void addScalars(TrajectoryData t) {
         try {

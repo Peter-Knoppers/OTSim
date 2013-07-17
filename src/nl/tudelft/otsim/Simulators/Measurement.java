@@ -43,6 +43,7 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 	private HashMap<SimulatedObject, Integer> indices = new HashMap<SimulatedObject, Integer>();
 	private ArrayList<Trajectory> trajectories = new ArrayList<Trajectory>();
 	private transient EventListenerList listenerList = new EventListenerList();
+	DatasetGroup datasetGroup = null;
 	
 	/**
 	 * Create a new Measurement.
@@ -191,11 +192,13 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 		return trajectories.size();
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public Comparable getSeriesKey(int series) {
 		return series;
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public int indexOf(Comparable seriesKey) {
 		if (seriesKey instanceof Integer)
@@ -222,14 +225,12 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 
 	@Override
 	public DatasetGroup getGroup() {
-		// TODO Auto-generated method stub
-		return null;
+		return datasetGroup;
 	}
 
 	@Override
 	public void setGroup(DatasetGroup group) {
-		// TODO Auto-generated method stub
-		
+		datasetGroup = group;
 	}
 
 	@Override

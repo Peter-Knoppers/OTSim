@@ -9,7 +9,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -23,7 +22,6 @@ import nl.tudelft.otsim.FileIO.ParsedNode;
 import nl.tudelft.otsim.FileIO.StaXWriter;
 import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GUI.GraphicsPanelClient;
-import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.GUI.Model;
 import nl.tudelft.otsim.GUI.Storable;
 import nl.tudelft.otsim.GUI.WED;
@@ -34,7 +32,6 @@ import nl.tudelft.otsim.GeoObjects.Network;
 import nl.tudelft.otsim.GeoObjects.Node;
 import nl.tudelft.otsim.GeoObjects.Vertex;
 import nl.tudelft.otsim.SpatialTools.Planar;
-import nl.tudelft.otsim.Utilities.Reversed;
 
 /**
  * This class holds the description for a measurement plan.

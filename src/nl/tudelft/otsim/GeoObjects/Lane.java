@@ -72,6 +72,7 @@ public class Lane extends CrossSectionObject {
     /**
      * Create a Lane with default values.
      * TODO: make this creator unneeded; it should not exist. 
+     * @param lane Example Lane to copy some properties from
      */
     public Lane(Lane lane) {
     	this.lateralWidth = lane.getLateralWidth();

@@ -76,6 +76,7 @@ public abstract class RSU extends Controller {
     
     /** 
      * Returns the location of this RSU.
+     * @return Double; the longitudinal location of this RSU along its {@link Lane}
      */
     public double x() {
         return x;
@@ -87,7 +88,7 @@ public abstract class RSU extends Controller {
     
     /**
      * Vehicle pass method to be defined by subclasses. This method is also 
-     * invoked for <tt>noticable</tt> RSUs which may be used to invoke a method
+     * invoked for <tt>noticeable</tt> RSUs which may be used to invoke a method
      * of the driver to clear bookkeeping regarding the prior RSU notices.
      * @param vehicle Vehicle that passes the RSU.
      */
