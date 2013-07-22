@@ -250,28 +250,27 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         });
 		
         int currentNode = Integer.MAX_VALUE;
-        double totalTripsFrom = 0;
-        ArrayList<Double> probabilityList = new ArrayList<Double>();
+        ArrayList<Double> routeProbabilities = new ArrayList<Double>();
         ArrayList<ArrayList<Integer>> routeList = new ArrayList<ArrayList<Integer>>();
-        double tripsByNode = 0;
+        double flow = 0;
         for (ExportTripPattern trip : tripList) {
 			int nextNode = trip.getRoute().get(0);
+			System.out.println("nextNode is " + nextNode);
 			// When next node changes: create a generator for the current Node
 			if (nextNode > currentNode) {
-				makeGenerator(probabilityList, currentNode, microNetwork, routeList, totalTripsFrom);
-				probabilityList.clear();
+				makeGenerator(routeProbabilities, currentNode, microNetwork, routeList, flow);
+				routeProbabilities.clear();
 				routeList.clear();
-				tripsByNode = 0;
-				totalTripsFrom = 0;
+				flow = 0;
 			}
 			currentNode = nextNode;
-			tripsByNode += trip.getFlow();
-			totalTripsFrom += tripsByNode;
+			flow += trip.getFlow();
+			System.out.println("tripsByNode increased to " + flow);
 			routeList.add(trip.getRoute());
-			probabilityList.add(trip.getFlow());
+			routeProbabilities.add(trip.getFlow());
 		}
         // Make the last generator
-		makeGenerator(probabilityList, currentNode, microNetwork, routeList, totalTripsFrom);
+		makeGenerator(routeProbabilities, currentNode, microNetwork, routeList, flow);
 
         // Set speed limits
         for (Lane lane : microNetwork)
@@ -322,23 +321,24 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         scheduler.enqueueEvent(0d, new Stepper(this));
 	}
 	
-	private static void makeGenerator(ArrayList<Double> probabilityList, int node, ArrayList<Lane> lanes, ArrayList<ArrayList<Integer>> routes, double flow) {
-		int routeCount = probabilityList.size();
+	private static void makeGenerator(ArrayList<Double> routeProbabilities, int node, ArrayList<Lane> lanes, ArrayList<ArrayList<Integer>> routes, double flow) {
+		int routeCount = routeProbabilities.size();
 		double probabilities[] = new double[routeCount];
 		Route[] routeEnds = new Route[routeCount];
 		Lane laneOrigin = lookupOrigin(node, lanes);
     	for (int index = 0; index < routeCount; index++) {
-        	int[] endOfRoute = new int[1]; //last node or route
+        	int[] endOfRoute = new int[1]; //last node of route
     		int routeLength = routes.get(index).size();
     		endOfRoute[0] = routes.get(index).get(routeLength - 1);
     		routeEnds[index] = new Route(endOfRoute);
-    		probabilities[index] = probabilityList.get(index);
+    		probabilities[index] = routeProbabilities.get(index);
     	}
 		Generator generator = new Generator(laneOrigin, Generator.distribution.EXPONENTIAL);
 		generator.routes = routeEnds;
 		generator.routeProb = probabilities;
 		generator.setClassProbabilities(new double[] { 0.9, 0.1 });
 		generator.setDemand(flow);
+		System.out.println("Flow of generator is " + flow);
 	}
 	
 	static Lane lookupLane(int id, ArrayList<Lane> lanes) {
