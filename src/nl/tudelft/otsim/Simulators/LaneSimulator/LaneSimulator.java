@@ -245,82 +245,33 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         Collections.sort(tripList, new Comparator<ExportTripPattern>() {
 			@Override
 			public int compare(ExportTripPattern arg0, ExportTripPattern arg1) {
-				return arg0.getStartNode() - arg1.getStartNode();
+				return arg0.getRoute().get(0) - arg1.getRoute().get(0);
 			}
         });
 		
-        int prevNode = Integer.MAX_VALUE;
+        int currentNode = Integer.MAX_VALUE;
         double totalTripsFrom = 0;
-        ArrayList<Double> probabilityList= new ArrayList<Double>();
+        ArrayList<Double> probabilityList = new ArrayList<Double>();
         ArrayList<ArrayList<Integer>> routeList = new ArrayList<ArrayList<Integer>>();
         double tripsByNode = 0;
-		for (int i=0;  i < tripList.size(); i++) {
-			ExportTripPattern trip = tripList.get(i);
-			int startNode = trip.getStartNode();
-			//When next node: report data of previous node
-			if (startNode > prevNode) {
-				int size = probabilityList.size();
-				for (double prob : probabilityList)
-					if (totalTripsFrom > 0)
-						prob = prob / totalTripsFrom;
-				double probabilities[] = new double[size];
-				Route[] routeListMin2 = new Route[size];
-				Route[] routeListLast = new Route[size];
-				Lane laneOrigin = lookupOrigin(prevNode, microNetwork);
-		    	
-		    	for (int index = 0; index < size; index++) {
-		    		int[] routeLast = new int[1]; //last node
-		    		int last = routeList.get(index).size();
-		    		routeLast[0] = routeList.get(index).get(last-1);
-			    	int[] route_min2 = new int[last-2]; //total route
-		    		for (int i1 = 2; i1 < last; i1++)
-		    			route_min2[i1-2] = routeList.get(index).get(i1);
-		    		routeListLast[index] = new Route(routeLast);
-		    		routeListMin2[index] = new Route(route_min2);
-		    		probabilities[index] = probabilityList.get(index).doubleValue();
-		    	}
-				Generator generator = new Generator(laneOrigin, Generator.distribution.EXPONENTIAL);
-				generator.routes = routeListLast;
-				generator.routeProb = probabilities;
-				generator.setClassProbabilities(new double[] { 0.9, 0.1});
-				generator.setDemand(totalTripsFrom);	
+        for (ExportTripPattern trip : tripList) {
+			int nextNode = trip.getRoute().get(0);
+			// When next node changes: create a generator for the current Node
+			if (nextNode > currentNode) {
+				makeGenerator(probabilityList, currentNode, microNetwork, routeList, totalTripsFrom);
 				probabilityList.clear();
 				routeList.clear();
 				tripsByNode = 0;
 				totalTripsFrom = 0;
 			}
-			prevNode = startNode;
-			tripsByNode = tripsByNode + trip.getPathNumberOfTrips();
-			totalTripsFrom = totalTripsFrom + tripsByNode;
+			currentNode = nextNode;
+			tripsByNode += trip.getFlow();
+			totalTripsFrom += tripsByNode;
 			routeList.add(trip.getRoute());
-			probabilityList.add(trip.getPathNumberOfTrips());
-			
-			if (i == tripList.size() - 1)  {
-				int size = probabilityList.size();
-				double probabilities[] = new double[size];
-				Route[] routeListMin2 = new Route[size];
-				Route[] routeListLast = new Route[size];
-				Lane laneOrigin = lookupOrigin(prevNode, microNetwork);
-		    	int[] routeLast = new int[1]; //last node
-				//routeList[destination] = new jRoute(route);
-		    	for (int index = 0; index < size; index++)   {
-		    		int last = routeList.get(index).size();
-		    		routeLast[0] = routeList.get(index).get(last-1);
-			    	int[] route_min2 = new int[last-2]; //total route
-		    		for (int i1 = 2; i1 < last; i1++)  {
-		    			route_min2[i1-2] = routeList.get(index).get(i1);
-		    		}
-		    		routeListLast[index] = new Route(routeLast);
-		    		routeListMin2[index] = new Route(routeLast);
-		    		probabilities[index] = probabilityList.get(index).doubleValue();
-		    	}
-				Generator generator = new Generator(laneOrigin, Generator.distribution.EXPONENTIAL);
-				generator.routes = routeListLast;
-				generator.routeProb = probabilities;
-				generator.setClassProbabilities(new double[] { 0.9, 0.1});
-				generator.setDemand(totalTripsFrom);	
-			}
+			probabilityList.add(trip.getFlow());
 		}
+        // Make the last generator
+		makeGenerator(probabilityList, currentNode, microNetwork, routeList, totalTripsFrom);
 
         // Set speed limits
         for (Lane lane : microNetwork)
@@ -369,6 +320,25 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         ConsistencyCheck.checkPostInit(model);
         System.out.println("model created");
         scheduler.enqueueEvent(0d, new Stepper(this));
+	}
+	
+	private static void makeGenerator(ArrayList<Double> probabilityList, int node, ArrayList<Lane> lanes, ArrayList<ArrayList<Integer>> routes, double flow) {
+		int routeCount = probabilityList.size();
+		double probabilities[] = new double[routeCount];
+		Route[] routeEnds = new Route[routeCount];
+		Lane laneOrigin = lookupOrigin(node, lanes);
+    	for (int index = 0; index < routeCount; index++) {
+        	int[] endOfRoute = new int[1]; //last node or route
+    		int routeLength = routes.get(index).size();
+    		endOfRoute[0] = routes.get(index).get(routeLength - 1);
+    		routeEnds[index] = new Route(endOfRoute);
+    		probabilities[index] = probabilityList.get(index);
+    	}
+		Generator generator = new Generator(laneOrigin, Generator.distribution.EXPONENTIAL);
+		generator.routes = routeEnds;
+		generator.routeProb = probabilities;
+		generator.setClassProbabilities(new double[] { 0.9, 0.1 });
+		generator.setDemand(flow);
 	}
 	
 	static Lane lookupLane(int id, ArrayList<Lane> lanes) {
@@ -1072,24 +1042,23 @@ class Stepper implements Step {
 }
 
 class ExportTripPattern {
-	Double pathNumberOfTrips;
+	Double flow;
 	ArrayList<Integer> route;
 	/**
 	 * @param startNode Integer; ID of the start node of the new ExportTripPattern
-	 * @param share Double; flow on the new ExportTripPattern
+	 * @param flow Double; flow on the new ExportTripPattern
 	 * @param route ArrayList&lt;Integer&gt;; IDs that define the route of the new ExportTripPattern
 	 */
-	public ExportTripPattern(Double share,
+	public ExportTripPattern(Double flow,
 			ArrayList<Integer> route) {
-		this.pathNumberOfTrips = share;
+		this.flow = flow;
 		this.route = route;
 	}
-	public int getStartNode() {
-		return route.get(0);
+
+	public Double getFlow() {
+		return flow;
 	}
-	public Double getPathNumberOfTrips() {
-		return pathNumberOfTrips;
-	}
+
 	public ArrayList<Integer> getRoute() {
 		return route;
 	}

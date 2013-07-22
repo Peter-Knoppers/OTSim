@@ -8,7 +8,7 @@ public class Generator extends Controller {
     /** Current demand level [veh/h] */
     protected double demand = 0;
 
-    /** Dynamic dymand as two columns with [t, demand]. May be <tt>null</tt>. */
+    /** Dynamic demand as two columns with [t, demand]. May be <tt>null</tt>. */
     protected double[][] dynamicDemand;
 
     /** Interpolate or stepwise dynamic demand. */
@@ -81,6 +81,7 @@ public class Generator extends Controller {
     // using this at the end is ok, generator is fully initialized
     public Generator(Lane lane, distribution dist) {
         super(lane.model);
+    	System.out.println("Creating generator for lane " + lane);
         this.lane = lane;
         this.dist = dist;
         lane.generator = this;
