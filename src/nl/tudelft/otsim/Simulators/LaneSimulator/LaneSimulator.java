@@ -255,7 +255,6 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         double flow = 0;
         for (ExportTripPattern trip : tripList) {
 			int nextNode = trip.getRoute().get(0);
-			System.out.println("nextNode is " + nextNode);
 			// When next node changes: create a generator for the current Node
 			if (nextNode > currentNode) {
 				makeGenerator(routeProbabilities, currentNode, microNetwork, routeList, flow);
@@ -265,7 +264,6 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 			}
 			currentNode = nextNode;
 			flow += trip.getFlow();
-			System.out.println("tripsByNode increased to " + flow);
 			routeList.add(trip.getRoute());
 			routeProbabilities.add(trip.getFlow());
 		}
@@ -338,7 +336,6 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 		generator.routeProb = probabilities;
 		generator.setClassProbabilities(new double[] { 0.9, 0.1 });
 		generator.setDemand(flow);
-		System.out.println("Flow of generator is " + flow);
 	}
 	
 	static Lane lookupLane(int id, ArrayList<Lane> lanes) {
