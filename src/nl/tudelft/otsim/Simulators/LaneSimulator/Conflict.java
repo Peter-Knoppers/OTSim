@@ -542,6 +542,9 @@ public class Conflict {
         /** 
          * Returns whether vehicles should keep the conflict clear when being 
          * blocked. 
+         * @return Boolean; true if vehicles should keep clear of the conflict 
+         * area when blocked; false if vehicles may block this conflict area 
+         * when blocked
          */
         public boolean keepClear() {
             return clear;
@@ -549,6 +552,8 @@ public class Conflict {
         
         /** 
          * Returns whether this conflict is a split conflict. 
+         * @return Boolean; true if this is a split conflict; false if this
+         * is not a split conflict
          */
         public boolean isSplit() {
             return type==conflictType.SPLIT;
@@ -556,6 +561,8 @@ public class Conflict {
         
         /** 
          * Returns whether this conflict is a merge conflict. 
+         * @return Boolean; true if this is a merge conflict; false if this is
+         * not a merge conflict
          */
         public boolean isMerge() {
             return type==conflictType.MERGE;
@@ -563,6 +570,8 @@ public class Conflict {
         
         /** 
          * Returns whether this conflict is a crossing conflict. 
+         * @return Boolean; true if this is a crossing conflict; false if this
+         * is not a crossing conflict
          */
         public boolean isCrossing() {
             return type==conflictType.CROSSING;
