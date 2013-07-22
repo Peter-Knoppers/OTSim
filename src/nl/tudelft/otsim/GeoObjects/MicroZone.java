@@ -161,6 +161,7 @@ public class MicroZone extends Vertex implements XML_IO {
 	 * Draw this MicroZone on a {@link GraphicsPanel}.
 	 * @param graphicsPanel GraphicsPanel to draw this MicroZone on
 	 */
+	@Override
 	public void paint(GraphicsPanel graphicsPanel) {
         final int nonSelectedMicroZoneDiameter = 15;
         final int selectedMicroZoneDiameter = 25;
