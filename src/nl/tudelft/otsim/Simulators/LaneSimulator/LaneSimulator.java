@@ -91,7 +91,6 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         	}
         }
     	double numberOfTripsPath = 0;
-    	double numberOfTrips = 0;
     	// pass 2; extract everything else
         for(String line : definition.split("\n")) {
         	String[] fields = line.split("\t");
@@ -180,38 +179,15 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         					Conflict.createSplit(down, lane.downs.get(jj));
         			}
         		}
-
-        	} else if (fields[0].equals("TripPattern")) {
-        		int i = 1;
-        		while (i < fields.length){
-        			if (fields[i].equals("numberOfTrips:"))  {
-        				i++;
-        				numberOfTrips = Double.parseDouble(fields[i]);
-        			}
-		            i = i + 1;
-        		}
-        	} else if (fields[0].equals("TripPatternPath")) {
-        		int i = 1;
-        		while (i < fields.length){
-        			if (fields[i].equals("numberOfTrips:"))  {
-        				i++;
-        				numberOfTripsPath = Double.parseDouble(fields[i]);
-        			}
-		            i = i + 1;
-        		}
-        	} else if (fields[0].equals("Path:")) {
-        		int i = 1;
-        		//int pathNo = Integer.parseInt(fields[i]);
-        		i++;
+        	} else if (fields[0].equals("TripPattern"))
+        		continue;	// FIXME: Field is not used. Why is it exported?
+        	else if (fields[0].equals("TripPatternPath"))
+        		numberOfTripsPath = Double.parseDouble(fields[2]);	// Only numberOfTrips is actually used
+        	else if (fields[0].equals("Path:")) {
         		ArrayList<Integer> route = new ArrayList<Integer>(); 
-        		while (i < fields.length){
-        			if (fields[i].equals("nodes:"))
-    		            i++;
+        		for (int i = 3; i < fields.length; i++)
         			route.add(Integer.parseInt(fields[i]));
-		            i++;
-        		}
-        		ExportTripPattern trip = new ExportTripPattern(route.get(0), numberOfTripsPath, route);
-        		tripList.add(trip);
+        		tripList.add (new ExportTripPattern(numberOfTripsPath, route));
         	} else if (fields[0].equals("Section LaneGeom"))
         		continue;
         	else if (fields[0].equals("Section LaneData"))
@@ -535,26 +511,11 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
             // check whether the lane is a taper
             boolean mergeTaper = false;
             boolean divergeTaper = false;
-            boolean addRight = false;
-            boolean addLeft = false;
-            boolean subRight = false;
-            boolean subLeft = false;
             if (lane.taper==lane && lane.down==null) {
                 mergeTaper = true;
             } else if (lane.taper==lane && lane.up==null) {
                 divergeTaper = true;
             }
-            if (lane.down==null && lane.right==null && lane.left!=null) {
-                subRight = true;
-            } else if (lane.down==null && lane.right!=null && lane.left==null) {
-                subLeft = true;
-            } 
-            if (lane.up==null && lane.right==null && lane.left!=null) {
-                addRight = true;
-            } else if (lane.up==null && lane.right!=null && lane.left==null) {
-                addLeft = true;
-            }
-            
             // set width numbers
             double w = 1.75; // half lane width
             double near = 0.375; // half distance between dual lane marking
@@ -906,33 +867,6 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         }
         
         /**
-         * Returns the concerned vehicle.
-         * @return Vehicle of this vehicle graphic.
-         */
-        public Vehicle getVehicle() {
-            return vehicle;
-        }
-        
-        /**
-         * Checks whether the vehicle is still in the simulation.
-         * @param model The model object.
-         * @return Whether the vehicle is still in the simulation.
-         */
-        public boolean exists(Model model) {
-        	// FIXME: can the supplied argument "model" really be different from this.model???
-            return model.getVehicles().contains(vehicle);
-        }
-        
-        /**
-         * Returns the bounding box of the vehicle position.
-         * @return By default <tt>null</tt>.
-         */
-        public java.awt.Rectangle.Double getGlobalBounds() {
-            return null;
-        }
-        
-        
-        /**
          * Paints the vehicle on a {@link GraphicsPanel}.
          * @param graphicsPanel {@link GraphicsPanel}; device to paint onto
          * @param showDownStream Boolean; if true, a line is drawn to the down
@@ -1140,7 +1074,6 @@ class Stepper implements Step {
 }
 
 class ExportTripPattern {
-	int startNode;
 	Double pathNumberOfTrips;
 	ArrayList<Integer> route;
 	/**
@@ -1148,14 +1081,13 @@ class ExportTripPattern {
 	 * @param share Double; flow on the new ExportTripPattern
 	 * @param route ArrayList&lt;Integer&gt;; IDs that define the route of the new ExportTripPattern
 	 */
-	public ExportTripPattern(int startNode, Double share,
+	public ExportTripPattern(Double share,
 			ArrayList<Integer> route) {
-		this.startNode = startNode;
 		this.pathNumberOfTrips = share;
 		this.route = route;
 	}
 	public int getStartNode() {
-		return startNode;
+		return route.get(0);
 	}
 	public Double getPathNumberOfTrips() {
 		return pathNumberOfTrips;
