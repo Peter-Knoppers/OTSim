@@ -19,7 +19,6 @@ import nl.tudelft.otsim.Simulators.SimulatedObject;
 import nl.tudelft.otsim.Simulators.SimulatedTrafficLightController;
 import nl.tudelft.otsim.Simulators.Simulator;
 import nl.tudelft.otsim.SpatialTools.Planar;
-import nl.tudelft.otsim.TrafficDemand.ExportTripPattern;
 
 /**
  * This class holds all data of a laneSimulator.
@@ -211,7 +210,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         			route.add(Integer.parseInt(fields[i]));
 		            i++;
         		}
-        		ExportTripPattern trip = new ExportTripPattern(route.get(0), route.get(route.size()-1), numberOfTripsPath, numberOfTrips, route);
+        		ExportTripPattern trip = new ExportTripPattern(route.get(0), numberOfTripsPath, route);
         		tripList.add(trip);
         	} else if (fields[0].equals("Section LaneGeom"))
         		continue;
@@ -267,44 +266,41 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         		throw new Error("Unknown object in LaneSimulator: \"" + fields[0] + "\"");        	
     	}
         
-    	class CompareNodeNumbers implements Comparator<ExportTripPattern> {
+    	class CompareStartNodeNumbers implements Comparator<ExportTripPattern> {
 			@Override
 			public int compare(ExportTripPattern trip1, ExportTripPattern trip2) {
 				return trip1.getStartNode() - trip2.getStartNode();
 			}
 		}
-		// sort list by NodeID (nodenumber)
-		Collections.sort(tripList, new CompareNodeNumbers());
+		// sort list by NodeID of start node
+		Collections.sort(tripList, new CompareStartNodeNumbers());
 		
         int prevNode = Integer.MAX_VALUE;
         double totalTripsFrom = 0;
         ArrayList<Double> probabilityList= new ArrayList<Double>();
         ArrayList<ArrayList<Integer>> routeList = new ArrayList<ArrayList<Integer>>();
         double tripsByNode = 0;
-		for ( int i=0;  i < tripList.size(); i++)  {
+		for (int i=0;  i < tripList.size(); i++) {
 			ExportTripPattern trip = tripList.get(i);
 			int startNode = trip.getStartNode();
 			//When next node: report data of previous node
-			if (startNode > prevNode)  {
+			if (startNode > prevNode) {
 				int size = probabilityList.size();
-				for (double prob : probabilityList) {
-					if (totalTripsFrom>0)
+				for (double prob : probabilityList)
+					if (totalTripsFrom > 0)
 						prob = prob / totalTripsFrom;
-				}
 				double probabilities[] = new double[size];
 				Route[] routeListMin2 = new Route[size];
 				Route[] routeListLast = new Route[size];
 				Lane laneOrigin = lookupOrigin(prevNode, microNetwork);
 		    	
-				//routeList[destination] = new jRoute(route);
-		    	for (int index = 0; index < size; index++)   {
+		    	for (int index = 0; index < size; index++) {
 		    		int[] routeLast = new int[1]; //last node
 		    		int last = routeList.get(index).size();
 		    		routeLast[0] = routeList.get(index).get(last-1);
 			    	int[] route_min2 = new int[last-2]; //total route
-		    		for (int i1 = 2; i1 < last; i1++)  {
+		    		for (int i1 = 2; i1 < last; i1++)
 		    			route_min2[i1-2] = routeList.get(index).get(i1);
-		    		}
 		    		routeListLast[index] = new Route(routeLast);
 		    		routeListMin2[index] = new Route(route_min2);
 		    		probabilities[index] = probabilityList.get(index).doubleValue();
@@ -945,8 +941,6 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
          * steam follower of the vehicle
          */
         public void paint(GraphicsPanel graphicsPanel, boolean showDownStream, boolean showUpStream) {
-            Color vehCol = Color.RED;
-            graphicsPanel.setColor(vehCol);
             vehicle.paint(scheduler.getSimulatedTime(), graphicsPanel);
             //Point2D.Double[] outline = vehicle.outline(scheduler.getSimulatedTime());
             //graphicsPanel.drawPolygon(outline);
@@ -1141,6 +1135,33 @@ class Stepper implements Step {
     	laneSimulator.getScheduler().enqueueEvent(model.t + model.dt, this);
     	//System.out.println("step returning true");
 		return true;
+	}
+	
+}
+
+class ExportTripPattern {
+	int startNode;
+	Double pathNumberOfTrips;
+	ArrayList<Integer> route;
+	/**
+	 * @param startNode Integer; ID of the start node of the new ExportTripPattern
+	 * @param share Double; flow on the new ExportTripPattern
+	 * @param route ArrayList&lt;Integer&gt;; IDs that define the route of the new ExportTripPattern
+	 */
+	public ExportTripPattern(int startNode, Double share,
+			ArrayList<Integer> route) {
+		this.startNode = startNode;
+		this.pathNumberOfTrips = share;
+		this.route = route;
+	}
+	public int getStartNode() {
+		return startNode;
+	}
+	public Double getPathNumberOfTrips() {
+		return pathNumberOfTrips;
+	}
+	public ArrayList<Integer> getRoute() {
+		return route;
 	}
 	
 }

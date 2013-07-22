@@ -182,8 +182,10 @@ public class Model {
                 for (int i=0; i<vehicles.size(); i++) {
                     veh = vehicles.get(i);
                     if (veh.down!=null && veh.getHeadway(veh.down)<0 &&
-                            (veh.lane==veh.down.lane || !veh.down.lane.isMerge()))
+                            (veh.lane==veh.down.lane || !veh.down.lane.isMerge())) {
                         System.err.println("Collision: "+veh.x+"@"+veh.lane.id);
+                        System.err.println("veh " + veh.toString() + " down veh " + veh.down.toString());
+                    }
                 }
             }
 

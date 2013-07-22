@@ -208,13 +208,11 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 
 	@Override
 	public void addChangeListener(DatasetChangeListener listener) {
-		System.err.println("Registering " + listener.toString());
 		listenerList.add(DatasetChangeListener.class, listener);
 	}
 
 	@Override
 	public void removeChangeListener(DatasetChangeListener listener) {
-		System.err.println("Unregistering " + listener.toString());
 		listenerList.remove(DatasetChangeListener.class, listener);
 	}
 	

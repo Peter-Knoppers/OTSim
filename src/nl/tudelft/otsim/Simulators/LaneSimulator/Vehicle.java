@@ -1,11 +1,13 @@
 package nl.tudelft.otsim.Simulators.LaneSimulator;
 
+import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
 
 import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.Simulators.SimulatedObject;
+import nl.tudelft.otsim.SpatialTools.Planar;
 
 /**
  * Default wrapper for a vehicle. It contains a driver and possibly an OBU.
@@ -509,7 +511,12 @@ public class Vehicle extends Movable implements SimulatedObject {
 
 	@Override
 	public void paint(double when, GraphicsPanel graphicsPanel) {
+        graphicsPanel.setColor(Color.BLACK);
+        graphicsPanel.setStroke(0.1f);
+        graphicsPanel.drawPolyLine(Planar.closePolyline(outline(when)));
         Point2D.Double[] outline = outline(when);
+		graphicsPanel.setColor(Color.RED);
+        graphicsPanel.setStroke(0f);
         graphicsPanel.drawPolygon(outline);
 	}
 

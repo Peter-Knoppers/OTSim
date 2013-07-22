@@ -267,14 +267,11 @@ public class TrafficDemand implements Storable {
 	 * @return String; the textual representation of this TrafficDemand
 	 */
     public String exportTripPattern() {    
-    	//private String exportTripPattern(HashMap<Node, Double> tripsByNode) {	
     	String result = "";
         for (TripPattern tripPattern : getTripPatternList())   {
         	Double totalTrips = tripPattern.getNumberOfTrips();
         	result += String.format(Locale.US, "TripPattern\tnumberOfTrips:\t%.2f\tLocationPattern:\t%s\n", totalTrips, tripPattern.getLocationList().toString());
             for (TripPatternPath tripPatternPath : tripPattern.getTripPatternPathList())   {
-            	//Node nodeStart = tripPatternPath.getNodeList().get(0);
-            	//Double totalTrips = tripsByNode.get(nodeStart);
             	double numberOfTrips = 0;
             	if (totalTrips > 0)
             		numberOfTrips = tripPatternPath.getNumberOfTrips();
