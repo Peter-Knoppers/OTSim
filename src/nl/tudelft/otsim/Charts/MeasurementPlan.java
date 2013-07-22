@@ -38,7 +38,7 @@ import nl.tudelft.otsim.SpatialTools.Planar;
  * 
  * @author Peter Knoppers
  */
-public class MeasurementPlan extends JPanel implements GraphicsPanelClient, Storable, ActionListener, Step {
+public class MeasurementPlan extends JPanel implements GraphicsPanelClient, Storable, ActionListener {
 	private static final long serialVersionUID = 1L;
 	/** Name for a Network element when stored in XML format */
 	public static final String XMLTAG = "MeasurementPlan";
@@ -330,12 +330,6 @@ public class MeasurementPlan extends JPanel implements GraphicsPanelClient, Stor
 	public void mouseMoved(GraphicsPanel graphicsPanel, MouseEvent evt) {
 	}
 
-	@Override
-	public boolean step(double now) {
-		// TODO Auto-generated method stub
-		return true;
-	}
-	
 	private void appendPart(ArrayList<Vertex> existingPart, ArrayList<Vertex> newPart) {
 		int first = 0;
 		if ((existingPart.size() > 0) && (existingPart.get(existingPart.size() - 1).distanceTo(newPart.get(0)) < veryClose))
