@@ -511,6 +511,8 @@ public class Vehicle extends Movable implements SimulatedObject {
 
 	@Override
 	public void paint(double when, GraphicsPanel graphicsPanel) {
+		if ((! lane.isVisible()) || ((null != rearLane) && (! rearLane.isVisible())))
+			return;
         graphicsPanel.setColor(Color.BLACK);
         graphicsPanel.setStroke(0.1f);
         graphicsPanel.drawPolyLine(Planar.closePolyline(outline(when)));

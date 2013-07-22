@@ -14,6 +14,7 @@ import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.GUI.ObjectInspector;
 import nl.tudelft.otsim.GUI.WED;
 import nl.tudelft.otsim.Simulators.Measurement;
+import nl.tudelft.otsim.Simulators.LaneSimulator.Conflict;
 import nl.tudelft.otsim.Simulators.ShutDownAble;
 import nl.tudelft.otsim.Simulators.SimulatedObject;
 import nl.tudelft.otsim.Simulators.SimulatedTrafficLightController;
@@ -32,6 +33,8 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 	private final Scheduler scheduler;
 	/** Type of this Simulator */
 	public static final String simulatorType = "Lane simulator";
+	
+	private int highestLaneID = 0;
 
 	/**
 	 * Retrieve the {@link Model} of this laneSimulator.
@@ -70,6 +73,8 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         	if (fields[0].equals("Lane")) {	
         		System.out.println("description: " + line);
         		int id = Integer.parseInt(fields[2]);
+        		if (id < highestLaneID)
+        			highestLaneID = id;
         		int numberOfPoints = (fields.length - 4);
         		double[] x = new double[numberOfPoints];
         		double[] y = new double[numberOfPoints];
@@ -319,7 +324,8 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         scheduler.enqueueEvent(0d, new Stepper(this));
 	}
 	
-	private static void makeGenerator(ArrayList<Double> routeProbabilities, int node, ArrayList<Lane> lanes, ArrayList<ArrayList<Integer>> routes, double flow) {
+	private void makeGenerator(ArrayList<Double> routeProbabilities, int node, ArrayList<Lane> lanes, ArrayList<ArrayList<Integer>> routes, double flow) {
+		System.out.println("Creating generator at node " + node);
 		int routeCount = routeProbabilities.size();
 		double probabilities[] = new double[routeCount];
 		Route[] routeEnds = new Route[routeCount];
@@ -331,6 +337,40 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
     		routeEnds[index] = new Route(endOfRoute);
     		probabilities[index] = routeProbabilities.get(index);
     	}
+    	int mergeCount = 0;
+    	Lane priorityLane = null;
+    	for (Lane lane : lanes)
+    		if (lane.down == laneOrigin) {
+    			mergeCount++;
+    			priorityLane = lane;
+    		}
+    	if (mergeCount > 1)
+    		throw new Error ("Don't know how to create an N-merge for N=" + mergeCount);
+    	if (mergeCount == 1) {
+    		double x[] = new double[2];
+    		x[0] = laneOrigin.x[0] - 50;
+    		x[1] = laneOrigin.x[0];
+    		double y[] = new double[2];
+    		y[0] = laneOrigin.y[0] - 50;
+    		y[1] = laneOrigin.y[0];
+    		Lane hiddenLane = new Lane(model, x, y, ++highestLaneID);
+    		hiddenLane.vLim = 50;
+			if (!laneOrigin.ups.isEmpty())
+				laneOrigin.ups.add(hiddenLane);
+			else if (laneOrigin.up != null)  {
+				laneOrigin.ups.add(laneOrigin.up);
+				laneOrigin.ups.add(hiddenLane);
+				laneOrigin.up = null;
+			}
+			else
+				laneOrigin.up = hiddenLane;
+			hiddenLane.down = laneOrigin;
+    		Conflict.createMerge(laneOrigin, priorityLane, hiddenLane);
+    		laneOrigin = hiddenLane;
+    		hiddenLane.setVisible(false);
+    		lanes.add(hiddenLane);
+    	}
+    	System.out.println("mergeCount is " + mergeCount);
 		Generator generator = new Generator(laneOrigin, Generator.distribution.EXPONENTIAL);
 		generator.routes = routeEnds;
 		generator.routeProb = probabilities;
@@ -375,6 +415,8 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 		}
 		
 		public void paint(GraphicsPanel graphicsPanel) {
+			if (! lane.isVisible())
+				return;
 			graphicsPanel.setColor(Color.GRAY);
 			graphicsPanel.setStroke(GraphicsPanel.SOLID, 1, 0);
 			

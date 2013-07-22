@@ -124,6 +124,8 @@ public class Lane {
      * direction of the merge, it should not be followed.
      */
     public Lane mergeOrigin;
+
+	private boolean visible = true;	// Default is to paint the lane
     
     /**
      * Constructor that will calculate the lane length from the x and y
@@ -1119,4 +1121,20 @@ public class Lane {
     public java.util.ArrayList<RSU> getRSUs_r() {
     	return RSUs;
     }
+
+	/**
+	 * @param visible Boolean; true if this Lane is to be painted (default);
+	 * false if this Lane must not be painted
+	 */
+	public void setVisible(boolean visible) {
+		this.visible = visible;
+	}
+
+	/**
+	 * @return Boolean; true if this lane is visible (this is the default);
+	 * false if this lane is invisible (hidden)
+	 */
+	public boolean isVisible() {
+		return visible;
+	}
 }

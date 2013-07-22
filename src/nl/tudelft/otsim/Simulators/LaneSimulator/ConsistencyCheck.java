@@ -26,7 +26,7 @@ public class ConsistencyCheck {
 			// Check the up consistency
 			if (null != lane.up) {
 				if (lane.ups.size() != 0)
-					throw new Exception (describeLane(lane) + "has both up and non-empty ups");
+					throw new Exception (describeLane(lane) + " has both up and non-empty ups");
 				Lane up = lane.up;
 				if (null != up.down) {
 					if (up.down != lane)
@@ -54,7 +54,7 @@ public class ConsistencyCheck {
 						if (down == lane)
 							hits++;
 					if (1 != hits)
-						throw new Exception("Up " + describeLane(up) + " of " + describeLane(lane) + " contains " + hits + " instances of " + describeLane(lane));
+						throw new Exception("Up " + describeLane(up) + " of " + describeLane(lane) + " contains " + hits + " instances of " + describeLane(lane) + " among its downs");
 				}
 			}
 			// Check the down consistency
