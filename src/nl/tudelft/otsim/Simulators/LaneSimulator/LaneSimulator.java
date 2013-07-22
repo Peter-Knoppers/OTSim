@@ -242,14 +242,12 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         		throw new Error("Unknown object in LaneSimulator: \"" + fields[0] + "\"");        	
     	}
         
-    	class CompareStartNodeNumbers implements Comparator<ExportTripPattern> {
+        Collections.sort(tripList, new Comparator<ExportTripPattern>() {
 			@Override
-			public int compare(ExportTripPattern trip1, ExportTripPattern trip2) {
-				return trip1.getStartNode() - trip2.getStartNode();
+			public int compare(ExportTripPattern arg0, ExportTripPattern arg1) {
+				return arg0.getStartNode() - arg1.getStartNode();
 			}
-		}
-		// sort list by NodeID of start node
-		Collections.sort(tripList, new CompareStartNodeNumbers());
+        });
 		
         int prevNode = Integer.MAX_VALUE;
         double totalTripsFrom = 0;
