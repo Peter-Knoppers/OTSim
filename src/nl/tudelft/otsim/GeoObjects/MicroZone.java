@@ -166,13 +166,13 @@ public class MicroZone extends Vertex implements XML_IO {
         final int selectedMicroZoneDiameter = 25;
     	Point2D.Double point = getPoint();            
     	graphicsPanel.setStroke(3F);
-        graphicsPanel.setColor(Color.BLACK);
-        graphicsPanel.drawString(getName_r(), point);
         graphicsPanel.drawCircle(point, Color.RED, nonSelectedMicroZoneDiameter);
         graphicsPanel.setStroke(8f);
         if (network.selectedMicroZone == this)   {
             graphicsPanel.drawCircle(point, Color.BLUE, selectedMicroZoneDiameter); 
         }
+        graphicsPanel.setColor(Color.BLACK);
+        graphicsPanel.drawString(getName_r(), point);
 	}
 	
 	private boolean writeNodeList(StaXWriter staXWriter) {
