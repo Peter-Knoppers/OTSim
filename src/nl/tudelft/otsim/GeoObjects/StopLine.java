@@ -133,10 +133,6 @@ public class StopLine extends CrossSectionObject {
 			throw new Error("Invalid stop line type: " + type);
 	}
 
-	//public Double getLength_r() {
-	//	return longitudinalLength;
-	//}
-
 	public void setLength_w(Double length) {
 		longitudinalLength = length;
 	}

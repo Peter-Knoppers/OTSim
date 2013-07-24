@@ -24,10 +24,10 @@ public class PriorityConflict {
 
     /** Type of the conflict being either split, merge or crossing. */
     protected conflictType conflictType;
-    private Lane priorityLane;
-    private Lane yieldLane;
+    //private Lane priorityLane;
+    //private Lane yieldLane;
     private StopLine stopLine;
-	private double priorityLongPosition;
+	//private double priorityLongPosition;
 	private double yieldLongPosition;
 	private Polygon conflictArea;
        
@@ -44,23 +44,24 @@ public class PriorityConflict {
      */
     protected PriorityConflict(Lane pLane, double pLongitudinal, Lane yLane, double yLongitudinal, conflictType type, Polygon conflictArea) {
         this.setStopLine(stopLine);
-        this.priorityLane = pLane;
+        //this.priorityLane = pLane;
         this.setPriorityLongPosition(pLongitudinal);
-        this.yieldLane = yLane;
+        //this.yieldLane = yLane;
         this.yieldLongPosition = yLongitudinal;
         this.conflictType = type;
         this.conflictArea = conflictArea;
     }
-        
-    public double getYieldLongPosition() {
+       
+    private double getYieldLongPosition() {
 		return yieldLongPosition;
 	}
 
-	public void setYieldLongPosition(double yieldLongPosition) {
+	private void setYieldLongPosition(double yieldLongPosition) {
 		this.yieldLongPosition = yieldLongPosition;
 	}
 
-	public Lane getPriorityLane() {
+	/*
+	private Lane getPriorityLane() {
 		return priorityLane;
 	}
 
@@ -72,33 +73,38 @@ public class PriorityConflict {
 		return yieldLane;
 	}
 
-	public void setYieldLane(Lane yieldLane) {
+	private void setYieldLane(Lane yieldLane) {
 		this.yieldLane = yieldLane;
 	}
 
 	public StopLine getStopLine() {
 		return stopLine;
 	}
+	*/
 
-	public void setStopLine(StopLine stopLine) {
+	private void setStopLine(StopLine stopLine) {
 		this.stopLine = stopLine;
 	}
 
+	/*
 	public double getPriorityLongPosition() {
 		return priorityLongPosition;
 	}
+	*/
 
-	public void setPriorityLongPosition(double priorityLongPosition) {
-		this.priorityLongPosition = priorityLongPosition;
+	private void setPriorityLongPosition(double priorityLongPosition) {
+		//this.priorityLongPosition = priorityLongPosition;
 	}
 
 	public Polygon getConflictArea() {
 		return conflictArea;
 	}
 
+	/*
 	public void setConflictArea(Polygon conflictArea) {
 		this.conflictArea = conflictArea;
 	}
+	*/
 
 	public  GeneralPath createPolygon()   {
     	double x;
