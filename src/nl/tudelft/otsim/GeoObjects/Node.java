@@ -655,12 +655,6 @@ public class Node extends Vertex implements XML_IO {
 		return result;
 	}
 	
-	/*
-	public ArrayList<DirectionalLink> getDirectionalLinks_r() {
-		return getLinks();
-	}
-	*/
-	
     private void determineSinkOrSource() {
     	sink = false;
     	source = false;
@@ -721,6 +715,7 @@ public class Node extends Vertex implements XML_IO {
     }
     
 	public ArrayList<DirectionalLink> getLinksFromJunction() {
+		// FIXME: this method does a lot of things that have nothing to do with it's name.
 	    determineSinkOrSource();
 	    ArrayList<DirectionalLink> dlList = null;
 		if (0 == links.size())

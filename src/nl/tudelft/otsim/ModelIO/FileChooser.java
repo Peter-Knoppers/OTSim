@@ -10,25 +10,25 @@ import static javax.swing.GroupLayout.Alignment.*;
 public class FileChooser extends JPanel implements ActionListener {
 	private static final long serialVersionUID = 1L;
 	private JButton[] fileButton = new JButton[20];
-    private int index = -1;
+    //private int index = -1;
     private JTextField[] textField = new JTextField[20];
     private JLabel[] label = new JLabel[20]; 
     private String moduleName;
     private String command;
-	private static int fileCount;
+	//private static int fileCount;
 
+	/*
     public static int getFileCount() {
 		return fileCount;
 	}
 
-    // TODO explain raison d'etre
 	public static void setFileCount(int fileCount) {
 		FileChooser.fileCount = fileCount;
-	}
+	}*/
 
 	public FileChooser(int files, String[] labels, String[] fileNames, String[] action) {
         for (int i = 0; i < files; i++ ) {
-        	fileCount++;
+        	//fileCount++;
         	fileButton[i] = new JButton(fileNames[i]);
         	fileButton[i].setToolTipText(fileNames[i]);
         	fileButton[i].addActionListener(this);
@@ -237,28 +237,29 @@ public class FileChooser extends JPanel implements ActionListener {
         pack();
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);*/
     }
-	
+	/*
     public int getIndex() {
 		return index;
 	}
 	public void setIndex(int index) {
 		this.index = index;
-	}
+	}*/
 	
 	public JButton[] getFileButton() {
 		return fileButton;
 	}
+	
 	public JTextField[] getTextField() {
 		return textField;
 	}
-
+	/*
 	public void setTextField(JTextField[] textField) {
 		this.textField = textField;
 	}
 
 	public void setFileButton(JButton[] fileButton) {
 		this.fileButton = fileButton;
-	}
+	}*/
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -342,6 +343,7 @@ public class FileChooser extends JPanel implements ActionListener {
 		return command;
 	}
 
+	/*
 	public void setCommand(String command) {
 		this.command = command;
 	}
@@ -349,6 +351,7 @@ public class FileChooser extends JPanel implements ActionListener {
 	public String getModuleName() {
 		return moduleName;
 	}
+	*/
 
 	public void setModuleName(String moduleName) {
 		this.moduleName = moduleName;
