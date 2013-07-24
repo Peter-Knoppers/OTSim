@@ -1097,7 +1097,7 @@ public class Lane {
     }
     
     /**
-     * Return whether it is possible to change to the left from this Lane
+     * Return whether it is possible to merge to the left from this Lane
      * @return Boolean; true if it is possible to change to the left from this
      * Lane; false if it is not possible to change to the left from this Lane
      */
@@ -1106,7 +1106,7 @@ public class Lane {
     }
     
     /**
-     * Return whether it is possible to change to the right from this Lane
+     * Return whether it is possible to merge to the right from this Lane
      * @return Boolean; true if it is possible to change to the right from this
      * Lane; false if it is not possible to change to the right from this Lane
      */
