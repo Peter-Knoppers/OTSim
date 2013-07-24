@@ -572,5 +572,11 @@ public class Link implements XML_IO {
 				&& writeXMLCrossSections(staXWriter)
 				&& staXWriter.writeNodeEnd(XMLTAG);
 	}
+
+	public void regenerateVertices() {
+		for (CrossSection cs : getCrossSections_r())
+			for (CrossSectionElement cse : cs.getCrossSectionElementList_r())
+				cse.regenerateVertices();
+	}
 	
 }

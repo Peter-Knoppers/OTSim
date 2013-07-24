@@ -1346,7 +1346,6 @@ public class Node extends Vertex implements XML_IO {
      * @return {@link Link}; the newly created Link
      */
     private Link createJunctionLink(DirectionalLink incoming, ArrayList<Lane> newLanes, ArrayList<RoadMarkerAlong> rmaList)  { 
-
 		CrossSectionElement inCse = newLanes.get(0).getUp().get(0).getCse();
 		Node expandNode1 = expandNode(true, incoming.link, inCse);
 		CrossSectionElement outCse = newLanes.get(0).getDown().get(0).getCse();
@@ -1396,8 +1395,7 @@ public class Node extends Vertex implements XML_IO {
 		CrossSectionElement newCse = new CrossSectionElement(newCs, "road", width, rmaList, null);
 		
 		ArrayList<Vertex> vertexInner = rmaList.get(0).getVertices();
-		newCse.setVerticesInner(rmaList.get(0).getVertices());
-		newCse.setVerticesOuter(tempVertices);
+		newCse.setVertices(rmaList.get(0).getVertices(), tempVertices);
 		for (Lane lane : newLanes) {
 			newCse.addCrossSectionObject(lane);
 			lane.setCse(newCse);

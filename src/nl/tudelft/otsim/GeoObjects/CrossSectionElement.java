@@ -644,16 +644,8 @@ public class CrossSectionElement implements XML_IO {
 		return verticesInner;
 	}
 
-	public void setVerticesInner(ArrayList<Vertex> verticesInner) {
-		this.verticesInner = verticesInner;
-	}
-
 	public ArrayList<Vertex> getVerticesOuter() {
 		return verticesOuter;
-	}
-
-	public void setVerticesOuter(ArrayList<Vertex> verticesOuter) {
-		this.verticesOuter = verticesOuter;
 	}
 
 	/**
@@ -1179,6 +1171,26 @@ public class CrossSectionElement implements XML_IO {
 				&& staXWriter.writeNode(XML_WIDTH, Double.toString(getCrossSectionElementWidth()))
 				&& writeCrossSectionObjectsXML(staXWriter)
 				&& staXWriter.writeNodeEnd(XMLTAG);
+	}
+
+	/**
+	 * Re-generate the cashed ArrayLists of inner and outer vertices of this CrossSectionElement.
+	 * <br /> This method must be called if the shape of this CrossSectionElement may have changed.
+	 */
+	public void regenerateVertices() {
+		setVertices(createAndCleanLinkPointListInner(false, true, false), createAndCleanLinkPointListOuter(false, true, false));         		
+	}
+
+	/**
+	 * Set the cached inner and outer vertices of this CrossSectionElement to the specified shapes. 
+	 * @param inner ArrayList&lt;{@link Vertex}&gt; the list of vertices that 
+	 * describes the inner boundary of this CrossSectionElement
+	 * @param outer ArrayList&lt;{@link Vertex}&gt; the list of vertices that 
+	 * describes the outer boundary of this CrossSectionElement
+	 */
+	public void setVertices(ArrayList<Vertex> inner, ArrayList<Vertex> outer) {
+		verticesInner = inner;
+		verticesOuter = outer;
 	}
 
 }
