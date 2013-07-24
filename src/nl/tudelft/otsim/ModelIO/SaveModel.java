@@ -21,7 +21,6 @@ import javax.swing.WindowConstants;
 import nl.tudelft.otsim.FileIO.StaXWriter;
 import nl.tudelft.otsim.GUI.FileDialog;
 import nl.tudelft.otsim.GUI.Main;
-import nl.tudelft.otsim.GUI.Model;
 import nl.tudelft.otsim.TrafficDemand.TrafficDemand;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -38,11 +37,11 @@ public class SaveModel implements ActionListener {
 	private JCheckBox optionDemand;
 	JFrame frame;
     private static FileChooser fChooser;
-    private Model saveModel;
+    //private Model saveModel;
     private static String fileSavedModel;
-    private static String fileSavedDemand;
+    //private static String fileSavedDemand;
 	private static int index; 
-	private static int fileCount;
+	//private static int fileCount;
 
 	public SaveModel() {
 		Class<?> klass;
@@ -84,7 +83,7 @@ public class SaveModel implements ActionListener {
     	String[] labels = new String[files];
     	labels[0] = "Network File";
     	labels[1] = "Traffic Demand File";
-    	fileCount = fileNames.length;
+    	//fileCount = fileNames.length;
     	String[] commandNames = new String[files];
     	commandNames[0] = "Model";
     	commandNames[1] = "Demand";
@@ -185,10 +184,10 @@ public class SaveModel implements ActionListener {
 	        Main.mainFrame.setActiveGraph();
 	        Main.mainFrame.menuItemSaveModel.setEnabled(true); 
 	        this.frame.dispose();
-			}
+		}
 		if (command.startsWith("Cancel")) {
 			System.out.println("Cancel" + command);
-			saveModel = null;
+			//saveModel = null;
 			this.frame.dispose();
 			//TODO add close statement
 		}
@@ -220,7 +219,7 @@ public class SaveModel implements ActionListener {
             }
         }
 	}
-	
+
 	public static void saveModel() throws Exception {		
 		if (fChooser.getCommand().startsWith("Model")) {
     		index = 0;            	
@@ -230,7 +229,6 @@ public class SaveModel implements ActionListener {
             fileSavedModel = new File(fileName).getPath();
 			fChooser.getTextField()[index].setText(fileSavedModel);
             System.out.printf("User selected network file \"%s\"", fileSavedModel);
-
 		}
 		else if (fChooser.getCommand().startsWith("Demand")) {
 			index = 1;
@@ -241,9 +239,9 @@ public class SaveModel implements ActionListener {
 			fChooser.getTextField()[index].setText(fileSavedModel);
             System.out.printf("User selected network file \"%s\"", fileSavedModel);
 		}
-    
 	}
 
+    /*
     private static boolean openDialogSaveFile() {
     	String fileName = FileDialog.showFileDialog(false, "xml", "xml files", Main.mainFrame.initialDirectory);
     	if (null == fileName)
@@ -286,11 +284,11 @@ public class SaveModel implements ActionListener {
 	public void setFinishButton(JButton finishButton) {
 		this.finishButton = finishButton;
 	}
-
+	*/
 	public JButton getNextButton() {
 		return nextButton;
 	}
-
+	/*
 	public void setNextButton(JButton nextButton) {
 		this.nextButton = nextButton;
 	}
@@ -302,5 +300,6 @@ public class SaveModel implements ActionListener {
 	public void setPrevButton(JButton prevButton) {
 		this.prevButton = prevButton;
 	}
+	*/
 
 }
