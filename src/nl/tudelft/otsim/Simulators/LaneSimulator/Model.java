@@ -304,6 +304,7 @@ public class Model {
             Vehicle veh = iter.next();
             if (veh.up==movable || veh.down==movable || veh.leftUp==movable ||
                     veh.leftDown==movable || veh.rightUp==movable || veh.rightDown==movable) {
+            	System.err.println("cut vehicle (a) " + veh.toString());
                 throw new RuntimeException("Cut vehicle: "+x+"@"+lane.id+
                         ", still connected: "+veh.x+"@"+veh.lane.id);
             }
@@ -313,6 +314,7 @@ public class Model {
             LCVehicle veh = iterLc.next();
             if (veh.up==movable || veh.down==movable || veh.leftUp==movable ||
                     veh.leftDown==movable || veh.rightUp==movable || veh.rightDown==movable) {
+            	System.err.println("cut vehicle (b) " + movable.toString() + " connected from " + veh.toString() + " neighbors" + veh.linkedNeighbors());
                 throw new java.lang.RuntimeException("Cut vehicle: "+x+"@"+lane.id+
                         ", still connected: "+veh.x+"@"+veh.lane.id);
             }

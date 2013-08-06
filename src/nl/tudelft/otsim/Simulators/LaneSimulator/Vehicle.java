@@ -48,8 +48,7 @@ public class Vehicle extends Movable implements SimulatedObject {
     public int classID;
     
     /** Set of ordered RSUs in <tt>RSURange</tt>. */
-    protected java.util.ArrayList<RSU> RSUsInRange = 
-            new java.util.ArrayList<RSU>();
+    protected java.util.ArrayList<RSU> RSUsInRange = new java.util.ArrayList<RSU>();
     
     /** Range within which RSUs are connected [m]. */
     protected double RSURange;
@@ -75,10 +74,10 @@ public class Vehicle extends Movable implements SimulatedObject {
      */
     public void setAcceleration(double a) {
         // limit acceleration to maximum deceleration
-        a = a<aMin ? aMin : a;
+        a = a < aMin ? aMin : a;
         // limit acceleration to lack of speed (getting to zero at end of time step)
-        double aZero = -v/model.dt;
-        a = a<aZero ? aZero : a;
+        double aZero = -v / model.dt;
+        a = a < aZero ? aZero : a;
         this.a = a;
     }
     
@@ -101,13 +100,13 @@ public class Vehicle extends Movable implements SimulatedObject {
         lcProgress += dy;
         // longitudinal
         double dt = model.dt;
-        double dx = dt*v + .5*a*dt*dt;
+        double dx = dt * v + .5 * a * dt * dt;
         dx = dx >= 0 ? dx : 0;
         v = v+dt*a;
         // limit speed to positive values
         v = v >= 0 ? v : 0;
         // clip very small values to zero for v==0 evaluations
-        v = v<0.000001 ? 0 : v;
+        v = v < 0.000001 ? 0 : v;
         translate(dx);
         setXY();
     }
@@ -142,7 +141,7 @@ public class Vehicle extends Movable implements SimulatedObject {
                 lastLane = rsu.lane;
                 lastX = rsu.x;
             }
-            s = getDistanceToRSU(rsu)-dx;
+            s = getDistanceToRSU(rsu) - dx;
         }
         // Add new RSUs in range
         java.util.ArrayList<RSU> next = new java.util.ArrayList<RSU>();
@@ -150,9 +149,9 @@ public class Vehicle extends Movable implements SimulatedObject {
             // lastLane may become null at a split where the route has no
             // appropriate downstream lane, as the vehicle has to change lane
             // before the split
-            next = lastLane.findRSU(lastX, RSURange-s);
+            next = lastLane.findRSU(lastX, RSURange - s);
             if (!next.isEmpty()) {
-                s = getDistanceToRSU(next.get(0))-dx;
+                s = getDistanceToRSU(next.get(0)) - dx;
                 for (RSU j : next) {
                     RSUsInRange.add(j);
                     if (j instanceof Lane.splitRSU) {
@@ -160,21 +159,20 @@ public class Vehicle extends Movable implements SimulatedObject {
                         lastLane = ((Lane.splitRSU) j).getLaneForRoute(route);
                         lastX = 0;
                     } else {
-                        // continue search after rsu
+                        // continue search after RSU
                         lastLane = j.lane;
                         lastX = j.x;
                     }
                 }
-            } else {
+            } else
                 s = RSURange; // stop loop
-            }
         }
         // Pass RSUs
         java.util.Iterator<RSU> it = RSUsInRange.iterator();
         while (it.hasNext()) {
             rsu = it.next();
             s = getDistanceToRSU(rsu) - dx;
-            if (s<0) {
+            if (s < 0) {
                 if (rsu.passable || rsu.noticeable)
                     rsu.pass(this);
                 it.remove();
@@ -186,12 +184,13 @@ public class Vehicle extends Movable implements SimulatedObject {
         justExceededLane = false;
         while (x > lane.l) {
             justExceededLane = true;
-            if (lane.down==null && lane.destination==-999) {
+            if (lane.down == null && lane.destination == Lane.none) {
                 model.deleted++;
                 System.out.println("Vehicle deleted as lane "+lane.id+" is exceeded ("+model.deleted+"), dead end");
                 delete();
                 return;
-            } else if (lane.down==null && lane.destination>=0) {
+            //} else if (lane.down==null && lane.destination>=0) {
+            } else if (route.destinations().length==1 && lane.destination==route.destinations()[0]) {
                 // vehicle has reached (a) destination
                 if (model.settings.getBoolean("storeTrajectoryData") && trajectory!=null) {
                     model.saveTrajectoryData(trajectory);
@@ -200,13 +199,13 @@ public class Vehicle extends Movable implements SimulatedObject {
                 return;
             } else {
                 // update route
-                if (lane.destination>0) {
+                if (lane.destination > 0)
                     route = route.subRouteAfter(lane.destination);
-                }
                 // check whether route is still reachable
                 if (!route.canBeFollowedFrom(lane.down)) {
 	                model.deleted++;
 	                System.out.println("Vehicle deleted as lane "+lane.id+" is exceeded ("+model.deleted+"), route unreachable");
+	                System.out.println(toString());
 	                delete();
 	                return;
                 } 
@@ -264,10 +263,9 @@ public class Vehicle extends Movable implements SimulatedObject {
         }
         
         // Append trajectory
-        if (model.settings.getBoolean("storeTrajectoryData") && trajectory!=null) {
+        if (model.settings.getBoolean("storeTrajectoryData") && trajectory != null)
             trajectory.append();
-        }
-    }
+     }
     
     /**
      * Sets the range within which RSUs are linked to the vehicle.
@@ -349,16 +347,13 @@ public class Vehicle extends Movable implements SimulatedObject {
     @Override
 	public void setXY() {
         java.awt.geom.Point2D.Double coord = atLaneXY();
-        if (lcVehicle!=null) {
-            // interpolate between own and lcVehicle global X and Y
-            globalX = coord.x*(1-lcProgress) + lcVehicle.globalX*lcProgress;
-            globalY = coord.y*(1-lcProgress) + lcVehicle.globalY*lcProgress;
-        } else {
-            globalX = coord.x;
-            globalY = coord.y;
-        }
+        if (lcVehicle != null) // interpolate between own and lcVehicle global X and Y
+            global = new java.awt.geom.Point2D.Double(coord.x * (1 - lcProgress) + lcVehicle.global.x * lcProgress,
+            		coord.y * (1 - lcProgress) + lcVehicle.global.y * lcProgress);
+        else
+        	global = new java.awt.geom.Point2D.Double(coord.x, coord.y);
         setHeading();
-        if (lcVehicle!=null)
+        if (lcVehicle != null)
             lcVehicle.heading = heading;
     }
     
@@ -368,36 +363,36 @@ public class Vehicle extends Movable implements SimulatedObject {
     public void setHeading() {
         java.awt.geom.Point2D.Double p1 = lane.XY(x);
         java.awt.geom.Point2D.Double p2;
-        if (x>l || rearLane==null) {
+        if ((x > l) || (rearLane == null)) {
             rearLane = lane;
-            p2 = lane.XY(x-l);
+            p2 = lane.XY (x - l);
         } else {
-            // update rearlane
+            // update rearLane
             double xRear = rearLane.xAdj(lane)+x-l;
             while (xRear > rearLane.l) {
-                if (rearLane.down!=null) {
+                if (rearLane.down != null)
                     rearLane = rearLane.down;
-                } else if (rearLane.isSplit()) {
-                    for (int i=0; i<rearLane.RSUcount(); i++) {
+                else if (rearLane.isSplit()) {
+                    for (int i = 0; i < rearLane.RSUcount(); i++) {
                         if (rearLane.getRSU(i) instanceof Lane.splitRSU) {
                             Lane.splitRSU split = (Lane.splitRSU) rearLane.getRSU(i);
                             Lane tmp = split.getLaneForRoute(route);
-                            if (tmp!=null) {
+                            if (tmp != null) {
                                 rearLane = tmp;
                                 break;
                             }
                         }
                     }
                 }
-                xRear = rearLane.xAdj(lane)+x-l;
+                xRear = rearLane.xAdj (lane) + x - l;
             }
-            p2 = rearLane.XY(xRear);
+            p2 = rearLane.XY (xRear);
         }
-        double xx = p1.x-p2.x;
-        double yy = p1.y-p2.y;
+        double xx = p1.x - p2.x;
+        double yy = p1.y - p2.y;
         // Normalize
-        double f = Math.sqrt(xx*xx + yy*yy);
-        heading = new java.awt.geom.Point2D.Double(xx/f, yy/f);
+        double f = Math.sqrt(xx * xx + yy * yy);
+        heading = new java.awt.geom.Point2D.Double(xx / f, yy / f);
     }
 
     /**
@@ -405,7 +400,7 @@ public class Vehicle extends Movable implements SimulatedObject {
      * @return Maximum vehicle speed [m/s].
      */
     public double getVMax() {
-        return vMax/3.6;
+        return vMax / 3.6;
     }
 
     /**
@@ -420,7 +415,7 @@ public class Vehicle extends Movable implements SimulatedObject {
      * @return Whether the car is equipped.
      */
     public boolean isEquipped() {
-        return OBU!=null;
+        return OBU != null;
     }
     
     /**
@@ -434,7 +429,7 @@ public class Vehicle extends Movable implements SimulatedObject {
     
     @Override
 	public String toString() {
-    	return String.format(Main.locale, "at (%.3f, %.3f), route %s", globalX, globalY, route.toString());
+    	return String.format (Main.locale, "at (%.3f, %.3f), route %s", global.x, global.y, route.toString());
     }
     
     /**
@@ -442,7 +437,7 @@ public class Vehicle extends Movable implements SimulatedObject {
      * @return String; the length of this Vehicle
      */
     public String getLength_r() {
-    	return String.format(Main.locale, "%.2f m", l);
+    	return String.format (Main.locale, "%.2f m", l);
     }
     
     /**
@@ -450,7 +445,7 @@ public class Vehicle extends Movable implements SimulatedObject {
      * @return String; the speed of this Vehicle
      */
     public String getSpeed_r() {
-    	return String.format(Main.locale, "%.2f km/h", v * 3.6);
+    	return String.format (Main.locale, "%.2f km/h", v * 3.6);
     }
     
     /**
@@ -458,7 +453,7 @@ public class Vehicle extends Movable implements SimulatedObject {
      * @return String; the acceleration of this vehicle
      */
     public String getAcceleration_r() {
-    	return String.format(Main.locale, "%.2f m/s/s", a);
+    	return String.format (Main.locale, "%.2f m/s/s", a);
     }
     
     /**
@@ -466,7 +461,7 @@ public class Vehicle extends Movable implements SimulatedObject {
      * @return String; the maximum acceleration of this Vehicle
      */
     public String getMaximumDeceleration_r () {
-    	return String.format(Main.locale, "%.2f m/s/s", aMin);
+    	return String.format (Main.locale, "%.2f m/s/s", aMin);
     }
     
     /**
@@ -526,15 +521,15 @@ public class Vehicle extends Movable implements SimulatedObject {
 	public Double[] outline(double when) {
 		double stepFraction = 0; 
     	Point2D.Double[] result = new Point2D.Double[4];
-        double halfWidth = 1;	// m
-        double xFront = globalX + heading.x * stepFraction;
-        double yFront = globalY + heading.y * stepFraction;
+        final double halfWidth = 1;	// m
+        final double xFront = global.x + heading.x * stepFraction;
+        final double yFront = global.y + heading.y * stepFraction;
         
         result[0] = new Point2D.Double(xFront + heading.y * halfWidth, yFront - heading.x * halfWidth);
         result[1] = new Point2D.Double(xFront - heading.y * halfWidth, yFront + heading.x * halfWidth);
 
-        double xRear = xFront - heading.x * l;
-        double yRear = yFront - heading.y * l;
+        final double xRear = xFront - heading.x * l;
+        final double yRear = yFront - heading.y * l;
         
         result[2] = new Point2D.Double(xRear - heading.y * halfWidth, yRear + heading.x * halfWidth);
         result[3] = new Point2D.Double(xRear + heading.y * halfWidth, yRear - heading.x * halfWidth);      	
@@ -543,7 +538,7 @@ public class Vehicle extends Movable implements SimulatedObject {
 
 	@Override
 	public Point2D.Double center(double when) {
-		return new Point2D.Double(globalX, globalY);
+		return global;
 	}
 
 }

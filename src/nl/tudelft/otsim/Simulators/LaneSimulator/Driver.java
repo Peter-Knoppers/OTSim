@@ -158,6 +158,8 @@ public class Driver {
     
     /** Set of time steps when certain actions were performed last. */
     protected java.util.HashMap<String, Integer> kForActions = new java.util.HashMap<String, Integer>();
+
+	private double bDeadend = 5;	// max deceleration for required lane change or dead end [m/s/s]
     
     /**
      * Constructor which links the driver with a vehicle and vice versa.
@@ -522,6 +524,16 @@ public class Driver {
             // Performing a lane change, simply follow both leaders
             lowerAcceleration(calculateAcceleration(vehicle, vehicle.down));
             lowerAcceleration(calculateAcceleration(vehicle, vehicle.lcVehicle.down));
+        }
+        // Decelerate for dead end or a required lane change
+        if (vehicle.route.nLaneChanges(vehicle.lane) > 0) {
+            // remaining distance towards dead-end (minus stopping distance s0)
+            double xRemain = vehicle.route.xLaneChanges(vehicle.lane) - vehicle.x - s0;
+            // minimum constant deceleration for current speed
+            double bMin = .5 * vehicle.v * vehicle.v / xRemain;
+            // apply IDM like approach: dv / dt = -bMin*beta where beta = bMin / bDeadend
+            if (bMin >= bDeadend)
+            	lowerAcceleration(-bMin * bMin / bDeadend);
         }
     }
     

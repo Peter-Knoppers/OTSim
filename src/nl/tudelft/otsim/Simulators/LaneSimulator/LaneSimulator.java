@@ -89,9 +89,9 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         		// Add it to the network
         		//System.out.println(String.format("microNetwork.add(new jLane(model, %s, %s, %d", x.toString(), y.toString(), id));
         		Lane newLane = new Lane(model, x, y, id);
-        		// set origin and destination as default to -999
-        		newLane.destination = -999;
-        		newLane.origin = -999;        		
+        		// set origin and destination as default to none
+        		newLane.destination = Lane.none;
+        		newLane.origin = Lane.none;        		
         		microNetwork.add(newLane);
         	}
         }
@@ -887,44 +887,44 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
             //graphicsPanel.drawPolygon(outline);
             if (showDownStream) {
             	Point2D.Double[] line = new Point2D.Double[2];
-            	line[0] = new Point2D.Double(vehicle.globalX, vehicle.globalY);
+            	line[0] = vehicle.global;
                 if (vehicle.leftDown!=null) {
                 	graphicsPanel.setColor(new Color(255,0,0));
                     java.awt.Point.Double h = vehicle.leftDown.heading;
-                	line[1] = new Point2D.Double(vehicle.leftDown.globalX - h.x * vehicle.leftDown.l, 
-                            vehicle.leftDown.globalY - h.y * vehicle.leftDown.l);
+                	line[1] = new Point2D.Double(vehicle.leftDown.global.x - h.x * vehicle.leftDown.l, 
+                            vehicle.leftDown.global.y - h.y * vehicle.leftDown.l);
                     graphicsPanel.drawPolyLine(line);
                 }
                 if (vehicle.down!=null) {
                 	graphicsPanel.setColor(new Color(0, 255, 0));
                     java.awt.Point.Double h = vehicle.down.heading;
-                    line[1] = new Point2D.Double(vehicle.down.globalX - h.x * vehicle.down.l,
-                            vehicle.down.globalY - h.y * vehicle.down.l);
+                    line[1] = new Point2D.Double(vehicle.down.global.x - h.x * vehicle.down.l,
+                            vehicle.down.global.y - h.y * vehicle.down.l);
                     graphicsPanel.drawPolyLine(line);
                 }
                 if (vehicle.rightDown!=null) {
                 	graphicsPanel.setColor(new Color(0, 0, 255));
                     java.awt.Point.Double h = vehicle.rightDown.heading;
-                    line[1] = new Point2D.Double(vehicle.rightDown.globalX - h.x * vehicle.rightDown.l,
-                            vehicle.rightDown.globalY - h.y * vehicle.rightDown.l);
+                    line[1] = new Point2D.Double(vehicle.rightDown.global.x - h.x * vehicle.rightDown.l,
+                            vehicle.rightDown.global.y - h.y * vehicle.rightDown.l);
                     graphicsPanel.drawPolyLine(line);
                 }
             }
             if (showUpStream) {
             	Point2D.Double[] line = new Point2D.Double[2];
-            	line[0] = new Point2D.Double(vehicle.globalX, vehicle.globalY);
+            	line[0] = vehicle.global;
                 if (vehicle.leftUp!=null) {
-                    line[1] = new Point2D.Double(vehicle.leftUp.globalX, vehicle.leftUp.globalY);
+                    line[1] = vehicle.leftUp.global;
                     graphicsPanel.drawPolyLine(line);
                 }
                 if (vehicle.up!=null) {
                 	graphicsPanel.setColor(new Color(255, 255, 0));
-                    line[1] = new Point2D.Double(vehicle.up.globalX, vehicle.up.globalY);
+                    line[1] = vehicle.up.global;
                     graphicsPanel.drawPolyLine(line);
                 }
                 if (vehicle.rightUp!=null) {
                 	graphicsPanel.setColor(new Color(0, 255, 255));
-                    line[1] = new Point2D.Double(vehicle.rightUp.globalX, vehicle.rightUp.globalY);
+                    line[1] = vehicle.rightUp.global;
                     graphicsPanel.drawPolyLine(line);
                 }
             }

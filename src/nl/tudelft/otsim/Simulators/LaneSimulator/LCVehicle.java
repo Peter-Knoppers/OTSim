@@ -59,8 +59,7 @@ public class LCVehicle extends Movable {
 	public void setXY() {
         // global position is always at lane
         java.awt.geom.Point2D.Double coord = atLaneXY();
-        globalX = coord.x;
-        globalY = coord.y;
+        global = new java.awt.geom.Point2D.Double(coord.x, coord.y);
     }
     
     /**

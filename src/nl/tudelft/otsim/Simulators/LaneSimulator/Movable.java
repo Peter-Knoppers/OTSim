@@ -5,8 +5,8 @@ import nl.tudelft.otsim.GUI.Main;
 /**
  * This class has the common functionality of regular vehicles and temporary
  * lane change vehicles. This is the position on the network and relative to
- * neighbouring movables. Common methods are related to position, neighbours and
- * visualisation.
+ * neighboring movables. Common methods are related to position, neighbors and
+ * visualization.
  */
 
 public abstract class Movable  {
@@ -29,11 +29,8 @@ public abstract class Movable  {
     /** Movable length [m]. */
     public double l;
 
-    /** Global x coordinate. */
-    public double globalX;
-
-    /** Global y coordinate. */
-    public double globalY;
+    /** Global coordinate */
+    public java.awt.geom.Point2D.Double global;
     
     /** Normalized heading of the vehicle. */
     public java.awt.geom.Point2D.Double heading = new java.awt.geom.Point2D.Double();
@@ -80,41 +77,40 @@ public abstract class Movable  {
     }
 
     /** 
-     * Finds neighbours in adjacent lanes or checks for overtaking. This will
-     * make sure that the adjacent neighbours are correct.
+     * Finds neighbors in adjacent lanes or checks for overtaking. This will
+     * make sure that the adjacent neighbors are correct.
      */
     public void updateNeighbours() {
         double xAdj;
-        // left neighbours
-        if (lane.left!=null) {
+        // left neighbors
+        if (lane.left != null) {
             xAdj = getAdjacentX(Model.latDirection.LEFT);
-            /* Remove adjacent neighbour in case of split, as this vehicle may
+            /* Remove adjacent neighbor in case of split, as this vehicle may
              * split the other way and become untreatable for regular overtake 
              * checks. Instead, refind the vehicle if appropriate.
              */ 
-            if (leftUp!=null && leftUp.lane.downSplit!=lane.left.downSplit)
+            if ((leftUp != null) && (leftUp.lane.downSplit != lane.left.downSplit))
                 leftUp = null;
-            // update current neighbour
-            if (leftUp==null)
+            // update current neighbor
+            if (leftUp == null)
                 leftUp = lane.left.findVehicle(xAdj, Model.longDirection.UP); // if there is no leftUp, find it
             else {
                 // if there is a leftUp, check overtake
                 Lane adjlane = lane.left;
-                // search upstream while neighbour is downstream
-                while (leftUp!=null && leftUp.x+adjlane.xAdj(leftUp.lane)>=xAdj) {
+                // search upstream while neighbor is downstream
+                while ((leftUp != null) && (leftUp.x + adjlane.xAdj(leftUp.lane) >= xAdj))
                     leftUp = leftUp.up;
-                }
-                // search downstream while neighbours down is upstream
-                while (leftUp!=null && leftUp.down!=null && leftUp.down.x+adjlane.xAdj(leftUp.down.lane)<=xAdj)
+                // search downstream while neighbors down is upstream
+                while ((leftUp != null) && (leftUp.down != null) && (leftUp.down.x + adjlane.xAdj(leftUp.down.lane) <= xAdj))
                     leftUp = leftUp.down;
             }
             // find closest downstream vehicle
-            if (leftUp!=null && leftUp.lane.downSplit==lane.left.downSplit)
+            if ((leftUp != null) && (leftUp.lane.downSplit == lane.left.downSplit))
                 leftDown = leftUp.down; // through upstream vehicle if no split in between
             else {
                 leftDown = lane.left.findVehicle(xAdj, Model.longDirection.DOWN);
                 // one vehicle, at a perfectly equal coordinate, may be in between
-                if (leftDown!=null && leftDown.up!=null && leftDown.up!=leftUp)
+                if ((leftDown != null) && (leftDown.up != null) && (leftDown.up != leftUp))
                     leftDown = leftDown.up;
             }
         } else {
@@ -123,48 +119,48 @@ public abstract class Movable  {
             leftUp = null;
         }
 
-        // right neighbours
-        if (lane.right!=null) {
+        // right neighbors
+        if (lane.right != null) {
             xAdj = getAdjacentX(Model.latDirection.RIGHT);
-            /* Remove adjacent neighbour in case of split, as this vehicle may
+            /* Remove adjacent neighbor in case of split, as this vehicle may
              * split the other way and become untreatable for regular overtake 
              * checks. Instead, refind the vehicle if appropriate.
              */
-            if (rightUp!=null && rightUp.lane.downSplit!=lane.right.downSplit)
+            if ((rightUp != null) && (rightUp.lane.downSplit != lane.right.downSplit))
                 rightUp = null;
-            // update current neighbour
-            if (rightUp==null)
+            // update current neighbor
+            if (rightUp == null)
                 rightUp = lane.right.findVehicle(xAdj, Model.longDirection.UP); // if there is no rightUp, find it
             else {
                 // if there is a rightUp, check overtake
                 Lane adjlane = lane.right;
-                // search upstream while neighbour is downstream
-                while (rightUp!=null && rightUp.x+adjlane.xAdj(rightUp.lane)>=xAdj)
+                // search upstream while neighbor is downstream
+                while ((rightUp != null) && (rightUp.x + adjlane.xAdj(rightUp.lane) >= xAdj))
                     rightUp = rightUp.up;
-                // search downstream while neighbours down is upstream
-                while (rightUp!=null && rightUp.down!=null && rightUp.down.x+adjlane.xAdj(rightUp.down.lane)<xAdj)
+                // search downstream while neighbors down is upstream
+                while ((rightUp != null) && (rightUp.down != null) && (rightUp.down.x + adjlane.xAdj(rightUp.down.lane) < xAdj))
                     rightUp = rightUp.down;
             }
             // find closest downstream vehicle
-            if (rightUp!=null && rightUp.lane.downSplit==lane.right.downSplit)
+            if ((rightUp != null) && (rightUp.lane.downSplit == lane.right.downSplit))
                 rightDown = rightUp.down; // through upstream vehicle if no split in between
             else {
                 rightDown = lane.right.findVehicle(xAdj, Model.longDirection.DOWN);
                 // one vehicle, at a perfectly equal coordinate, may be in between
-                if (rightDown!=null && rightDown.up!=null && rightDown.up!=rightUp)
+                if ((rightDown != null) && (rightDown.up != null) && (rightDown.up != rightUp))
                     rightDown = rightDown.up;
             }
         } else {
-            // no adjacent lane, no adjacent neighbours
+            // no adjacent lane, no adjacent neighbors
             rightDown = null;
             rightUp = null;
         }
     }
 
     /**
-     * Sets this vehicle as adjacent neighbour of own adjacent neighbours. When
-     * put on a lane a vehicle may be the adjacent neighbour for many vehicles
-     * on adjacent lanes. This method checks if the adjacent neighbours of these
+     * Sets this vehicle as adjacent neighbor of own adjacent neighbors. When
+     * put on a lane a vehicle may be the adjacent neighbor for many vehicles
+     * on adjacent lanes. This method checks if the adjacent neighbors of these
      * vehicles are either the <tt>up</tt> or <tt>down</tt> vehicle and adjusts 
      * that to this vehicle if so.
      */
@@ -183,9 +179,9 @@ public abstract class Movable  {
          * ---------    ---------    ---------
          */
         Movable ld = leftDown;
-        while (ld!=null) {
-            if ((ld.rightUp==up && up!=null) ||
-                    (ld.rightUp==null && ld.lane.right!=null && ld.lane.right.isSameLane(lane))) {
+        while (ld != null) {
+            if (((ld.rightUp == up) && (up != null)) ||
+                    ((ld.rightUp == null) && (ld.lane.right != null) && ld.lane.right.isSameLane(lane))) {
                 ld.rightUp = this;
                 ld = ld.down;
             } else
@@ -193,27 +189,27 @@ public abstract class Movable  {
         }
         // The other three mirrored principles
         Movable rd = rightDown;
-        while (rd!=null) {
-            if ((rd.leftUp==up && up!=null) || 
-                    (rd.leftUp==null && rd.lane.left!=null && rd.lane.left.isSameLane(lane))) {
+        while (rd != null) {
+            if (((rd.leftUp == up) && (up != null)) || 
+                    ((rd.leftUp == null) && (rd.lane.left != null) && rd.lane.left.isSameLane(lane))) {
                 rd.leftUp = this;
                 rd = rd.down;
             } else
                 rd = null;
         }
         Movable lu = leftUp;
-        while (lu!=null) {
-            if ((lu.rightDown==down && down!=null) || 
-                    (lu.rightDown==null && lu.lane.right!=null && lu.lane.right.isSameLane(lane))) {
+        while (lu != null) {
+            if (((lu.rightDown == down) && (down != null)) || 
+                    ((lu.rightDown == null) && (lu.lane.right != null) && lu.lane.right.isSameLane(lane))) {
                 lu.rightDown = this;
                 lu = lu.up;
             } else
                 lu = null;
         }
         Movable ru = rightUp;
-        while (ru!=null) {
-            if ((ru.leftDown==down && down!=null) || 
-                    (ru.leftDown==null && ru.lane.left!=null && ru.lane.left.isSameLane(lane))) {
+        while (ru != null) {
+            if (((ru.leftDown == down) && (down != null)) || 
+                    ((ru.leftDown == null) && (ru.lane.left != null) && ru.lane.left.isSameLane(lane))) {
                 ru.leftDown = this;
                 ru = ru.up;
             } else {
@@ -230,7 +226,7 @@ public abstract class Movable  {
          *    ------      ------
          * Vehicle A is pasted onto the road. When vehicle B does not have a
          * leftUp or if it is C, A will become the leftUp of B. Search
-         * downstream untill vehicles are found within the lane. This situation
+         * downstream until vehicles are found within the lane. This situation
          * also applies with up/downstream switched.
          */
         pasteAsAdjacentLeader(lane, Model.longDirection.DOWN);
@@ -243,7 +239,7 @@ public abstract class Movable  {
     public abstract void setXY();
     
     /**
-     * Returns the global x and y at the lane centre.
+     * Returns the global x and y at the lane center.
      * @return 2-element array with x and y at the lane.
      */
     public java.awt.geom.Point2D.Double atLaneXY() {
@@ -276,8 +272,7 @@ public abstract class Movable  {
         // Ignore leader which is on the other side of a merge but which came
         // from another lane. It should also be only partially past the conflict.
         // The conflict should deal with the situation.
-        if (leader==down && leader.lane.upMerge!=null && 
-                leader.lane.upMerge!=lane.upMerge &&
+        if ((leader == down) && (leader.lane.upMerge != null) && (leader.lane.upMerge != lane.upMerge) &&
                 ((null == leader.lane.upMerge.mergeOrigin) || !leader.lane.upMerge.mergeOrigin.isSameLane(lane)) && 
                 leader.lane.upMerge.xAdj(leader.lane)+leader.x<leader.l) {
             return Double.POSITIVE_INFINITY;
@@ -290,20 +285,20 @@ public abstract class Movable  {
             s = leader.getAdjacentX(Model.latDirection.LEFT) - x; // leader is right
         else if (lane==leader.lane.right)
             s = leader.getAdjacentX(Model.latDirection.RIGHT) - x; // leader is left
-        else if ((xAdjTmp=lane.xAdj(leader.lane))!=0)
+        else if ((xAdjTmp=lane.xAdj(leader.lane)) != 0)
             s = leader.x + xAdjTmp - x; // leader is up- or downstream
-        else if ((xAdjTmp=lane.xAdj(leader.lane.left))!=0)
+        else if ((xAdjTmp=lane.xAdj(leader.lane.left)) != 0)
             s = leader.getAdjacentX(Model.latDirection.LEFT) + xAdjTmp - x; // leader is on right lane up- or downstream
-        else if (lane.right!=null && (xAdjTmp=lane.right.xAdj(leader.lane))!=0)
+        else if (lane.right!=null && (xAdjTmp=lane.right.xAdj(leader.lane)) != 0)
             s = leader.x + xAdjTmp - getAdjacentX(Model.latDirection.RIGHT); // leader is on right lane up- or downstream (no up/down lane)
-        else if ((xAdjTmp=lane.xAdj(leader.lane.right))!=0)
+        else if ((xAdjTmp=lane.xAdj(leader.lane.right)) != 0)
             s = leader.getAdjacentX(Model.latDirection.RIGHT) + xAdjTmp - x; // leader is on left lane up- or downstream
-        else if (lane.left!=null && (xAdjTmp=lane.left.xAdj(leader.lane))!=0)
+        else if (lane.left!=null && (xAdjTmp=lane.left.xAdj(leader.lane)) != 0)
             s = leader.x + xAdjTmp - getAdjacentX(Model.latDirection.LEFT); // leader is on left lane up- or downstream (no up/down lane)
         else if (this instanceof Vehicle) {
             // leader may actually be a leader of the lane change vehicle
             /*
-             * This happens for a neighbour of an lcVehicle as:
+             * This happens for a neighbor of an lcVehicle as:
              * ------------
              *          A
              * ------------
@@ -319,7 +314,7 @@ public abstract class Movable  {
              * found and so the headway between B and A will be needed.
              */
             Vehicle veh = (Vehicle) this;
-            if (veh.lcVehicle==null) {
+            if (veh.lcVehicle == null) {
                 // give warning as vehicles are not adjacent
                 System.err.println("Headway not found from lanes: "+x+"@"+lane.id+"->"+leader.x+"@"+leader.lane.id+", returning Inf");
                 s = Double.POSITIVE_INFINITY;
@@ -340,17 +335,17 @@ public abstract class Movable  {
     }
 
     /**
-     * Deletes a vehicle entirerly while taking care of any neighbour reference
+     * Deletes a vehicle entirely while taking care of any neighbor reference
      * to the vehicle.
      */
     public void delete() {
         /* When deleting a vehicle, all pointers to it need to be removed in
          * order for the garbage collector to remove the object from memory.
          * Vehicles are referenced from: model, lane, OBU, driver, trajectory,
-         * lcVehicle<->vehicle and neighbouring vehicles.
+         * lcVehicle<->vehicle and neighboring vehicles.
          */
         
-        // remove from lane and neighbours
+        // remove from lane and neighbors
         cut();
 
         // remove from various objects
@@ -397,15 +392,14 @@ public abstract class Movable  {
      * to this vehicle are updated or removed.
      */
     public void cut() {
-
         // remove from lane vector
         lane.vehicles.remove(this);
 
         /*
-         * All pointers from neighbours need to be updated or removed. Finding
+         * All pointers from neighbors need to be updated or removed. Finding
          * all vehicles with pointers to this could be performed in two ways:
          *   1) loop all vehicles in the model
-         *   2) start at own neighbours and search
+         *   2) start at own neighbors and search
          * For efficiency, the 2nd option is chosen. This can become a bit
          * complex as pointers can be:
          *   1) Asymmetric: vehicles have pointers to each other but not as each
@@ -429,27 +423,27 @@ public abstract class Movable  {
          *      rightUp. This situation is solved by moving upstream from
          *      vehicle F while the leftDown vehicle is G.
          *   3) One-directional: This is a pointer where one vehicle lacks a
-         *      certain neighbour that would make it indirect. These situations
+         *      certain neighbor that would make it indirect. These situations
          *      are discussed below.
          */
 
         // reset pointers in own lane
-        if (up!=null && up.down==this)
+        if ((up != null) && (up.down == this))
             up.down = down;
-        if (down!=null && down.up==this)
+        if ((down != null) && (down.up == this))
             down.up = up;
         /* 
          * Own lane pointers are one-directional for the last vehicle on a 
          * split, or the first vehicle on a merge. Loop all split or merge 
          * lanes, find the nearest vehicle and update pointers.
          */
-        if (down==null && lane.downSplit!=null) {
+        if ((down == null) && (lane.downSplit != null)) {
             java.util.ArrayList<Movable> downs = findVehiclesDownstreamOfSplit(lane);
             for (Movable d : downs)
                 if (d.up==this)
                     d.up = up;
         }
-        if (up==null && lane.upMerge!=null) {
+        if ((up == null) && (lane.upMerge != null)) {
             java.util.ArrayList<Movable> ups = findVehiclesUpstreamOfMerge(lane);
             for (Movable d : ups)
                 if (d.down==this)
@@ -459,41 +453,41 @@ public abstract class Movable  {
         // reset pointers in adjacent lanes
         // left down
         Movable ld = leftDown;
-        if (ld!=null && ld.rightDown==this) {
+        if ((ld != null) && (ld.rightDown == this)) {
             ld.rightDown = down; // asymmetric pointer
             ld = ld.down;
         }
-        while (ld!=null && ld.rightUp==this) {
+        while ((ld != null) && (ld.rightUp == this)) {
             ld.rightUp = up; // indirect pointer
             ld = ld.down;
         }
         // left up
         Movable lu = leftUp;
-        if (lu!=null && lu.rightUp==this) {
+        if ((lu != null) && (lu.rightUp == this)) {
             lu.rightUp = up; // asymmetric pointer
             lu = lu.up;
         }
-        while (lu!=null && lu.rightDown==this) {
+        while ((lu != null) && (lu.rightDown == this)) {
             lu.rightDown = down; // indirect pointer
             lu = lu.up;
         }
         // right down
         Movable rd = rightDown;
-        if (rd!=null && rd.leftDown==this) {
+        if ((rd != null) && (rd.leftDown == this)) {
             rd.leftDown = down; // asymmetric pointer
             rd = rd.down;
         }
-        while (rd!=null && rd.leftUp==this) {
+        while ((rd != null) && (rd.leftUp == this)) {
             rd.leftUp = up; // indirect pointer
             rd = rd.down;
         }
         // right up
         Movable ru = rightUp;
-        if (ru!=null && ru.leftUp==this) {
+        if ((ru != null) && (ru.leftUp == this)) {
             ru.leftUp = up; // asymmetric pointer
             ru = ru.up;
         }
-        while (ru!=null && ru.leftDown==this) {
+        while ((ru != null) && (ru.leftDown == this)) {
             ru.leftDown = down; // indirect pointer
             ru = ru.up;
         }
@@ -522,19 +516,19 @@ public abstract class Movable  {
          * Vehicle A will be deleted, vehicle C has A as leftDown but vehicle B
          * does not anymore because there is no adjacent lane. This can only
          * happen as vehicles move beyond the end of the lane. Therefore only an
-         * upstream search is usefull.
+         * upstream search is useful.
          */
-        if (x>lane.l) {
-            if (lane.right!=null) {
+        if (x > lane.l) {
+            if (lane.right != null) {
                 Movable veh = lane.right.findVehicle(lane.right.l, Model.longDirection.UP);
-                while (veh!=null && veh.leftDown==this) {
+                while ((veh != null) && (veh.leftDown == this)) {
                     veh.leftDown = null;
                     veh = veh.up;
                 }
             }
-            if (lane.left!=null) {
+            if (lane.left != null) {
                 Movable veh = lane.left.findVehicle(lane.left.l, Model.longDirection.UP);
-                while (veh!=null && veh.rightDown==this) {
+                while ((veh != null) && (veh.rightDown == this)) {
                     veh.rightDown = null;
                     veh = veh.up;
                 }
@@ -569,7 +563,7 @@ public abstract class Movable  {
         		continue;
         	j.marked = true;
             Movable d = j.findVehicle(j.l, Model.longDirection.UP);
-            if (d!=null)
+            if (d != null)
                 out.add(d);
             else if (j.upMerge!=null)
                 out.addAll(findVehiclesUpstreamOfMerge(j));
@@ -592,7 +586,7 @@ public abstract class Movable  {
         		continue;
         	j.marked = true;
             Movable d = j.findVehicle(0, Model.longDirection.DOWN);
-            if (d!=null)
+            if (d != null)
                 out.add(d);
             else if (j.downSplit!=null)
                 out.addAll(findVehiclesDownstreamOfSplit(j));
@@ -611,12 +605,12 @@ public abstract class Movable  {
         if (Model.longDirection.DOWN==lon) {
             for (Lane n : k.downs)
                 cutAsAdjacentLeader0(n, lon);
-            if (k.down!=null)
+            if (k.down != null)
                 cutAsAdjacentLeader0(k.down, lon);
         } else {
             for (Lane n : k.ups)
                 cutAsAdjacentLeader0(n, lon);
-            if (k.up!=null)
+            if (k.up != null)
                 cutAsAdjacentLeader0(k.up, lon);
         }
     }
@@ -629,20 +623,20 @@ public abstract class Movable  {
      */
     protected void cutAsAdjacentLeader0(Lane k, Model.longDirection lon) {
         Movable m = null;
-        if (Model.longDirection.DOWN==lon) {
+        if (Model.longDirection.DOWN == lon) {
             // look downstream
             if (k.right!=null) { // look right
                 m = k.right.findVehicle(0, Model.longDirection.DOWN);
-                if (m!=null && m.leftUp!=this)
+                if ((m != null) && (m.leftUp != this))
                     m = m.down; // most upstream vehicle may form a one-directional pair as it may have just moved onto the lane
-                while (m!=null && m.leftUp==this) {
+                while ((m != null) && (m.leftUp == this)) {
                     m.leftUp = up;
                     m = m.down; // next vehicle may form a one-directional pair
                 }
             }
-            if (k.left!=null) { // look left
+            if (k.left != null) { // look left
                 m = k.left.findVehicle(0, Model.longDirection.DOWN);
-                if (m!=null && m.rightUp!=this)
+                if ((m != null) && (m.rightUp != this))
                     m = m.down; // most upstream vehicle may form a one-directional pair as it may have just moved onto the lane
                 while (m!=null && m.rightUp==this) {
                     m.rightUp = up;
@@ -656,20 +650,20 @@ public abstract class Movable  {
             	k.marked = true;
                 cutAsAdjacentLeader(k, lon);
                 k.marked = false;
-                // else stop: further vehicles have vehicles at k as neighbour
+                // else stop: further vehicles have vehicles at k as neighbor
             }
         } else {
             // look upstream
-            if (k.right!=null) { // look right
+            if (k.right != null) { // look right
                 m = k.right.findVehicle(k.right.l, Model.longDirection.UP);
-                while (m!=null && m.leftDown==this) {
+                while ((m != null) && (m.leftDown == this)) {
                     m.leftDown = down;
                     m = m.up; // next vehicle may form a one-directional pair
                 }
             }
-            if (k.left!=null) { // look left
+            if (k.left != null) { // look left
                 m = k.left.findVehicle(k.left.l, Model.longDirection.UP);
-                while (m!=null && m.rightDown==this) {
+                while ((m != null) && (m.rightDown == this)) {
                     m.rightDown = down;
                     m = m.up; // next vehicle may form a one-directional pair
                 }
@@ -684,11 +678,11 @@ public abstract class Movable  {
             } else {
                 // check if there is any vehicle that has not just exceeded its lane
                 int i = 0;
-                while (k!=null && i<k.vehicles.size()) {
+                while (i < k.vehicles.size()) {
                     if (!k.vehicles.get(i).justExceededLane) {
                         /* 
                          * A vehicle was found that has been there for at least
-                         * one time step. This vehicle is the neighbour of any
+                         * one time step. This vehicle is the neighbor of any
                          * further upstream vehicles. The search can be stopped.
                          */ 
                         k = null;
@@ -696,7 +690,7 @@ public abstract class Movable  {
                     }
                     i++;
                 }
-                if (k!=null) {
+                if (k != null) {
                     /*
                      * Vehicle(s) were found, but they all just exceeded its 
                      * lane. Search needs to be continued as adjacent vehicles
@@ -715,15 +709,15 @@ public abstract class Movable  {
      * @param lon Longitudinal direction.
      */
     protected void pasteAsAdjacentLeader(Lane k, Model.longDirection lon) {
-        if (Model.longDirection.DOWN==lon) {
+        if (Model.longDirection.DOWN == lon) {
             for (Lane n : k.downs)
                 pasteAsAdjacentLeader0(n, lon);
-            if (k.down!=null)
+            if (k.down != null)
                 pasteAsAdjacentLeader0(k.down, lon);
         } else {
             for (Lane n : k.ups)
                 pasteAsAdjacentLeader0(n, lon);
-            if (k.up!=null)
+            if (k.up != null)
                 pasteAsAdjacentLeader0(k.up, lon);
         }
     }
@@ -736,18 +730,18 @@ public abstract class Movable  {
      */
     protected void pasteAsAdjacentLeader0(Lane k, Model.longDirection lon) {
         Movable m = null;
-        if (Model.longDirection.DOWN==lon) {
+        if (Model.longDirection.DOWN == lon) {
             // look downstream
-            if (k.right!=null) { // look right
+            if (k.right != null) { // look right
                 m = k.right.findVehicle(0, Model.longDirection.DOWN);
-                while (m!=null && m.leftUp==up && m.leftUp!=null) {
+                while ((m != null) && (m.leftUp == up) && (m.leftUp != null)) {
                     m.leftUp = this;
                     m = m.down; // next vehicle may form a one-directional pair
                 }
             }
-            if (k.left!=null) { // look left
+            if (k.left != null) { // look left
                 m = k.left.findVehicle(0, Model.longDirection.DOWN);
-                while (m!=null && m.rightUp==up && m.rightUp!=null) {
+                while ((m != null) && (m.rightUp == up) && (m.rightUp != null)) {
                     m.rightUp = this;
                     m = m.down;
                 }
@@ -763,16 +757,16 @@ public abstract class Movable  {
             }
         } else {
             // look upstream
-            if (k.right!=null) { // look right
+            if (k.right != null) { // look right
                 m = k.right.findVehicle(k.right.l, Model.longDirection.UP);
-                while (m!=null && m.leftDown==down && m.leftDown!=null) {
+                while ((m != null) && (m.leftDown == down) && (m.leftDown != null)) {
                     m.leftDown = this;
                     m = m.up; // next vehicle may form a one-directional pair
                 }
             }
-            if (k.left!=null) { // look left
+            if (k.left != null) { // look left
                 m = k.left.findVehicle(k.left.l, Model.longDirection.UP);
-                while (m!=null && m.rightDown==down && m.rightDown!=null) {
+                while ((m != null) && (m.rightDown == down) && (m.rightDown != null)) {
                     m.rightDown = this;
                     m = m.up; // next vehicle may form a one-directional pair
                 }
@@ -789,8 +783,8 @@ public abstract class Movable  {
     }
 
     /**
-     * Places a vehicle on a lane, sets new neighbours and sets this vehicle as
-     * neighbour of surrounding vehicles.
+     * Places a vehicle on a lane, sets new neighbors and sets this vehicle as
+     * neighbor of surrounding vehicles.
      * @param atLane Lane where the vehicle needs to be placed at.
      * @param atX Location where the vehicle needs to be placed at.
      */
@@ -804,37 +798,37 @@ public abstract class Movable  {
         }
         // find up/down neighbors
         up = atLane.findVehicle(atX, Model.longDirection.UP);
-        if (up!=null) {
+        if (up != null) {
             down = up.down; // in between
-            if (up.down==null && up.lane.downSplit!=atLane.downSplit)
+            if ((up.down == null) && (up.lane.downSplit != atLane.downSplit))
                 down = atLane.findVehicle(atX, Model.longDirection.DOWN); // just passed split, so up has no down (as this was cut)
             else
                 up.down = this; // same lane, up has this as down
         } else
             down = atLane.findVehicle(atX, Model.longDirection.DOWN);
-        if (down!=null && down.lane.upMerge==atLane.upMerge)
+        if ((down != null) && (down.lane.upMerge == atLane.upMerge))
             down.up = this; // same lane, down has this as up
         // set properties
         lane = atLane;
         x = atX;
         // Set pointers to this of vehicles at other side of split or merge.
-        if (lane.upMerge!=null && up==null) {
+        if ((lane.upMerge != null) && (up == null)) {
             java.util.ArrayList<Movable> ups = findVehiclesUpstreamOfMerge(lane);
             for (Movable d : ups)
-                if ((d.down==null || d.down==down) && (d.lane.downSplit==null || d.lane.downSplit==lane.downSplit))
+                if (((d.down == null) || (d.down == down)) && ((d.lane.downSplit == null) || (d.lane.downSplit == lane.downSplit)))
                     d.down = this;
         }
-        if (lane.downSplit!=null && down==null) {
+        if ((lane.downSplit != null) && (down == null)) {
             java.util.ArrayList<Movable> downs = findVehiclesDownstreamOfSplit(lane);
             for (Movable d : downs)
-                if ((d.up==null || d.up==up) && (d.lane.upMerge==null || d.lane.upMerge==lane.upMerge))
+                if (((d.up == null) || (d.up == up)) && ((d.lane.upMerge == null) || (d.lane.upMerge == lane.upMerge)))
                     d.up = this;
         }
         // add to lane vector
         atLane.vehicles.add(this);
-        // set adjacent neighbours
+        // set adjacent neighbors
         updateNeighbours();
-        // set adjacent neighbours' new neighbours (this vehicle)
+        // set adjacent neighbors' new neighbors (this vehicle)
         updateNeighboursInv();
     }
     
@@ -858,6 +852,32 @@ public abstract class Movable  {
      */
     public String getLongitudinalPositionInLane_r() {
     	return String.format(Main.locale, "%.2fm (of %.2fm)", x, lane.l);
+    }
+    
+    @Override
+	public String toString() {
+    	return String.format(Main.locale, "at (%.3f, %.3f)", global.x, global.y);
+    }
+    
+    /**
+     * Show the connectivity between Movables (for debugging).
+     * @return String
+     */
+    public String linkedNeighbors() {
+        String result = "";
+        if (null != up)
+        	result += " up " + up.toString();
+        if (null != down)
+        	result += " down " + down.toString();
+        if (null != leftUp)
+        	result += " leftUp " + leftUp.toString();
+        if (null != leftDown)
+        	result += " leftDown " + leftDown.toString();
+        if (null != rightUp)
+        	result += " rightUp " + rightUp.toString();
+        if (null != rightDown)
+        	result += " rightDown " + rightDown.toString();
+        return result;
     }
     
 }

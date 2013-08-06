@@ -621,7 +621,7 @@ public class Conflict {
             if (j!=null && j.isMerge()) {
                 for (Lane k : j.ups) {
                     // find appropriate rsu on lane
-                	System.out.println("Checking up " + k.id);
+                	//System.out.println("Checking up " + k.id);
                     double xRsu = 0;
                     boolean found = false;
                     while (!found) {
@@ -637,7 +637,7 @@ public class Conflict {
                                 }
                             }
                         }
-                        System.out.println("isEmpty returns " + (rsus.isEmpty() ? "empty" : "not empty"));
+                        //System.out.println("isEmpty returns " + (rsus.isEmpty() ? "empty" : "not empty"));
                         if (!found && !rsus.isEmpty()) {
                             // next cross section with rsu(s)
                             xRsu = rsus.get(0).x;

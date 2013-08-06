@@ -16,6 +16,9 @@ import nl.tudelft.otsim.GUI.Main;
 public class Lane {
 	
 	boolean marked;
+	
+	/** Special value for no source or no destination */
+	public final static int none = -999;
 
     /** Array of x-coordinates defining the lane curvature. */
     public double[] x;
@@ -73,10 +76,10 @@ public class Lane {
     /** All movables on this lane, in no particular order. */
     public java.util.ArrayList<Movable> vehicles = new java.util.ArrayList<Movable>(0);
 
-    /** Destination number, -999 GT if no destination. */
+    /** Destination number, NODESTINATION if no destination. */
     public int destination;
 
-    /** Destination number, -999 GT if no destination. */
+    /** Destination number, NODESTINATION if no destination. */
     public int origin;
 
     /** Legal speed limit [km/h]. */
@@ -813,26 +816,26 @@ public class Lane {
         double dy; // section distance in y
         int section = -1; // current section of vehicle
         // calculate cumulative lengths until x of vehicle is passed
-        for (int i=1; i<x.length; i++) {
-            dx = x[i] - x[i-1];
-            dy = y[i] - y[i-1];
-            cumlength[i] = cumlength[i-1] + java.lang.Math.sqrt(dx*dx + dy*dy);
+        for (int i = 1; i < x.length; i++) {
+            dx = x[i] - x[i - 1];
+            dy = y[i] - y[i - 1];
+            cumlength[i] = cumlength[i - 1] + java.lang.Math.sqrt(dx * dx + dy * dy);
             if (section==-1 && cumlength[i]>pos) {
                 section = i;
                 i = x.length; // stop loop
             }
         }
-        if (section==-1) {
+        if (section == -1) {
             // the vehicle is probably beyond the lane, extrapolate from last section
             section = x.length-1;
         }
-        double x0 = x[section-1]; // start of current section
-        double y0 = y[section-1];
+        double x0 = x[section - 1]; // start of current section
+        double y0 = y[section - 1];
         double x1 = x[section]; // end of current section
         double y1 = y[section];
-        double res = pos-cumlength[section-1]; // distance within section
-        double sec = cumlength[section] - cumlength[section-1]; // section length
-        return new java.awt.geom.Point2D.Double(x0 + (x1-x0)*(res/sec), y0 + (y1-y0)*(res/sec));
+        double res = pos - cumlength[section - 1]; // distance within section
+        double sec = cumlength[section] - cumlength[section - 1]; // section length
+        return new java.awt.geom.Point2D.Double(x0 + (x1 - x0)*(res / sec), y0 + (y1 - y0) * (res / sec));
     }
     
     /**
