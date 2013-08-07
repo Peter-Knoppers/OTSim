@@ -39,7 +39,7 @@ public class VehicleDriver {
      * Constructor.
      * @param model Main model.
      * @param vehicle Default vehicle of this class. This vehicle defines the class.
-     * @param id Number for class recogniztion by the user.
+     * @param id Number for class recognition by the user.
      */
     // using this at the end is ok, class is fully initialized
     public VehicleDriver(Model model, Vehicle vehicle, int id){
@@ -113,7 +113,7 @@ public class VehicleDriver {
             }
             // copy OBU parameters
             java.lang.reflect.Field[] fields = veh.OBU.getClass().getFields();
-            for (int i=0; i<fields.length; i++) {
+            for (int i = 0; i < fields.length; i++) {
                 if (fields[i].getType().isPrimitive()) {
                     try {
                         if (fields[i].get(defaultVehicle.OBU) instanceof Double)
@@ -141,7 +141,7 @@ public class VehicleDriver {
 
         // copy driver parameters
         java.lang.reflect.Field[] fields = veh.driver.getClass().getFields();
-        for (int i=0; i<fields.length; i++) {
+        for (int i = 0; i < fields.length; i++) {
             if (fields[i].getType().isPrimitive()) {
                 try {
                     if (fields[i].get(defaultVehicle.driver) instanceof Double)
@@ -179,7 +179,7 @@ public class VehicleDriver {
         if (stochasticDriverParameters.size()>0) {
             int setParams = 0;
             java.lang.reflect.Field[] fields = veh.getDriver().getClass().getFields();
-            for (int i=1; i<fields.length; i++) {
+            for (int i = 1; i < fields.length; i++) {
                 java.lang.String param = fields[i].getName();
                 if (stochasticDriverParameters.containsKey(param)) {
                     double value = stochasticDriverParameters.get(param).rand();
@@ -201,7 +201,7 @@ public class VehicleDriver {
         if (stochasticVehicleParameters.size()>0) {
             int setParams = 0;
             java.lang.reflect.Field[] fields = veh.getClass().getFields();
-            for (int i=1; i<fields.length; i++) {
+            for (int i = 1; i < fields.length; i++) {
                 java.lang.String param = fields[i].getName();
                 if (stochasticVehicleParameters.containsKey(param)) {
                     double value = stochasticVehicleParameters.get(param).rand();
@@ -241,11 +241,11 @@ public class VehicleDriver {
      */
     public void addStochasticVehicleParameter(java.lang.String param,
             distribution distr, double mean, double std) {
-        if (distr==distribution.GAUSSIAN)
+        if (distr == distribution.GAUSSIAN)
             stochasticVehicleParameters.put(param, new gaussian(mean, std));
-        else if (distr==distribution.EXPONENTIAL)
+        else if (distr == distribution.EXPONENTIAL)
             stochasticVehicleParameters.put(param, new exponential(mean));
-        else if (distr==distribution.LOGNORMAL)
+        else if (distr == distribution.LOGNORMAL)
             stochasticVehicleParameters.put(param, new lognormal(mean, std));
     }
     
@@ -258,11 +258,11 @@ public class VehicleDriver {
      */
     public void addStochasticDriverParameter(java.lang.String param,
             distribution distr, double mean, double std) {
-        if (distr==distribution.GAUSSIAN)
+        if (distr == distribution.GAUSSIAN)
             stochasticDriverParameters.put(param, new gaussian(mean, std));
-        else if (distr==distribution.EXPONENTIAL)
+        else if (distr == distribution.EXPONENTIAL)
             stochasticDriverParameters.put(param, new exponential(mean));
-        else if (distr==distribution.LOGNORMAL)
+        else if (distr == distribution.LOGNORMAL)
             stochasticDriverParameters.put(param, new lognormal(mean, std));
     }
     
@@ -340,7 +340,7 @@ public class VehicleDriver {
          */
         @Override
 		public double rand() {
-            // note: r = -log(uniform)/gamma & mean = 1/gamma
+            // note: r = -log(uniform) / gamma & mean = 1 / gamma
             return -Math.log(model.random().nextDouble()) * mean;
         }
     }

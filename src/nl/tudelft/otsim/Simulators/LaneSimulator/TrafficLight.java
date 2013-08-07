@@ -16,8 +16,6 @@ public class TrafficLight extends RSU implements SimulatedTrafficLight {
     protected lightColor color = lightColor.RED;
     private final String name;
     private final Point2D.Double outline[];
-    private static int count = 0;
-    private int mycount = count++;
 
     /**
      * Constructor that sets the traffic light as noticeable.

@@ -33,14 +33,14 @@ public class LCVehicle extends Movable {
         justExceededLane = false;
         if (x > lane.l) {
             justExceededLane = true;
-            // check whether adjacent neighbours need to be reset
+            // check whether adjacent neighbors need to be reset
             // these will be found automatically by updateNeighbour() in
             // the main model loop
-            if (lane.left!=null && lane.left.down!=lane.down.left) {
+            if ((lane.left != null) && (lane.left.down != lane.down.left)) {
                 leftUp = null;
                 leftDown = null;
             }
-            if (lane.right!=null && lane.right.down!=lane.down.right) {
+            if ((lane.right != null) && (lane.right.down != lane.down.right)) {
                 rightUp = null;
                 rightDown = null;
             }

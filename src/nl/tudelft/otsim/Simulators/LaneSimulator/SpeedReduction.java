@@ -4,7 +4,7 @@ package nl.tudelft.otsim.Simulators.LaneSimulator;
  * A speed reduction allows a driver to adapt the speed before a certain 
  * location is reached. Speed limits at lanes are only considered as soon as the
  * vehicle is on that lane, which is not always sufficient. Speed reductions are 
- * typically usefull at the start of lanes where the speed limit is low due to 
+ * typically useful at the start of lanes where the speed limit is low due to 
  * curvature.
  */
 public class SpeedReduction extends RSU {

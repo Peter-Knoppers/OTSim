@@ -1,7 +1,7 @@
 package nl.tudelft.otsim.Simulators.LaneSimulator;
 
 /**
- * Respresents a dual-loop induction detector that registers vehicles including
+ * Represents a dual-loop induction detector that registers vehicles including
  * their speeds.
  */
 public class Detector extends RSU {

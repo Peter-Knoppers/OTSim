@@ -24,10 +24,10 @@ public class DetectorData implements java.io.Serializable {
      */
     public DetectorData(Detector detector) {
         q = new int[detector.qHist.size()];
-        for (int i=0; i<detector.qHist.size(); i++)
+        for (int i = 0; i<detector.qHist.size(); i++)
             q[i] = detector.qHist.get(i);
         v = new double[detector.vHist.size()];
-        for (int i=0; i<detector.vHist.size(); i++)
+        for (int i = 0; i<detector.vHist.size(); i++)
             v[i] = detector.vHist.get(i);
         lane = detector.lane.id;
         x = detector.x;

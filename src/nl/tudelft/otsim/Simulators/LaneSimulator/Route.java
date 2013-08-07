@@ -36,12 +36,12 @@ public class Route {
      */
     public Route subRouteAfter(int destination) {
         int i = 0;
-        for (int j=0; j<destinations.length; j++)
-            if (destinations[j]==destination)
-                i = j+1; // +1 for 'after'
-        int[] newRoute = new int[destinations.length-i];
-        for (int j=i; j<destinations.length; j++)
-            newRoute[j-i] = destinations[j];
+        for (int j = 0; j < destinations.length; j++)
+            if (destinations[j] == destination)
+                i = j + 1; // +1 for 'after'
+        int[] newRoute = new int[destinations.length - i];
+        for (int j = i; j<destinations.length; j++)
+            newRoute[j - i] = destinations[j];
         return new Route(newRoute);
     }
     
@@ -51,7 +51,7 @@ public class Route {
      * @return Whether this route can be followed from the given lane.
      */
     public boolean canBeFollowedFrom(Lane lane) {
-        if (lane==null)
+        if (lane == null)
             return false;
         // Check and handling added by PK
         // TODO: check correctness of this handling with Wouter Schakel

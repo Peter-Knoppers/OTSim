@@ -109,7 +109,6 @@ public class Model {
      * running the model.
      */
     public void init() {
-
         // Set attributes
         k = 0;
         t = 0;
@@ -117,11 +116,11 @@ public class Model {
         lcVehicles = new java.util.ArrayList<LCVehicle>();
 
         // Initialize lanes
-        for (int i=0; i<network.length; i++)
+        for (int i = 0; i < network.length; i++)
             network[i].init();
         
         // Initialize controllers
-        for (int i=0; i<controllers.size(); i++)
+        for (int i = 0; i < controllers.size(); i++)
             controllers.get(i).init();
     }
 
@@ -131,29 +130,27 @@ public class Model {
      * @param n Number of loops to be run before returning.
      */
     public void run(int n) {
-
         // loop n times
         int nn = 0;
-        while (nn<n && t<period) {
-
+        while ((nn < n) && (t < period)) {
             // Run on-board units, road-side units and controllers
             runUnits();
 
             // Vehicle generation
             generating = true;
-            for (int i=0; i<network.length; i++)
-                if (network[i].generator!=null)
+            for (int i = 0; i < network.length; i++)
+                if (network[i].generator != null)
                     network[i].generator.run();
             generating = false;
 
             // Drive
             // copy pointer array as vehicles may be deleted
             java.util.ArrayList<Vehicle> tmp = new java.util.ArrayList<Vehicle>(vehicles.size());
-            for (int i=0; i<vehicles.size(); i++)
+            for (int i = 0; i < vehicles.size(); i++)
                 tmp.add(i, vehicles.get(i));
-            for (int i=0; i<tmp.size(); i++) {
+            for (int i = 0; i < tmp.size(); i++) {
                 tmp.get(i).driver.drive(); // sets a and dy
-                if (tmp.get(i).dy!=0 && tmp.get(i).lcProgress==0)
+                if ((tmp.get(i).dy != 0) && (tmp.get(i).lcProgress == 0))
                     tmp.get(i).startLaneChange();
             }
 
@@ -162,27 +159,27 @@ public class Model {
             tmp.clear();
             for (int i=0; i<vehicles.size(); i++)
                 tmp.add(i, vehicles.get(i));
-            for (int i=0; i<tmp.size(); i++)
+            for (int i = 0; i < tmp.size(); i++)
                 tmp.get(i).move(); // performs a and dy
 
-            // Update all neighbour references (overtaking)
-            for (int i=0; i<vehicles.size(); i++)
+            // Update all neighbor references (overtaking)
+            for (int i = 0; i < vehicles.size(); i++)
                 vehicles.get(i).updateNeighbours();
-            for (int i=0; i<lcVehicles.size(); i++)
+            for (int i = 0; i < lcVehicles.size(); i++)
                 lcVehicles.get(i).updateNeighbours();
 
             // End lane changes
-            for (int i=0; i<vehicles.size(); i++)
+            for (int i = 0; i < vehicles.size(); i++)
                 if (vehicles.get(i).lcProgress>=1)
                     vehicles.get(i).endLaneChange();
             
             // Check for collisions
             if (debug) {
                 Vehicle veh;
-                for (int i=0; i<vehicles.size(); i++) {
+                for (int i = 0; i < vehicles.size(); i++) {
                     veh = vehicles.get(i);
-                    if (veh.down!=null && veh.getHeadway(veh.down)<0 &&
-                            (veh.lane==veh.down.lane || !veh.down.lane.isMerge())) {
+                    if ((veh.down != null) && (veh.getHeadway(veh.down) < 0) &&
+                            ((veh.lane == veh.down.lane) || !veh.down.lane.isMerge())) {
                         System.err.println("Collision: "+veh.x+"@"+veh.lane.id);
                         System.err.println("veh " + veh.toString() + " down veh " + veh.down.toString());
                     }
@@ -199,22 +196,22 @@ public class Model {
     
     /**
      * Runs all road-side units, on-board units and controllers. This is part of
-     * a regular time step, aswell as gathering the final data after simulation.
+     * a regular time step, as well as gathering the final data after simulation.
      * This is because the model will only run while t&lt;period. If however a
      * units needs to aggregate data at t=period, that will not happen in the
      * main model loop.
      */
     protected void runUnits() {
         // Run road-side units
-        for (int i=0; i<network.length; i++)
-            for (int j=0; j<network[i].RSUcount(); j++)
+        for (int i = 0; i < network.length; i++)
+            for (int j = 0; j < network[i].RSUcount(); j++)
                 network[i].getRSU(j).run();
         // Run on-board units
-        for (int i=0; i<vehicles.size(); i++)
+        for (int i = 0; i < vehicles.size(); i++)
             if (vehicles.get(i).isEquipped())
                 vehicles.get(i).OBU.run();
         // Run controllers
-        for (int i=0; i<controllers.size(); i++)
+        for (int i = 0; i < controllers.size(); i++)
             controllers.get(i).run();
     }
 
@@ -232,7 +229,7 @@ public class Model {
      * @return Class with given id.
      */
     public VehicleDriver getClass(int id) {
-        for (int i=0; i<classes.size(); i++)
+        for (int i = 0; i<classes.size(); i++)
             if (classes.get(i).id() == id)
                 return classes.get(i);
         return null;
@@ -302,8 +299,8 @@ public class Model {
         java.util.Iterator<Vehicle> iter = vehicles.iterator();
         while (iter.hasNext()) {
             Vehicle veh = iter.next();
-            if (veh.up==movable || veh.down==movable || veh.leftUp==movable ||
-                    veh.leftDown==movable || veh.rightUp==movable || veh.rightDown==movable) {
+            if ((veh.up == movable) || (veh.down == movable) || (veh.leftUp == movable) ||
+                    (veh.leftDown == movable) || (veh.rightUp == movable) || (veh.rightDown == movable)) {
             	System.err.println("cut vehicle (a) " + veh.toString());
                 throw new RuntimeException("Cut vehicle: "+x+"@"+lane.id+
                         ", still connected: "+veh.x+"@"+veh.lane.id);
@@ -312,8 +309,8 @@ public class Model {
         java.util.Iterator<LCVehicle> iterLc = lcVehicles.iterator();
         while (iterLc.hasNext()) {
             LCVehicle veh = iterLc.next();
-            if (veh.up==movable || veh.down==movable || veh.leftUp==movable ||
-                    veh.leftDown==movable || veh.rightUp==movable || veh.rightDown==movable) {
+            if ((veh.up == movable) || (veh.down == movable) || (veh.leftUp == movable) ||
+                    (veh.leftDown == movable) || (veh.rightUp == movable) || (veh.rightDown == movable)) {
             	System.err.println("cut vehicle (b) " + movable.toString() + " connected from " + veh.toString() + " neighbors" + veh.linkedNeighbors());
                 throw new java.lang.RuntimeException("Cut vehicle: "+x+"@"+lane.id+
                         ", still connected: "+veh.x+"@"+veh.lane.id);
@@ -336,9 +333,9 @@ public class Model {
      * @return Absolute current time.
      */
     public java.util.Date currentTime() {
-        if (startTime==null)
+        if (startTime == null)
             return null;    
-        return new java.util.Date(startTime.getTime() + (long) (t*1000));
+        return new java.util.Date(startTime.getTime() + (long) (t * 1000));
     }
     
     /**
@@ -394,22 +391,21 @@ public class Model {
      * still in simulation and in the buffer and all detectors. Typically, this
      * method is called after the simulation has finished.
      */
-    public void storeData() {
-        
+    public void storeData() {        
         // Run on-board units, road-side units and controllers
         runUnits();
         
         // Store remaining vehicles
         if (settings.getBoolean("storeTrajectoryData")) {
-            for (int i=0; i<vehicles.size(); i++)
+            for (int i = 0; i < vehicles.size(); i++)
                 if (vehicles.get(i).trajectory!=null)
                     saveTrajectoryData(vehicles.get(i).trajectory);
             saveTrajectoryBufferToDisk();
         }
         if (settings.getBoolean("storeDetectorData")) {
             // Store detector data
-            for (int i=0; i<network.length; i++)
-                for (int j=0; j<network[i].RSUcount(); j++)
+            for (int i = 0; i < network.length; i++)
+                for (int j = 0; j < network[i].RSUcount(); j++)
                     if (network[i].getRSU(j) instanceof Detector)
                         saveDetectorData((Detector) network[i].getRSU(j));
         }
@@ -432,9 +428,9 @@ public class Model {
     protected synchronized void saveTrajectoryBufferToDisk() {
         // Save trajectories to disk
         java.text.DecimalFormat df = new java.text.DecimalFormat("000000");
-        for (int i=0; i<trajectories.size(); i++) {
+        for (int i = 0; i < trajectories.size(); i++) {
             trajectoriesSaved++;
-            saveData(trajectories.get(i), "trajectories", "trajectory"+df.format(trajectoriesSaved)+".dat");
+            saveData(trajectories.get(i), "trajectories", "trajectory" + df.format(trajectoriesSaved)+".dat");
         }
         // Clear trajectories
         trajectories.clear();

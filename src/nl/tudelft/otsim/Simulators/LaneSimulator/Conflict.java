@@ -84,19 +84,16 @@ public class Conflict {
      */
     protected static Conflict createMerge(Lane pLane, Lane yLane) {
         coord intersect;
-        if (pLane.x[pLane.x.length-1]==yLane.x[yLane.x.length-1] &&
-                pLane.y[pLane.y.length-1]==yLane.y[yLane.y.length-1]) {
-            // equal end coordinates
+        if ((pLane.x[pLane.x.length - 1] == yLane.x[yLane.x.length - 1]) &&
+                (pLane.y[pLane.y.length - 1] == yLane.y[yLane.y.length - 1])) // equal end coordinates
             intersect = new coord(pLane.l, yLane.l, pLane.x[pLane.x.length-1], pLane.y[pLane.y.length-1]);
-        } else	// find intersect
+        else	// find intersection
             intersect = intersect(pLane, yLane);
-        if (intersect==null)
+        if (intersect == null)
             return null;
         coord[] clearance = findClearanceSpace(pLane, yLane, intersect, false);
-        if (clearance!=null && clearance[0]!=null) {
-            return new Conflict(pLane, intersect.x1, yLane, intersect.x2,  
-                    false, conflictType.MERGE, intersect.x1-clearance[0].x1);
-        }
+        if ((clearance != null) && (clearance[0] != null))
+            return new Conflict(pLane, intersect.x1, yLane, intersect.x2, false, conflictType.MERGE, intersect.x1 - clearance[0].x1);
         return null;
     }
     
@@ -122,18 +119,15 @@ public class Conflict {
      */
     protected static Conflict createSplit(Lane lane1, Lane lane2) {
         coord intersect;
-        if (lane1.x[0]==lane2.x[0] && lane1.y[0]==lane2.y[0]) {
-            // equal start coordinates
+        if ((lane1.x[0] == lane2.x[0]) && (lane1.y[0] == lane2.y[0])) // equal start coordinates
             intersect = new coord(0, 0, lane1.x[0], lane2.y[0]);
-        } else	// find intersect
+        else	// find intersection
             intersect = intersect(lane1, lane2);
-        if (intersect==null)
+        if (intersect == null)
             return null;
         coord[] clearance = findClearanceSpace(lane1, lane2, intersect, false);
-        if (clearance!=null && clearance[1]!=null) {
-            return new Conflict(lane1, clearance[1].x1, lane2, clearance[1].x2,
-                    false, conflictType.SPLIT, clearance[1].x1);
-        }
+        if ((clearance != null) && (clearance[1] != null)) 
+            return new Conflict(lane1, clearance[1].x1, lane2, clearance[1].x2, false, conflictType.SPLIT, clearance[1].x1);
         return null;
     }
     
@@ -146,13 +140,11 @@ public class Conflict {
      */
     public static Conflict createCrossing(Lane pLane, Lane yLane, boolean clear) {
         coord intersect = intersect(pLane, yLane);
-        if (intersect==null)
+        if (intersect == null)
             return null;
         coord[] clearance = findClearanceSpace(pLane, yLane, intersect, true);
-        if (clearance!=null && clearance[0]!=null && clearance[1]!=null) {
-            return new Conflict(pLane, clearance[1].x1, yLane, clearance[1].x2,  
-                    clear, conflictType.CROSSING, clearance[1].x1-clearance[0].x1);
-        }
+        if ((clearance != null) && (clearance[0] != null) && (clearance[1] != null))
+            return new Conflict(pLane, clearance[1].x1, yLane, clearance[1].x2, clear, conflictType.CROSSING, clearance[1].x1-clearance[0].x1);
         return null;
     }
     
@@ -162,7 +154,7 @@ public class Conflict {
      * i.e. half of the vehicle and lane width, which allows the distance 
      * between a vehicle and the conflicting lane to be zero in the most 
      * critical situation (parallel lanes).
-     * @param d Abslolute distance between the start and/or end of two conflict areas [m].
+     * @param d Absolute distance between the start and/or end of two conflict areas [m].
      */
     public static void setConflictDistance(double d) {
         D_CONF = d;
@@ -179,6 +171,7 @@ public class Conflict {
         D_CONF = 2.625;
     }
     
+    // TODO This duplicates code in SpacialTools/Planar
     /**
      * Returns the global and lane coordinates of the intersection of two lanes.
      * @param lane1 1st lane.
@@ -189,20 +182,20 @@ public class Conflict {
     protected static coord intersect(Lane lane1, Lane lane2) {
         // Loop sections of lane 1
         double xCumul1 = 0;
-        for (int i=0; i<lane1.x.length-1; i++) {
-            // Get parameters of lane 1 as: y1 = a1 + b1*x1
-            double dx1 = lane1.x[i+1] - lane1.x[i];
-            double dy1 = lane1.y[i+1] - lane1.y[i];
-            double b1 = dy1/dx1;
-            double a1 = lane1.y[i] - lane1.x[i]*b1;
+        for (int i = 0; i < lane1.x.length - 1; i++) {
+            // Get parameters of lane 1 as: y1 = a1 + b1 * x1
+            double dx1 = lane1.x[i + 1] - lane1.x[i];
+            double dy1 = lane1.y[i + 1] - lane1.y[i];
+            double b1 = dy1 / dx1;
+            double a1 = lane1.y[i] - lane1.x[i] * b1;
             // Loop sections of lane 2
             double xCumul2 = 0;
-            for (int j=0; j<lane2.x.length-1; j++) {
-                // Get parameters of lane 2 as: y2 = a2 + b2*x2
-                double dx2 = lane2.x[j+1] - lane2.x[j];
-                double dy2 = lane2.y[j+1] - lane2.y[j];
-                double b2 = dy2/dx2;
-                double a2 = lane2.y[j] - lane2.x[j]*b2;
+            for (int j = 0; j < lane2.x.length - 1; j++) {
+                // Get parameters of lane 2 as: y2 = a2 + b2 * x2
+                double dx2 = lane2.x[j + 1] - lane2.x[j];
+                double dy2 = lane2.y[j + 1] - lane2.y[j];
+                double b2 = dy2 / dx2;
+                double a2 = lane2.y[j] - lane2.x[j] * b2;
                 
                 // Find coordinates of intersect
                 if (Double.isInfinite(b1) && Double.isInfinite(b2)) {
@@ -212,19 +205,19 @@ public class Conflict {
                     double y;
                     if (Double.isInfinite(b1)) {
                         x = lane1.x[i];
-                        y = a2 + b2*x;
+                        y = a2 + b2 * x;
                     } else if (Double.isInfinite(b2)) {
                         x = lane2.x[j];
-                        y = a1 + b1*x;
+                        y = a1 + b1 * x;
                     } else {
-                        x = -(a1-a2)/(b1-b2);
-                        y = a1 + b1*x;
+                        x = -(a1 - a2) / (b1 - b2);
+                        y = a1 + b1 * x;
                     }
                     // Check whether intersect coordinate is on both lines
-                    if (((x>=lane1.x[i] && x<=lane1.x[i+1]) || (x<=lane1.x[i] && x>=lane1.x[i+1])) &&
-                            ((x>=lane2.x[j] && x<=lane2.x[j+1]) || (x<=lane2.x[j] && x>=lane2.x[j+1])) &&
-                            ((y>=lane1.y[i] && y<=lane1.y[i+1]) || (y<=lane1.y[i] && y>=lane1.y[i+1])) &&
-                            ((y>=lane2.y[j] && y<=lane2.y[j+1]) || (y<=lane2.y[j] && y>=lane2.y[j+1]))) {
+                    if ((((x >= lane1.x[i]) && (x <= lane1.x[i + 1])) || ((x <= lane1.x[i]) && (x >= lane1.x[i + 1]))) &&
+                            (((x >= lane2.x[j]) && (x <= lane2.x[j + 1])) || ((x <= lane2.x[j]) && (x >= lane2.x[j + 1]))) &&
+                            (((y >= lane1.y[i]) && (y <= lane1.y[i + 1])) || ((y <= lane1.y[i]) && (y >= lane1.y[i + 1]))) &&
+                            (((y >= lane2.y[j]) && (y <= lane2.y[j + 1])) || ((y <= lane2.y[j]) && (y >= lane2.y[j + 1])))) {
                         // Calculate cumulative distances to intersect point
                         dx1 = x-lane1.x[i];
                         dy1 = y-lane1.y[i];
@@ -237,10 +230,10 @@ public class Conflict {
                     }
                 }
                 // Next section on lane 2
-                xCumul2 += Math.sqrt(dx2*dx2 + dy2*dy2);
+                xCumul2 += Math.sqrt(dx2 * dx2 + dy2 * dy2);
             }
-            // Next ssection on lane 1
-            xCumul1 += Math.sqrt(dx1*dx1 + dy1*dy1);
+            // Next section on lane 1
+            xCumul1 += Math.sqrt(dx1 * dx1 + dy1 * dy1);
         }
         // No intersect found
         return null;
@@ -269,14 +262,14 @@ public class Conflict {
             java.awt.geom.Point2D.Double h1 = lane1.heading(intersect.x1);
             java.awt.geom.Point2D.Double h2 = lane2.heading(intersect.x2);
             ang = Math.acos(h1.x*h2.x + h1.y*h2.y);
-            if (ang>Math.PI/2) {
+            if (ang > Math.PI / 2) {
                 reversed = true;
                 int n = xs2.length;
                 double[] xs2B = new double[n];
                 double[] ys2B = new double[n];
                 for (int i=0; i<n; i++) {
-                    xs2B[i] = xs2[n-i-1];
-                    ys2B[i] = ys2[n-i-1];
+                    xs2B[i] = xs2[n - i - 1];
+                    ys2B[i] = ys2[n - i - 1];
                 }
                 xs2 = xs2B;
                 ys2 = ys2B;
@@ -286,32 +279,29 @@ public class Conflict {
         // get initial sections of intersect coordinates
         double xCumul = 0;
         int i;
-        for (i=0; i<xs1.length-1; i++) {
-            double dx = xs1[i+1] - xs1[i];
-            double dy = ys1[i+1] - ys1[i];
-            xCumul += Math.sqrt(dx*dx + dy*dy);
-            if (xCumul>=intersect.x1) {
+        for (i = 0; i < xs1.length - 1; i++) {
+            double dx = xs1[i + 1] - xs1[i];
+            double dy = ys1[i + 1] - ys1[i];
+            xCumul += Math.sqrt(dx * dx + dy * dy);
+            if (xCumul >= intersect.x1)
                 break;
-            }
         }
         xCumul = 0;
         int j;
-        for (j=0; j<xs2.length-1; j++) {
-            double dx = xs2[j+1] - xs2[j];
-            double dy = ys2[j+1] - ys2[j];
-            xCumul += Math.sqrt(dx*dx + dy*dy);
-            if (xCumul>=intersect.x2) {
+        for (j = 0; j < xs2.length - 1; j++) {
+            double dx = xs2[j + 1] - xs2[j];
+            double dy = ys2[j + 1] - ys2[j];
+            xCumul += Math.sqrt(dx * dx + dy * dy);
+            if (xCumul >= intersect.x2)
                 break;
-            }
         }
         int iInit = i;
         int jInit = j;
         
         // Upstream
-        if (intersect.x1==0 || intersect.x2==0) {
-            // no upstream point
+        if ((intersect.x1 == 0) || (intersect.x2 == 0)) // no upstream point
             out.add(null);
-        } else {
+        else {
             // Global end coordinate of current subsections (initially the intersect point)
             double xEnd1 = intersect.x;
             double xEnd2 = intersect.x;
@@ -322,61 +312,58 @@ public class Conflict {
             // Distance moved so far
             xCumul = 0;
             // Move upstream until sufficient space is found
-            while (i>=0 && j>=0) {
+            while ((i >= 0) && (j >= 0)) {
                 // Get lengths
                 double dx1 = xEnd1 - xs1[i];
                 double dy1 = yEnd1 - ys1[i];
                 double dx2 = xEnd2 - xs2[j];
                 double dy2 = yEnd2 - ys2[j];
-                double len1 = Math.sqrt(dx1*dx1 + dy1*dy1);
-                double len2 = Math.sqrt(dx2*dx2 + dy2*dy2);
+                double len1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
+                double len2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
                 // Get angle and required distance
                 double xUp;
-                if (len1==0 || len2==0) {
-                    // go to next section
+                if ((len1 == 0) || (len2 == 0)) // go to next section
                     xUp = Double.POSITIVE_INFINITY;
-                } else {
-                    ang = Math.acos((dx1*dx2 + dy1*dy2)/(len1*len2));
-                    xUp = (.5*(D_CONF-d))/Math.sin(.5*ang);
+                else {
+                    ang = Math.acos((dx1 * dx2 + dy1 * dy2) / (len1 * len2));
+                    xUp = (.5 * (D_CONF - d)) / Math.sin(.5 * ang);
                 }
-                if (xUp>len1 || xUp>len2) {
+                if ((xUp > len1) || (xUp > len2)) {
                     // Subsection length too short, move a subsection and 
                     // increase space between lanes so far.
-                    if (len1<len2) {
+                    if (len1 < len2) {
                         xCumul += len1;
-                        xEnd2 = xEnd2*(1-len1/len2) + xs2[j]*len1/len2;
-                        yEnd2 = yEnd2*(1-len1/len2) + ys2[j]*len1/len2;
+                        xEnd2 = xEnd2 * (1 - len1 / len2) + xs2[j] * len1 / len2;
+                        yEnd2 = yEnd2 * (1 - len1 / len2) + ys2[j] * len1 / len2;
                         xEnd1 = xs1[i];
                         yEnd1 = ys1[i];
                         i--;
-                        d += (D_CONF-d)*len1/xUp;
+                        d += (D_CONF - d) * len1 / xUp;
                     } else {
                         xCumul += len2;
-                        xEnd1 = xEnd1*(1-len2/len1) + xs1[i]*len2/len1;
-                        yEnd1 = yEnd1*(1-len2/len1) + ys1[i]*len2/len1;
+                        xEnd1 = xEnd1 * (1 - len2 / len1) + xs1[i] * len2 / len1;
+                        yEnd1 = yEnd1 * (1 - len2 / len1) + ys1[i] * len2 / len1;
                         xEnd2 = xs2[j];
                         yEnd2 = ys2[j];
                         j--;
-                        d += (D_CONF-d)*len2/xUp;
+                        d += (D_CONF - d) * len2 / xUp;
                     }
                 } else {
                     // Both sections are longer than required distance
                     xCumul += xUp;
-                    out.add(new coord(intersect.x1-xCumul, intersect.x2-xCumul, 0, 0));
-                    i=-1; // exit while loop
+                    out.add(new coord(intersect.x1 - xCumul, intersect.x2 - xCumul, 0, 0));
+                    i = -1; // exit while loop
                 }
             }
             // No appropriate point found
-            if (out.isEmpty()) {
+            if (out.isEmpty())
                 out.add(null);
-            }
         }
         
         // Downstream
-        if (intersect.x1==lane1.l || intersect.x2==lane2.l) {
-            // no downstream point
+        if ((intersect.x1 == lane1.l) || (intersect.x2 == lane2.l)) // no downstream point
             out.add(null);
-        } else {
+        else {
             // get initial sections of coordinates
             i = iInit;
             j = jInit;
@@ -390,58 +377,56 @@ public class Conflict {
             // Distance moved so far
             xCumul = 0;
             // Move downstream until sufficient space is found
-            while (i<xs1.length-1 && j<xs2.length-1) {
+            while ((i < xs1.length - 1) && (j < xs2.length - 1)) {
                 // Get lengths
                 double dx1 = xs1[i+1] - xStart1;
                 double dy1 = ys1[i+1] - yStart1;
                 double dx2 = xs2[j+1] - xStart2;
                 double dy2 = ys2[j+1] - yStart2;
-                double len1 = Math.sqrt(dx1*dx1 + dy1*dy1);
-                double len2 = Math.sqrt(dx2*dx2 + dy2*dy2);
+                double len1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
+                double len2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
                 // Get angle and required distance
                 double xDown;
-                if (len1==0 || len2==0) {
-                    // go to next section
+                if ((len1 == 0) || (len2 == 0)) // go to next section
                     xDown = Double.POSITIVE_INFINITY;
-                } else {
-                    ang = Math.acos((dx1*dx2 + dy1*dy2)/(len1*len2));
-                    xDown = (.5*(D_CONF-d))/Math.sin(.5*ang);
+                else {
+                    ang = Math.acos((dx1 * dx2 + dy1 * dy2) / (len1 * len2));
+                    xDown = (.5 * (D_CONF - d)) / Math.sin(.5 * ang);
                 }
-                if (xDown>len1 || xDown>len2) {
+                if ((xDown > len1) || (xDown > len2)) {
                     // Subsection length too short, move a subsection and 
                     // increase space between lanes so far.
-                    if (len1<len2) {
+                    if (len1 < len2) {
                         xCumul += len1;
-                        xStart2 = xStart2*(1-len1/len2) + xs2[j+1]*len1/len2;
-                        yStart2 = yStart2*(1-len1/len2) + ys2[j+1]*len1/len2;
-                        xStart1 = xs1[i+1];
-                        yStart1 = ys1[i+1];
+                        xStart2 = xStart2 * (1 - len1 / len2) + xs2[j + 1] * len1 / len2;
+                        yStart2 = yStart2 * (1 - len1 / len2) + ys2[j + 1] * len1 / len2;
+                        xStart1 = xs1[i + 1];
+                        yStart1 = ys1[i + 1];
                         i++;
-                        d += (D_CONF-d)*len1/xDown;
+                        d += (D_CONF - d) * len1 / xDown;
                     } else {
                         xCumul += len2;
-                        xStart1 = xStart1*(1-len2/len1) + xs1[i+1]*len2/len1;
-                        yStart1 = yStart1*(1-len2/len1) + ys1[i+1]*len2/len1;
-                        xStart2 = xs2[j+1];
-                        yStart2 = ys2[j+1];
+                        xStart1 = xStart1 * (1 - len2 / len1) + xs1[i + 1] * len2 / len1;
+                        yStart1 = yStart1 * (1 - len2 / len1) + ys1[i + 1] * len2 / len1;
+                        xStart2 = xs2[j + 1];
+                        yStart2 = ys2[j + 1];
                         j++;
-                        d += (D_CONF-d)*len2/xDown;
+                        d += (D_CONF - d) * len2 / xDown;
                     }
                 } else {
                     // Both sections are longer than required distance
                     xCumul += xDown;
-                    out.add(new coord(intersect.x1+xCumul, intersect.x2+xCumul, 0, 0));
-                    i=xs1.length; // exit while loop
+                    out.add(new coord(intersect.x1 + xCumul, intersect.x2 + xCumul, 0, 0));
+                    i = xs1.length; // exit while loop
                 }
             }
             // No appropriate point found
-            if (out.size()==1) {
+            if (out.size() == 1)
                 out.add(null);
-            }
         }
         
         // Reverse results of 2nd lane if it was reversed
-        if (reversed && out.get(0)!=null && out.get(1)!=null) {
+        if (reversed && (out.get(0) != null) && (out.get(1) != null)) {
             // switch x's of 2nd lane (up = down and vice versa)
             double x = out.get(0).x2;
             out.get(0).x2 = out.get(1).x2;
@@ -515,7 +500,7 @@ public class Conflict {
          * @return First (partially) upstream vehicle of the coupled RSU. 
          */
         public Movable otherUp() {
-            if (this==p)
+            if (this == p)
                 return y.up();
             return p.up();
         }
@@ -525,7 +510,7 @@ public class Conflict {
          * @return Coupled RSU on the other lane of this conflict.
          */
         public conflictRSU otherRSU() {
-            if (this==p)
+            if (this == p)
                 return y;
             return p;
         }
@@ -556,7 +541,7 @@ public class Conflict {
          * is not a split conflict
          */
         public boolean isSplit() {
-            return type==conflictType.SPLIT;
+            return type == conflictType.SPLIT;
         }
         
         /** 
@@ -565,7 +550,7 @@ public class Conflict {
          * not a merge conflict
          */
         public boolean isMerge() {
-            return type==conflictType.MERGE;
+            return type == conflictType.MERGE;
         }
         
         /** 
@@ -574,7 +559,7 @@ public class Conflict {
          * is not a crossing conflict
          */
         public boolean isCrossing() {
-            return type==conflictType.CROSSING;
+            return type == conflictType.CROSSING;
         }
         
         /**
@@ -590,14 +575,13 @@ public class Conflict {
          * @return Visibility range on the minor road where the major road is visible [m].
          */
         public double visibility() {
-            if (vLane!=null) {
+            if (vLane != null) {
                 double dx = vLane.xAdj(y.lane);
-                if (dx==0 && vLane!=y.lane) {
+                if ((dx == 0) && (vLane != y.lane)) {
                     System.err.println("No visibility was set as the lanes "+y.lane.id+
                             " and "+vLane.id+" are not up- or downstream of one another.");
-                } else {
+                } else
                     visibility = y.x+dx - vX;
-                }
                 vLane = null;
             }
             return visibility;
@@ -614,11 +598,10 @@ public class Conflict {
             super.init();
             // move upstream
             Lane j = lane;
-            while (j!=null && !j.isMerge()) {
+            while ((j != null) && !j.isMerge())
                 j = j.up;
-            }
             // stopped as merge was found?
-            if (j!=null && j.isMerge()) {
+            if ((j != null) && j.isMerge()) {
                 for (Lane k : j.ups) {
                     // find appropriate rsu on lane
                 	//System.out.println("Checking up " + k.id);
@@ -638,10 +621,8 @@ public class Conflict {
                             }
                         }
                         //System.out.println("isEmpty returns " + (rsus.isEmpty() ? "empty" : "not empty"));
-                        if (!found && !rsus.isEmpty()) {
-                            // next cross section with rsu(s)
+                        if (!found && !rsus.isEmpty()) // next cross section with rsu(s)
                             xRsu = rsus.get(0).x;
-                        }
                     }
                 }
             }
@@ -662,51 +643,43 @@ public class Conflict {
         		return;
         	marked = true;
             // remove jLcVehicle as up if the lane change has ended (vehicle==null)
-            if (up!=null && up instanceof LCVehicle && ((LCVehicle) up).vehicle==null) {
+            if ((up != null) && (up instanceof LCVehicle) && (((LCVehicle) up).vehicle == null))
                 up = null;
-            }
             // move downstream for as long as the leader is still upstream, this
             // leader may have changed lane
-            if (up!=null) {
-                while (up.down!=null && up.down.getDistanceToRSU(this)>0) {
+            if (up != null)
+                while ((up.down != null) && (up.down.getDistanceToRSU(this) > 0))
                     up = up.down;
-                }
-            }
             // check existing vehicle
             if (up!=null && mergeConflictOfUp==null) {
                 // upstream vehicle which is not upstream of a merge conflict
-                if (up.lane==lane || up.lane.xAdj(lane)!=0) {
-                    double s = up.getDistanceToRSU(this)+up.l;
-                    if (s<0) {
-                        // passed the rsu fully, no longer the upstream vehicle
+                if ((up.lane == lane) || (up.lane.xAdj(lane) != 0)) {
+                    double s = up.getDistanceToRSU(this) + up.l;
+                    if (s < 0) // passed the rsu fully, no longer the upstream vehicle
                         up = null;
-                    }
-                } else {
-                    // diverged at a split, no longer upstream of this rsu
+                } else // diverged at a split, no longer upstream of this rsu
                     up = null;
-                }
-            } else if (up!=null) {
+            } else if (up != null) {
                 // upstream vehicle which is/was upstream of a merge conflict
                 // either find upstream vehicle, not upstream of merge conflict,
-                // or recheck time to enter the merge
+                // or re-check time to enter the merge
                 mergeConflictOfUp = null;
                 up = null;
             }
             
-            // find vehicle upstream of rsu
-            if (up==null) {
+            // find vehicle upstream of RSU
+            if (up == null)
                 up = lane.findVehicle(x, Model.longDirection.UP);
-            }
             // find vehicle upstream of upstream merge
-            if (up==null) {
+            if (up == null) {
                 double tte; // time to enter the merge by upstream vehicle
                 double tteMin = Double.POSITIVE_INFINITY; 
                 for (Conflict.conflictRSU rsu : upstreamMergeConflicts) {
                     Movable up2 = rsu.up();
-                    if (up2!=null) {
+                    if (up2 != null) {
                         // select if smallest tte
-                        tte = up2.getDistanceToRSU(rsu)/up2.v;
-                        if (tte<tteMin) {
+                        tte = up2.getDistanceToRSU(rsu) / up2.v;
+                        if (tte < tteMin) {
                             up = up2;
                             tteMin = tte;
                             mergeConflictOfUp = rsu;
