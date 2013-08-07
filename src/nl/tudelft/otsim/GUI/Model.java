@@ -1,6 +1,7 @@
 package nl.tudelft.otsim.GUI;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import nl.tudelft.otsim.Activities.Activities;
 import nl.tudelft.otsim.Charts.MeasurementPlan;
@@ -30,7 +31,11 @@ public class Model implements Storable {
 	public Activities activities = new Activities();
 	/** {@link Activities} of this model */
 	public TrafficDemand trafficDemand = new TrafficDemand(this);
+	private static final String XML_ACTIVATIONPENETRATION = "activationPenetration";
+	private static final String XML_ACTIVATIONLEVEL = "activationLevel";
 	private ArrayList<MeasurementPlan> measurementPlans = new ArrayList<MeasurementPlan>();
+	private double activationPenetration = 0;
+	private double activationLevel = 0;
 	private String fileName = null;
 	private boolean modified = false;
 	
@@ -53,6 +58,10 @@ public class Model implements Storable {
 					throw new Exception("There should be precisely one \"" + TrafficDemand.XMLTAG + "\" node in the XML tree");
 			} else if (key.equals(MeasurementPlan.XMLTAG))
 				;	// no check to be done
+			else if (key.equals(XML_ACTIVATIONPENETRATION))
+				activationPenetration = Double.parseDouble(modelNode.getSubNode(XML_ACTIVATIONPENETRATION, 0).getValue());
+			else if (key.equals(XML_ACTIVATIONLEVEL))
+				activationLevel = Double.parseDouble(modelNode.getSubNode(XML_ACTIVATIONLEVEL, 0).getValue());
 			else	// complain, then continue
 				WED.showProblem(WED.INFORMATION, "Unsupported node \"%s\" ignored", key);
 		}
@@ -218,6 +227,13 @@ public class Model implements Storable {
     			return false;
     	return true;
     }
+    
+    private boolean writeActivationData(StaXWriter staXWriter) {
+    	if ((activationLevel == 0) && (activationPenetration == 0))
+    		return true;
+    	return staXWriter.writeNode(XML_ACTIVATIONPENETRATION, String.format(Locale.US, "%.3f", activationPenetration))
+    			&& staXWriter.writeNode(XML_ACTIVATIONLEVEL, String.format(Locale.US,  "%.3f", activationLevel));
+    }
 
 	@Override
 	public boolean writeXML(StaXWriter staXWriter) {
@@ -225,6 +241,7 @@ public class Model implements Storable {
 				&& network.writeXML(staXWriter)
 				&& trafficDemand.writeXML(staXWriter)
 				&& writeMeasurementPlans(staXWriter)
+				&& writeActivationData(staXWriter)
 				&& staXWriter.writeNodeEnd(XMLTAG);
 	}
 
