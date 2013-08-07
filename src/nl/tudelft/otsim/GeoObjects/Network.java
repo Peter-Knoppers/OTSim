@@ -1463,7 +1463,10 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 	   	List<Lane> laneList = createLaneList();
    		result += String.format("Section LaneGeom\n");
 		for(Lane lane : laneList) {
-			result += String.format("Lane\tlaneID:\t%d\tXY:", lane.getID());
+			String speedLimit = "50";	// UGLY
+			if (null != lane.crossSectionElement)
+				speedLimit = lane.crossSectionElement.getSpeedLimit_r();
+			result += String.format("Lane\tlaneID:\t%d\tSpeedLimit:\t%s\tXY:", lane.getID(), speedLimit);
     		for (Vertex coord : lane.getLaneVerticesCenter())
 				result += String.format(Locale.US, "\t%.2f,%.2f", coord.getX(), coord.getY()); 
  			result += "\n";

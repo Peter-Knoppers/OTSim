@@ -11,6 +11,7 @@ import nl.tudelft.otsim.FileIO.ParsedNode;
 import nl.tudelft.otsim.FileIO.StaXWriter;
 import nl.tudelft.otsim.FileIO.XML_IO;
 import nl.tudelft.otsim.GUI.GraphicsPanel;
+import nl.tudelft.otsim.GUI.InputValidator;
 import nl.tudelft.otsim.SpatialTools.Planar;
 import nl.tudelft.otsim.Utilities.Reversed;
 
@@ -34,6 +35,8 @@ public class CrossSectionElement implements XML_IO {
 	private static final String XML_NAME = "name";
 	/** Label of width in XML representation of a CrossSectionElement */
 	private static final String XML_WIDTH = "width";
+	/** Label of speedLimit in XML representation of a CrossSectionElement */
+	private static final String XML_SPEEDLIMIT = "speedLimit";
 
     private Double width;
 	private String crossSectionElementTypologyName;
@@ -44,6 +47,7 @@ public class CrossSectionElement implements XML_IO {
 	private int neighborIndex = -1;
 	private ArrayList<Vertex> verticesInner;
 	private ArrayList<Vertex> verticesOuter;
+	private double speedLimit = 50 / 3.6;	// 50 km/h in m/s
 	
 	class CompareObjects implements Comparator<CrossSectionObject> {
 		@Override
@@ -171,6 +175,8 @@ public class CrossSectionElement implements XML_IO {
 				crossSectionElementTypologyName = value;
 			else if (fieldName.equals(XML_WIDTH))
 				width = Double.parseDouble(value);
+			else if (fieldName.equals(XML_SPEEDLIMIT))
+				speedLimit = Double.parseDouble(value);
 			else if (fieldName.equals(RoadMarkerAlong.XMLTAG))
 				for (int index = 0; index < pn.size(fieldName); index++)
 					objects.add(new RoadMarkerAlong(this, pn.getSubNode(fieldName, index)));
@@ -193,7 +199,6 @@ public class CrossSectionElement implements XML_IO {
 			throw new Exception("TypologyName of CrossSectionElement not defined " + pn.lineNumber + ", " + pn.columnNumber);
 		if (Double.isNaN(width))
 			throw new Exception("Width of CrossSectionElement not defined " + pn.lineNumber + ", " + pn.columnNumber);
-		//if (null == )
 	}
 
 	/**
@@ -230,6 +235,18 @@ public class CrossSectionElement implements XML_IO {
 		this.width = width;
 	}
 
+	public String getSpeedLimit_r() {
+		return String.format("%.0f", speedLimit * 3.6);
+	}
+	
+	public void setSpeedLimit_w(double newLimit) {
+		speedLimit = newLimit / 3.6;
+	}
+	
+	@SuppressWarnings("static-method")
+	public InputValidator validateSpeedLimit_v() {
+		return new InputValidator("[1-9][0-9]*", 1, 200);
+	}
 	/**
 	 * Obtain the lateral offset of the left edge of this CrossSectionElement
 	 * @return Double; lateral offset of the left edge of this CrossSectionElement
@@ -1169,6 +1186,7 @@ public class CrossSectionElement implements XML_IO {
 		return staXWriter.writeNodeStart(XMLTAG)
 				&& staXWriter.writeNode(XML_NAME, getType_r())
 				&& staXWriter.writeNode(XML_WIDTH, Double.toString(getCrossSectionElementWidth()))
+				&& staXWriter.writeNode(XML_SPEEDLIMIT, getSpeedLimit_r())
 				&& writeCrossSectionObjectsXML(staXWriter)
 				&& staXWriter.writeNodeEnd(XMLTAG);
 	}

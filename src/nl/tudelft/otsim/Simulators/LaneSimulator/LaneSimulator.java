@@ -75,11 +75,12 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         		int id = Integer.parseInt(fields[2]);
         		if (id < highestLaneID)
         			highestLaneID = id;
-        		int numberOfPoints = (fields.length - 4);
+        		double speedLimit = Double.parseDouble(fields[4]);
+        		int numberOfPoints = (fields.length - 6);
         		double[] x = new double[numberOfPoints];
         		double[] y = new double[numberOfPoints];
         		for (int i = 0; i < numberOfPoints; i++) {
-        			String subField = fields[i + 4];
+        			String subField = fields[i + 6];
         			String[] subFields = subField.split(",");
         			if (subFields.length != 2)
         				throw new Error ("Bad number of subFields in " + subField);
@@ -91,7 +92,8 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         		Lane newLane = new Lane(model, x, y, id);
         		// set origin and destination as default to none
         		newLane.destination = Lane.none;
-        		newLane.origin = Lane.none;        		
+        		newLane.origin = Lane.none;   
+        		newLane.vLim = speedLimit;
         		microNetwork.add(newLane);
         	}
         }
@@ -275,10 +277,6 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         // Make the last generator
 		makeGenerator(routeProbabilities, currentNode, microNetwork, routeList, flow);
 
-        // Set speed limits
-        for (Lane lane : microNetwork)
-        	lane.vLim = 50;
-        
         model.network = microNetwork.toArray(new Lane[0]);
         // Add the tapers to the list of lane objects
         for (Lane lane : model.network)
