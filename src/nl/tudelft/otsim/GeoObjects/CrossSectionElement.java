@@ -176,7 +176,7 @@ public class CrossSectionElement implements XML_IO {
 			else if (fieldName.equals(XML_WIDTH))
 				width = Double.parseDouble(value);
 			else if (fieldName.equals(XML_SPEEDLIMIT))
-				speedLimit = Double.parseDouble(value);
+				speedLimit = Double.parseDouble(value) / 3.6;
 			else if (fieldName.equals(RoadMarkerAlong.XMLTAG))
 				for (int index = 0; index < pn.size(fieldName); index++)
 					objects.add(new RoadMarkerAlong(this, pn.getSubNode(fieldName, index)));
