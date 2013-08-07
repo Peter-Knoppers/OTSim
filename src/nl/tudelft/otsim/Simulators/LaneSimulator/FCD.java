@@ -3,7 +3,7 @@ package nl.tudelft.otsim.Simulators.LaneSimulator;
 /**
  * Snapshot of vehicle state. A series of snapshots can be used as a trajectory  
  * or floating car data. To extend the information in such data this class can
- * be extended. Any additional fields are autmatically available in 
+ * be extended. Any additional fields are automatically available in 
  * <tt>jTrajectory</tt> and <tt>jTrajectoryData</tt>. Subclasses should have a
  * constructor with a <tt>jVehicle</tt> as input. Use <tt>addScalars</tt> to 
  * include scalar fields in stored trajectory data (<tt>jTrajectoryData</tt>) 
