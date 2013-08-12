@@ -373,6 +373,8 @@ public class Main extends JFrame implements ActionListener {
         controls.add(checkBoxShowLeader = makeCheckBox("Show leader", "LaneSimulatorRedraw", false), gbc);
         gbc.gridy++;
         controls.add(checkBoxShowFollower = makeCheckBox("Show follower", "LaneSimulatorRedraw", false), gbc);
+        gbc.gridy++;
+        controls.add(checkBoxShowLCVehicles = makeCheckBox("Show lane changing ghosts", "LaneSimulatorRedraw", false), gbc);
         controls.add(new JPanel());
         // add a filler
         gbc.gridy++;
@@ -560,6 +562,7 @@ public class Main extends JFrame implements ActionListener {
     public JCheckBox showNodes;
     /** Links should be drawn when the showLinks check box is checked */
     public JCheckBox showLinks;
+
     /** 
      * Only drive-able links should be drawn if the showDrivable links check 
      * box is checked */
@@ -590,6 +593,8 @@ public class Main extends JFrame implements ActionListener {
     public JCheckBox checkBoxShowLeader;
     /** Simulators must show the follower of a vehicle. */
     public JCheckBox checkBoxShowFollower;
+    /** LCVehicles should be drawn then the checkBoxShowLCVehicles check box is checked */
+	public JCheckBox checkBoxShowLCVehicles;
 	private StatusBar statusBar;
 	private JProgressBar mainStatusLabel;
 	private final int roadWaySimulatorIndex;
