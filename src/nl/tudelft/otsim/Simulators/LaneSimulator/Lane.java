@@ -415,14 +415,14 @@ public class Lane {
      */
     public Movable findVehicle(double startX, Model.longDirection updown) {
         Movable veh = null;
-        if (updown==Model.longDirection.UP) {
+        if (updown == Model.longDirection.UP) {
             // if there are vehicles on the lane, pick any vehicle
             if (!vehicles.isEmpty())
                 veh = vehicles.get(0);
             else {
                 // search for upstream lane with vehicles
                 Lane j = up;
-                while (j!=null && j.vehicles.isEmpty()) {
+                while ((j != null) && j.vehicles.isEmpty()) {
                 	if (j.marked) {
                 		j = null;
                 		System.out.println("Loop detected in \"up\" links");
@@ -438,12 +438,12 @@ public class Lane {
                 for (j = up; j!= null && j.marked; j = j.up)
                 	j.marked = false;
             }
-            // search up/downstream to match x
             if (veh != null) {
-                while (veh.down != null && veh.down.x + xAdj(veh.down.lane) <= startX)
-                    veh = veh.down;
-                while (veh != null && veh.x + xAdj(veh.lane) > startX)
-                    veh = veh.up;
+                // search downstream; then upstream to find first vehicle with x > startX
+            	while ((null != veh.getNeighbor(Movable.DOWN)) && (veh.getNeighbor(Movable.DOWN).x + xAdj(veh.getNeighbor(Movable.DOWN).lane) <= startX))
+            		veh = veh.getNeighbor(Movable.DOWN);
+            	while ((null != veh) && (veh.x + xAdj(veh.lane) > startX))
+            		veh = veh.getNeighbor(Movable.UP);
             }
         } else if (updown==Model.longDirection.DOWN) {
             // if there are vehicle on the lane, pick any vehicle
@@ -452,7 +452,7 @@ public class Lane {
             else {
                 // search for downstream lane with vehicles
                 Lane j = down;
-                while (j!=null && j.vehicles.isEmpty()) {
+                while ((j != null) && j.vehicles.isEmpty()) {
                 	if (j.marked) {
                 		j = null;
                 		System.out.println("Loop detected in \"down\" links");
@@ -468,12 +468,12 @@ public class Lane {
                 for (j = down; j!= null && j.marked; j = j.down)
                 	j.marked = false;
             }
-            // search up/downstream to match x
             if (veh != null) {
-                while (veh.up != null && veh.up.x + xAdj(veh.up.lane) >= startX)
-                    veh = veh.up;
-                while (veh != null && veh.x + xAdj(veh.lane) < startX)
-                    veh = veh.down;
+                // search upstream; then downstream to find first vehicle with x < startX
+            	while ((null != veh.getNeighbor(Movable.UP)) && (veh.getNeighbor(Movable.UP).x + xAdj(veh.getNeighbor(Movable.UP).lane) >= startX))
+            		veh = veh.getNeighbor(Movable.UP);
+            	while ((null != veh) && (veh.x + xAdj(veh.lane) < startX))
+            		veh = veh.getNeighbor(Movable.DOWN);
             }
         }
         return veh;
@@ -725,8 +725,7 @@ public class Lane {
      * @return Adjacent location [m].
      */
     public double getAdjacentX(double myX, Model.latDirection dir) {
-
-        if (dir==Model.latDirection.LEFT && !goLeft && !left.goRight)
+        if ((dir == Model.latDirection.LEFT) && !goLeft && !left.goRight)
             return myX * left.l/l; // maybe not physically adjacent, use total length only
         else if (dir==Model.latDirection.RIGHT && !goRight && !right.goLeft)
             return myX * right.l/l; // maybe not physically adjacent, use total length only

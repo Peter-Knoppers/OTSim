@@ -21,6 +21,9 @@ public class Model {
     /** Absolute start time of simulation. */
     public java.util.Date startTime;
     
+    /** Total movables generated */
+    public int nextMovableId = 0;
+    
     /** 
      * Generator for random numbers. This generator is connected to the seed and
      * should be used for all operations that are random and should be 
@@ -178,17 +181,18 @@ public class Model {
                 Vehicle veh;
                 for (int i = 0; i < vehicles.size(); i++) {
                     veh = vehicles.get(i);
-                    if ((veh.down != null) && (veh.getHeadway(veh.down) < 0) &&
-                            ((veh.lane == veh.down.lane) || !veh.down.lane.isMerge())) {
+                    Movable leader = veh.getNeighbor(Movable.DOWN);
+                    if ((null != leader) && (veh.getHeadway(leader) < 0) &&
+                            ((veh.lane == leader.lane) || !leader.lane.isMerge())) {
                         System.err.println("Collision: "+veh.x+"@"+veh.lane.id);
-                        System.err.println("veh " + veh.toString() + " down veh " + veh.down.toString());
+                        System.err.println("veh " + veh.toString() + " down veh " + leader.toString());
                     }
                 }
             }
 
             // Update time
-            k = k+1; // time step number
-            t = k*dt; // time [s]
+            k = k + 1; // time step number
+            t = k * dt; // time [s]
 
             nn++;
         }
@@ -287,6 +291,21 @@ public class Model {
         return lcVehicles;
     }
     
+    private static void showBadCut(Movable movable, int direction, Movable other) {
+    	String whatIsIt;
+    	if (movable instanceof Vehicle)
+    		whatIsIt = "Vehicle";
+    	else if (movable instanceof LCVehicle)
+    		whatIsIt = "LCVehicle";
+    	else
+    		whatIsIt = "Movable";	// should never happen
+		String description = "Cut " + whatIsIt + " " + movable.toString() + " " + movable.x + "@" + movable.lane.id 
+				+ " is still connected from movable " + other.toString() + " " + other.x + "@" + other.lane.id 
+                + " in direction " + Movable.directionToString(direction);
+    	System.err.println(description);
+        throw new RuntimeException(description);    	
+    }
+    
     /**
      * Displays messages whenever any movable in simulation has a pointer to the
      * given movable. This can be used to check whether the given movable was 
@@ -294,27 +313,19 @@ public class Model {
      * @param movable Cut movable.
      */
     public void checkForRemainingPointers(Movable movable) {
-        Lane lane = movable.lane;
-        double x = movable.x;
-        java.util.Iterator<Vehicle> iter = vehicles.iterator();
-        while (iter.hasNext()) {
+        final int[] directions = { Movable.UP, Movable.DOWN, Movable.LEFT_UP, Movable.LEFT_DOWN, Movable.RIGHT_UP, Movable.RIGHT_DOWN };
+        for (java.util.Iterator<Vehicle> iter = vehicles.iterator(); iter.hasNext(); ) {
             Vehicle veh = iter.next();
-            if ((veh.up == movable) || (veh.down == movable) || (veh.leftUp == movable) ||
-                    (veh.leftDown == movable) || (veh.rightUp == movable) || (veh.rightDown == movable)) {
-            	System.err.println("cut vehicle (a) " + veh.toString());
-                throw new RuntimeException("Cut vehicle: "+x+"@"+lane.id+
-                        ", still connected: "+veh.x+"@"+veh.lane.id);
-            }
+            for (int direction : directions)
+            	if (veh.getNeighbor(direction) == movable)
+            		showBadCut(movable, direction, veh);
         }
         java.util.Iterator<LCVehicle> iterLc = lcVehicles.iterator();
         while (iterLc.hasNext()) {
             LCVehicle veh = iterLc.next();
-            if ((veh.up == movable) || (veh.down == movable) || (veh.leftUp == movable) ||
-                    (veh.leftDown == movable) || (veh.rightUp == movable) || (veh.rightDown == movable)) {
-            	System.err.println("cut vehicle (b) " + movable.toString() + " connected from " + veh.toString() + " neighbors" + veh.linkedNeighbors());
-                throw new java.lang.RuntimeException("Cut vehicle: "+x+"@"+lane.id+
-                        ", still connected: "+veh.x+"@"+veh.lane.id);
-            }
+            for (int direction : directions)
+            	if (veh.getNeighbor(direction) == movable)
+            		showBadCut(movable, direction, veh);
         }
     }
     

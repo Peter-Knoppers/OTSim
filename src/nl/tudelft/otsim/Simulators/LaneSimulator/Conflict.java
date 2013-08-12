@@ -648,8 +648,8 @@ public class Conflict {
             // move downstream for as long as the leader is still upstream, this
             // leader may have changed lane
             if (up != null)
-                while ((up.down != null) && (up.down.getDistanceToRSU(this) > 0))
-                    up = up.down;
+                while ((up.getNeighbor(Movable.DOWN) != null) && (up.getNeighbor(Movable.DOWN).getDistanceToRSU(this) > 0))
+                    up = up.getNeighbor(Movable.DOWN);
             // check existing vehicle
             if (up!=null && mergeConflictOfUp==null) {
                 // upstream vehicle which is not upstream of a merge conflict

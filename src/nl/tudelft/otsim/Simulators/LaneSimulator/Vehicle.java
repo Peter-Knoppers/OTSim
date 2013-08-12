@@ -90,10 +90,14 @@ public class Vehicle extends Movable implements SimulatedObject {
     	if (moved >= lane.model.k)
     		return;
     	// move leaders first
-    	if (down!= null)
-    		down.getDriver().vehicle.move();
-    	if (lcVehicle != null && lcVehicle.down != null)
-    		lcVehicle.down.getDriver().vehicle.move();
+    	Movable leader = getNeighbor(Movable.DOWN);
+    	if (null != leader)
+    		leader.getDriver().vehicle.move();
+    	if (null != lcVehicle) {
+    		Movable LCLeader = lcVehicle.getNeighbor(Movable.DOWN);
+    		if (null != LCLeader)
+    			LCLeader.getDriver().vehicle.move();
+    	}
     	//tag as moved
     	moved  = lane.model.k;
         // lateral
@@ -190,11 +194,10 @@ public class Vehicle extends Movable implements SimulatedObject {
                 delete();
                 return;
             //} else if (lane.down==null && lane.destination>=0) {
-            } else if (route.destinations().length==1 && lane.destination==route.destinations()[0]) {
+            } else if (route.destinations().length == 1 && lane.destination==route.destinations()[0]) {
                 // vehicle has reached (a) destination
-                if (model.settings.getBoolean("storeTrajectoryData") && trajectory!=null) {
+                if (model.settings.getBoolean("storeTrajectoryData") && trajectory != null)
                     model.saveTrajectoryData(trajectory);
-                }
                 delete();
                 return;
             } else {
@@ -210,7 +213,7 @@ public class Vehicle extends Movable implements SimulatedObject {
 	                return;
                 } 
             	// abort impossible lane change
-                if (lcVehicle!=null) {
+                if (lcVehicle != null) {
                     if ((lcDirection==Model.latDirection.RIGHT && (lane.down.right==null || lane.down.right!=lcVehicle.lane.down)) ||
                             (lcDirection==Model.latDirection.LEFT && (lane.down.left==null || lane.down.left!=lcVehicle.lane.down))) {
                         abortLaneChange();
@@ -219,13 +222,13 @@ public class Vehicle extends Movable implements SimulatedObject {
                 // check whether adjacent neighbors need to be reset
                 // these will be found automatically by updateNeighbour() in
                 // the main model loop
-                if (lane.left!=null && lane.left.down!=lane.down.left) {
-                    leftUp = null;
-                    leftDown = null;
+                if ((null != lane.left) && (lane.left.down != lane.down.left)) {
+                	setNeighbor(Movable.LEFT_UP, null);
+                	setNeighbor(Movable.LEFT_DOWN, null);
                 }
-                if (lane.right!=null && lane.right.down!=lane.down.right) {
-                    rightUp = null;
-                    rightDown = null;
+                if ((null != lane.right) && (lane.right.down != lane.down.right)) {
+                	setNeighbor(Movable.RIGHT_UP, null);
+                	setNeighbor(Movable.RIGHT_DOWN, null);
                 }
                 // put on downstream lane
                 x -= lane.l;
@@ -249,7 +252,7 @@ public class Vehicle extends Movable implements SimulatedObject {
         if (lcVehicle != null) {
             double xNew = 0;
             double xAdj = 0;
-            if (lcDirection==Model.latDirection.LEFT) {
+            if (lcDirection == Model.latDirection.LEFT) {
                 xNew = getAdjacentX(Model.latDirection.LEFT);
                 xAdj = lcVehicle.lane.xAdj(lane.left);
             } else {
@@ -429,7 +432,10 @@ public class Vehicle extends Movable implements SimulatedObject {
     
     @Override
 	public String toString() {
-    	return String.format (Main.locale, "at (%.3f, %.3f), route %s", global.x, global.y, route.toString());
+    	String location = "null";
+    	if (null != global)
+    		location = String.format(Main.locale, "%.3f,%.3f", global.x, global.y);
+    	return String.format (Main.locale, "%d at (%s), route %s", id, location, route.toString());
     }
     
     /**
@@ -469,7 +475,7 @@ public class Vehicle extends Movable implements SimulatedObject {
      * @return Movable; the leader of this Vehicle
      */
     public Movable getLeader_r() {
-    	return down;
+    	return getNeighbor(Movable.DOWN);
     }
     
     /**
@@ -477,7 +483,7 @@ public class Vehicle extends Movable implements SimulatedObject {
      * @return Movable; the follower of this Vehicle
      */
     public Movable getFollower_r() {
-    	return up;
+    	return getNeighbor(Movable.UP);
     }
     
     /**

@@ -54,6 +54,15 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 	 */
 	public LaneSimulator(String definition, GraphicsPanel graphicsPanel, Scheduler scheduler) throws Exception {
 		this.scheduler = scheduler;
+		/* test the flip operations
+		for (int direction = 0; direction < 6; direction++) {
+			System.out.print("Direction " + direction + " is " + Movable.directionToString(direction));
+			for (int flip = 0; flip <= 30; flip += 10)
+				System.out.print(" with " + Movable.flipToString(flip) + " " + Movable.directionToString(Movable.flipDirection(direction, flip)));
+			System.out.println("");
+		}
+		*/
+		
 		// STUB set reasonable defaults
 		model.period = 1860;
         model.dt = .2;
@@ -861,7 +870,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
     
     private class VehicleGraphic {
         /** The concerned vehicle object. */
-        private Vehicle vehicle;
+        private Movable vehicle;
         
         /**
          * Constructor that sets the vehicle.
@@ -869,6 +878,10 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
          */
         public VehicleGraphic(Vehicle vehicle) {
             this.vehicle = vehicle;
+        }
+        
+        public VehicleGraphic(LCVehicle lcv) {
+        	this.vehicle = lcv;
         }
         
         /**
@@ -880,51 +893,59 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
          * steam follower of the vehicle
          */
         public void paint(GraphicsPanel graphicsPanel, boolean showDownStream, boolean showUpStream) {
-            vehicle.paint(scheduler.getSimulatedTime(), graphicsPanel);
+        	if (vehicle instanceof Vehicle)
+        		((Vehicle) vehicle).paint(scheduler.getSimulatedTime(), graphicsPanel);
+        	else if (vehicle instanceof LCVehicle)
+        		((LCVehicle) vehicle).paint(scheduler.getSimulatedTime(), graphicsPanel);
             //Point2D.Double[] outline = vehicle.outline(scheduler.getSimulatedTime());
             //graphicsPanel.drawPolygon(outline);
             if (showDownStream) {
+            	if (null == vehicle.global) {
+            		System.err.println("LaneSimulator.paint: movable global is NULL");
+            		return;
+            	}
+            	int[] directions = { Movable.LEFT_DOWN, Movable.DOWN, Movable.RIGHT_DOWN };
             	Point2D.Double[] line = new Point2D.Double[2];
             	line[0] = vehicle.global;
-                if (vehicle.leftDown!=null) {
-                	graphicsPanel.setColor(new Color(255,0,0));
-                    java.awt.Point.Double h = vehicle.leftDown.heading;
-                	line[1] = new Point2D.Double(vehicle.leftDown.global.x - h.x * vehicle.leftDown.l, 
-                            vehicle.leftDown.global.y - h.y * vehicle.leftDown.l);
-                    graphicsPanel.drawPolyLine(line);
-                }
-                if (vehicle.down!=null) {
-                	graphicsPanel.setColor(new Color(0, 255, 0));
-                    java.awt.Point.Double h = vehicle.down.heading;
-                    line[1] = new Point2D.Double(vehicle.down.global.x - h.x * vehicle.down.l,
-                            vehicle.down.global.y - h.y * vehicle.down.l);
-                    graphicsPanel.drawPolyLine(line);
-                }
-                if (vehicle.rightDown!=null) {
-                	graphicsPanel.setColor(new Color(0, 0, 255));
-                    java.awt.Point.Double h = vehicle.rightDown.heading;
-                    line[1] = new Point2D.Double(vehicle.rightDown.global.x - h.x * vehicle.rightDown.l,
-                            vehicle.rightDown.global.y - h.y * vehicle.rightDown.l);
-                    graphicsPanel.drawPolyLine(line);
-                }
+            	for (int direction : directions) {
+            		Movable other = vehicle.getNeighbor(direction);
+            		if (null != other) {
+            			graphicsPanel.setColor (
+            					Movable.LEFT_DOWN == direction ? new Color(255,0,0)
+            					: Movable.DOWN == direction ? new Color(0, 255, 0)
+            					: new Color(0, 0, 255));
+                        java.awt.Point.Double h = other.heading;
+                        if (null == other.global)
+                        	System.err.println("neighbor " + other.toString() + " (" + Movable.directionToString(direction) + " of " + vehicle.toString() + " has bad global");
+                        else {
+	                    	line[1] = new Point2D.Double(other.global.x - h.x * other.l, 
+	                                other.global.y - h.y * other.l);
+	                        graphicsPanel.drawPolyLine(line);
+                        }
+            		}
+            	}
             }
             if (showUpStream) {
+            	int[] directions = { Movable.LEFT_UP, Movable.UP, Movable.RIGHT_UP };
             	Point2D.Double[] line = new Point2D.Double[2];
             	line[0] = vehicle.global;
-                if (vehicle.leftUp!=null) {
-                    line[1] = vehicle.leftUp.global;
-                    graphicsPanel.drawPolyLine(line);
-                }
-                if (vehicle.up!=null) {
-                	graphicsPanel.setColor(new Color(255, 255, 0));
-                    line[1] = vehicle.up.global;
-                    graphicsPanel.drawPolyLine(line);
-                }
-                if (vehicle.rightUp!=null) {
-                	graphicsPanel.setColor(new Color(0, 255, 255));
-                    line[1] = vehicle.rightUp.global;
-                    graphicsPanel.drawPolyLine(line);
-                }
+            	for (int direction : directions) {
+            		Movable other = vehicle.getNeighbor(direction);
+            		if (null != other) {
+            			graphicsPanel.setColor (
+            					Movable.LEFT_UP == direction ? new Color(0, 255,255)
+            					: Movable.UP == direction ? new Color(255, 0, 255)
+            					: new Color(0, 255, 255));
+                        java.awt.Point.Double h = other.heading;
+                        if (null == other.global)
+                        	System.err.println("neighbor " + other.toString() + " (" + Movable.directionToString(direction) + " of " + vehicle.toString() + " has bad global");
+                        else {
+	                    	line[1] = new Point2D.Double(other.global.x - h.x * other.l, 
+	                                other.global.y - h.y * other.l);
+	                        graphicsPanel.drawPolyLine(line);
+                        }
+            		}
+            	}
             }
         }
     } 
@@ -1010,6 +1031,9 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 		boolean showFollower = Main.mainFrame.checkBoxShowFollower.isSelected();
 		for (Vehicle vehicle : model.getVehicles())
 			new VehicleGraphic(vehicle).paint(graphicsPanel, showLeader, showFollower);
+		if (Main.mainFrame.checkBoxShowLCVehicles.isSelected())
+			for (LCVehicle lcv : model.getLcVehicles())
+				new VehicleGraphic(lcv).paint(graphicsPanel, showLeader, showFollower);
 		
 	}
 
