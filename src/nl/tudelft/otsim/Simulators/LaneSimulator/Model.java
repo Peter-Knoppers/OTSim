@@ -291,19 +291,24 @@ public class Model {
         return lcVehicles;
     }
     
-    private static void showBadCut(Movable movable, int direction, Movable other) {
-    	String whatIsIt;
-    	if (movable instanceof Vehicle)
-    		whatIsIt = "Vehicle";
-    	else if (movable instanceof LCVehicle)
-    		whatIsIt = "LCVehicle";
-    	else
-    		whatIsIt = "Movable";	// should never happen
-		String description = "Cut " + whatIsIt + " " + movable.toString() + " " + movable.x + "@" + movable.lane.id 
-				+ " is still connected from movable " + other.toString() + " " + other.x + "@" + other.lane.id 
-                + " in direction " + Movable.directionToString(direction);
-    	System.err.println(description);
-        throw new RuntimeException(description);    	
+    private static void checkCut(Movable cutMovable, Movable other) {
+        final int[] directions = { Movable.UP, Movable.DOWN, Movable.LEFT_UP, Movable.LEFT_DOWN, Movable.RIGHT_UP, Movable.RIGHT_DOWN };
+        for (int direction : directions) {
+        	if (other.getNeighbor(direction) == cutMovable) {
+            	String whatIsIt;
+            	if (cutMovable instanceof Vehicle)
+            		whatIsIt = "Vehicle";
+            	else if (cutMovable instanceof LCVehicle)
+            		whatIsIt = "LCVehicle";
+            	else
+            		whatIsIt = "Movable";	// That should never happen ...
+        		String description = "Cut " + whatIsIt + " " + cutMovable.toString() + " " + cutMovable.x + "@" + cutMovable.lane.id 
+        				+ " is still connected from movable " + other.toString() + " " + other.x + "@" + other.lane.id 
+                        + " in direction " + Movable.directionToString(direction);
+            	System.err.println(description);
+                throw new RuntimeException(description);    	        		
+        	}
+        }
     }
     
     /**
@@ -313,20 +318,10 @@ public class Model {
      * @param movable Cut movable.
      */
     public void checkForRemainingPointers(Movable movable) {
-        final int[] directions = { Movable.UP, Movable.DOWN, Movable.LEFT_UP, Movable.LEFT_DOWN, Movable.RIGHT_UP, Movable.RIGHT_DOWN };
-        for (java.util.Iterator<Vehicle> iter = vehicles.iterator(); iter.hasNext(); ) {
-            Vehicle veh = iter.next();
-            for (int direction : directions)
-            	if (veh.getNeighbor(direction) == movable)
-            		showBadCut(movable, direction, veh);
-        }
-        java.util.Iterator<LCVehicle> iterLc = lcVehicles.iterator();
-        while (iterLc.hasNext()) {
-            LCVehicle veh = iterLc.next();
-            for (int direction : directions)
-            	if (veh.getNeighbor(direction) == movable)
-            		showBadCut(movable, direction, veh);
-        }
+        for (java.util.Iterator<Vehicle> iter = vehicles.iterator(); iter.hasNext(); )
+        	checkCut(movable, iter.next());
+        for (java.util.Iterator<LCVehicle> iter = lcVehicles.iterator(); iter.hasNext(); )
+        	checkCut(movable, iter.next());
     }
     
     /**
