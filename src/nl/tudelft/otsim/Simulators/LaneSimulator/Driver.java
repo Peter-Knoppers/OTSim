@@ -229,10 +229,9 @@ public class Driver {
      * desire which is set in <tt>notice()</tt> methods.
      */
     public void drive() {
-        // Notice RSU's
         noticeRSUs();
         
-        // Set interaction booleans as false by default
+        // Initialize interaction booleans to false
         leftSync = false; // for visualization only
         rightSync = false;
         leftYield = false;
@@ -240,8 +239,7 @@ public class Driver {
         vehicle.leftIndicator = false; // for vehicle interaction
         vehicle.rightIndicator = false;
         
-        // Perform the lane change model only when not already changing lane
-        if (vehicle.lcProgress == 0) {
+        if (vehicle.lcProgress == 0) {	// Apply the lane change model only when not already changing lane
             /* The headway is exponentially relaxed towards the normal value of
              * Tmax. The relaxation time is tau, which can never be smaller than
              * the time step. Smaller values of T can be set within the model.
@@ -428,6 +426,11 @@ public class Driver {
                     		follower.getDriver().resetT();
                     	} else
                     		aFollow = Double.NEGATIVE_INFINITY;// Negative headway; reject gap
+                    } else {	// Do not change lanes right after a merge because some followers may not be visible (BUG)
+                    	Lane otherLane = Movable.LEFT_DOWN == direction ? vehicle.lane.left : vehicle.lane.right;
+                    	Model.latDirection latDirection = Movable.LEFT_DOWN == direction ? Model.latDirection.LEFT : Model.latDirection.RIGHT;
+                    	if ((null != otherLane) && (null != otherLane.upMerge) && (otherLane.upMerge.xAdj(otherLane) + vehicle.getAdjacentX(latDirection) < otherLane.getVLim() * Tmax))
+                    		aFollow = Double.NEGATIVE_INFINITY;
                     }
                     boolean laneChangePermitted = Movable.LEFT_DOWN == direction ? vehicle.lane.goLeft : vehicle.lane.goRight;
                     /*
@@ -470,7 +473,7 @@ public class Driver {
                     vehicle.leftIndicator = true;	// Indicate need to left
                 else if ((dRight >= dLeft) && (dRight >= dCoop))
                     vehicle.rightIndicator = true;	// Indicate need to right
-            } // not on first 100m
+            } // else not on first 100m after a generator
             
             /* === LONGITUDINAL ===
              * Follow all applicable vehicles and use lowest acceleration.

@@ -1,5 +1,7 @@
 package nl.tudelft.otsim.Simulators.LaneSimulator;
 
+import nl.tudelft.otsim.GUI.Main;
+
 /**
  * Main model object. This functions as the main interface with the model. It
  * contains general settings, the network, all vehicles etc. Furthermore, it
@@ -184,8 +186,9 @@ public class Model {
                     Movable leader = veh.getNeighbor(Movable.DOWN);
                     if ((null != leader) && (veh.getHeadway(leader) < 0) &&
                             ((veh.lane == leader.lane) || !leader.lane.isMerge())) {
-                        System.err.println("Collision: "+veh.x+"@"+veh.lane.id);
-                        System.err.println("veh " + veh.toString() + " down veh " + leader.toString());
+                    	String problem = String.format("Collision: %s %.2f@%d collided with %s %.2f@%d", veh.toString(), veh.x, veh.lane.id, leader.toString(), leader.x, leader.lane.id);
+                        System.err.println(problem);
+                        throw new RuntimeException(problem);
                     }
                 }
             }
@@ -302,9 +305,9 @@ public class Model {
             		whatIsIt = "LCVehicle";
             	else
             		whatIsIt = "Movable";	// That should never happen ...
-        		String description = "Cut " + whatIsIt + " " + cutMovable.toString() + " " + cutMovable.x + "@" + cutMovable.lane.id 
-        				+ " is still connected from movable " + other.toString() + " " + other.x + "@" + other.lane.id 
-                        + " in direction " + Movable.directionToString(direction);
+        		String description = String.format(Main.locale, "Cut %s %s %.3f@%d is still connected from movable %s %.2f@%d in direction %s", 
+        				whatIsIt, cutMovable.toString(), cutMovable.x, cutMovable.lane.id, other.toString(), other.x, other.lane.id, 
+                        Movable.directionToString(direction));
             	System.err.println(description);
                 throw new RuntimeException(description);    	        		
         	}
