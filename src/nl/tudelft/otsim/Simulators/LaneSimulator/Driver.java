@@ -293,9 +293,9 @@ public class Driver {
                      * left lane. In this way we have symmetry which prevents
                      * lane hopping.
                      */
-                    if (dLeftRoute<dCurRouteFL)
+                    if (dLeftRoute < dCurRouteFL)
                         dLeftRoute = dCurRouteFL;
-                    else if (dLeftRoute>dCurRouteFL)
+                    else if (dLeftRoute > dCurRouteFL)
                         dLeftRoute = -dLeftRoute;
                     else
                         dLeftRoute = 0;
@@ -407,6 +407,8 @@ public class Driver {
                 boolean acceptLeft = false;
                 boolean acceptRight = false;
                 for (int direction : directions) {
+                	if ((933 == vehicle.id) && (vehicle.model.t() >= 13 * 60 + 34.5) && (Movable.RIGHT_DOWN == direction))
+                		System.out.println("Opletten");                		
                 	Movable leader = vehicle.getNeighbor(direction);
                     double aSelf = 0; // assume current speed is fine
                     double desire = Movable.LEFT_DOWN == direction ? dLeft : dRight;

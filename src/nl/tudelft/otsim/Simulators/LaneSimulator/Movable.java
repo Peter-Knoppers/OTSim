@@ -105,6 +105,10 @@ public abstract class Movable  {
      * @param newNeighbor Movable; the new neighbor in the specified direction (may be null)
      */
     public void setNeighbor (int direction, Movable newNeighbor) {
+    	if ((933 == id) && (null != newNeighbor) && (1071 == newNeighbor.id))
+    		System.out.println("Opletten: setting neighbor of " + toString() + " in " + directionToString(direction) + " to " + newNeighbor.toString() + " t=" + model.t());
+    	if ((1129 == id) && (null != newNeighbor) && (1071 == newNeighbor.id) && (model.t() > 800))
+    		System.out.println("Opletten: setting neighbor of " + toString() + " in " + directionToString(direction) + " to " + newNeighbor.toString() + " t=" + model.t());
     	neighbors[direction] = newNeighbor;
     }
     
@@ -441,8 +445,8 @@ public abstract class Movable  {
      * to this vehicle are updated or removed.
      */
     public void cut() {
-    	//if ((371 == id) && (model.t > 332))
-    	//	System.out.println("Cutting vehicle " + this.toString() + " linked neighbors: " + linkedNeighbors());
+    	if ((1129 == id) && (model.t > 814.3))
+    		System.out.println("Cutting vehicle " + this.toString() + " linked neighbors: " + linkedNeighbors());
         // remove from lane vector
         lane.vehicles.remove(this);
 
@@ -895,4 +899,52 @@ public abstract class Movable  {
     			+ printNeighbor("leftDown", LEFT_DOWN) + printNeighbor("rightDown", RIGHT_DOWN);
     }
     
+    /**
+     * Retrieve the leader of this Movable.
+     * @return Movable; the leader of this Movable (may be null)
+     */
+    public Movable getLeader_r () {
+    	return getNeighbor(DOWN);
+    }
+    
+    /**
+     * Retrieve the left leader of this Movable.
+     * @return Movable; the left leader of this Movable (may be null)
+     */
+    public Movable getLeaderLeft_r () {
+    	return getNeighbor(LEFT_DOWN);
+    }
+
+    /**
+     * Retrieve the right leader of this Movable.
+     * @return Movable; the right leader of this Movable (may be null)
+     */
+    public Movable getLeaderRight_r () {
+    	return getNeighbor(RIGHT_DOWN);
+    }
+
+    /**
+     * Retrieve the follower of this Movable.
+     * @return Movable; the follower of this Movable (may be null)
+     */
+    public Movable getFollower_r () {
+    	return getNeighbor(UP);
+    }
+    
+    /**
+     * Retrieve the left follower of this Movable.
+     * @return Movable; the left follower of this Movable (may be null)
+     */
+    public Movable getFollowerLeft_r () {
+    	return getNeighbor(LEFT_UP);
+    }
+
+    /**
+     * Retrieve the right follower of this Movable.
+     * @return Movable; the right follower of this Movable (may be null)
+     */
+    public Movable getFollowerRight_r () {
+    	return getNeighbor(RIGHT_UP);
+    }
+
 }

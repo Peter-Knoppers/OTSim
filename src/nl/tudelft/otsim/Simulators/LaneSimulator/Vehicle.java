@@ -471,22 +471,6 @@ public class Vehicle extends Movable implements SimulatedObject {
     }
     
     /**
-     * Retrieve the leader of this Vehicle.
-     * @return Movable; the leader of this Vehicle
-     */
-    public Movable getLeader_r() {
-    	return getNeighbor(Movable.DOWN);
-    }
-    
-    /**
-     * Retrieve the follower of this Vehicle.
-     * @return Movable; the follower of this Vehicle
-     */
-    public Movable getFollower_r() {
-    	return getNeighbor(Movable.UP);
-    }
-    
-    /**
      * Retrieve the {@link Driver} of this Vehicle.
      * @return {@link Driver}; the Driver of this Vehicle 
      */
@@ -508,6 +492,14 @@ public class Vehicle extends Movable implements SimulatedObject {
      */
     public java.util.ArrayList<RSU> getRSUsInRange_r() {
     	return RSUsInRange;
+    }
+    
+    /**
+     * Retrieve the {@link LCVehicle} of this Vehicle.
+     * @return {@link LCVehicle}; the LCVehicle of this Vehicle (may be null)
+     */
+    public LCVehicle getLCVehicle_r() {
+    	return lcVehicle;
     }
 
 	@Override

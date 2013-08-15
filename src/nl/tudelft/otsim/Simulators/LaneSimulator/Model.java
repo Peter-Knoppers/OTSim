@@ -1,5 +1,8 @@
 package nl.tudelft.otsim.Simulators.LaneSimulator;
 
+import java.util.Collections;
+import java.util.Comparator;
+
 import nl.tudelft.otsim.GUI.Main;
 
 /**
@@ -162,7 +165,7 @@ public class Model {
             // Move
             // copy pointer array as vehicles may be deleted
             tmp.clear();
-            for (int i=0; i<vehicles.size(); i++)
+            for (int i = 0; i<vehicles.size(); i++)
                 tmp.add(i, vehicles.get(i));
             for (int i = 0; i < tmp.size(); i++)
                 tmp.get(i).move(); // performs a and dy
@@ -178,11 +181,9 @@ public class Model {
                 if (vehicles.get(i).lcProgress>=1)
                     vehicles.get(i).endLaneChange();
             
-            // Check for collisions
             if (debug) {
-                Vehicle veh;
-                for (int i = 0; i < vehicles.size(); i++) {
-                    veh = vehicles.get(i);
+                for (Vehicle veh : vehicles) {
+                    // Check for collisions
                     Movable leader = veh.getNeighbor(Movable.DOWN);
                     if ((null != leader) && (veh.getHeadway(leader) < 0) &&
                             ((veh.lane == leader.lane) || !leader.lane.isMerge())) {
@@ -190,13 +191,65 @@ public class Model {
                         System.err.println(problem);
                         throw new RuntimeException(problem);
                     }
+                    // Check reciprocity of UP and DOWN neighbor links
+                    int[] directions = { Movable.UP, Movable.DOWN };
+                    for (int direction : directions) {
+                    	Movable other = veh.getNeighbor(direction);
+                    	if (null != other) {
+                    		Movable back = other.getNeighbor(Movable.flipDirection(direction, Movable.FLIP_UD));
+                    		if ((null != back) && (back != veh)) {
+                    			String problem = String.format ("Movable %s has non reciprocal %s link to %s (reverse link goes to %s)", veh.toString(), Movable.directionToString(direction), other.toString(), back.toString());
+                                System.err.println(problem);
+                                throw new RuntimeException(problem);
+                    		}
+                    	}                   		
+                    }
+                }
+                for (Lane l : network) {
+                	java.util.ArrayList<Movable> vehiclesOnLane = new java.util.ArrayList<Movable> (l.vehicles);
+                	Collections.sort(vehiclesOnLane, new Comparator<Movable>() {
+						@Override
+						public int compare(Movable arg0, Movable arg1) {
+							double dx = arg0.x - arg1.x;
+							return dx > 0 ? 1 : dx < 0 ? -1 : 0;
+						}
+                	});
+                	Movable prev = null;
+                	for (Movable m : vehiclesOnLane) {
+                		if (null != prev) {
+                			Movable neighbor = prev.getNeighbor(Movable.DOWN);
+                			if (prev == m) {
+                				String problem = String.format("Movable %s is linked multiple times to a lane", m.toString());
+                				System.err.println(problem);
+                				throw new RuntimeException (problem);                				
+                			}
+                			if (null == neighbor) {
+                				String problem = String.format("Movable %s has unset DOWN (should be %s)", prev.toString(), m.toString());
+                				System.err.println(problem);
+                				throw new RuntimeException (problem);
+                			} else if (m != neighbor) {
+                				String problem = String.format("Movable %s has DOWN set to %s (should be %s)", prev.toString(), neighbor.toString(), m.toString());
+                				System.err.println(problem);
+                				throw new RuntimeException (problem);                				
+                			}
+                			neighbor = m.getNeighbor(Movable.UP);
+                			if (null == neighbor) {
+                				String problem = String.format("Movable %s has unset UP (should be %s)", m.toString(), prev.toString());
+                				System.err.println(problem);
+                				throw new RuntimeException (problem);                				
+                			} else if (prev != neighbor) {
+                				String problem = String.format("Movable %s has UP set to %s (should be %s)", m.toString(), neighbor.toString(), prev.toString());
+                				System.err.println(problem);
+                				throw new RuntimeException (problem);                				
+                			}
+                		}
+                		prev = m;
+                	}
                 }
             }
-
             // Update time
             k = k + 1; // time step number
             t = k * dt; // time [s]
-
             nn++;
         }
     }
