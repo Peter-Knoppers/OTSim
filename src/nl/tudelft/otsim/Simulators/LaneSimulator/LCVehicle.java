@@ -5,6 +5,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
 
 import nl.tudelft.otsim.GUI.GraphicsPanel;
+import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.SpatialTools.Planar;
 
 /**
@@ -56,6 +57,11 @@ public class LCVehicle extends Movable {
             lane.vehicles.remove(this);
             lane.down.vehicles.add(this);
             lane = lane.down;
+            if (lane.isMerge() || lane.isSplit()) {
+                Lane lTmp = lane;
+                cut();
+                paste(lTmp, x);
+            }
         }
     }
 

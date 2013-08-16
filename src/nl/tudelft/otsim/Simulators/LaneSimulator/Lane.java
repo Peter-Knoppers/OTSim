@@ -972,10 +972,10 @@ public class Lane {
         @Override
         public void pass(Vehicle vehicle) {
             Lane lan = getLaneForRoute(vehicle.route);
-            if (lan!=null) {
-                if (vehicle.lcVehicle!=null) {
-                    if ((vehicle.lcDirection==Model.latDirection.RIGHT && (lan.right==null || lan.right!=vehicle.lcVehicle.lane.down)) ||
-                            (vehicle.lcDirection==Model.latDirection.LEFT && (lan.left==null || lan.left!=vehicle.lcVehicle.lane.down))) {
+            if (lan != null) {
+                if (vehicle.lcVehicle != null) {
+                    if ((vehicle.lcDirection == Model.latDirection.RIGHT && (lan.right == null || lan.right != vehicle.lcVehicle.lane.down)) ||
+                            (vehicle.lcDirection == Model.latDirection.LEFT && (lan.left == null || lan.left != vehicle.lcVehicle.lane.down))) {
                     	vehicle.abortLaneChange();
                     }
                 }
@@ -984,11 +984,11 @@ public class Lane {
                 while (atX > lan.l) {
                     if (lan.isSplit()) {
                         atX = atX - lan.l;
-                        for (int i=0; i<lan.RSUcount(); i++) {
+                        for (int i = 0; i < lan.RSUcount(); i++) {
                             if (lan.getRSU(i) instanceof splitRSU) {
                                 splitRSU split = (splitRSU) lan.getRSU(i);
                                 Lane tmp = split.getLaneForRoute(vehicle.route);
-                                if (tmp!=null) {
+                                if (tmp != null) {
                                     lan = tmp;
                                     break;
                                 }
@@ -1002,6 +1002,10 @@ public class Lane {
                 }
                 vehicle.cut();
                 vehicle.paste(lan, atX);
+                //vehicle.setNeighbor(Movable.LEFT_DOWN, null);
+                //vehicle.setNeighbor(Movable.LEFT_UP, null);
+                //vehicle.setNeighbor(Movable.RIGHT_DOWN, null);
+                //vehicle.setNeighbor(Movable.RIGHT_UP, null);
             } else {
                 vehicle.model.deleted++;
                 System.out.println("Vehicle deleted while split was entered ("+model.deleted+"), no applicable downstream lane.");

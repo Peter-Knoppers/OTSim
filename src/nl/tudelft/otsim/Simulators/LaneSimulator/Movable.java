@@ -105,10 +105,6 @@ public abstract class Movable  {
      * @param newNeighbor Movable; the new neighbor in the specified direction (may be null)
      */
     public void setNeighbor (int direction, Movable newNeighbor) {
-    	if ((933 == id) && (null != newNeighbor) && (1071 == newNeighbor.id))
-    		System.out.println("Opletten: setting neighbor of " + toString() + " in " + directionToString(direction) + " to " + newNeighbor.toString() + " t=" + model.t());
-    	if ((1129 == id) && (null != newNeighbor) && (1071 == newNeighbor.id) && (model.t() > 800))
-    		System.out.println("Opletten: setting neighbor of " + toString() + " in " + directionToString(direction) + " to " + newNeighbor.toString() + " t=" + model.t());
     	neighbors[direction] = newNeighbor;
     }
     
@@ -445,8 +441,6 @@ public abstract class Movable  {
      * to this vehicle are updated or removed.
      */
     public void cut() {
-    	if ((1129 == id) && (model.t > 814.3))
-    		System.out.println("Cutting vehicle " + this.toString() + " linked neighbors: " + linkedNeighbors());
         // remove from lane vector
         lane.vehicles.remove(this);
 
