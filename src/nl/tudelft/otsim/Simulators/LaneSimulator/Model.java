@@ -124,62 +124,56 @@ public class Model {
         lcVehicles = new java.util.ArrayList<LCVehicle>();
 
         // Initialize lanes
-        for (int i = 0; i < network.length; i++)
-            network[i].init();
+        for (Lane l : network)
+        	l.init();
         
         // Initialize controllers
-        for (int i = 0; i < controllers.size(); i++)
-            controllers.get(i).init();
+        for (Controller c : controllers)
+        	c.init();
     }
 
     /**
      * Performs the main model loop. This entails the RSUs, OBUs, controllers, 
      * vehicle generators and drivers (in this order).
-     * @param n Number of loops to be run before returning.
+     * @param n Number of steps to be run before returning.
      */
     public void run(int n) {
-        // loop n times
-        int nn = 0;
-        while ((nn < n) && (t < period)) {
+        // Simulate n steps
+    	for (int nn = 0; (nn < n) && (t < period); nn++) {
             // Run on-board units, road-side units and controllers
             runUnits();
 
             // Vehicle generation
             generating = true;
-            for (int i = 0; i < network.length; i++)
-                if (network[i].generator != null)
-                    network[i].generator.run();
+            for (Lane l : network)
+            	if (null != l.generator)
+            		l.generator.run();
             generating = false;
 
             // Drive
             // copy pointer array as vehicles may be deleted
-            java.util.ArrayList<Vehicle> tmp = new java.util.ArrayList<Vehicle>(vehicles.size());
-            for (int i = 0; i < vehicles.size(); i++)
-                tmp.add(i, vehicles.get(i));
-            for (int i = 0; i < tmp.size(); i++) {
-                tmp.get(i).driver.drive(); // sets a and dy
-                if ((tmp.get(i).dy != 0) && (tmp.get(i).lcProgress == 0))
-                    tmp.get(i).startLaneChange();
+            java.util.ArrayList<Vehicle> tmp = new java.util.ArrayList<Vehicle>(vehicles);
+            for (Vehicle v : tmp) {
+            	v.driver.drive();	// sets a and dy
+            	if ((v.dy != 0) && (v.lcProgress == 0))
+            		v.startLaneChange();
             }
-
             // Move
             // copy pointer array as vehicles may be deleted
-            tmp.clear();
-            for (int i = 0; i<vehicles.size(); i++)
-                tmp.add(i, vehicles.get(i));
-            for (int i = 0; i < tmp.size(); i++)
-                tmp.get(i).move(); // performs a and dy
+            tmp = new java.util.ArrayList<Vehicle>(vehicles);
+            for (Vehicle v : tmp)
+            	v.move();	// performs a and dy
 
             // Update all neighbor references (overtaking)
-            for (int i = 0; i < vehicles.size(); i++)
-                vehicles.get(i).updateNeighbours();
-            for (int i = 0; i < lcVehicles.size(); i++)
-                lcVehicles.get(i).updateNeighbours();
+            for (Vehicle v : vehicles)
+            	v.updateNeighbours();
+            for (LCVehicle lcv : lcVehicles)
+                lcv.updateNeighbours();
 
             // End lane changes
-            for (int i = 0; i < vehicles.size(); i++)
-                if (vehicles.get(i).lcProgress>=1)
-                    vehicles.get(i).endLaneChange();
+            for (Vehicle v : vehicles)
+            	if (v.lcProgress >= 1)
+            		v.endLaneChange();
             
             if (debug) {
                 for (Vehicle veh : vehicles) {
@@ -205,8 +199,10 @@ public class Model {
                     	}                   		
                     }
                 }
+                // Check that all vehicles on all lanes are correctly linked to each other
                 for (Lane l : network) {
                 	java.util.ArrayList<Movable> vehiclesOnLane = new java.util.ArrayList<Movable> (l.vehicles);
+                	// Sort by x (traveled distance on the lane)
                 	Collections.sort(vehiclesOnLane, new Comparator<Movable>() {
 						@Override
 						public int compare(Movable arg0, Movable arg1) {
@@ -214,43 +210,42 @@ public class Model {
 							return dx > 0 ? 1 : dx < 0 ? -1 : 0;
 						}
                 	});
-                	Movable prev = null;
+                	Movable prevM = null;
                 	for (Movable m : vehiclesOnLane) {
-                		if (null != prev) {
-                			Movable neighbor = prev.getNeighbor(Movable.DOWN);
-                			if (prev == m) {
+                		if (null != prevM) {
+                			Movable neighbor = prevM.getNeighbor(Movable.DOWN);
+                			if (prevM == m) {
                 				String problem = String.format("Movable %s is linked multiple times to a lane", m.toString());
                 				System.err.println(problem);
                 				throw new RuntimeException (problem);                				
                 			}
                 			if (null == neighbor) {
-                				String problem = String.format("Movable %s has unset DOWN (should be %s)", prev.toString(), m.toString());
+                				String problem = String.format("Movable %s has unset DOWN (should be %s)", prevM.toString(), m.toString());
                 				System.err.println(problem);
                 				throw new RuntimeException (problem);
                 			} else if (m != neighbor) {
-                				String problem = String.format("Movable %s has DOWN set to %s (should be %s)", prev.toString(), neighbor.toString(), m.toString());
+                				String problem = String.format("Movable %s has DOWN set to %s (should be %s)", prevM.toString(), neighbor.toString(), m.toString());
                 				System.err.println(problem);
                 				throw new RuntimeException (problem);                				
                 			}
                 			neighbor = m.getNeighbor(Movable.UP);
                 			if (null == neighbor) {
-                				String problem = String.format("Movable %s has unset UP (should be %s)", m.toString(), prev.toString());
+                				String problem = String.format("Movable %s has unset UP (should be %s)", m.toString(), prevM.toString());
                 				System.err.println(problem);
                 				throw new RuntimeException (problem);                				
-                			} else if (prev != neighbor) {
-                				String problem = String.format("Movable %s has UP set to %s (should be %s)", m.toString(), neighbor.toString(), prev.toString());
+                			} else if (prevM != neighbor) {
+                				String problem = String.format("Movable %s has UP set to %s (should be %s)", m.toString(), neighbor.toString(), prevM.toString());
                 				System.err.println(problem);
                 				throw new RuntimeException (problem);                				
                 			}
                 		}
-                		prev = m;
+                		prevM = m;
                 	}
                 }
             }
             // Update time
-            k = k + 1; // time step number
+            k++; // Increment time step number
             t = k * dt; // time [s]
-            nn++;
         }
     }
     
@@ -263,16 +258,16 @@ public class Model {
      */
     protected void runUnits() {
         // Run road-side units
-        for (int i = 0; i < network.length; i++)
-            for (int j = 0; j < network[i].RSUcount(); j++)
-                network[i].getRSU(j).run();
+    	for (Lane l : network)
+    		for (RSU rsu : l.RSUs)
+    			rsu.run();
         // Run on-board units
-        for (int i = 0; i < vehicles.size(); i++)
-            if (vehicles.get(i).isEquipped())
-                vehicles.get(i).OBU.run();
+    	for (Vehicle v : vehicles)
+    		if (v.isEquipped())
+    			v.OBU.run();
         // Run controllers
-        for (int i = 0; i < controllers.size(); i++)
-            controllers.get(i).run();
+    	for (Controller c : controllers)
+    		c.run();
     }
 
     /** 
@@ -289,9 +284,9 @@ public class Model {
      * @return Class with given id.
      */
     public VehicleDriver getClass(int id) {
-        for (int i = 0; i<classes.size(); i++)
-            if (classes.get(i).id() == id)
-                return classes.get(i);
+    	for (VehicleDriver vd : classes)
+    		if (id == vd.id)
+    			return vd;
         return null;
     }
     
@@ -439,7 +434,7 @@ public class Model {
      * logarithm.
      * @param m Mean of the lognormal distribution.
      * @param s Standard deviation of the lognormal distribution.
-     * @return Random lognormally distributed number.
+     * @return Double; random lognormally distributed number.
      */
     public double lognormal(double m, double s) {
         double mu = Math.log(m*m / Math.sqrt(s*s+m*m));
@@ -459,17 +454,17 @@ public class Model {
         
         // Store remaining vehicles
         if (settings.getBoolean("storeTrajectoryData")) {
-            for (int i = 0; i < vehicles.size(); i++)
-                if (vehicles.get(i).trajectory!=null)
-                    saveTrajectoryData(vehicles.get(i).trajectory);
+        	for (Vehicle v : vehicles)
+        		if (null != v.trajectory)
+        			saveTrajectoryData(v.trajectory);
             saveTrajectoryBufferToDisk();
         }
         if (settings.getBoolean("storeDetectorData")) {
             // Store detector data
-            for (int i = 0; i < network.length; i++)
-                for (int j = 0; j < network[i].RSUcount(); j++)
-                    if (network[i].getRSU(j) instanceof Detector)
-                        saveDetectorData((Detector) network[i].getRSU(j));
+        	for (Lane l : network)
+        		for (RSU rsu : l.RSUs)
+        			if (rsu instanceof Detector)
+        				saveDetectorData((Detector) rsu);
         }
     }
 
@@ -490,11 +485,8 @@ public class Model {
     protected synchronized void saveTrajectoryBufferToDisk() {
         // Save trajectories to disk
         java.text.DecimalFormat df = new java.text.DecimalFormat("000000");
-        for (int i = 0; i < trajectories.size(); i++) {
-            trajectoriesSaved++;
-            saveData(trajectories.get(i), "trajectories", "trajectory" + df.format(trajectoriesSaved)+".dat");
-        }
-        // Clear trajectories
+        for (TrajectoryData td : trajectories)
+        	saveData(td, "trajectories", "trajectory" + df.format(++trajectoriesSaved) + ".dat");
         trajectories.clear();
     }
 
@@ -552,15 +544,15 @@ public class Model {
             boolean ok = f.mkdir();
             java.io.FileOutputStream fos;
             if (subPath==null || subPath.isEmpty())
-                fos = new java.io.FileOutputStream(settings.getString("outputDir")+"/"+fileName);
+                fos = new java.io.FileOutputStream(settings.getString("outputDir") + "/" + fileName);
             else
-                fos = new java.io.FileOutputStream(settings.getString("outputDir")+"/"+subPath+"/"+fileName);
+                fos = new java.io.FileOutputStream(settings.getString("outputDir") + "/" + subPath + "/" + fileName);
             java.io.BufferedOutputStream bos = new java.io.BufferedOutputStream(fos);
             java.io.ObjectOutputStream oos = new java.io.ObjectOutputStream(bos);
             oos.writeObject(obj.getClass().cast(obj));
             oos.close();
         } catch (Exception e) {
-            throw new RuntimeException("Unable to write to file "+fileName+".", e);
+            throw new RuntimeException("Unable to write to file " + fileName + ".", e);
         }
     }
     
@@ -579,7 +571,7 @@ public class Model {
             out = ois.readObject();
             fis.close();
         } catch (Exception e) {
-            throw new RuntimeException("Unable to load file "+file+".", e);
+            throw new RuntimeException("Unable to load file " + file + ".", e);
         }
         return out;
     }
