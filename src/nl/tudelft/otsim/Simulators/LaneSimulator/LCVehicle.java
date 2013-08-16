@@ -85,7 +85,7 @@ public class LCVehicle extends Movable {
     }
     
 	private Double[] outline() {
-		double stepFraction = 0; 
+		double stepFraction = 0; // FIXME
     	Point2D.Double[] result = new Point2D.Double[4];
         final double halfWidth = 1;	// m
         final double xFront = global.x + heading.x * stepFraction;

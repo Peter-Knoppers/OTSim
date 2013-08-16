@@ -122,9 +122,7 @@ public class Vehicle extends Movable implements SimulatedObject {
      */
     @Override
 	public void translate(double dx) {
-        
         // Update RSUs in range and pass them if appropriate
-        RSU rsu = null;
         double s = 0;
         // Get point to search from
         Lane lastLane;
@@ -136,7 +134,7 @@ public class Vehicle extends Movable implements SimulatedObject {
             s = 0;
         } else {
             // search downstream of last RSU
-            rsu = RSUsInRange.get(RSUsInRange.size()-1);
+            RSU rsu = RSUsInRange.get(RSUsInRange.size() - 1);
             if (rsu instanceof Lane.splitRSU) {
                 // at a split, search from x=0 at the next lane
                 lastLane = ((Lane.splitRSU) rsu).getLaneForRoute(route);
@@ -149,7 +147,7 @@ public class Vehicle extends Movable implements SimulatedObject {
         }
         // Add new RSUs in range
         java.util.ArrayList<RSU> next = new java.util.ArrayList<RSU>();
-        while (s<RSURange && lastLane!=null) {
+        while ((s < RSURange) && (null != lastLane)) {
             // lastLane may become null at a split where the route has no
             // appropriate downstream lane, as the vehicle has to change lane
             // before the split
@@ -158,12 +156,10 @@ public class Vehicle extends Movable implements SimulatedObject {
                 s = getDistanceToRSU(next.get(0)) - dx;
                 for (RSU j : next) {
                     RSUsInRange.add(j);
-                    if (j instanceof Lane.splitRSU) {
-                        // continue search on next lane after split
+                    if (j instanceof Lane.splitRSU) {	// continue search on next lane after split
                         lastLane = ((Lane.splitRSU) j).getLaneForRoute(route);
                         lastX = 0;
-                    } else {
-                        // continue search after RSU
+                    } else {	// continue search after RSU
                         lastLane = j.lane;
                         lastX = j.x;
                     }
@@ -172,9 +168,8 @@ public class Vehicle extends Movable implements SimulatedObject {
                 s = RSURange; // stop loop
         }
         // Pass RSUs
-        java.util.Iterator<RSU> it = RSUsInRange.iterator();
-        while (it.hasNext()) {
-            rsu = it.next();
+        for (java.util.Iterator<RSU> it = RSUsInRange.iterator(); it.hasNext(); ) {
+            RSU rsu = it.next();
             s = getDistanceToRSU(rsu) - dx;
             if (s < 0) {
                 if (rsu.passable || rsu.noticeable)
@@ -188,37 +183,33 @@ public class Vehicle extends Movable implements SimulatedObject {
         justExceededLane = false;
         while (x > lane.l) {
             justExceededLane = true;
-            if (lane.down == null && lane.destination == Lane.none) {
+            if ((null == lane.down) && (Lane.none == lane.destination)) {
                 model.deleted++;
-                System.out.println("Vehicle deleted as lane "+lane.id+" is exceeded ("+model.deleted+"), dead end");
+                System.out.println("Vehicle deleted as lane " + lane.id + " is exceeded (" + model.deleted + "), dead end");
                 delete();
                 return;
-            //} else if (lane.down==null && lane.destination>=0) {
             } else if (route.destinations().length == 1 && lane.destination==route.destinations()[0]) {
                 // vehicle has reached (a) destination
                 if (model.settings.getBoolean("storeTrajectoryData") && trajectory != null)
                     model.saveTrajectoryData(trajectory);
                 delete();
                 return;
-            } else {
-                // update route
+            } else {	// update route
                 if (lane.destination > 0)
                     route = route.subRouteAfter(lane.destination);
                 // check whether route is still reachable
                 if (!route.canBeFollowedFrom(lane.down)) {
 	                model.deleted++;
-	                System.out.println("Vehicle deleted as lane "+lane.id+" is exceeded ("+model.deleted+"), route unreachable");
+	                System.out.println("Vehicle deleted as lane " + lane.id + " is exceeded (" + model.deleted + "), route unreachable");
 	                System.out.println(toString());
 	                delete();
 	                return;
                 } 
             	// abort impossible lane change
-                if (lcVehicle != null) {
+                if (null != lcVehicle )
                     if ((lcDirection==Model.latDirection.RIGHT && (lane.down.right==null || lane.down.right!=lcVehicle.lane.down)) ||
-                            (lcDirection==Model.latDirection.LEFT && (lane.down.left==null || lane.down.left!=lcVehicle.lane.down))) {
+                            (lcDirection==Model.latDirection.LEFT && (lane.down.left==null || lane.down.left!=lcVehicle.lane.down)))
                         abortLaneChange();
-                    }
-                }
                 // check whether adjacent neighbors need to be reset
                 // these will be found automatically by updateNeighbour() in
                 // the main model loop
@@ -366,21 +357,21 @@ public class Vehicle extends Movable implements SimulatedObject {
     public void setHeading() {
         java.awt.geom.Point2D.Double p1 = lane.XY(x);
         java.awt.geom.Point2D.Double p2;
-        if ((x > l) || (rearLane == null)) {
+        if ((x > l) || (null == rearLane)) {
             rearLane = lane;
             p2 = lane.XY (x - l);
         } else {
             // update rearLane
-            double xRear = rearLane.xAdj(lane)+x-l;
+            double xRear = rearLane.xAdj(lane) + x - l;
             while (xRear > rearLane.l) {
-                if (rearLane.down != null)
+                if (null != rearLane.down)
                     rearLane = rearLane.down;
                 else if (rearLane.isSplit()) {
                     for (int i = 0; i < rearLane.RSUcount(); i++) {
                         if (rearLane.getRSU(i) instanceof Lane.splitRSU) {
                             Lane.splitRSU split = (Lane.splitRSU) rearLane.getRSU(i);
                             Lane tmp = split.getLaneForRoute(route);
-                            if (tmp != null) {
+                            if (null != tmp) {
                                 rearLane = tmp;
                                 break;
                             }
@@ -517,7 +508,7 @@ public class Vehicle extends Movable implements SimulatedObject {
 
 	@Override
 	public Double[] outline(double when) {
-		double stepFraction = 0; 
+		double stepFraction = 0; // FIXME
     	Point2D.Double[] result = new Point2D.Double[4];
         final double halfWidth = 1;	// m
         final double xFront = global.x + heading.x * stepFraction;
