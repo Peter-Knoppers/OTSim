@@ -1,12 +1,10 @@
 package nl.tudelft.otsim.ModelIO;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.util.ArrayList;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -25,28 +23,14 @@ public class TableImport  extends JFrame {
 
     public TableImport(Object[][] obj, String[] header, Object[] longValues)  {
         super("Static JTable example");
-        // JPanel to horl the JTable
-        JPanel panel = new JPanel(new BorderLayout());
         // constructor of JTable model
         model = new MyTableModel(obj, header, longValues);
         // the table from that model
 	        table = new JTable(model);
 	    }
  
-	    public MyTableModel getModel() {
-			return model;
-		}
-
-		public void setModel(MyTableModel model) {
-			this.model = model;
-		}
-
 		public JTable getTable() {
 			return table;
-		}
-
-		public void setTable(JTable table) {
-			this.table = table;
 		}
 
 		public static void initColumnSizes(JTable table, Integer columns) {
@@ -73,36 +57,32 @@ public class TableImport  extends JFrame {
 	                                 false, false, 0, i);
 	            cellWidth = comp.getPreferredSize().width;
 	 
-	            if (DEBUG) {
+	            if (DEBUG)
 	                System.out.println("Initializing width of column "
                                    + i + ". "
                                    + "headerWidth = " + headerWidth
                                    + "; cellWidth = " + cellWidth);
-            }
-            column.setPreferredWidth(Math.max(headerWidth, cellWidth));
+             column.setPreferredWidth(Math.max(headerWidth, cellWidth));
         }
     }
  
-    public static void setUpDropdownColumn(JTable table,
-                                 TableColumn dropDownColumn, String[] names) {
-    	if (dropDownColumn != null)   {
+    public static void setUpDropdownColumn(TableColumn dropDownColumn, String[] names) {
+    	if (dropDownColumn != null) {
 	        //Set up the editor for the cells.
 	        JComboBox<String> comboBox = new JComboBox<String>();
 	        comboBox.addItem(EMPTYCOLUMN);
-	        for (int i = 0; i < names.length; i++)   {
+	        for (int i = 0; i < names.length; i++)
 	        	comboBox.addItem(names[i]);
-	        }
 	        dropDownColumn.setCellEditor(new DefaultCellEditor(comboBox));
 	 
 	        //Set up tool tips for the sport cells.
-	        DefaultTableCellRenderer renderer =
-	                new DefaultTableCellRenderer();
+	        DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
 	        renderer.setToolTipText("Click for combo box");
 	        dropDownColumn.setCellRenderer(renderer);
     	}
     }
   
-	 class MyTableModel extends AbstractTableModel {
+	class MyTableModel extends AbstractTableModel {
 		private static final long serialVersionUID = 1L;
 		ArrayList<Object[]> al;
         // the headers
@@ -116,32 +96,31 @@ public class TableImport  extends JFrame {
             this.longValues = longValues;
             al = new ArrayList<Object[]>();
             // copy the rows into the ArrayList
-	            for(int i = 0; i < obj.length; ++i)
-	                al.add(obj[i]);
-	        }
+            for(int i = 0; i < obj.length; ++i)
+                al.add(obj[i]);
+	    }
  
-
-	        @Override
-			public int getColumnCount() {
-	            return header.length;
-	        }
+        @Override
+		public int getColumnCount() {
+            return header.length;
+        }
+ 
+        @Override
+		public int getRowCount() {
+            return al.size();
+        }
+ 
+        @Override
+		public String getColumnName(int col) {
+            return header[col];
+        }
+ 
+        @Override
+		public Object getValueAt(int row, int col) {
+            return al.get(row)[col];
+        }
 	 
-	        @Override
-			public int getRowCount() {
-	            return al.size();
-	        }
-	 
-	        @Override
-			public String getColumnName(int col) {
-	            return header[col];
-	        }
-	 
-	        @Override
-			public Object getValueAt(int row, int col) {
-	            return al.get(row)[col];
-	        }
-	 
-	        /*
+	    /*
          * JTable uses this method to determine the default renderer/
          * editor for each cell.  If we didn't implement this method,
          * then the last column would contain text ("true"/"false"),
@@ -171,12 +150,11 @@ public class TableImport  extends JFrame {
          */
         @Override
 		public void setValueAt(Object value, int row, int col) {
-            if (DEBUG) {
+            if (DEBUG)
                 System.out.println("Setting value at " + row + "," + col
                                    + " to " + value
                                    + " (an instance of "
                                    + value.getClass() + ")");
-            }
  
             al.get(row)[col] = value;
             fireTableCellUpdated(row, col);
@@ -193,9 +171,8 @@ public class TableImport  extends JFrame {
  
             for (int i=0; i < numRows; i++) {
                 System.out.print("    row " + i + ":");
-                for (int j=0; j < numCols; j++) {
+                for (int j=0; j < numCols; j++)
                     System.out.print("  " + al.get(i)[j]);
-                }
                 System.out.println();
             }
             System.out.println("--------------------------");

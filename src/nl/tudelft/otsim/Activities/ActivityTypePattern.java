@@ -21,11 +21,6 @@ public class ActivityTypePattern {
     private Activities activities;
     private int ID;
     
-    /**
-     * Constructor generating a linked list of activities<br>
-     * <br><pre>
-     * LinkedList<ActivityType> 			"activityTypePattern"
-     */
     public ActivityTypePattern(Activities activities, int ID, LinkedList<ActivityType> activityList)  {
         this.activityTypePattern = activityList;
         this.ID = ID;

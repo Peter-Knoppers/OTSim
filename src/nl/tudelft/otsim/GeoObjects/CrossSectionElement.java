@@ -235,14 +235,26 @@ public class CrossSectionElement implements XML_IO {
 		this.width = width;
 	}
 
+	/**
+	 * Retrieve the speed limit in km/h.
+	 * @return String; the speed limit in km/h
+	 */
 	public String getSpeedLimit_r() {
 		return String.format("%.0f", speedLimit * 3.6);
 	}
 	
+	/**
+	 * Set/Change the speed limit.
+	 * @param newLimit Double; new speed limit in km/h
+	 */
 	public void setSpeedLimit_w(double newLimit) {
 		speedLimit = newLimit / 3.6;
 	}
 	
+	/**
+	 * Get an {@link InputValidator} for speed limit values.
+	 * @return {@link InputValidator}; to check speed limit values
+	 */
 	@SuppressWarnings("static-method")
 	public InputValidator validateSpeedLimit_v() {
 		return new InputValidator("[1-9][0-9]*", 1, 200);
@@ -389,7 +401,7 @@ public class CrossSectionElement implements XML_IO {
 			throw new Error("parent is null");
         ArrayList<Vertex> referenceVertices = crossSection.getVertices_r();
         ArrayList<Vertex> prevReferenceVertices = null;
-        if (this.connectedFrom != null && adjustLink) {
+        if ((this.connectedFrom != null) && adjustLink) {
         	prevReferenceVertices = new ArrayList<Vertex> ();
         	if (lateralReference == LateralReferenceLeft)
         		prevReferenceVertices = this.connectedFrom.getVerticesInner();
@@ -459,19 +471,14 @@ public class CrossSectionElement implements XML_IO {
 	 * connect to the corresponding preceding CrossSectionElement; if false,
 	 * the reference line is not adjusted
 	 * @param adjustLink Boolean; if true; the result is adjusted to connect
-	 * to the preceding CrossSectionElement; if false; no such adjustment is
-	 * performed
+	 * to the preceding {@link Link}; if false; no such adjustment is performed
 	 * @return {@link Vertex} the selected Vertex from the inner reference line
 	 */
 	public final Vertex getLinkPointInner(int index, boolean cleanup, boolean adjust, boolean adjustLink) {
 		ArrayList<Vertex> list = cleanLinkPointList(generateLinkPointList(LateralReferenceLeft, adjust, adjustLink), cleanup);
-		//System.out.print("index=" + index);
-		int useIndex = index;
-		if (useIndex < 0)
-			useIndex += list.size();
-		if (useIndex < 0)
-			throw new Error("index " + index + " is out of range (0.." + list.size());
-		return list.get(useIndex);
+		if (index < 0)
+			index = list.size() + index;
+		return list.get(index);
 	}
 	
 	/**
@@ -485,8 +492,7 @@ public class CrossSectionElement implements XML_IO {
 	 * connect to the corresponding preceding CrossSectionElement; if false,
 	 * the reference line is not adjusted
 	 * @param adjustLink Boolean; if true; the result is adjusted to connect
-	 * to the preceding CrossSectionElement; if false; no such adjustment is
-	 * performed
+	 * to the preceding {@link Link}; if false; no such adjustment is performed
 	 * @return {@link Vertex} the selected Vertex from the inner reference line
 	 */
 	public Vertex getLinkPointOuter(int index, boolean cleanup, boolean adjust, boolean adjustLink) {
@@ -646,13 +652,29 @@ public class CrossSectionElement implements XML_IO {
 	 * @param adjust Boolean; if true, the reference line is adjusted to
 	 * connect to the corresponding preceding CrossSectionElement; if false,
 	 * the reference line is not adjusted
+	 * @param adjustLink Boolean; if true; the result is adjusted to match the 
+	 * last point on the preceding CrossSectionElement; if false; the result is
+	 * not adjusted to match the last point on the preceding CrossSectionElement
 	 * @return ArrayList&lt;{@link Vertex}&gt;; the vertices that describe the
-	 * reference line
+	 * inner reference line
 	 */
 	public ArrayList<Vertex> createAndCleanLinkPointListInner(boolean cleanup, boolean adjust, boolean adjustLink) {
 		return cleanLinkPointList(generateLinkPointList(LateralReferenceLeft, adjust, adjustLink), cleanup);
 	}
 
+	/**
+	 * Retrieve the outer reference line of this CrossSectionElement.
+	 * @param cleanup Boolean; if true, duplicate vertices are removed from the
+	 * reference line; if false, duplicate vertices are retained
+	 * @param adjust Boolean; if true, the reference line is adjusted to
+	 * connect to the corresponding preceding CrossSectionElement; if false,
+	 * the reference line is not adjusted
+	 * @param adjustLink Boolean; if true; the result is adjusted to match the 
+	 * last point on the preceding CrossSectionElement; if false; the result is
+	 * not adjusted to match the last point on the preceding CrossSectionElement
+	 * @return ArrayList&lt;{@link Vertex}&gt;; the vertices that describe the
+	 * outer reference line
+	 */
 	public ArrayList<Vertex> createAndCleanLinkPointListOuter(boolean cleanup, boolean adjust, boolean adjustLink) {
 		return cleanLinkPointList(generateLinkPointList(LateralReferenceRight, adjust, adjustLink), cleanup);
 	}
@@ -1134,8 +1156,6 @@ public class CrossSectionElement implements XML_IO {
     public void paint(GraphicsPanel graphicsPanel) {
     	//if ( this.crossSection.getLink().isAutoGenerated()) {
     		GeneralPath polygon = this.createCSEPolygon();  	
-/*	    	ArrayList<Vertex> inner = getVerticesInner();
-	    	ArrayList<Vertex> outer = getVerticesOuter();*/
 	    	graphicsPanel.setStroke(1F);
 	    	GeneralPath polygonJunction = null;
 	    	if (polygon != null)  {

@@ -19,7 +19,7 @@ import nl.tudelft.otsim.GeoObjects.Node;
  * @author not gtamminga
  */
 /**
- * from the internet (devogella)
+ * from the Internet (devogella)
  * http://www.vogella.com/articles/JavaAlgorithmsDijkstra/article.html#dijkstra
  * @author gtamminga
  */
@@ -31,12 +31,18 @@ public class DijkstraAlgorithm {
 	private Map<Node, Node> predecessors;
 	private Map<Node, Double> distance;
 
+	/**
+	 * Prepare to run the Dijkstra algorithm.
+	 * @param network {@link Network}; the Network to run Dijkstra on
+	 */
 	public DijkstraAlgorithm(Network network) {
-		// Create a copy of the array so that we can operate on this array
-		//this.nodes = new ArrayList<Node>(network.getAllNodeList());
-		edges = network.getLinkList(); //new ArrayList<Link>(network.getLinkList());
+		edges = network.getLinkList();
 	}
 	
+	/**
+	 * Run the Dijkstra algorithm to compute routes and distances to a specific {@Link Node}.
+	 * @param nodeA {@link Node}; the Node to compute the routes and distances for 
+	 */
 	public void execute(Node nodeA) {
 		settledNodes = new HashSet<Node>();
 		unSettledNodes = new HashSet<Node>();
@@ -99,9 +105,14 @@ public class DijkstraAlgorithm {
 		return d;
 	}
 
+	/**
+	 * Create a path (a set of {@Link Link Links} connecting a set of {@link Node Nodes}. 
+	 * @param path LinkedList&lt;{@link NOde}&gt;; the set of Nodes.
+	 * @return LinkedList&lt;{@link Link}&gt;; the list of Links that form the path
+	 */
 	public LinkedList<Link> getPathLinks(LinkedList<Node> path) {
     	LinkedList<Link> pathLinks = new LinkedList<Link>();
-        Node nodeStart=null;
+        Node nodeStart = null;
         int i = 0;
         for (Node pathNodes : path) {
             i++;
@@ -116,9 +127,12 @@ public class DijkstraAlgorithm {
         return pathLinks;
     }
 	
-	/*
+	/**
 	 * This method returns the path from the source to the selected target or
 	 * NULL if no path exists
+	 * @param target {@link Node} End point of the path.
+	 * @return ArrayList&lt;{@link Node}&gt;; the set of Nodes that form the
+	 * source to the target 
 	 */
 	public ArrayList<Node> getPathNodes(Node target) {
 
@@ -136,25 +150,5 @@ public class DijkstraAlgorithm {
 		Collections.reverse(pathNodes);		
 		return pathNodes;
 	}
-/*	private static final int BSIZE = 1024;
-	public static final int ENDBUFFER = -999;
-	public IntBuffer getPathNodesBytes(Node target) {
-
-	    ByteBuffer bb = ByteBuffer.allocate(BSIZE);
-	    IntBuffer ib = bb.asIntBuffer();
-		Node step = target;
-		// Check if a path exists
-		if (null == predecessors.get(step))
-			return null;
-		ib.put(step.getNodeID());
-		while (predecessors.get(step) != null) {
-			step = predecessors.get(step);
-			ib.put(step.getNodeID());
-		}
-		ib.put(ENDBUFFER);
-
-		// TODO Put it into the correct order		
-		return ib;
-	}*/
 
 }

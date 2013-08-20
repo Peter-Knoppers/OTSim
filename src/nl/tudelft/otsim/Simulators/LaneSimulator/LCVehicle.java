@@ -5,7 +5,6 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
 
 import nl.tudelft.otsim.GUI.GraphicsPanel;
-import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.SpatialTools.Planar;
 
 /**

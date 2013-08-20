@@ -10,7 +10,6 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.net.URL;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -23,10 +22,7 @@ import nl.tudelft.otsim.FileIO.DataWriter;
 import nl.tudelft.otsim.FileIO.StaXWriter;
 import nl.tudelft.otsim.GUI.FileDialog;
 import nl.tudelft.otsim.GUI.Main;
-import nl.tudelft.otsim.GUI.Model;
 import nl.tudelft.otsim.TrafficDemand.TrafficDemand;
-
-import com.vividsolutions.jts.geom.Coordinate;
 
 public class ExportModel implements ActionListener {
 
@@ -41,17 +37,10 @@ public class ExportModel implements ActionListener {
 	private JCheckBox optionDemand;
 	JFrame frame;
     private static FileChooser fChooser;
-    private Model exportModel;
     private static String fileExportModel;
-    private static String fileExportDemand;
 	private static int index; 
-	private static int fileCount;
 
 	public ExportModel() {
-		Class<?> klass;
-		klass = Coordinate.class;
-		URL location = klass.getResource('/' + klass.getName().replace(".", "/") + ".class");
-		System.out.print(location);
         frame = new JFrame() ;
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setPreferredSize(new Dimension(700, 400));
@@ -87,7 +76,6 @@ public class ExportModel implements ActionListener {
     	String[] labels = new String[files];
     	labels[0] = "Network File";
     	labels[1] = "Traffic Demand File";
-    	fileCount = fileNames.length;
     	String[] commandNames = new String[files];
     	commandNames[0] = "Model";
     	commandNames[1] = "Demand";
@@ -191,7 +179,6 @@ public class ExportModel implements ActionListener {
 			}
 		if (command.startsWith("Cancel")) {
 			System.out.println("Cancel" + command);
-			exportModel = null;
 			this.frame.dispose();
 			//TODO add close statement
 		}
@@ -249,63 +236,8 @@ public class ExportModel implements ActionListener {
     
 	}
 
-    private static boolean openDialogExportFile() {
-    	String fileName = FileDialog.showFileDialog(false, "xml", "xml files", Main.mainFrame.initialDirectory);
-    	if (null == fileName)
-    		return false;
-    	fileExportDemand = new File(fileName).getPath();
-		fChooser.getTextField()[index].setText(fileExportDemand);
-        System.out.printf("User selected network file \"%s\"", fileExportDemand);
-        return true;
-    }
-    
-    private static String[] names = null;
-	public static String[] getNames() {
-		return names;
-	}
-    
-    public static String getFileSavedModel() {
-		return fileExportModel;
-	}
-
-	public Model getExportModel() {
-		return exportModel;
-	}
-
-	public void setExportModel(Model loadedModel) {
-		this.exportModel = loadedModel;
-	}
-
-    public static JPanel getCards() {
-		return cards;
-	}
-
-	public static void setCards(JPanel cards) {
-		ExportModel.cards = cards;
-	}
-
-	public JButton getFinishButton() {
-		return finishButton;
-	}
-
-	public void setFinishButton(JButton finishButton) {
-		this.finishButton = finishButton;
-	}
-
-	public JButton getNextButton() {
+	private JButton getNextButton() {
 		return nextButton;
-	}
-
-	public void setNextButton(JButton nextButton) {
-		this.nextButton = nextButton;
-	}
-
-	public JButton getPrevButton() {
-		return prevButton;
-	}
-
-	public void setPrevButton(JButton prevButton) {
-		this.prevButton = prevButton;
 	}
 
 }

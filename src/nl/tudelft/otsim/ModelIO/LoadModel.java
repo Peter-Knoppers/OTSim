@@ -34,12 +34,10 @@ public class LoadModel implements ActionListener {
     private JButton prevButton;
 
 	private JCheckBox optionModel;
-	private JCheckBox optionDemand;
 	JFrame frame  ;
     private static FileChooser fChooser;
     private Model loadedModel;
 	private static int index; 
-	private static int fileCount;
 
 	public LoadModel() {
 		Class<?> klass;
@@ -83,7 +81,6 @@ public class LoadModel implements ActionListener {
     	String[] labels = new String[files];
     	labels[0] = "Network File";
     	labels[1] = "Traffic Demand File";
-    	fileCount = fileNames.length;
     	String[] commandNames = new String[files];
     	commandNames[0] = "Model";
     	commandNames[1] = "Demand";
@@ -124,7 +121,6 @@ public class LoadModel implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
 		String command = e.getActionCommand();
 		System.out.println("actionperformed: command is " + command);
 		if (command.startsWith("Load Model") )   {
@@ -218,49 +214,20 @@ public class LoadModel implements ActionListener {
         System.out.printf("User selected file \"%s\"", file);
     }
     
-    private static String[] names = null;
-	public static String[] getNames() {
-		return names;
-	}
-    
 	public Model getLoadedModel() {
 		return loadedModel;
-	}
-
-	public void setLoadedModel(Model loadedModel) {
-		this.loadedModel = loadedModel;
-	}
-
-    public static JPanel getCards() {
-		return cards;
-	}
-
-	public static void setCards(JPanel cards) {
-		LoadModel.cards = cards;
 	}
 
 	public JButton getFinishButton() {
 		return finishButton;
 	}
 
-	public void setFinishButton(JButton finishButton) {
-		this.finishButton = finishButton;
-	}
-
 	public JButton getNextButton() {
 		return nextButton;
 	}
 
-	public void setNextButton(JButton nextButton) {
-		this.nextButton = nextButton;
-	}
-
 	public JButton getPrevButton() {
 		return prevButton;
-	}
-
-	public void setPrevButton(JButton prevButton) {
-		this.prevButton = prevButton;
 	}
 
 }

@@ -714,16 +714,13 @@ public class Node extends Vertex implements XML_IO {
 
     }
     
+    /**
+     * Return a list of {@link DirectionalLink DirectionalLinks} of this Node.
+     * @return ArrayList&lt;{@link DirectionalLink}&gt;; the list of DirectionalLinks of this Node 
+     */
 	public ArrayList<DirectionalLink> getLinksFromJunction() {
-		// FIXME: this method does a lot of things that have nothing to do with it's name.
-	    determineSinkOrSource();
-	    ArrayList<DirectionalLink> dlList = null;
-		if (0 == links.size())
-			return dlList;
-		// the number of incoming and leaving links from this node
-
-		// retrieve all directional links that are connected to this node
-		return dlList = getLinks();
+	    determineSinkOrSource();	// FIXME: is this call needed?
+		return getLinks();
 	}
 	
     /**
@@ -1014,255 +1011,178 @@ public class Node extends Vertex implements XML_IO {
 				// index of the current directional link (increase for the next loop)
 				incomingArm++;
         	}	
-			
 			// revisit the new Links to investigate conflicting lanes (merge, split, cross)
 			for (Link link : newLinks) {
 				for (Link compareToLink : newLinks) {
-					//Point2D.Double p1 = link.getFromNode_r().getPoint();
-					//Point2D.Double p2 = link.getToNode_r().getPoint();
-					//Point2D.Double p3 = compareToLink.getFromNode_r().getPoint();
-					//Point2D.Double p4 = compareToLink.getToNode_r().getPoint();
 					PriorityConflict priorityConflict = null;
 					conflictType cType;
-					//if ( !p1.equals(p3) && !p2.equals(p4)) {
-							// merging links
-							if (link.getToNode_r().getPoint().equals(compareToLink.getToNode_r().getPoint())) {
-								cType =  conflictType.MERGE;
-								//System.err.println("fixLinkConnections: skipping null lane");
-							}
-							// splitting links
-							else if (link.getFromNode_r().getPoint().equals(compareToLink.getFromNode_r().getPoint()))
-								cType =  conflictType.SPLIT;
-							// conflicting links
-							else
-								cType =  conflictType.CROSSING;
-							for (CrossSectionObject lane1 : link.getCrossSections_r().get(0).getCrossSectionElementList_r().get(0).getCrossSectionObjects(Lane.class))   {
-								for (CrossSectionObject lane2 : compareToLink.getCrossSections_r().get(0).getCrossSectionElementList_r().get(0).getCrossSectionObjects(Lane.class))   {									
-									if (null == lane1)
-										System.err.println("fixLinkConnections: skipping null lane");
-									else  {
-										Lane laneA = (Lane) lane1;
-										Lane laneB = (Lane) lane2;
-										// we only visit pairs of lanes ones 
-										// select only crossing conflicts
-										if (laneA.getID() > laneB.getID() & cType != conflictType.SPLIT) {
-											// identify yield and priority lane
-											Lane pLane = new Lane();
-											Lane yLane = new Lane();										
+					if (link.getToNode_r().getPoint().equals(compareToLink.getToNode_r().getPoint()))
+						cType =  conflictType.MERGE;
+					else if (link.getFromNode_r().getPoint().equals(compareToLink.getFromNode_r().getPoint()))
+						cType =  conflictType.SPLIT;
+					else
+						cType =  conflictType.CROSSING;
+					for (CrossSectionObject lane1 : link.getCrossSections_r().get(0).getCrossSectionElementList_r().get(0).getCrossSectionObjects(Lane.class)) {
+						for (CrossSectionObject lane2 : compareToLink.getCrossSections_r().get(0).getCrossSectionElementList_r().get(0).getCrossSectionObjects(Lane.class)) {									
+							if (null == lane1)
+								System.err.println("fixLinkConnections: skipping null lane");
+							else {
+								if (conflictType.SPLIT == cType)
+									continue;	// take care of the easy cases first
+								Lane laneA = (Lane) lane1;
+								Lane laneB = (Lane) lane2;
+								// we only visit pairs of lanes once 
+								// identify yield and priority lane
+								Lane pLane = new Lane();
+								Lane yLane = new Lane();										
 
-											Lane upA = laneA.getUp().get(0);
-											Lane upB = laneB.getUp().get(0);
-											Lane downA = laneA.getDown().get(0);
-											Lane downB = laneB.getDown().get(0);
-											Link linkUpA = upA.getCse().getCrossSection().getLink();
-											Link linkUpB = upB.getCse().getCrossSection().getLink();
-											Link linkDownA = downA.getCse().getCrossSection().getLink();
-											Link linkDownB = downB.getCse().getCrossSection().getLink();
-											boolean yieldA = true;
-											boolean yieldB = true;
-											double angleIncomingA = Double.NaN;
-											double angleIncomingB = Double.NaN;
-											double angleLeavingA = Double.NaN;
-											double angleLeavingB = Double.NaN;
-											double turnAngleA = Double.NaN;
-											double turnAngleB = Double.NaN;
-											
-											if ((upA.getStopLine() != null))
-												if (upA.getStopLine().getType() == StopLine.PRIORITYSTOPLINE)
-													yieldA = false;
-											
-											if ((upB.getStopLine() != null))
-												if (upB.getStopLine().getType() == StopLine.PRIORITYSTOPLINE)
-													yieldB = false;
-	
-											if (yieldA && (! yieldB)) {
-												yLane = laneA;
-												pLane = laneB;
-											} else if ((! yieldA) && yieldB) {
-												yLane = laneB;
-												pLane = laneA;
-											}
-											// conflict is based on general priority rules
-											// could be on a junction with no rules or two opposing roads (both priority or yield)
-											else if ( (yieldA == false && yieldB == false) || (yieldA == true && yieldB == true) )   {
-												for (DirectionalLink incoming : dlList)  {
-													if (incoming.incoming) {
-														if (incoming.link.equals(linkUpA))
-															angleIncomingA = incoming.angle;
-														else if (incoming.link.equals(linkUpB))
-															angleIncomingB = incoming.angle;	
-													} else if (! incoming.incoming) {
-														if (incoming.link.equals(linkDownA))
-															angleLeavingA = incoming.angle;
-														else if (incoming.link.equals(linkDownB))
-															angleLeavingB = incoming.angle;
-													}
-												}
-												double angleDif;
-						            			if (angleIncomingA > angleIncomingB)
-						            				angleDif = 2 * Math.PI - angleIncomingA + angleIncomingB;
-						            			else
-						            				angleDif = angleIncomingA - angleIncomingB;
-						            			
-						            			//	lane B comes from right
-												if (angleDif < 0.75 * Math.PI) {
-													yLane = laneA;
-													pLane = laneB;
-												}
-						            			//	lane B comes from left
-												else if ( angleDif > 1.25 * Math.PI) {
-													pLane = laneA;
-													yLane = laneB;
-												} else { // opposing flows: turning movement determines priority rules
-							            			if (angleIncomingA > angleLeavingA)
-							            				turnAngleA = 2 * Math.PI - angleIncomingA + angleLeavingA;
-							            			else
-							            				turnAngleA = angleIncomingA - angleLeavingA;
-							            			if (angleIncomingB > angleLeavingB)
-							            				turnAngleB = 2 * Math.PI - angleIncomingB + angleLeavingB;
-							            			else
-							            				turnAngleB = angleIncomingB - angleLeavingB;
-							            			// turn with smallest angle has priority
-							            			if (turnAngleA < turnAngleB) {
-														pLane = laneA;
-														yLane = laneB;
-							            			} else {
-														yLane = laneA;
-														pLane = laneB;
-							            			}	
-												}
-											}
-											// Determine location at the lanes at the start of the conflict Area:
-											Point2D.Double pInIn = new Point2D.Double(); 
-											Point2D.Double pInOut = new Point2D.Double(); 
-											Point2D.Double pOutIn = new Point2D.Double(); 
-											Point2D.Double pOutOut = new Point2D.Double(); 
-											
-											// A: yields
-											// B: has priority
-											double longitudinalInInYield = 0;
-											double longitudinalInInPriority = 0;
-											ArrayList<Vertex> verticesYield = yLane.getLaneVerticesInner();
-											ArrayList<Vertex> verticesPriority = pLane.getLaneVerticesInner();											
-											pInIn = getConflictIntersectionPoint(verticesYield, verticesPriority, longitudinalInInYield, longitudinalInInPriority);
-
-											double longitudinalInOutYield = 0;
-											double longitudinalInOutPriority = 0;
-											verticesYield = yLane.getLaneVerticesInner();
-											verticesPriority = pLane.getLaneVerticesOuter();
-											pInOut = getConflictIntersectionPoint(verticesYield, verticesPriority, longitudinalInOutYield, longitudinalInOutPriority);
-	
-											double longitudinalOutInYield = 0;
-											double longitudinalOutInPriority = 0;
-											verticesYield = yLane.getLaneVerticesOuter();
-											verticesPriority = pLane.getLaneVerticesInner();
-											pOutIn = getConflictIntersectionPoint(verticesYield, verticesPriority, longitudinalOutInYield, longitudinalOutInPriority);
-	
-											double longitudinalOutOutYield = 0;
-											double longitudinalOutOutPriority = 0;
-											verticesYield = yLane.getLaneVerticesOuter();
-											verticesPriority = pLane.getLaneVerticesOuter();
-											pOutOut = getConflictIntersectionPoint(verticesYield, verticesPriority, longitudinalOutOutYield, longitudinalOutOutPriority);
-											// TODO should that really be single &'s in the next line?
-											if (! (pInIn == null & pInOut == null & pInIn == null & pInIn == null) ) {
-												double longitudinalYield = 0;
-												double longitudinalPriority = 0;
-		
-												Polygon conflictArea = new Polygon();
-												if (longitudinalInInYield <= longitudinalInOutYield) {
-													if (longitudinalInInYield <= longitudinalOutInYield)
-														longitudinalYield = longitudinalInInYield;
-													else
-														longitudinalYield = longitudinalOutInYield;
-												} else if (longitudinalInOutYield < longitudinalInInYield) {
-													if (longitudinalInOutYield <= longitudinalOutOutYield)
-														longitudinalYield = longitudinalInOutYield;
-													else
-														longitudinalYield = longitudinalOutOutYield;
-												}
-												if (longitudinalInInPriority <= longitudinalInOutPriority) {
-													if (longitudinalInInPriority <= longitudinalOutInPriority)
-														longitudinalPriority = longitudinalInInPriority;
-													else
-														longitudinalPriority = longitudinalOutInPriority;
-												} else if (longitudinalInOutPriority < longitudinalInInPriority) {
-													if (longitudinalInOutPriority <= longitudinalOutOutPriority)
-														longitudinalPriority = longitudinalInOutPriority;
-													else
-														longitudinalPriority = longitudinalOutOutPriority;
-												}
-												// determine the stopLines of the incoming Link
-												StopLine stopLine = yLane.getUp().get(0).getStopLine();
-												Double x = null;
-												Double y = null;
-												if (pInIn != null) {
-													x = pInIn.getX();
-													y = pInIn.getY();
-													conflictArea.addPoint(x.intValue(), y.intValue());
-												}
-												if (pInOut != null) {
-													x = pInOut.getX();
-													y = pInOut.getY();
-													conflictArea.addPoint(x.intValue(), y.intValue());
-												}
-												if (pOutIn != null) {
-													x = pOutIn.getX();
-													y = pOutIn.getY();
-													conflictArea.addPoint(x.intValue(), y.intValue());
-												}
-												if (pOutOut != null) {	
-													x = pOutOut.getX();
-													y = pOutOut.getY();
-													conflictArea.addPoint(x.intValue(), y.intValue());
-												}
-												if (cType.equals(conflictType.MERGE))
-													yLane.addMergingYieldToLaneList(pLane);
-												else if (cType.equals(conflictType.CROSSING))
-													yLane.addCrossingYieldToLaneList(pLane);
-												priorityConflict = new PriorityConflict(pLane, longitudinalYield, yLane, longitudinalPriority, cType, conflictArea);
-												//  add conflict to the relevant stopLine 
-												if (stopLine == null)		
-													System.out.print("no Stopline created or found");
-												else
-													stopLine.addConflicts(priorityConflict);
-											}
+								Lane upA = laneA.getUp().get(0);
+								Lane upB = laneB.getUp().get(0);
+								Lane downA = laneA.getDown().get(0);
+								Lane downB = laneB.getDown().get(0);
+								Link linkUpA = upA.getCse().getCrossSection().getLink();
+								Link linkUpB = upB.getCse().getCrossSection().getLink();
+								Link linkDownA = downA.getCse().getCrossSection().getLink();
+								Link linkDownB = downB.getCse().getCrossSection().getLink();
+								boolean yieldA = true;
+								boolean yieldB = true;
+								
+								if ((upA.getStopLine() != null) && (upA.getStopLine().getType() == StopLine.PRIORITYSTOPLINE))
+									yieldA = false;								
+								if ((upB.getStopLine() != null) && (upB.getStopLine().getType() == StopLine.PRIORITYSTOPLINE))
+									yieldB = false;
+								if (yieldA && (! yieldB)) {
+									yLane = laneA;
+									pLane = laneB;
+								} else if ((! yieldA) && yieldB) {
+									yLane = laneB;
+									pLane = laneA;
+								} else {	// Stop lines did not resolve this conflict.
+									// Apply traffic law priority rules
+									// could be on a junction with no rules or two opposing roads (both priority or yield)
+									double angleIncomingA = Double.NaN;
+									double angleIncomingB = Double.NaN;
+									double angleLeavingA = Double.NaN;
+									double angleLeavingB = Double.NaN;
+									for (DirectionalLink incoming : dlList) {
+										if (incoming.incoming) {
+											if (incoming.link.equals(linkUpA))
+												angleIncomingA = incoming.angle;
+											else if (incoming.link.equals(linkUpB))
+												angleIncomingB = incoming.angle;	
+										} else {
+											if (incoming.link.equals(linkDownA))
+												angleLeavingA = incoming.angle;
+											else if (incoming.link.equals(linkDownB))
+												angleLeavingB = incoming.angle;
 										}
 									}
+									double angleDif;
+			            			if (angleIncomingA > angleIncomingB)
+			            				angleDif = 2 * Math.PI - angleIncomingA + angleIncomingB;
+			            			else
+			            				angleDif = angleIncomingA - angleIncomingB;
+									if (angleDif < 0.75 * Math.PI) {	// lane B comes from right
+										yLane = laneA;
+										pLane = laneB;
+									} else if (angleDif > 1.25 * Math.PI) {	// lane B comes from left
+										pLane = laneA;
+										yLane = laneB;
+									} else { // Opposing flows: turning movement determines priority rules
+										double turnAngleA;
+										double turnAngleB;
+				            			if (angleIncomingA > angleLeavingA)
+				            				turnAngleA = 2 * Math.PI - angleIncomingA + angleLeavingA;
+				            			else
+				            				turnAngleA = angleIncomingA - angleLeavingA;
+				            			if (angleIncomingB > angleLeavingB)
+				            				turnAngleB = 2 * Math.PI - angleIncomingB + angleLeavingB;
+				            			else
+				            				turnAngleB = angleIncomingB - angleLeavingB;
+				            			// turn with smallest angle has priority
+				            			if (turnAngleA < turnAngleB) {
+											pLane = laneA;
+											yLane = laneB;
+				            			} else {
+											yLane = laneA;
+											pLane = laneB;
+				            			}	
+									}
+								}
+								// Determine location at the lanes at the start of the conflict Area:
+								Point2D.Double pInIn = new Point2D.Double(); 
+								Point2D.Double pInOut = new Point2D.Double(); 
+								Point2D.Double pOutIn = new Point2D.Double(); 
+								Point2D.Double pOutOut = new Point2D.Double(); 
+								
+								pInIn = getConflictIntersectionPoint(yLane.getLaneVerticesInner(), pLane.getLaneVerticesInner());
+								pInOut = getConflictIntersectionPoint(yLane.getLaneVerticesInner(), pLane.getLaneVerticesOuter());
+								pOutIn = getConflictIntersectionPoint(yLane.getLaneVerticesOuter(), pLane.getLaneVerticesInner());
+								pOutOut = getConflictIntersectionPoint(yLane.getLaneVerticesOuter(), pLane.getLaneVerticesOuter());
+								// FIXME: if statement below is crazy
+								if (! (pInIn == null & pInOut == null & pInIn == null & pInIn == null) ) {
+									Polygon cArea = new Polygon();
+									// determine the stopLines of the incoming Link
+									StopLine stopLine = yLane.getUp().get(0).getStopLine();
+									Double cX = null;
+									Double cY = null;
+									if (pInIn != null) {
+										cX = pInIn.getX();
+										cY = pInIn.getY();
+										cArea.addPoint(cX.intValue(), cY.intValue());
+									}
+									if (pInOut != null) {
+										cX = pInOut.getX();
+										cY = pInOut.getY();
+										cArea.addPoint(cX.intValue(), cY.intValue());
+									}
+									if (pOutIn != null) {
+										cX = pOutIn.getX();
+										cY = pOutIn.getY();
+										cArea.addPoint(cX.intValue(), cY.intValue());
+									}
+									if (pOutOut != null) {	
+										cX = pOutOut.getX();
+										cY = pOutOut.getY();
+										cArea.addPoint(cX.intValue(), cY.intValue());
+									}
+									if (cType.equals(conflictType.MERGE))
+										yLane.addMergingYieldToLaneList(pLane);
+									else if (cType.equals(conflictType.CROSSING))
+										yLane.addCrossingYieldToLaneList(pLane);
+									priorityConflict = new PriorityConflict(pLane, yLane, cType, cArea);
+									//  add conflict to the relevant stopLine 
+									if (stopLine == null)		
+										System.err.println("no Stopline created or found");
+									else
+										stopLine.addConflicts(priorityConflict);
 								}
 							}
-
-					//}
+						}
+					}
 				}
 			}
-			
 			System.out.format("Adding %d links to network for node %s\n", newLinks.size(), name);
 		}
     }
     
-    private Point2D.Double getConflictIntersectionPoint(ArrayList<Vertex> verticesA, ArrayList<Vertex> verticesB, double longitudinalA, double longitudinalB)   {
+    private static Point2D.Double getConflictIntersectionPoint(ArrayList<Vertex> verticesA, ArrayList<Vertex> verticesB)   {
 		Vertex prevA = null;
 		Vertex prevB = null;
 		Point2D.Double p = null; 
 		for (Vertex vA : verticesA)  {
 			if (! (prevA == null)) {
-				longitudinalB = 0;
 				for (Vertex vB : verticesB) {
 					if (! (prevB == null))   {
 						Line2D.Double l1 = new Line2D.Double(prevA.getX(),prevA.getY(),vA.getX(),vA.getY());
 						Line2D.Double l2 = new Line2D.Double(prevB.getX(),prevB.getY(),vB.getX(),vB.getY());
-						if (Planar.lineIntersectsLine(l1, l2)) {
-							p =  Planar.intersection(l1, l2);
-						}
-						if (p != null)  {
-							longitudinalA += Math.pow(p.getX()-prevA.getX(), p.getY()-prevA.getY());  															
-							longitudinalB += Math.pow(p.getX()-prevB.getX(), p.getY()-prevB.getY());  															
+						if (Planar.lineIntersectsLine(l1, l2))
+							p = Planar.intersection(l1, l2);
+						if (p != null)
 							break;
-						}
-						longitudinalB += Math.pow(vB.getX()-prevB.getX(), vB.getY()-prevB.getY());  
 					}
 					prevB = vB;
 				}
-				longitudinalA += Math.pow(vA.getX()-prevA.getX(), vA.getY()-prevA.getY()); 
 				if (p != null)
 					break;
 			}
@@ -1514,6 +1434,10 @@ public class Node extends Vertex implements XML_IO {
 		return expandedNode;
     }
     
+    /**
+     * Create a GeneralPath that describes the conflictArea of this Node.
+     * @return GeneralPath; the contour of the conflictArea of this Node
+     */
 	public GeneralPath createJunctionPolygon()   {
 		GeneralPath polygon = new GeneralPath(Path2D.WIND_EVEN_ODD);
 		boolean firstPoint = true;

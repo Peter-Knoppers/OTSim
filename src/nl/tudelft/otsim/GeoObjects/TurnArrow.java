@@ -19,7 +19,6 @@ public class TurnArrow extends CrossSectionObject {
 	private int[] outLinkNumbers; 
 	
 	public TurnArrow(CrossSectionElement cse, int[] outLinkNumbers, double lateralPosition, double longitudinalPosition) {
-		super();
 		//System.out.println("Creating new turn arrow at longitudinalPosition " + longitudinalPosition);
 		this.crossSectionElement = cse;
 		this.lateralReference = CrossSectionElement.LateralReferenceLeft;
@@ -39,7 +38,6 @@ public class TurnArrow extends CrossSectionObject {
 	 * @throws Exception
 	 */
 	public TurnArrow(CrossSectionElement cse, ParsedNode pn) throws Exception {
-		super();
 		crossSectionElement = cse;
 		lateralReference = CrossSectionElement.LateralReferenceLeft;
 		longitudinalPosition = lateralPosition = Double.NaN;
@@ -72,10 +70,6 @@ public class TurnArrow extends CrossSectionObject {
 
 	public int[] getOutLinkNumbers() {
 		return outLinkNumbers;
-	}
-
-	public void setOutLinkNumbers(int[] outLinkNumbers) {
-		this.outLinkNumbers = outLinkNumbers;
 	}
 
 	public void setLateralPosition(double lateralPosition) {
@@ -112,7 +106,7 @@ public class TurnArrow extends CrossSectionObject {
 				}
 			}
 		} else
-			System.out.print("STRANGE!!!!!!!!!!!!!!!!, no section element for Turn arrow paint");
+			System.out.print("STRANGE!!!!!!!!!!!!!!!!, no cross section element for Turn arrow paint");
 	}
 
 	@Override

@@ -10,21 +10,10 @@ import static javax.swing.GroupLayout.Alignment.*;
 public class FileChooser extends JPanel implements ActionListener {
 	private static final long serialVersionUID = 1L;
 	private JButton[] fileButton = new JButton[20];
-    //private int index = -1;
     private JTextField[] textField = new JTextField[20];
     private JLabel[] label = new JLabel[20]; 
     private String moduleName;
     private String command;
-	//private static int fileCount;
-
-	/*
-    public static int getFileCount() {
-		return fileCount;
-	}
-
-	public static void setFileCount(int fileCount) {
-		FileChooser.fileCount = fileCount;
-	}*/
 
 	public FileChooser(int files, String[] labels, String[] fileNames, String[] action) {
         for (int i = 0; i < files; i++ ) {
@@ -124,8 +113,6 @@ public class FileChooser extends JPanel implements ActionListener {
                 )
         );
        
-       // layout.linkSize(SwingConstants.HORIZONTAL, fileButton[0], cancelButton);
-
         layout.setVerticalGroup(layout.createSequentialGroup()
             .addGroup(layout.createParallelGroup(BASELINE)
                 .addComponent(label[0])
@@ -227,23 +214,8 @@ public class FileChooser extends JPanel implements ActionListener {
             	.addComponent(textField[19], GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                 .addComponent(fileButton[19],  10, 20, 25) 
                 )
-/*            .addGroup(layout.createParallelGroup(LEADING)
-                .addComponent(cancelButton)) 
-            .addGroup(layout.createParallelGroup(LEADING)
-                .addComponent(OKButton))*/
         );
-
-/*        setTitle("ChooseFile(s)");
-        pack();
-        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);*/
     }
-	/*
-    public int getIndex() {
-		return index;
-	}
-	public void setIndex(int index) {
-		this.index = index;
-	}*/
 	
 	public JButton[] getFileButton() {
 		return fileButton;
@@ -252,14 +224,6 @@ public class FileChooser extends JPanel implements ActionListener {
 	public JTextField[] getTextField() {
 		return textField;
 	}
-	/*
-	public void setTextField(JTextField[] textField) {
-		this.textField = textField;
-	}
-
-	public void setFileButton(JButton[] fileButton) {
-		this.fileButton = fileButton;
-	}*/
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -306,52 +270,11 @@ public class FileChooser extends JPanel implements ActionListener {
 				e1.printStackTrace();
 			}
 		}
-		//
-/*		if (command.startsWith("ShapeFiles ") && index < 3) {			
-	    	DataStoreFactorySpi format = new ShapefileDataStoreFactory();
-	        Map<String, Serializable> params = new HashMap<String, Serializable>();
-	        params.put("directory", directory);
-	        JDataStoreWizard wizard = new JDataStoreWizard(format);	
-	        int result = wizard.showModalDialog();	        
-			try {
-				connect(wizard, result, index);
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}	        
-	        File file = wizard.getFile();
-	        this.getTextField()[index].setText(file.getAbsolutePath());
-		}
-		else if (command.startsWith("ShapeFiles ") && index == 3) {
-			openDialogImportMatrix();
-		}
-		//set enabled true, but if not all files are selected puts it back to false
-        Main.mainFrame.getImportWizard().getNextButton().setEnabled(true);
-        for (int i = 0; i < fileCount; i++ ) {
-        	if (this.getTextField()[i].getText().toString().isEmpty() )   {
-        		Main.mainFrame.getImportWizard().getNextButton().setEnabled(false);
-        	}
-        }
-        if (Main.mainFrame.getImportWizard().getNextButton().isEnabled())   {	
-    		shapeImport = new TableModelImport(linkAttributeNames);
-    		shapeImport.setOpaque(true); //content panes must be opaque
-			ImportModelShapeWizard.getCards().add(shapeImport, shapeImport.toString());
-        }*/
 	}
 
     public String getCommand() {
 		return command;
 	}
-
-	/*
-	public void setCommand(String command) {
-		this.command = command;
-	}
-
-	public String getModuleName() {
-		return moduleName;
-	}
-	*/
 
 	public void setModuleName(String moduleName) {
 		this.moduleName = moduleName;

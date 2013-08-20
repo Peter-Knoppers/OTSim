@@ -37,11 +37,8 @@ public class SaveModel implements ActionListener {
 	private JCheckBox optionDemand;
 	JFrame frame;
     private static FileChooser fChooser;
-    //private Model saveModel;
     private static String fileSavedModel;
-    //private static String fileSavedDemand;
 	private static int index; 
-	//private static int fileCount;
 
 	public SaveModel() {
 		Class<?> klass;
@@ -125,7 +122,6 @@ public class SaveModel implements ActionListener {
 		String command = e.getActionCommand();
 		System.out.println("actionperformed: command is " + command);
 		if (command.startsWith("Save Model") )   {
-			//this.getNextButton().setEnabled(true);
 	        Main.mainFrame.getSaveModel().getNextButton().setEnabled(true);
 	        if (optionModel.isSelected())  {
 	        	fChooser.getFileButton()[0].setEnabled(true);
@@ -241,65 +237,8 @@ public class SaveModel implements ActionListener {
 		}
 	}
 
-    /*
-    private static boolean openDialogSaveFile() {
-    	String fileName = FileDialog.showFileDialog(false, "xml", "xml files", Main.mainFrame.initialDirectory);
-    	if (null == fileName)
-    		return false;
-    	fileSavedDemand = new File(fileName).getPath();
-		fChooser.getTextField()[index].setText(fileSavedDemand);
-        System.out.printf("User selected network file \"%s\"", fileSavedDemand);
-        return true;
-    }
-    
-    private static String[] names = null;
-	public static String[] getNames() {
-		return names;
-	}
-    
-    public static String getFileSavedModel() {
-		return fileSavedModel;
-	}
-
-	public Model getSaveModel() {
-		return saveModel;
-	}
-
-	public void setSaveModel(Model loadedModel) {
-		this.saveModel = loadedModel;
-	}
-
-    public static JPanel getCards() {
-		return cards;
-	}
-
-	public static void setCards(JPanel cards) {
-		SaveModel.cards = cards;
-	}
-
-	public JButton getFinishButton() {
-		return finishButton;
-	}
-
-	public void setFinishButton(JButton finishButton) {
-		this.finishButton = finishButton;
-	}
-	*/
-	public JButton getNextButton() {
+	private JButton getNextButton() {
 		return nextButton;
 	}
-	/*
-	public void setNextButton(JButton nextButton) {
-		this.nextButton = nextButton;
-	}
-
-	public JButton getPrevButton() {
-		return prevButton;
-	}
-
-	public void setPrevButton(JButton prevButton) {
-		this.prevButton = prevButton;
-	}
-	*/
 
 }

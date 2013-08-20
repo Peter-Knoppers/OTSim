@@ -81,7 +81,6 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 	/** CrossSection selected for editing */
 	public CrossSection selectedCrossSection = null;
 	private Component repaintComponent = null;
-	private IntBuffer[][] routesBetweenMicroZones;
 
 	/**
 	 * Clear the <i>modified</i> flag. (Should be called when this Network has 
@@ -216,11 +215,6 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 			if (! rmat.writeXML(staXWriter))
 				return false;
 		// Write the TrafficLightControllers
-		/*
-		for (TrafficLightController tlc : trafficLightControllers.values())
-			if (! tlc.writeXML(staXWriter))
-				return false;
-		*/
 		if (! staXWriter.writeNodeEnd(XMLTAG))
 			return false;
 		// TODO write PolyZones
@@ -297,7 +291,7 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 				for (Lane lane : cs.collectLanes()) {
 					//Every lane gets an Origin and a Destination
 					// FIXME: This should have been done at Lane creation time
-					if (link.getFromNode_r().isSource() && indexCs == 0)
+					if (link.getFromNode_r().isSource() && (indexCs == 0))
 						lane.setOrigin(link.getFromNodeExpand().getNodeID());
 					if (indexCs == link.getCrossSections_r().size() - 1)
 						lane.setDestination(link.getToNodeExpand().getNodeID());
@@ -387,25 +381,6 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 		return microZoneList.get(zoneID);
 	}
 	
-	/* NEVER USED
-	// TODO: Guus: explain what this does/is
-	public Link lookupLinkUp(Link linkSplitted) {
-		for (Link link : linkList)
-			if (linkSplitted.getFromNode_r().equals(link.getToNode_r()))
-				return link;
-		return null;
-	}
-	*/
-
-	/* NEVER USED
-	public Link lookupLinkDown(Link linkMerged) {
-		for (Link link : linkList)
-			if (linkMerged.getToNode_r().equals(link.getFromNode_r()))
-				return link;
-		return null;
-	}
-	*/
-	
 	/**
 	 * Create a new {@link MicroZone} and add it to this Network.
 	 * @param zoneName String; name of the new MicroZone
@@ -437,14 +412,6 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 	 */
 	public Collection<MicroZone> getMicroZoneList() {
 		return microZoneList.values();
-	}
-
-	public IntBuffer[][] getRoutesBetweenMicroZones() {
-		return routesBetweenMicroZones;
-	}
-
-	public void setRoutesBetweenMicroZones(IntBuffer[][] routesBetweenMicroZones) {
-		this.routesBetweenMicroZones = routesBetweenMicroZones;
 	}
 
 	/**
@@ -724,52 +691,6 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
         	node.paint(graphicsPanel);
     }
     
-    /**
-     * Draw the path from startNode to endNode.
-     * <br />
-     * If startNode or endNode is null; this method does nothing.
-     * @param graphicsPanel GraphicsPanel; output device to draw onto
-     */
-    /*public void paintPaths(GraphicsPanel graphicsPanel) {
-    	if ((null == startNode) || (null == endNode))
-    		return;
-    	int rank = 0;
-    	int startNodeIndex = -1;
-    	int endNodeIndex = -1;
-    	for (Node node : getAllNodeList(true)) {
-    		if (node == startNode)
-    			startNodeIndex = rank;
-    		if (node == endNode)
-    			endNodeIndex = rank;
-    		rank++;
-    	}
-    	if (startNodeIndex < 0)
-    		throw new Error("Cannot find rank of node " + startNode.toString());
-    	if (endNodeIndex < 0)
-    		throw new Error("Cannot find rank of node " + endNode.toString());
-       // ShortestPathAlgorithms.PathNodesList path = ShortestPathAlgorithms.CreatePaths.pathFromTo[startNodeIndex][endNodeIndex];
-        // TODO Guus: aanpassen!!!!
-    	IntBuffer path = ShortestPathAlgorithms.CreatePaths.getPathFromToInt()[startNodeIndex][endNodeIndex];
-        if (null != path) {
-            graphicsPanel.setColor(Color.ORANGE);
-            graphicsPanel.setStroke(6f);
-            // FIXME: use a descriptive name instead of i
-            int i = 0;
-        	int from = path.get(i);
-        	i++;
-        	Node nodeFrom = lookupNode(from, true);
-        	Node nodeTo = null;     	
-        	while (path.get(i) != ShortestPathAlgorithms.DijkstraAlgorithm.ENDBUFFER) {
-	        	nodeTo = lookupNode(path.get(i), true);
-            	if (from >= 0)  {
-            		graphicsPanel.drawLine(nodeFrom.getPoint(), nodeTo.getPoint());
-            	}
-            	nodeFrom = nodeTo;
-        		i++;
-        	}
-        }
-    }*/
-
 	private static volatile boolean reBuilding = false;
 	/**
 	 * Clear, then rebuild the automatically generated geometry at junctions.
@@ -922,8 +843,6 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
      * Each cross section will have road elements
      * Every road element should have a drive-able area
      * If there are road markers along, the lanes are created here!
-     * TODO update the next comment line when / if that is done
-     * The geometry will be added later!
      */
     private void rebuildLanes() {
     	for (Link link : links.values())
@@ -996,12 +915,8 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
     }
     
     private void fixLinkLengths() {
-    	for (Link link : links.values()) {
+    	for (Link link : links.values())
     		link.calculateLength(link.getVertices());
-    		// TODO: do something useful ...
-    		//double distance = link.getLength();
-    	}
-    	
     }
     
     /**

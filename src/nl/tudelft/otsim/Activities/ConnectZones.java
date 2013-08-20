@@ -35,6 +35,7 @@ public class ConnectZones {
 		Coordinate pointBuilding = new Coordinate(activityLocation.getX(),activityLocation.getY(), 0);
 		Envelope search = new Envelope(pointBuilding);  // search area: set it up
         search.expandBy(maxSearchDistance);   // search area creates circle
+		@SuppressWarnings("unchecked")
 		List<LineString> links = linkTree.query(search);  // find the links within this area
         double minDist = maxSearchDistance + 1.0e-6;
         Coordinate minDistPoint = null;   // the coordinates of the nearest point of the nearest line 
@@ -101,6 +102,7 @@ public class ConnectZones {
 			Envelope search = new Envelope(pointOfLink);  // search area: set it up
 			Point pointLink = geometryFactory.createPoint(pointOfLink);
 	        search.expandBy(MAX_SEARCH_DISTANCE);   // search area creates circle
+			@SuppressWarnings("unchecked")
 			List<Point> microZones = microZoneTree.query(search);  // find the microZones within this area
 	        double minDist = MAX_SEARCH_DISTANCE + 1.0e-6;
 	        MicroZone attachedMicroZone = null;

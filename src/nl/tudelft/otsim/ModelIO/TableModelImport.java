@@ -38,7 +38,6 @@ package nl.tudelft.otsim.ModelIO;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
@@ -57,12 +56,8 @@ import java.awt.Insets;
  */
 public class TableModelImport extends JPanel implements TableModelListener {
 	private static final long serialVersionUID = 1L;
-	private boolean DEBUG = false;
-    private JTable table;
     private TableImport tableDirection;
     private TableImport tableField;
-	//Important: determines the type of data!!!!
-	
 	
     public TableModelImport(String[] namesDropDown, Object[] types, Object[][] dataDir) {
         super(new GridBagLayout());
@@ -102,7 +97,7 @@ public class TableModelImport extends JPanel implements TableModelListener {
         if (dropDownColumnNumber>= 0)
         	dropDownColumn = tableDirection.getTable().getColumnModel().getColumn(dropDownColumnNumber);
         //Fiddle with the dropdown column's cell editors/renderers.
-        TableImport.setUpDropdownColumn(tableDirection.getTable(), dropDownColumn, namesDropDown);   
+        TableImport.setUpDropdownColumn(dropDownColumn, namesDropDown);   
         //Add the scroll pane to this panel.
         add(scrollPane1, gbConstraints);     
         
@@ -149,7 +144,7 @@ public class TableModelImport extends JPanel implements TableModelListener {
         if (dropDownColumnNumber>= 0)
         	dropDownColumn = tableField.getTable().getColumnModel().getColumn(dropDownColumnNumber);
         //Fiddle with the dropdown column's cell editors/renderers.
-        TableImport.setUpDropdownColumn(tableField.getTable(), dropDownColumn, namesDropDown);
+        TableImport.setUpDropdownColumn(dropDownColumn, namesDropDown);
         JScrollPane scrollPane2 = new JScrollPane(tableField.getTable()); 
         //Add the scroll pane to this panel.
         add(scrollPane2, gbConstraints);
@@ -188,16 +183,8 @@ public class TableModelImport extends JPanel implements TableModelListener {
 		return tableDirection;
 	}
 
-	public void setTableDirection(TableImport tableDirection) {
-		this.tableDirection = tableDirection;
-	}
-
 	public TableImport getTableField() {
 		return tableField;
-	}
-
-	public void setTableField(TableImport tableField) {
-		this.tableField = tableField;
 	}
 
 }

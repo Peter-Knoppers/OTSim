@@ -70,8 +70,6 @@ public class StopLine extends CrossSectionObject {
 	 */
 	public StopLine(CrossSectionElement cse, StopLine stopLine) {
 		this(cse, stopLine.getType(), stopLine.getLongitudinalPosition(), stopLine.longitudinalLength, stopLine.lateralPosition);
-		
-
 	}
 
 	

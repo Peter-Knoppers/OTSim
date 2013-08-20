@@ -482,11 +482,10 @@ public class Link implements XML_IO {
 		for (CrossSection cs : crossSections)
 			for (CrossSectionElement cse : Reversed.reversed(cs.getCrossSectionElementList_r()))  {
 				for (CrossSectionObject cso : Reversed.reversed(cse.getCrossSectionObjects(RoadMarkerAlong.class)))
-            		((RoadMarkerAlong) cso).createVertices(cse);
+            		((RoadMarkerAlong) cso).createVertices();
 				cse.createLanes();
 			}
 	}
-	
 	
 	/**
 	 * Clean up the way that the {@link CrossSection CrossSections} of this 

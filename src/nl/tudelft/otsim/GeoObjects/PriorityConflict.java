@@ -24,11 +24,7 @@ public class PriorityConflict {
 
     /** Type of the conflict being either split, merge or crossing. */
     protected conflictType conflictType;
-    //private Lane priorityLane;
-    //private Lane yieldLane;
     private StopLine stopLine;
-	//private double priorityLongPosition;
-	private double yieldLongPosition;
 	private Polygon conflictArea;
        
     /**
@@ -40,86 +36,37 @@ public class PriorityConflict {
      * @param yieldLane Lane without priority.
      * @param mergeLane Lane where lanes split of merge.
      * 
-
      */
-    protected PriorityConflict(Lane pLane, double pLongitudinal, Lane yLane, double yLongitudinal, conflictType type, Polygon conflictArea) {
+    protected PriorityConflict(Lane priorityLane, Lane yieldLane, conflictType type, Polygon conflictArea) {
         this.setStopLine(stopLine);
-        //this.priorityLane = pLane;
-        this.setPriorityLongPosition(pLongitudinal);
-        //this.yieldLane = yLane;
-        this.yieldLongPosition = yLongitudinal;
         this.conflictType = type;
         this.conflictArea = conflictArea;
     }
        
-    private double getYieldLongPosition() {
-		return yieldLongPosition;
-	}
-
-	private void setYieldLongPosition(double yieldLongPosition) {
-		this.yieldLongPosition = yieldLongPosition;
-	}
-
-	/*
-	private Lane getPriorityLane() {
-		return priorityLane;
-	}
-
-	public void setPriorityLane(Lane priorityLane) {
-		this.priorityLane = priorityLane;
-	}
-
-	public Lane getYieldLane() {
-		return yieldLane;
-	}
-
-	private void setYieldLane(Lane yieldLane) {
-		this.yieldLane = yieldLane;
-	}
-
-	public StopLine getStopLine() {
-		return stopLine;
-	}
-	*/
-
 	private void setStopLine(StopLine stopLine) {
 		this.stopLine = stopLine;
 	}
 
-	/*
-	public double getPriorityLongPosition() {
-		return priorityLongPosition;
-	}
-	*/
-
-	private void setPriorityLongPosition(double priorityLongPosition) {
-		//this.priorityLongPosition = priorityLongPosition;
-	}
-
+	/**
+	 * Retrieve the conflictArea of this PriorityConflict.
+	 * @return Polygon; the conflictArea of this PriorityConflict
+	 */
 	public Polygon getConflictArea() {
 		return conflictArea;
 	}
 
-	/*
-	public void setConflictArea(Polygon conflictArea) {
-		this.conflictArea = conflictArea;
-	}
-	*/
-
-	public  GeneralPath createPolygon()   {
-    	double x;
-    	double y;
+	/**
+	 * Return a closed GeneralPath that describes the area of this PriorityConflict.
+	 * @return GeneralPath; the area of this PriorityConflict
+	 */
+	public GeneralPath createPolygon()   {
 		GeneralPath polygon = new GeneralPath(Path2D.WIND_EVEN_ODD);
-		boolean firstPoint = true;
-    	for (int i=0; i < getConflictArea().npoints; i++ )  {
-        	x = getConflictArea().xpoints[i];
-        	y = getConflictArea().ypoints[i];
-			if (firstPoint)
-				polygon.moveTo(x, y);
-			else
-				polygon.lineTo(x, y);
-			firstPoint = false;
-    	}
+		if (conflictArea.npoints == 0)
+			throw new Error("Degenerate polygon");
+			//return polygon;
+		polygon.moveTo(conflictArea.xpoints[0], conflictArea.ypoints[0]);
+		for (int i = 1; i < conflictArea.npoints; i++)
+			polygon.lineTo(conflictArea.xpoints[i],  conflictArea.ypoints[i]);
 		polygon.closePath();
 		return polygon;
 	}

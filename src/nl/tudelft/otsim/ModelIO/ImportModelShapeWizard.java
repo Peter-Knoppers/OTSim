@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -71,9 +70,6 @@ public class ImportModelShapeWizard implements ActionListener {
 	JFrame frame;
     private static FileChooser fChooser;
     private Model importedModel = new Model();
-	private String fileImportedLinks;
-    private String fileImportedNodes;
-    private String fileImportedCentroids;
     private static String fileImportedMatrix;
 	private static TableModelImport shapeImport = null;	
 	private static int index; 
@@ -189,7 +185,7 @@ public class ImportModelShapeWizard implements ActionListener {
 	        	fChooser.getFileButton()[3].setEnabled(false);
         	} 
 		}
-		//Main.mainFrame.model 
+
 		if (command.startsWith("Finish")) {
 			System.out.println("Finish" + command);
 			try {
@@ -246,8 +242,6 @@ public class ImportModelShapeWizard implements ActionListener {
 	}
 	
 	public static void importModel() throws Exception   {
-		File directory = new File(Main.mainFrame.initialDirectory);
-			
 		if (fChooser.getCommand().startsWith("Shape")) {
 			File file = new File(Main.mainFrame.initialDirectory);
 	        file = JFileDataStoreChooser.showOpenFile("shp", null);
@@ -259,34 +253,21 @@ public class ImportModelShapeWizard implements ActionListener {
         	if (name == "ShapeLinks" )   {
         		index = 0;
 		        dataStoreLinks = FileDataStoreFinder.getDataStore(file);
-		        SimpleFeatureSource featureSource = dataStoreLinks.getFeatureSource();        		
+		        dataStoreLinks.getFeatureSource();        		
             	linkAttributeNames = getAttributeNames(dataStoreLinks);
         	}
         	else if (name == "ShapeNodes" )   {
         		index = 1;
 		        dataStoreNodes = FileDataStoreFinder.getDataStore(file);
-		        SimpleFeatureSource featureSource = dataStoreLinks.getFeatureSource();        		
-            	nodeAttributeNames = getAttributeNames(dataStoreLinks);
+		        dataStoreLinks.getFeatureSource();        		
+            	getAttributeNames(dataStoreLinks);
         	}
         	else if (name == "ShapeZones" )   {
         		index = 2;
 		        dataStoreZones = FileDataStoreFinder.getDataStore(file);
-		        SimpleFeatureSource featureSource = dataStoreLinks.getFeatureSource();        		
-            	nodeAttributeNames = getAttributeNames(dataStoreLinks);
+		        dataStoreLinks.getFeatureSource();        		
+            	getAttributeNames(dataStoreLinks);
         	}
-	    	/*DataStoreFactorySpi format = new ShapefileDataStoreFactory();
-	        Map<String, Serializable> params = new HashMap<String, Serializable>();
-	        params.put("directory", directory); 
-	        JDataStoreWizard wizard = new JDataStoreWizard(format);	
-	        int result = wizard.showModalDialog();	        
-			try {
-				connect(wizard, result, fChooser.getCommand());
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}	        
-	        File file = wizard.getFile();
-	    	 */
 	        fChooser.getTextField()[index].setText(file.getAbsolutePath());
 		}
 		else if (fChooser.getCommand().startsWith("Matrix")) {
@@ -295,11 +276,10 @@ public class ImportModelShapeWizard implements ActionListener {
 		}
 		//set enabled true, but if not all files are selected puts it back to false
         Main.mainFrame.getImportModelShapeWizard().getNextButton().setEnabled(true);
-        for (int i = 0; i < fileCount-1; i++ ) {
-        	if (fChooser.getTextField()[i].getText().toString().isEmpty() )   {
+        for (int i = 0; i < fileCount-1; i++)
+        	if (fChooser.getTextField()[i].getText().toString().isEmpty())
         		Main.mainFrame.getImportModelShapeWizard().getNextButton().setEnabled(false);
-        	}
-        }
+
         // TODO explain what this does
         if (Main.mainFrame.getImportModelShapeWizard().getNextButton().isEnabled())   {	
         	Object[] types = {"Jane", "Kathy", Boolean.TRUE};
@@ -320,46 +300,13 @@ public class ImportModelShapeWizard implements ActionListener {
     private static FileDataStore dataStoreNodes;
     private static FileDataStore dataStoreZones;
     private static String[] linkAttributeNames;
-    private static String[] nodeAttributeNames;
-	private static Map<String, Object> connectionParameters;
-	
-/*	    public static void connect(JDataStoreWizard wizard, int result, String name ) throws Exception {
-	        if (result == JWizard.FINISH) {
-	        	if (name == "ShapeLinks" )   {
-	        		index = 0;
-	        		connectionParameters = wizard.getConnectionParameters();
-	            	dataStoreLinks = DataStoreFinder.getDataStore(connectionParameters);
-	            	linkAttributeNames = getAttributeNames(dataStoreLinks);
-	        	}
-	        	else if (name == "ShapeNodes" )   {
-	        		index = 1;
-	        		connectionParameters.putAll(wizard.getConnectionParameters());
-	        		dataStoreNodes = DataStoreFinder.getDataStore(connectionParameters);
-	        		nodeAttributeNames = getAttributeNames(dataStoreNodes);
-	        	}
-	        	else if (name == "ShapeZones" )   {
-	        		index = 2;
-	        		connectionParameters.putAll(wizard.getConnectionParameters());
-	        		dataStoreZones = DataStoreFinder.getDataStore(connectionParameters);
-	        		nodeAttributeNames = getAttributeNames(dataStoreZones);
-	        	}
-	        }
-	    }*/
-    
-    public static String[] getLinkAttributeNames() {
-		return linkAttributeNames;
-	}
-
-	public static String[] getNodeAttributeNames() {
-		return nodeAttributeNames;
-	}
 	
     private static String[] names = null;
     
     private static String[] getAttributeNames(DataStore dataStore) throws Exception {
         String[] typeName = dataStore.getTypeNames();
         SimpleFeatureSource source = dataStore.getFeatureSource(typeName[0]);
-        SimpleFeatureCollection features = source.getFeatures();
+        source.getFeatures();
         FeatureType ft = source.getSchema();
         Collection<PropertyDescriptor> attributeDescriptors = ft.getDescriptors();
         Iterator<PropertyDescriptor> iteratorAttributes = attributeDescriptors.iterator();
@@ -374,86 +321,48 @@ public class ImportModelShapeWizard implements ActionListener {
         return names;
     }
 
-	public static String[] getNames() {
-		return names;
-	}
-
-
-	public static DataStore getDataStoreLinks() {
+	private static DataStore getDataStoreLinks() {
 		return dataStoreLinks;
 	}
 
-	public static DataStore getDataStoreNodes() {
+	private static DataStore getDataStoreNodes() {
 		return dataStoreNodes;
 	}
 
-	public static DataStore getDataStoreZones() {
+	private static DataStore getDataStoreZones() {
 		return dataStoreZones;
 	}
 
-    
-	public String getFileImportedLinks() {
-		return fileImportedLinks;
-	}
-
-	public void setFileImportedLinks(String fileImportedLinks) {
-		this.fileImportedLinks = fileImportedLinks;
-	}
-
-	public String getFileImportedNodes() {
-		return fileImportedNodes;
-	}
-
-	public void setFileImportedNodes(String fileImportedNodes) {
-		this.fileImportedNodes = fileImportedNodes;
-	}
-
-	public String getFileImportedCentroids() {
-		return fileImportedCentroids;
-	}
-
-	public void setFileImportedCentroids(String fileImportedCentroids) {
-		this.fileImportedCentroids = fileImportedCentroids;
-	}
-
-	public static String getFileImportedMatrix() {
+	private static String getFileImportedMatrix() {
 		return fileImportedMatrix;
 	}
 
-	public TableModelImport getTableShapeImport() {
+	private static TableModelImport getTableShapeImport() {
 		return shapeImport;
 	}
 		
-	public Model getFeatures( DataStore linkStore, DataStore nodeStore, DataStore zoneStore, TableImport tableField, TableImport tableDirection) throws IOException  {
-		        
+	private Model getFeatures( DataStore linkStore, DataStore nodeStore, DataStore zoneStore, TableImport tableField, TableImport tableDirection) throws IOException {        
 		// Reading Centroids (as nodes)
 		DataStore dataStoreZone = zoneStore;
         String[] typeNameZone = dataStoreZone.getTypeNames();
         SimpleFeatureSource sourceZone = dataStoreZone.getFeatureSource(typeNameZone[0]);
         SimpleFeatureCollection featuresZone = sourceZone.getFeatures();
         //FeatureCollectionTableModel model = new FeatureCollectionTableModel(featuresNode);
-        FeatureIterator iteratorZone = featuresZone.features();	
+        FeatureIterator<?> iteratorZone = featuresZone.features();	
         String propertyZone = "CENTROIDNR";	
         int zoneID = 0;
-        try   {
-	        while( iteratorZone.hasNext())   {
-	        	Vertex v = new Vertex();
-	        	Feature feature = iteratorZone.next();
-	        	Geometry test = (Geometry) feature.getDefaultGeometryProperty().getValue();
-	        	Coordinate[] coords = test.getCoordinates();
-	        	for (int i = 0; i < coords.length; i++) {
-	        		v = new Vertex(coords[i]);
-	        	}
-	        	Property property = feature.getProperty(propertyZone);
-	        	String nodeNr = property.getValue().toString();
-	        	zoneID = Integer.parseInt(property.getValue().toString());
-	        	importedModel.network.addMicroZone(nodeNr, null, zoneID, v.getX(), v.getY(), v.getZ());
-	        	//importedModel.network.addNode(nodeNr, zoneID, v.x, v.y, v.z);
-	        	zoneID++;
-	        }
-        }
-        finally   {
-        	// There is no longer a close method... featuresZone.close(iteratorZone);
+        while( iteratorZone.hasNext()) {
+        	Vertex v = new Vertex();
+        	Feature feature = iteratorZone.next();
+        	Geometry test = (Geometry) feature.getDefaultGeometryProperty().getValue();
+        	Coordinate[] coords = test.getCoordinates();
+        	for (int i = 0; i < coords.length; i++)
+        		v = new Vertex(coords[i]);
+         	Property property = feature.getProperty(propertyZone);
+        	String nodeNr = property.getValue().toString();
+        	zoneID = Integer.parseInt(property.getValue().toString());
+        	importedModel.network.addMicroZone(nodeNr, null, zoneID, v.getX(), v.getY(), v.getZ());
+        	zoneID++;
         }
         
 		// Reading Nodes
@@ -462,28 +371,21 @@ public class ImportModelShapeWizard implements ActionListener {
         SimpleFeatureSource sourceNode = dataStoreNode.getFeatureSource(typeNameNode[0]);
         SimpleFeatureCollection featuresNode = sourceNode.getFeatures();
         //FeatureCollectionTableModel model = new FeatureCollectionTableModel(featuresNode);
-        FeatureIterator iteratorNode = featuresNode.features();	
+        FeatureIterator<?> iteratorNode = featuresNode.features();	
         String propertyNode = "NODENR";	
         int nodeID = zoneID + 1;
-        try   {
-	        while( iteratorNode.hasNext())   {
-	        	Vertex v = new Vertex();
-	        	Feature feature = iteratorNode.next();
-	        	Geometry test = (Geometry) feature.getDefaultGeometryProperty().getValue();
-	        	Coordinate[] coords = test.getCoordinates();
-	        	for (int i = 0; i < coords.length; i++) {
-	        		v = new Vertex(coords[i]);
-	        	}
-	        	Property property = feature.getProperty(propertyNode);
-	        	String nodeNr = property.getValue().toString();
-	        	nodeID = Integer.parseInt(property.getValue().toString());
-	        	importedModel.network.addNode(nodeNr, nodeID, v.getX(), v.getY(), v.getZ());
-	        	nodeID++;
-	        	// network.addNode(name, id, x, y, z);	
-	        }
-        }
-        finally   {
-        	// there is no longer a close method... featuresNode.close(iteratorNode);
+        while( iteratorNode.hasNext()) {
+        	Vertex v = new Vertex();
+        	Feature feature = iteratorNode.next();
+        	Geometry test = (Geometry) feature.getDefaultGeometryProperty().getValue();
+        	Coordinate[] coords = test.getCoordinates();
+        	for (int i = 0; i < coords.length; i++)
+        		v = new Vertex(coords[i]);
+        	Property property = feature.getProperty(propertyNode);
+        	String nodeNr = property.getValue().toString();
+        	nodeID = Integer.parseInt(property.getValue().toString());
+        	importedModel.network.addNode(nodeNr, nodeID, v.getX(), v.getY(), v.getZ());
+        	nodeID++;
         }
 		
         //Reading Links
@@ -491,7 +393,7 @@ public class ImportModelShapeWizard implements ActionListener {
         String[] typeNameLink = dataStoreLink.getTypeNames();
         SimpleFeatureSource sourceLink = dataStoreLink.getFeatureSource(typeNameLink[0]);
         SimpleFeatureCollection featuresLink = sourceLink.getFeatures();
-        FeatureIterator iteratorLink = featuresLink.features();	 
+        FeatureIterator<?> iteratorLink = featuresLink.features();	 
         // select the attributes
         String propertyLength = null;
         String propertyDirection = null;
@@ -507,230 +409,190 @@ public class ImportModelShapeWizard implements ActionListener {
         String propertyExitLanesBA = null;
         String propertyMaxSpeed = null;
         String propertyMaxSpeedBA = null;
-        Boolean booleanLanes = null;
         int valueDirectionAB = -1;
         int valueDirectionBA = -1;
         int valueDirectionABBA = -1;
         for (int i = 0; i < tableDirection.getTable().getRowCount(); i++) {
-			Object attr1 = tableDirection.getTable().getValueAt(i, 0);
+			tableDirection.getTable().getValueAt(i, 0);
 			Object attr2 = tableDirection.getTable().getValueAt(i, 1);	 
-			if (i == 0)  {
+			if (i == 0)
 				 propertyDirection = attr2.toString();
-			}
-			if (i == 1)  {
+			if (i == 1)
 				 valueDirectionAB = Integer.parseInt( attr2.toString() );
-			}
-			if (i == 2)  {
+			if (i == 2)
 				 valueDirectionBA = Integer.parseInt(attr2.toString() );
-			}
-			if (i == 3)  {
+			if (i == 3)
 				 valueDirectionABBA = Integer.parseInt(attr2.toString() );
-			}				
         }
 		for (int i = 0; i < tableField.getTable().getRowCount(); i++) {
-			Object attr1 = tableField.getTable().getValueAt(i, 0);
+			tableField.getTable().getValueAt(i, 0);
 			Object attr2 = tableField.getTable().getValueAt(i, 1);
-			Object attr3 = tableField.getTable().getValueAt(i, 2);
+			tableField.getTable().getValueAt(i, 2);
 			if (!attr2.toString().equals(TableImport.EMPTYCOLUMN)) {
-				if (i == 1)  {
+				if (i == 1)
 					 propertyFromNode = attr2.toString();
-				}
-				else if (i == 2)  {
+				else if (i == 2)
 					 propertyToNode = attr2.toString();
-				}
-				else if (i == 3)  {
+				else if (i == 3) {
 					 propertyCapacity = attr2.toString();
 					 propertyCapacityBA = propertyCapacity.replaceAll("AB", "BA");
-				}
-				else if (i == 4)  {
+				} else if (i == 4) {
 					 propertyLanes = attr2.toString();
 					 propertyLanesBA = propertyLanes.replaceAll("AB", "BA");
-					 //booleanLanes = (Boolean) attr3;
-				}
-				else if (i == 5)  {
+				} else if (i == 5) {
 					propertyTurnLanes = attr2.toString();
 					propertyTurnLanesBA = propertyTurnLanes.replaceAll("AB", "BA");
-				}
-				else if (i == 6)  {
+				} else if (i == 6) {
 					propertyExitLanes = attr2.toString();
 					propertyExitLanesBA = propertyExitLanes.replaceAll("AB", "BA");
-				}
-				else if (i == 7)  {
+				} else if (i == 7) {
 					 propertyMaxSpeed = attr2.toString();
 					 propertyMaxSpeedBA = propertyMaxSpeed.replaceAll("AB", "BA");
-				}
-				else if (i == 8)  {
+				} else if (i == 8)
 					 propertyLength = attr2.toString();
-				}
 			}
 
 		}
 
-        try   {
-        	int linkID = 0;
-	        while( iteratorLink.hasNext())   {
-	        	Feature feature = iteratorLink.next();
-	        	Geometry test = (Geometry) feature.getDefaultGeometryProperty().getValue();
-	        	Coordinate[] coords = test.getCoordinates();
-				ArrayList<Vertex> pointList = new ArrayList<Vertex>();
-				ArrayList<Vertex> pointListBA = new ArrayList<Vertex>();					
-				int fromNodeID = -1;
-				int toNodeID = -1;
-				double length = -1;
-				double capacity = -1;
-				String turnLanes = "";
-				int exitLanes = -1;
-				double maxSpeed = -1;
-				int lanes = -1;
-				double capacityBA = -1;
-				String turnLanesBA = "";
-				int exitLanesBA = -1;
-				double maxSpeedBA = -1;
-				int direction = -1; 
-				int lanesBA = -1;
-				String typologyName = "road";
-				String linkType = "ANODE";
-				Property property = null;
-	        	property = feature.getProperty(linkType);
-        		boolean voedingsLinkAB = false;
-	        	boolean voedingsLinkBA = false;
-        		int node;
-	        	node = Integer.parseInt(property.getValue().toString());
-	        	if (node<20) {
-	        		voedingsLinkAB = true;
-	        		voedingsLinkBA = true;
-	        	}
-/*				linkType = "LINKTYPEBA";
-	        	property = feature.getProperty(linkType);
-	        	if (property.getValue().toString().equals("Voedingslink"))  {
-	        		voedingsLinkBA = true;
-	        	}*/
-	        	if (!propertyDirection.equals(""))   {
-		        	property = feature.getProperty(propertyDirection);
-		        	direction = Integer.parseInt(property.getValue().toString());
+    	int linkID = 0;
+        while( iteratorLink.hasNext())   {
+        	Feature feature = iteratorLink.next();
+        	Geometry test = (Geometry) feature.getDefaultGeometryProperty().getValue();
+        	Coordinate[] coords = test.getCoordinates();
+			ArrayList<Vertex> pointList = new ArrayList<Vertex>();
+			ArrayList<Vertex> pointListBA = new ArrayList<Vertex>();					
+			int fromNodeID = -1;
+			int toNodeID = -1;
+			double length = -1;
+			double capacity = -1;
+			String turnLanes = "";
+			int exitLanes = -1;
+			double maxSpeed = -1;
+			int lanes = -1;
+			double capacityBA = -1;
+			String turnLanesBA = "";
+			int exitLanesBA = -1;
+			double maxSpeedBA = -1;
+			int direction = -1; 
+			int lanesBA = -1;
+			String typologyName = "road";
+			String linkType = "ANODE";
+			Property property = null;
+        	property = feature.getProperty(linkType);
+    		boolean voedingsLinkAB = false;
+        	boolean voedingsLinkBA = false;
+    		int node;
+        	node = Integer.parseInt(property.getValue().toString());
+        	if (node<20) {
+        		voedingsLinkAB = true;
+        		voedingsLinkBA = true;
+        	}
+        	if (!propertyDirection.equals(""))   {
+	        	property = feature.getProperty(propertyDirection);
+	        	direction = Integer.parseInt(property.getValue().toString());
+        	}
+        	
+        	if (!propertyFromNode.equals(""))   {
+	        	property = feature.getProperty(propertyFromNode);
+	        	fromNodeID = Integer.parseInt(property.getValue().toString());
+        	}
+        	if (!propertyToNode.equals(""))   {
+	        	property = feature.getProperty(propertyToNode);
+	        	toNodeID = Integer.parseInt(property.getValue().toString());
+        	}
+        	if (direction == valueDirectionAB  || direction == valueDirectionABBA)  {
+	        	for (int i = 1; i < coords.length - 1; i++) {
+	        		Vertex v = new Vertex(coords[i]);
+	        		pointList.add(v);
 	        	}
 	        	
-	        	if (!propertyFromNode.equals(""))   {
-		        	property = feature.getProperty(propertyFromNode);
-		        	fromNodeID = Integer.parseInt(property.getValue().toString());
+	        	if (! (propertyCapacity.equals("") || feature.getProperty(propertyCapacity)==null))   {
+		        	property = feature.getProperty(propertyCapacity);
+		        	capacity = Double.parseDouble(property.getValue().toString());
 	        	}
-	        	if (!propertyToNode.equals(""))   {
-		        	property = feature.getProperty(propertyToNode);
-		        	toNodeID = Integer.parseInt(property.getValue().toString());
+	        	if (! (propertyTurnLanes.equals("") || feature.getProperty(propertyTurnLanes)==null))   {
+		        	property = feature.getProperty(propertyTurnLanes);
+		        	turnLanes = property.getValue().toString();
 	        	}
-	        	if (direction == valueDirectionAB  || direction == valueDirectionABBA)  {
-		        	for (int i = 1; i < coords.length - 1; i++) {
-		        		Vertex v = new Vertex(coords[i]);
-		        		pointList.add(v);
-		        	}
-		        	
-		        	if (! (propertyCapacity.equals("") || feature.getProperty(propertyCapacity)==null))   {
-			        	property = feature.getProperty(propertyCapacity);
-			        	capacity = Double.parseDouble(property.getValue().toString());
-		        	}
-		        	if (! (propertyTurnLanes.equals("") || feature.getProperty(propertyTurnLanes)==null))   {
-			        	property = feature.getProperty(propertyTurnLanes);
-			        	turnLanes = property.getValue().toString();
-		        	}
-		        	if (! (propertyExitLanes.equals("") || feature.getProperty(propertyExitLanes)==null))   {
-			        	property = feature.getProperty(propertyExitLanes);
-			        	// exitLanes are defined for the opposite direction!!!
-			        	exitLanesBA = Integer.parseInt(property.getValue().toString());
-		        	}
-		        	if (! (propertyMaxSpeed.equals("") || feature.getProperty(propertyMaxSpeed)==null))   {
-			        	property = feature.getProperty(propertyMaxSpeed);
-			        	maxSpeed = Double.parseDouble(property.getValue().toString());
-		        	}			        	
-		        	if (! (propertyLength.equals("") || feature.getProperty(propertyLength)==null))   {
-			        	property = feature.getProperty(propertyLength);
-			        	length = Double.parseDouble(property.getValue().toString()) * 1000 ;
-		        	}			        	
-		        	if (! (propertyLanes.equals("") || feature.getProperty(propertyLanes)==null))   {
-		        		property = feature.getProperty(propertyLanes);
-			        	lanes = Integer.parseInt(property.getValue().toString());
-		        	}
-/*		        	else {
-		        		if (capacity > 0) {
-		        			lanes = 0;
-		        		}
-		        	}*/
+	        	if (! (propertyExitLanes.equals("") || feature.getProperty(propertyExitLanes)==null))   {
+		        	property = feature.getProperty(propertyExitLanes);
+		        	// exitLanes are defined for the opposite direction!!!
+		        	exitLanesBA = Integer.parseInt(property.getValue().toString());
 	        	}
+	        	if (! (propertyMaxSpeed.equals("") || feature.getProperty(propertyMaxSpeed)==null))   {
+		        	property = feature.getProperty(propertyMaxSpeed);
+		        	maxSpeed = Double.parseDouble(property.getValue().toString());
+	        	}			        	
+	        	if (! (propertyLength.equals("") || feature.getProperty(propertyLength)==null))   {
+		        	property = feature.getProperty(propertyLength);
+		        	length = Double.parseDouble(property.getValue().toString()) * 1000 ;
+	        	}			        	
+	        	if (! (propertyLanes.equals("") || feature.getProperty(propertyLanes)==null))   {
+	        		property = feature.getProperty(propertyLanes);
+		        	lanes = Integer.parseInt(property.getValue().toString());
+	        	}
+        	}
 
-	        	if (direction == valueDirectionBA  || direction == valueDirectionABBA)  {
-		        	for (int i = coords.length - 2; i > 0; i--) {
-		        		Vertex v = new Vertex(coords[i]);
-		        		pointListBA.add(v);
-		        	}
-		        	if (! (propertyCapacityBA.equals("") || feature.getProperty(propertyCapacityBA)==null))   {
-			        	property = feature.getProperty(propertyCapacityBA);
-			        	capacityBA = Double.parseDouble(property.getValue().toString());
-		        	}
-		        	if (! (propertyTurnLanesBA.equals("") || feature.getProperty(propertyTurnLanesBA)==null))   {
-			        	property = feature.getProperty(propertyTurnLanesBA);
-			        	turnLanesBA = property.getValue().toString();
-		        	}
-		        	if (! (propertyExitLanesBA.equals("") || feature.getProperty(propertyExitLanesBA)==null))   {
-			        	property = feature.getProperty(propertyExitLanesBA);
-			        	// exitLanes are defined for the opposite direction!!!
-			        	exitLanes = Integer.parseInt(property.getValue().toString());
-		        	}
-		        	if (! (propertyMaxSpeedBA.equals("") || feature.getProperty(propertyMaxSpeedBA)==null))   {
-			        	property = feature.getProperty(propertyMaxSpeedBA);
-			        	maxSpeedBA = Double.parseDouble(property.getValue().toString());
-		        	}
-		        	if (! (propertyLanesBA.equals("") || feature.getProperty(propertyLanesBA)==null))   {
-		        		property = feature.getProperty(propertyLanesBA);
-			        	lanesBA = Integer.parseInt(property.getValue().toString());
-		        	}
-/*		        	else {
-		        		lanes = 0;
-		        	}*/
-	        	}  
-	        	if (lanes <= 0)
-	        		lanes = deriveLanes(capacity, maxSpeed);
-	        	if (lanesBA <= 0)
-	        		lanesBA =  deriveLanes(capacityBA, maxSpeedBA);
-	        	if (lanes == 0)   {
-	        		System.out.print("geen lanes??????");
-	        	}		
-	        	
-	        	double defaultLaneWidth = 3.5;
-	        	if (voedingsLinkAB == false)  {
-		        	if (direction == valueDirectionAB  || direction == valueDirectionABBA)  {
-		        		addImportedLink(linkID, typologyName, fromNodeID, toNodeID, defaultLaneWidth, lanes, exitLanes, pointList, turnLanes, maxSpeed, length, zoneID);
-			        	linkID++;
-		        	}
+        	if (direction == valueDirectionBA  || direction == valueDirectionABBA)  {
+	        	for (int i = coords.length - 2; i > 0; i--) {
+	        		Vertex v = new Vertex(coords[i]);
+	        		pointListBA.add(v);
 	        	}
-	        	else {
-//	        		importedModel.network.addMicroZone(nodeNr, null, zoneID, v.x, v.y, v.z);
-        			List<Integer> nodeList = new ArrayList<Integer>();
-	        		if (fromNodeID < 20)  {
-	        			nodeList.add(toNodeID);
-	        			importedModel.network.lookupMicroZone(fromNodeID).setNodeList(nodeList);
-	        		}
-	        			else  {
-		        			nodeList.add(fromNodeID);
-	        				importedModel.network.lookupMicroZone(toNodeID);
-	        			}
+	        	if (! (propertyCapacityBA.equals("") || feature.getProperty(propertyCapacityBA) == null)) {
+		        	property = feature.getProperty(propertyCapacityBA);
+		        	capacityBA = Double.parseDouble(property.getValue().toString());
 	        	}
-	        		
-	        	if (voedingsLinkBA == false)  {
-		        	if (direction == valueDirectionBA  || direction == valueDirectionABBA)   {
-		        		addImportedLink(linkID, typologyName, toNodeID, fromNodeID, defaultLaneWidth, lanesBA, exitLanesBA, pointListBA, turnLanesBA, maxSpeed, length, zoneID);
-			        	linkID++;
-		        	}
+	        	if (! (propertyTurnLanesBA.equals("") || feature.getProperty(propertyTurnLanesBA) == null)) {
+		        	property = feature.getProperty(propertyTurnLanesBA);
+		        	turnLanesBA = property.getValue().toString();
 	        	}
-	        	else {
-	        		
+	        	if (! (propertyExitLanesBA.equals("") || feature.getProperty(propertyExitLanesBA) == null)) {
+		        	property = feature.getProperty(propertyExitLanesBA);
+		        	// exitLanes are defined for the opposite direction!!!
+		        	exitLanes = Integer.parseInt(property.getValue().toString());
 	        	}
-	        }
-        }
-        finally   {
-        	int i2 = 0;
-        	// there is no longer a close method... featuresLink.close(iteratorLink);
+	        	if (! (propertyMaxSpeedBA.equals("") || feature.getProperty(propertyMaxSpeedBA) == null)) {
+		        	property = feature.getProperty(propertyMaxSpeedBA);
+		        	maxSpeedBA = Double.parseDouble(property.getValue().toString());
+	        	}
+	        	if (! (propertyLanesBA.equals("") || feature.getProperty(propertyLanesBA)==null)) {
+	        		property = feature.getProperty(propertyLanesBA);
+		        	lanesBA = Integer.parseInt(property.getValue().toString());
+	        	}
+        	}  
+        	if (lanes <= 0)
+        		lanes = deriveLanes(capacity, maxSpeed);
+        	if (lanesBA <= 0)
+        		lanesBA =  deriveLanes(capacityBA, maxSpeedBA);
+        	if (lanes == 0)
+        		System.out.print("geen lanes??????");
+        	
+        	double defaultLaneWidth = 3.5;
+        	if (voedingsLinkAB == false) {
+	        	if (direction == valueDirectionAB  || direction == valueDirectionABBA) {
+	        		addImportedLink(linkID, typologyName, fromNodeID, toNodeID, defaultLaneWidth, lanes, exitLanes, pointList, turnLanes, length);
+		        	linkID++;
+	        	}
+        	}
+        	else {
+    			List<Integer> nodeList = new ArrayList<Integer>();
+        		if (fromNodeID < 20) {
+        			nodeList.add(toNodeID);
+        			importedModel.network.lookupMicroZone(fromNodeID).setNodeList(nodeList);
+        		} else {
+	        		nodeList.add(fromNodeID);
+        			importedModel.network.lookupMicroZone(toNodeID);
+        		}
+        	}
+        		
+        	if (! voedingsLinkBA) {
+	        	if (direction == valueDirectionBA  || direction == valueDirectionABBA) {
+	        		addImportedLink(linkID, typologyName, toNodeID, fromNodeID, defaultLaneWidth, lanesBA, exitLanesBA, pointListBA, turnLanesBA, length);
+		        	linkID++;
+	        	}
+        	}
         }
         
-
 		// Construct the model
     	//settings.rebuild();
         importedModel.network.rebuild();
@@ -772,7 +634,7 @@ public class ImportModelShapeWizard implements ActionListener {
 
     }
 	private void addImportedLink(int linkID, String typologyName, int fromNodeID, int toNodeID,  double laneWidth, int lanes, 
-			int exitLanes, ArrayList<Vertex> pointList, String turnLanes, double maxSpeed, double length, int zoneID)   {
+			int exitLanes, ArrayList<Vertex> pointList, String turnLanes, double length)   {
 		if (null == typologyName)
 			typologyName = "road";
 			//throw new Error ("CrossSectionElement has null typologyName");
@@ -990,51 +852,16 @@ public class ImportModelShapeWizard implements ActionListener {
 		return importedModel;
 	}
 
-	public void setImportedModel(Model importedModel) {
-		this.importedModel = importedModel;
-	}
-
-	private static Object[][] data = {
-		{"point(s)", "the_geom", false},
-		{"fromNode", "ANODE", false},
-		{"toNode", "BNODE", false},
-		{"capacity", "CAPACITYAB", false},
-		{"lanes", "", true},
-		{"turnLanes", "LANESMASAB", false},
-		{"exitLanes", "EXITLANEAB", false},
-		{"maxSpeed", "SPEEDAB", false}       		
-		};
-
-    public static JPanel getCards() {
-		return cards;
-	}
-
-	public static void setCards(JPanel cards) {
-		ImportModelShapeWizard.cards = cards;
-	}
-
 	public JButton getFinishButton() {
 		return finishButton;
-	}
-
-	public void setFinishButton(JButton finishButton) {
-		this.finishButton = finishButton;
 	}
 
 	public JButton getNextButton() {
 		return nextButton;
 	}
 
-	public void setNextButton(JButton nextButton) {
-		this.nextButton = nextButton;
-	}
-
 	public JButton getPrevButton() {
 		return prevButton;
-	}
-
-	public void setPrevButton(JButton prevButton) {
-		this.prevButton = prevButton;
 	}
 
 }
