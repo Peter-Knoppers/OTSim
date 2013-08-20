@@ -116,91 +116,81 @@ public class ExportModel implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		String command = e.getActionCommand();
 		System.out.println("actionperformed: command is " + command);
-		if (command.startsWith("Export Model") )   {
-			//this.getNextButton().setEnabled(true);
+		if (command.startsWith("Export Model")) {
 	        Main.mainFrame.getExportModel().getNextButton().setEnabled(true);
-	        if (optionModel.isSelected())  {
+	        if (optionModel.isSelected())
 	        	fChooser.getFileButton()[0].setEnabled(true);
-	        }
-        	else  {
+        	else
 	        	fChooser.getFileButton()[0].setEnabled(false);        		
-        	}        		
 	    }
-
 		if (command.startsWith("Export Traffic Demand") )   {
 	        Main.mainFrame.getLoadModel().getNextButton().setEnabled(true);
-	        if (optionModel.isSelected())  {
+	        if (optionModel.isSelected())
 	        	fChooser.getFileButton()[1].setEnabled(true);	        		
-	        }
-        	else  {
+        	else
 	        	fChooser.getFileButton()[1].setEnabled(false);
-        	} 
 		}
 		if (command.startsWith("Finish")) {
 			System.out.println("Finish" + command);
-				if (fChooser.getFileButton()[0].isEnabled() == true) {
-					String fileName = fChooser.getTextField()[0].getText();
-					try {
-						DataWriter.WriteData(fileName, Main.mainFrame.model);
-						Main.mainFrame.model.network.clearModified();
-						Main.mainFrame.model.network.setStorageName(fileName);
-					} catch (Exception e1) {
-						e1.printStackTrace();
-					}
+			if (fChooser.getFileButton()[0].isEnabled() == true) {
+				String fileName = fChooser.getTextField()[0].getText();
+				try {
+					DataWriter.WriteData(fileName, Main.mainFrame.model);
+					Main.mainFrame.model.network.clearModified();
+					Main.mainFrame.model.network.setStorageName(fileName);
+				} catch (Exception e1) {
+					e1.printStackTrace();
 				}
-				if (fChooser.getFileButton()[1].isEnabled() == true) {
-					String fileName = fChooser.getTextField()[1].getText();
-					try {
-						StaXWriter staXWriter = new StaXWriter(fileName, true);
-						if (! staXWriter.writeNodeStart(TrafficDemand.XMLTAG))
-							throw new Error("Could not write " + TrafficDemand.XMLTAG + " start node");
-						if (! Main.mainFrame.model.trafficDemand.writeXML(staXWriter))
-							throw new Error("Could not write trafficDemand");
-						if (! staXWriter.writeNodeEnd(TrafficDemand.XMLTAG))
-							throw new Error("Could not write " + TrafficDemand.XMLTAG + " end node");
-						if (! staXWriter.close())
-							throw new Error("Could not close XML file");
-						Main.mainFrame.model.network.clearModified();
-						Main.mainFrame.model.network.setStorageName(fileName);
-					} catch (Exception e1) {
-						e1.printStackTrace();
-					}
+			}
+			if (fChooser.getFileButton()[1].isEnabled() == true) {
+				String fileName = fChooser.getTextField()[1].getText();
+				try {
+					StaXWriter staXWriter = new StaXWriter(fileName, true);
+					if (! staXWriter.writeNodeStart(TrafficDemand.XMLTAG))
+						throw new Error("Could not write " + TrafficDemand.XMLTAG + " start node");
+					if (! Main.mainFrame.model.trafficDemand.writeXML(staXWriter))
+						throw new Error("Could not write trafficDemand");
+					if (! staXWriter.writeNodeEnd(TrafficDemand.XMLTAG))
+						throw new Error("Could not write " + TrafficDemand.XMLTAG + " end node");
+					if (! staXWriter.close())
+						throw new Error("Could not close XML file");
+					Main.mainFrame.model.network.clearModified();
+					Main.mainFrame.model.network.setStorageName(fileName);
+				} catch (Exception e1) {
+					e1.printStackTrace();
 				}
-				//importedModel.trafficDemand.createTripPatternList(tripPatternList);
-
+			}
 	        Main.mainFrame.setTitle("Exported");
 	        Main.mainFrame.setActiveGraph();
 	        Main.mainFrame.menuItemExportModel.setEnabled(true); 
 	        this.frame.dispose();
-			}
+		}
 		if (command.startsWith("Cancel")) {
 			System.out.println("Cancel" + command);
 			this.frame.dispose();
-			//TODO add close statement
 		}
 		if (command.startsWith("\u22b2Prev")) {
             CardLayout cl = (CardLayout) cards.getLayout();
-            if (cardCounter == cards.getComponentCount()-1)  {
+            if (cardCounter == cards.getComponentCount() - 1)
             	this.finishButton.setEnabled(false);
-            }
-            if (cardCounter > 0)  {
+            if (cardCounter > 0) {
             	cl.previous(cards);
             	this.nextButton.setEnabled(true);
             	cardCounter--;
-            	System.out.print( "cardnumber" + cardCounter +"prev" );
+            	System.out.print("cardnumber" + cardCounter +"prev" );
             }
             if (cardCounter == 0)
             	this.prevButton.setEnabled(false);
 		}
 		if (command.startsWith("Next\u22b3")) {
             CardLayout cl = (CardLayout) cards.getLayout();
-            if (cardCounter != cards.getComponentCount()-1)  {
+            if (cardCounter != cards.getComponentCount() - 1) {
             	cl.next(cards);
             	this.prevButton.setEnabled(true);
             	cardCounter++;
-            	System.out.print( "cardnumber" + cardCounter +"next" );
+            	System.out.print("cardnumber" + cardCounter + "next");
             }
-            if (cardCounter == cards.getComponentCount()-1)  { 
+            if (cardCounter == cards.getComponentCount() - 1) { 
             	this.finishButton.setEnabled(true);
             	this.nextButton.setEnabled(false);
             }
@@ -213,23 +203,19 @@ public class ExportModel implements ActionListener {
         	String fileName =  FileDialog.showFileDialog(true, ".*", "all files", Main.mainFrame.initialDirectory);
         	if (null == fileName)
         		return;
-            fileExportModel = new File(fileName).getPath();
             fileExportModel = new File(fileName).getParent();
             
 			fChooser.getTextField()[index].setText(fileExportModel);
-            System.out.printf("User selected network file \"%s\"", fileExportModel);
-
-		}
-		else if (fChooser.getCommand().startsWith("Demand")) {
+            System.out.printf("User selected Model file \"%s\"", fileExportModel);
+		} else if (fChooser.getCommand().startsWith("Demand")) {
 			index = 1;
-        	String fileName =  FileDialog.showFileDialog(true, "xml", "xml files", Main.mainFrame.initialDirectory);
+        	String fileName = FileDialog.showFileDialog(true, "xml", "xml files", Main.mainFrame.initialDirectory);
         	if (null == fileName)
         		return;
             fileExportModel = new File(fileName).getPath();
 			fChooser.getTextField()[index].setText(fileExportModel);
-            System.out.printf("User selected network file \"%s\"", fileExportModel);
+            System.out.printf("User selected Demand file \"%s\"", fileExportModel);
 		}
-    
 	}
 
 	private JButton getNextButton() {
