@@ -142,10 +142,6 @@ public class ExportModel implements ActionListener {
 					String fileName = fChooser.getTextField()[0].getText();
 					try {
 						DataWriter.WriteData(fileName, Main.mainFrame.model);
-/*							if (! Main.mainFrame.model.network.writeXML(staXWriter))
-								throw new Error("Could not write network");
-							if (! staXWriter.close())
-								throw new Error("Could not close XML file");*/
 						Main.mainFrame.model.network.clearModified();
 						Main.mainFrame.model.network.setStorageName(fileName);
 					} catch (Exception e1) {
