@@ -1143,8 +1143,13 @@ public class CrossSectionElement implements XML_IO {
 				polygon.lineTo(v.getX(), v.getY());
 			firstPoint = false;
 		}
+		if (outer.size() < 2) {
+			System.err.println("let op");
+			getVerticesInner();
+		}
 		for (Vertex v : Reversed.reversed(outer))	// reverse the outer point list
 			 polygon.lineTo(v.getX(), v.getY());
+		if (! firstPoint)
 		polygon.closePath();
 		return polygon;
 	}
@@ -1229,6 +1234,8 @@ public class CrossSectionElement implements XML_IO {
 	public void setVertices(ArrayList<Vertex> inner, ArrayList<Vertex> outer) {
 		verticesInner = inner;
 		verticesOuter = outer;
+		if ((inner.size() < 2) || (outer.size() < 2))
+			System.err.println("oops");
 	}
 
 }

@@ -82,8 +82,6 @@ public class Link implements XML_IO {
     		throw new Error("network is null");
     	if (null != network.lookupLink(linkName))
     		throw new Error("link name already exists in the Network");
-    	if ("_6665_6667_1".equals(linkName))
-    		System.out.println("creating link " + linkName);
 		this.network = network;
     	this.name = linkName;
         this.fromNode = fromNode;
@@ -232,7 +230,7 @@ public class Link implements XML_IO {
 	
 	/**
 	 * Retrieve the maximum allowed speed on the link in m/s
-	 * @return double precision floating point value (speed limit in m/s)
+	 * @return double precision floating point value (speed limit in km/h)
 	 */
     public double getMaxSpeed_r() {
         return maxSpeed;
@@ -240,7 +238,7 @@ public class Link implements XML_IO {
     
     /**
      * Set or update the speed limit on the Link
-     * @param maxSpeed new speed limit (in m/s)
+     * @param maxSpeed new speed limit (in km/h)
      */
     public void setMaxSpeed_w(double maxSpeed) {
         this.maxSpeed = maxSpeed;

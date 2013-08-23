@@ -48,6 +48,7 @@ import nl.tudelft.otsim.GeoObjects.Network;
 import nl.tudelft.otsim.GeoObjects.Node;
 import nl.tudelft.otsim.ModelIO.ExportModel;
 import nl.tudelft.otsim.ModelIO.ImportModelShapeWizard;
+import nl.tudelft.otsim.ModelIO.ImportOSM;
 import nl.tudelft.otsim.ModelIO.LoadModel;
 import nl.tudelft.otsim.ModelIO.SaveModel;
 import nl.tudelft.otsim.Simulators.Simulator;
@@ -240,6 +241,7 @@ public class Main extends JFrame implements ActionListener {
         menuFile2.add(makeMenu("Open", "load", "Briefcase.png"));
         menuFile2.add(makeMenu("Save", "save", "Save.png"));
         menuFile2.add(makeMenuItem("Import model ...", "openDialogImportModel", "Back.png"));
+        menuFile2.add(makeMenuItem("Import OpenStreetMap Network ...", "openDialogImportOSM", "Back.png"));
         menuFile2.add(makeMenuItem("Exit", "Exit", "Exit.png"));
         
         menuBar.add(menuFile2);
@@ -744,6 +746,25 @@ public class Main extends JFrame implements ActionListener {
 		return true;
 	}
 	
+	private void openDialogImportOSM() {
+		if (! mayDiscardChanges(model.network))
+			return;	// cancel Open file operation
+		String fileName = FileDialog.showFileDialog(true, "osm", "Open StreetMap", initialDirectory);
+		if (null != fileName)
+			try {
+				model.network = ImportOSM.loadOSM(fileName);
+				setActiveGraph();
+				zoomToScene();
+				setActiveGraph();
+			} catch (Exception e) {
+				if (e instanceof java.io.FileNotFoundException)
+					WED.showProblem(WED.ENVIRONMENTERROR, "File \"%s\" does not exist", fileName);
+				else
+					WED.showProblem(WED.ENVIRONMENTERROR, "Could not load %s from file %s:\r\n%s", model.network.description(), fileName, WED.exeptionStackTraceToString(e));
+			}
+	}
+
+
 	/**
 	 * Check for any unsaved changes.
 	 * @return Boolean; true if there are no unsaved changes, or the user has
@@ -971,6 +992,8 @@ public class Main extends JFrame implements ActionListener {
         	openDialogSaveModel();
         else if ("openDialogExportModel".equals(command))
         	openDialogExportModel();//TODO GUUS export!!
+        else if ("openDialogImportOSM".equals(command))
+        	openDialogImportOSM();
         else if ("newModel".equals(command))
         	newModel();
         else if ("openDialogLoadModel".equals(command))

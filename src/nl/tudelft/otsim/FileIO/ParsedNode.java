@@ -4,8 +4,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import javax.xml.stream.Location;
@@ -13,6 +15,7 @@ import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.XMLEvent;
 
 /**
@@ -22,7 +25,9 @@ import javax.xml.stream.events.XMLEvent;
  */
 public class ParsedNode {
 	private Map<String, ArrayList<ParsedNode>> subNodes = null;
+	final String name;
 	String value = null;
+	HashMap<String, String> attributes = null;
 	/** Line number in the XML file that defined this ParsedNode */
 	public final int lineNumber;
 	/** ColumnNumber in the line in the XML file that defined this ParsedNode */
@@ -34,6 +39,7 @@ public class ParsedNode {
 	 * @throws Exception 
 	 */
 	public ParsedNode(String fileName) throws Exception {
+		name = fileName;
 		lineNumber = columnNumber = -1;
 		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 		InputStream in = null;
@@ -64,7 +70,16 @@ public class ParsedNode {
 			case XMLStreamConstants.START_ELEMENT:
 				String childName = event.asStartElement().getName().getLocalPart();
 				//System.out.println("Adding child \"" + childName + "\"");
-				addNode(childName, new ParsedNode(er, childName, event.getLocation()));
+				ParsedNode newNode = new ParsedNode(er, childName, event.getLocation());
+				for (@SuppressWarnings("unchecked")
+				Iterator<Attribute> it = event.asStartElement().getAttributes(); it.hasNext(); ) {
+					Attribute attr = it.next();
+					//System.out.println(String.format("attr \"%s\" -> \"%s\"", attr.getName(), attr.getValue()));
+					if (null == newNode.attributes)
+						newNode.attributes = new HashMap<String, String>();
+					newNode.attributes.put("" + attr.getName(), attr.getValue());
+				}
+				addNode(childName, newNode);
 				break;
 				
 			case XMLStreamConstants.END_ELEMENT:
@@ -94,6 +109,7 @@ public class ParsedNode {
 	}
 	
 	private ParsedNode(XMLEventReader er, String name, Location location) throws XMLStreamException {
+		this.name = name;
 		if (null == location)
 			lineNumber = columnNumber = -1;
 		else {
@@ -174,23 +190,65 @@ public class ParsedNode {
 	}
 	
 	/**
+	 * Retrieve the set of attribute names for this ParsedNode.
+	 * @return Set<String>; the (possibly empty) Set of Strings that identify the attributes of this ParsedNode
+	 */
+	public Set<String> getAttributeKeys() {
+		final Set<String> emptyset = Collections.emptySet();
+		if (null == attributes)
+			return emptyset;
+		return attributes.keySet();
+	}
+	
+	/**
+	 * Retrieve the value of an attribute of this ParsedNode.
+	 * <br /> If this ParsedNode has no attribute with the specified key, null is returned.
+	 * @param key String; the String that identifies the attribute
+	 * @return String the value of the attribute
+	 */
+	public String getAttributeValue(String key) {
+		if (null == attributes)
+			return null;
+		return attributes.get(key);
+	}
+	
+	/**
+	 * Convert this ParsedNode and every sub-node to a string representation
+	 * @param prefix String; prefix for this ParsedNode
+	 * @param limit Integer; maximum number of sub-nodes of the same type to 
+	 * report for this ParsedNode and each recursively visited ParsedNode
+	 * @return String; textual representation of this ParsedNode and all its sub-nodes
+	 */
+	public String toString(String prefix, int limit) {
+		String result = "";
+		//prefix += "/" + name;
+		for (String key : getAttributeKeys())
+			result += prefix + ":" + key + "=\"" + getAttributeValue(key) + "\"\n";
+		for (String key : getKeys()) {
+			ArrayList<ParsedNode> subList = subNodes.get(key);
+			int index = 0;
+			for(ParsedNode node : subList) {
+				if (index >= limit) {
+					int remainder = subList.size() - index;
+					result += prefix + String.format("/" + node.name + " ... (%d item%s suppressed)\n", remainder, remainder == 1 ? "" : "s");
+					break;
+				}
+				String indexString = String.format("[%d]", index++);
+    			result += node.toString(prefix + "/" + node.name + indexString, limit);
+    		}
+		}
+		if (null != value)
+			result += prefix + "/" + name +  ": \"" + value + "\"\n";
+		return result;
+	}
+	
+	/**
 	 * Convert this ParsedNode and every sub-node to a string representation
 	 * @param prefix String; prefix for this ParsedNode
 	 * @return String; textual representation of this ParsedNode and all its sub-nodes
 	 */
 	public String toString(String prefix) {
-		String result = "";
-		for (String key : getKeys()) {
-			ArrayList<ParsedNode> subList = subNodes.get(key);
-			int index = 0;
-			for(ParsedNode node: subList) {
-				String indexString = String.format("[%d]", index++);
-    			result += node.toString(prefix + "/" + key + indexString);
-    		}
-		}
-		if (null != value)
-			result += prefix + ": \"" + value + "\"\n";
-		return result;
+		return toString (prefix, Integer.MAX_VALUE);
 	}
 
 }

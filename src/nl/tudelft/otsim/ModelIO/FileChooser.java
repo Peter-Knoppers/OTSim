@@ -16,8 +16,7 @@ public class FileChooser extends JPanel implements ActionListener {
     private String command;
 
 	public FileChooser(int files, String[] labels, String[] fileNames, String[] action) {
-        for (int i = 0; i < files; i++ ) {
-        	//fileCount++;
+        for (int i = 0; i < files; i++) {
         	fileButton[i] = new JButton(fileNames[i]);
         	fileButton[i].setToolTipText(fileNames[i]);
         	fileButton[i].addActionListener(this);

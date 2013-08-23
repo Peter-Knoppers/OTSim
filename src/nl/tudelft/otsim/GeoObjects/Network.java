@@ -7,7 +7,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -871,17 +870,17 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
     		ArrayList<CrossSection> CSList = CrossSection.getCrossSectionsAtNode(node);
     		if (CSList != null)  {
 	    		if (CSList.size() == 2) {
-		    		for (CrossSectionElement cse : CSList.get(CSList.size()-1).getCrossSectionElementList_r()) {
+		    		for (CrossSectionElement cse : CSList.get(CSList.size() - 1).getCrossSectionElementList_r()) {
 						ArrayList<Vertex> verticesInner = cse.createAndCleanLinkPointListInner(false, true, true);
 						//cse.setVerticesInner(verticesInner);
 						cse.getVerticesInner().set(0, verticesInner.get(0));
 						ArrayList<Vertex> prevVerticesInner = cse.getConnectedFrom().getVerticesInner();
-						prevVerticesInner.get(prevVerticesInner.size()-1).setPoint(verticesInner.get(0));
+						prevVerticesInner.get(prevVerticesInner.size() - 1).setPoint(verticesInner.get(0));
 						ArrayList<Vertex> verticesOuter = cse.createAndCleanLinkPointListOuter(false, true, true);
 						//cse.setVerticesOuter(verticesOuter);
 						cse.getVerticesOuter().set(0, verticesOuter.get(0));
 						ArrayList<Vertex> prevVerticesOuter = cse.getConnectedFrom().getVerticesOuter();
-						prevVerticesOuter.get(prevVerticesOuter.size()-1).setPoint(verticesOuter.get(0));
+						prevVerticesOuter.get(prevVerticesOuter.size() - 1).setPoint(verticesOuter.get(0));
 		    		}
 	    		}
     		}
