@@ -283,8 +283,8 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 			routeList.add(trip.getRoute());
 			routeProbabilities.add(trip.getFlow());
 		}
-        // Make the last generator
-		makeGenerator(routeProbabilities, currentNode, microNetwork, routeList, flow);
+        if (Integer.MAX_VALUE != currentNode) // Make the last generator
+        	makeGenerator(routeProbabilities, currentNode, microNetwork, routeList, flow);
 
         model.network = microNetwork.toArray(new Lane[0]);
         // Add the tapers to the list of lane objects
@@ -327,7 +327,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         System.out.println("model.init()");
         model.init();
         ConsistencyCheck.checkPostInit(model);
-        System.out.println("model created");
+        System.out.println(String .format("model created: %d lanes", model.network.length));
         scheduler.enqueueEvent(0d, new Stepper(this));
 	}
 	
@@ -337,6 +337,10 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 		double probabilities[] = new double[routeCount];
 		Route[] routeEnds = new Route[routeCount];
 		Lane laneOrigin = lookupOrigin(node, lanes);
+		if (null == laneOrigin) {
+			System.err.println("LookupOrigin failed for node " + node);
+			return;
+		}
     	for (int index = 0; index < routeCount; index++) {
         	int[] endOfRoute = new int[1]; //last node of route
     		int routeLength = routes.get(index).size();
@@ -351,8 +355,10 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
     			mergeCount++;
     			priorityLane = lane;
     		}
-    	if (mergeCount > 1)
-    		throw new Error ("Don't know how to create an N-merge for N=" + mergeCount);
+    	if (mergeCount > 1) {
+    		System.err.println ("Don't know how to create an N-merge for N=" + mergeCount + " at lane " + laneOrigin.id);
+    		return;
+    	}
     	if (mergeCount == 1) {
     		double x[] = new double[2];
     		x[0] = laneOrigin.x[0] - 50;
@@ -378,11 +384,15 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
     		lanes.add(hiddenLane);
     	}
     	System.out.println("mergeCount is " + mergeCount);
-		Generator generator = new Generator(laneOrigin, Generator.distribution.EXPONENTIAL);
-		generator.routes = routeEnds;
-		generator.routeProb = probabilities;
-		generator.setClassProbabilities(new double[] { 0.9, 0.1 });
-		generator.setDemand(flow);
+    	if (null == laneOrigin)
+    		System.err.println("Oops: Not creating a generator for a null lane");
+    	else {
+			Generator generator = new Generator(laneOrigin, Generator.distribution.EXPONENTIAL);
+			generator.routes = routeEnds;
+			generator.routeProb = probabilities;
+			generator.setClassProbabilities(new double[] { 0.9, 0.1 });
+			generator.setDemand(flow);
+    	}
 	}
 	
 	static Lane lookupLane(int id, ArrayList<Lane> lanes) {
@@ -398,6 +408,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 				return lane;
 		return null;
 	}
+	
 	class LaneData {
 		int id;
 		double[] x;
@@ -405,7 +416,6 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 		int fromNode;
 		int toNode;
 	}
-	
 	
 	class LaneGraphic {
 		private Lane lane;

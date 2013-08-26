@@ -67,7 +67,7 @@ public class Model {
      */
     protected boolean generating = false;
     
-    /** Expandable set of general modelling settings. */
+    /** Expandable set of general modeling settings. */
     public Settings settings = new Settings();
     
     /** Temporary trajectory storage before a set is saved to disk. */

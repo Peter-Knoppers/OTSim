@@ -598,7 +598,7 @@ public class Conflict {
             super.init();
             // move upstream
             Lane j = lane;
-            while ((j != null) && !j.isMerge())
+            while ((j != null) && (! j.isMerge()))
                 j = j.up;
             // stopped as merge was found?
             if ((j != null) && j.isMerge()) {
@@ -607,8 +607,8 @@ public class Conflict {
                 	//System.out.println("Checking up " + k.id);
                     double xRsu = 0;
                     boolean found = false;
-                    while (!found) {
-                        java.util.ArrayList<RSU> rsus = k.findNoticeableRSU(xRsu, k.l-xRsu);
+                    while (! found) {
+                        java.util.ArrayList<RSU> rsus = k.findNoticeableRSU(xRsu, k.l - xRsu);
                         for (RSU rsu : rsus) {
                             if (rsu instanceof Conflict.conflictRSU) {
                                 Conflict.conflictRSU rsu2 = (Conflict.conflictRSU) rsu;
@@ -621,7 +621,7 @@ public class Conflict {
                             }
                         }
                         //System.out.println("isEmpty returns " + (rsus.isEmpty() ? "empty" : "not empty"));
-                        if (!found && !rsus.isEmpty()) // next cross section with rsu(s)
+                        if ((! found) && (! rsus.isEmpty())) // next cross section with rsu(s)
                             xRsu = rsus.get(0).x;
                     }
                 }

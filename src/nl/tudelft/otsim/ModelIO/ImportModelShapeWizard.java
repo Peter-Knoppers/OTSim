@@ -604,23 +604,10 @@ public class ImportModelShapeWizard implements ActionListener {
 	}
 	
 	private static ArrayList<RoadMarkerAlong> createRMA(int lanes, double defaultLaneWidth)  {
-		RoadMarkerAlong rma = null;
 		ArrayList<RoadMarkerAlong> rmaList = new ArrayList<RoadMarkerAlong>();
-		for (int i = 0; i < lanes; i++ )  {
-    		double offSet = i * defaultLaneWidth; 
-			if (i == 0)  {
-	    		rma = new RoadMarkerAlong("|", offSet);
-	    		rmaList.add(rma);
-			}
-			offSet = (i + 1) * defaultLaneWidth;
-			if (i < lanes - 1)  {
-				rma = new RoadMarkerAlong(":", offSet);
-			}
-			else {
-				rma = new RoadMarkerAlong("|", offSet);				
-			}
-			rmaList.add(rma);				
-		}
+		rmaList.add(new RoadMarkerAlong("|", 0));
+		for (int i = 0; i < lanes; i++)
+			rmaList.add(new RoadMarkerAlong(i < lanes - 1 ? ":" : "|", (i + 1) * defaultLaneWidth));
 		return rmaList;
 	}
     private static void openDialogImportMatrix() {
@@ -684,10 +671,8 @@ public class ImportModelShapeWizard implements ActionListener {
         		ArrayList<CrossSectionElement> cse2List = new ArrayList<CrossSectionElement>();
             	cse2List.add(cse2);
             	cs2.setCrossSectionElementList_w(cse2List);
-    		}
-    		else  {
+    		} else
     			cse = new CrossSectionElement(cs, typologyName, laneWidth * lanes, rmaList, turnArrowList);
-    		}
     	}
     	if (exitLanes > 0)  {
     		if (!(lanes == exitLanes) ) {

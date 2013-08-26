@@ -84,14 +84,14 @@ public class Curves {
 		Vertex prevStart = up.get(up.size() - 2);
 		//when distance between vertices the angle is not robust. Choose a vertex further away
 		int i = 2;
-		while (start.distance(prevStart) < 3  && up.size() - i - 1 >= 0) {
+		while ((start.distance(prevStart) < 3)  && (up.size() - i - 1 >= 0)) {
 			prevStart = up.get(up.size() - i - 1);
 			i++;
 		}
 		Vertex end = down.get(0);
 		Vertex endNext = down.get(1);
 		i = 2; // third (next) vertex
-		while (end.distance(endNext) < 3 && i < down.size()) {
+		while ((end.distance(endNext) < 3) && (i < down.size())) {
 			endNext = down.get(i);
 			i++;
 		}
