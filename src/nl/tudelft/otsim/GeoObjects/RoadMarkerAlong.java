@@ -112,6 +112,8 @@ public class RoadMarkerAlong extends CrossSectionObject implements XML_IO {
 	 * Create or re-create the vertices for the path of this RoadMarkerAlong.
 	 */
 	public void createVertices() {
+		if (null == crossSectionElement)
+			System.err.println("RoadMarkerAlong has null crossSectionElement");
 		ArrayList<Vertex> innerVertices = crossSectionElement.createAndCleanLinkPointListInner(false, true, false);
 		ArrayList<Vertex> outerVertices = crossSectionElement.createAndCleanLinkPointListOuter(false, true, false);
 		while (innerVertices.size() != outerVertices.size()) {

@@ -79,7 +79,7 @@ public class Lane {
     /** Destination number, NODESTINATION if no destination. */
     public int destination;
 
-    /** Destination number, NODESTINATION if no destination. */
+    /** Origin number, NOORIGIN if no origin. */
     public int origin;
 
     /** Legal speed limit [km/h]. */

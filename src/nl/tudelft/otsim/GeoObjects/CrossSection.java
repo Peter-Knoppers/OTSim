@@ -48,7 +48,7 @@ public class CrossSection implements XML_IO {
      * @param sectionElementList ArrayList<{@link CrossSectionElement} specifying the CrossSectionElements of the new CrossSection
      */
 	public CrossSection(double longitudalPosition, double lateralOffset, ArrayList<CrossSectionElement> sectionElementList) {
-	      this.crossSectionElementList = sectionElementList;
+	      setCrossSectionElementList_w(sectionElementList);
           this.longitudinalPosition = longitudalPosition; 
 	      this.lateralOffset = lateralOffset;
 	}
@@ -254,6 +254,8 @@ public class CrossSection implements XML_IO {
 			crossSectionEnd = parentList.get(nextCrossSectionIndex).longitudinalPosition;
 		// System.out.format("CrossSection runs from %.3f to %.3f\r\n", longitudinalPosition, crossSectionEnd);
 		ArrayList<Vertex> linkVertices = link.getVertices();
+		if (linkVertices.get(0).distance(linkVertices.get(linkVertices.size() - 1)) < 0.0001)
+			System.err.println("Oops: linkVertices covers zero or extremely short distance: " + linkVertices.toString());
 		for (Vertex v : linkVertices) {
 			Point2D.Double p = v.getPoint();
 			if (null != prevVertex) {
@@ -276,7 +278,8 @@ public class CrossSection implements XML_IO {
 			System.err.println("Hmmm; vertices has one entry");
 			vertices.add(linkVertices.get(linkVertices.size() - 1));
 		}
-		//System.out.println("Vertices is " + vertices.toString());
+		if (vertices.get(0).distance(vertices.get(vertices.size() - 1)) < 0.0001)
+			System.err.println("Vertices is " + vertices.toString() + " linkVertices is " + linkVertices.toString());
 		return vertices;
 	}
 

@@ -158,12 +158,11 @@ public class StopLine extends CrossSectionObject {
 		ArrayList<Vertex> outLine = Planar.slicePolyline(crossSectionElement.getLinkPointList(CrossSectionElement.LateralReferenceLeft, true, false), longitudinalPosition, longitudinalLength);
 		ArrayList<Vertex> add = Planar.slicePolyline(crossSectionElement.getLinkPointList(CrossSectionElement.LateralReferenceRight, true, false), longitudinalPosition, longitudinalLength);		
 		ArrayList<Vertex> result = new ArrayList<Vertex>();
-		for (int i = 0; i < outLine.size(); i++) {
+		for (int i = 0; (i < outLine.size()) && (i < add.size()); i++)
 			result.add(Vertex.weightedVertex(this.lateralPosition / crossSectionElement.getWidth_r(), outLine.get(i), add.get(i)));
-		}
-		for (int i = outLine.size()-1; i >= 0; i--) {
-			result.add(Vertex.weightedVertex( (this.lateralPosition + this.lateralWidth) / crossSectionElement.getWidth_r(), outLine.get(i), add.get(i)));
-		}
+		for (int i = outLine.size(); --i >= 0; )
+			if (i < add.size())
+				result.add(Vertex.weightedVertex( (this.lateralPosition + this.lateralWidth) / crossSectionElement.getWidth_r(), outLine.get(i), add.get(i)));
 		graphicsPanel.setColor(color);
 		graphicsPanel.setOpaque(opaque);
 		if (result.size() > 0)

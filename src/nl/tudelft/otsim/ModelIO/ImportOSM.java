@@ -42,7 +42,7 @@ public class ImportOSM {
 		System.out.println(String.format(Main.locale, "%f,%f -> %f,%f", in.x, in.y, out.x, out.y));
 		*/
 		ParsedNode parser = new ParsedNode(fileName);
-		System.out.println(parser.toString(fileName, 10));
+		//System.out.println(parser.toString(fileName, 10));
 		final String mainEntry = "osm";
 		if (parser.size(mainEntry) != 1)
 			throw new Exception("file should contain one \"" + mainEntry + "\" entity");
@@ -67,11 +67,20 @@ public class ImportOSM {
 			if (null != ways.get(id))
 				throw new Exception("Duplicate way in OSM file: " + id);
 			if (null == getOSMTag(way, "highway"))
-					continue;;
+				continue;
+			String wayType = getOSMTag(way, "highway");
+			if (null != wayType) {
+				if (wayType.equals("footway"))
+					continue;
+				if (wayType.equals("cycleway"))
+					continue;
+				if (wayType.equals("pedestrian"))
+					continue;
+			}
 			ways.put(id,  way);
 			int nodeCount = way.size(ndEntry);
-			if (nodeCount < 2) {
-				System.err.println("way " + id + " has too few " + ndEntry + " entries");
+			if (nodeCount < 2) {	// this line probably extends over the bounding box
+				//System.err.println("way " + id + " has too few " + ndEntry + " entries");
 				continue;
 			}
 			long ref = Long.parseLong(way.getSubNode(ndEntry, 0).getAttributeValue(refEntry));
@@ -104,35 +113,60 @@ public class ImportOSM {
 			String speedLimitString = getOSMTag(wayNode, "maxspeed");
 			double maxSpeed = null == speedLimitString ? 50 : Double.parseDouble(speedLimitString);
 			int ndCount = wayNode.size(ndEntry);
+			if (ndCount < 2)
+				continue;
 			ArrayList<Vertex> intermediateVertices = new ArrayList<Vertex>();
+			final double tooClose = 0.001;	// m
 			OSMNode prevNode = null;
 			for (int i = 0; i < ndCount; i++) {
 				long nodeID = Long.parseLong(wayNode.getSubNode(ndEntry, i).getAttributeValue(refEntry));
 				OSMNode node = nodes.get(nodeID);
 				if (node.referenceCount > 0) {
 					if (null != prevNode) {
+						final double laneWidth = 3.5;
+						int laneCount = 1;
+						String laneCountString = getOSMTag(wayNode, "lanes");
+						if (null != laneCountString)
+							laneCount = Integer.parseInt(laneCountString);
 						ArrayList<CrossSection> csList = new ArrayList<CrossSection>();
 						ArrayList<CrossSectionElement> cseList = new ArrayList<CrossSectionElement>();
 						CrossSection cs = new CrossSection(0, 0, cseList);
-						CrossSectionElement cse = new CrossSectionElement(cs, "road", 5.0, new ArrayList<RoadMarkerAlong>(), null);
+						ArrayList<RoadMarkerAlong> rmaList = new ArrayList<RoadMarkerAlong>();
+						rmaList.add(new RoadMarkerAlong("|", 0));
+						for (int laneIndex = 1; laneIndex < laneCount; laneIndex++)
+							rmaList.add(new RoadMarkerAlong(":", laneWidth * laneIndex));
+						rmaList.add(new RoadMarkerAlong("|", laneWidth * laneCount));
+						CrossSectionElement cse = new CrossSectionElement(cs, "road", laneWidth * laneCount, rmaList, null);
 						cseList.add(cse);
 						csList.add(cs);
-						if (prevNode.number == node.number)
-							System.err.println("Cannot handle circular roads; yet (" + linkName + ")");
+						if ((intermediateVertices.size() > 0) && (intermediateVertices.get(intermediateVertices.size() - 1).getPoint().distance(result.lookupNode(node.number, false).getPoint()) <= tooClose)) {
+							System.out.println("removing last point of intermediateVertices because it is too close to the following node");
+							intermediateVertices.remove(intermediateVertices.size() - 1);
+						}
+						if ((prevNode.number == node.number) && (intermediateVertices.size() == 0))
+							System.err.println("Cannot handle circular roads with no intermediateVertices (" + linkName + ")");
+						else if (result.lookupNode(prevNode.number, false).getPoint().distance(result.lookupNode(node.number, false).getPoint()) <= tooClose) {
+							System.err.println(String.format("Node n%d is too close to node n%s", prevNode.number, node.number));
+						}
 						else {
-							try {
-								Link newLink = result.addLink(linkName + ++lastLinkNumber, prevNode.number, node.number, 123, false, csList, intermediateVertices);
-								newLink.setMaxSpeed_w(maxSpeed);
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
+							Link newLink = result.addLink(linkName + ++lastLinkNumber, prevNode.number, node.number, 123, false, csList, intermediateVertices);
+							newLink.setMaxSpeed_w(maxSpeed);
 						}
 						intermediateVertices = new ArrayList<Vertex>();
 					}
 					prevNode = node;
 				} else {
-					Point2D.Double location = converter.meters(new Point2D.Double(node.longitude, node.lattitude));					
-					intermediateVertices.add(new Vertex(location.x, location.y, 0));
+					Point2D.Double location = converter.meters(new Point2D.Double(node.longitude, node.lattitude));
+					if (null == prevNode)
+						System.err.println("Oops: prevNode is null");
+					Vertex prevVertex = intermediateVertices.size() > 0 ? intermediateVertices.get(intermediateVertices.size() - 1) : result.lookupNode(prevNode.number, false);
+					if (null == prevVertex)
+						System.err.println("Oops: prevVertex is null");
+					Point2D.Double prevPoint = prevVertex.getPoint();
+					if (prevPoint.distance(location) > tooClose)
+						intermediateVertices.add(new Vertex(location.x, location.y, 0));
+					else
+						System.out.println("Not adding intermediate vertex " + node.number + " because it is too close to its predecessor");
 				}
 			}
 		}

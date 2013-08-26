@@ -454,7 +454,7 @@ public class Node extends Vertex implements XML_IO {
 		double distanceStart = vertices.get(0).getPoint().distance(circle.center());
 		double distanceEnd = vertices.get(vertices.size() - 1).getPoint().distance(circle.center());
 		if ((distanceStart < circle.radius()) && (distanceEnd < circle.radius())) {
-			System.err.println("Vertices begins AND ends within circle of node " + name);
+			System.err.println("Vertices begin AND end within circle of node " + name);
 			return vertices;
 		} 
 		if (distanceStart < circle.radius())
@@ -931,8 +931,7 @@ public class Node extends Vertex implements XML_IO {
 									if (gotoNextOutlink) {
 										OutLaneInfo exploreOutlaneInfo = outLanesAndLinkList.get(outLaneIndex); 
 										int outLinkRank = exploreOutlaneInfo.getLinkRank();
-										while ( outLinkRank == exploreOutlaneInfo.getLinkRank() ) {
-											//&& !(currentOutlaneInfo.getInLane() == null)
+										while (outLinkRank == exploreOutlaneInfo.getLinkRank()) {
 											outLaneIndex++;
 											if (outLaneIndex >= outLanesAndLinkList.size()) {
 												System.err.format("indexOutLane (%d) is not in range of outLanesAndLinkList (0..%d)\r\n", outLaneIndex, outLanesAndLinkList.size() - 1);
@@ -961,7 +960,7 @@ public class Node extends Vertex implements XML_IO {
 						Lane newLane = null;
 						// when all incoming lanes are "inspected", the link and lane connectors are created
 						// for every connection between an incoming and leaving arm, one link is created
-	    				for (OutLaneInfo outLaneInfo:  outLanesAndLinkList) {
+	    				for (OutLaneInfo outLaneInfo : outLanesAndLinkList) {
 		    				Lane currentOutLane = outLaneInfo.getLane();
 		    				Lane currentInLane = outLaneInfo.getInLane();
 		    				boolean sameOutLink = false;
@@ -998,7 +997,7 @@ public class Node extends Vertex implements XML_IO {
 								newLane = newLaneConnection(currentInLane, currentOutLane, createCurve, oldLane, sameOutLink);				    					
 			    				newLanes.add(0, newLane);
 		    				}
-		    				if (outLaneIndex == outLanesAndLinkList.size() - 1)  {
+		    				if (outLaneIndex == outLanesAndLinkList.size() - 1) {
 		    			    	if (newLanes.size() == 0) 
 		    			    		System.out.println("strange");
 	            				Link newLink = createJunctionLink(incoming, newLanes, rmaList);
@@ -1208,10 +1207,12 @@ public class Node extends Vertex implements XML_IO {
 			System.err.println("newLaneConnection: linkPointList is null");
 			return null;
 		}
-		if (createCurve)  {
+		if (createCurve) {
 			ArrayList<Vertex> up = upLane.getLaneVerticesCenter();
-			ArrayList<Vertex> down = downLane.getLaneVerticesCenter();		
-			Point2D.Double ctrlPoint = 	Curves.createControlPoint(up, down);
+			ArrayList<Vertex> down = downLane.getLaneVerticesCenter();
+			if ((up.size() == 0) || (down.size() == 0))
+				System.err.println("Oops: up.size is " + up.size() + ", down.size is " + down.size());
+			Point2D.Double ctrlPoint = Curves.createControlPoint(up, down);
 			newLane.setCtrlPointCenter(ctrlPoint);
 			ArrayList<Vertex> laneVerticesCenter = new ArrayList<Vertex>();
 			if (ctrlPoint == null)
@@ -1222,8 +1223,7 @@ public class Node extends Vertex implements XML_IO {
 			newLane.setDesignLine(laneVerticesCenter);			
 			newLane.setLaneVerticesInner(Planar.createParallelVertices(laneVerticesCenter, - newLane.getLateralWidth() / 2));
 			newLane.setLaneVerticesOuter(Planar.createParallelVertices(laneVerticesCenter, + newLane.getLateralWidth() / 2));
-		}
-		else  {
+		} else {
 			boolean sameUp = false;
 			boolean sameDown = false;
 			ArrayList<Vertex> laneVerticesCenter = new ArrayList<Vertex>();
@@ -1282,12 +1282,10 @@ public class Node extends Vertex implements XML_IO {
 				// TODO figure out if this still happens and fix it
 				continue;
 			}
-			if (count == 0)   {
+			if (count == 0)
 				rma = new RoadMarkerAlong(typeContinuous, width);
-			}
-			else {
+			else
 				rma = new RoadMarkerAlong(typeStriped, width);
-			}
 			rma.setVertices(lane.getLaneVerticesInner());
 			count++;
 			rmaList.add(rma);
@@ -1295,7 +1293,7 @@ public class Node extends Vertex implements XML_IO {
 			if (prev != null)  {
 				lane.setLeft(prev);
 				prev.setRight(lane);
-				if (rma.getType() == typeStriped)  {
+				if (rma.getType() == typeStriped) {
 					lane.setGoLeft(true);
 					prev.setGoRight(true);
 				}				
@@ -1334,17 +1332,6 @@ public class Node extends Vertex implements XML_IO {
 		return newLink;
     }
  
-    /*
-    private static ArrayList<Vertex> connectVertices(ArrayList<Vertex> up, ArrayList<Vertex> down) {
-		ArrayList<Vertex> vertices = new ArrayList<Vertex>();	
-		Vertex start = up.get(up.size() - 1);
-		Vertex end = down.get(0);
-		vertices.add(start);
-		vertices.add(end);
-		return vertices;
-    }
-    */
-
     /**
      * Return a caption for the pop up menu of the {@link nl.tudelft.otsim.GUI.ObjectInspector}.
      * @return String; caption for the pop up menu of the {@link nl.tudelft.otsim.GUI.ObjectInspector}
@@ -1465,7 +1452,8 @@ public class Node extends Vertex implements XML_IO {
     	graphicsPanel.setStroke(1F);
         final Color color = network.isExpandedNode(this) ? Color.blue : Color.RED;
         graphicsPanel.setColor(color);
-        graphicsPanel.drawString(getName_r(), point);
+        if ((! network.isExpandedNode(this)) || (Main.mainFrame.showLabelsOnAutogeneratedNodes.isSelected()))
+        	graphicsPanel.drawString(getName_r(), point);
         graphicsPanel.setStroke(0f);
         graphicsPanel.drawCircle(point, color, nonSelectedNodeDiameter);
         graphicsPanel.setStroke(6f);

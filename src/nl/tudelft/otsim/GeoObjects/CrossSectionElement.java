@@ -129,8 +129,10 @@ public class CrossSectionElement implements XML_IO {
         this.width = crossSectionElementWidth; 
 		//this.roadMarkerAlongList = roadMarkerAlongList;
 		//this.turnArrowList = turnArrowList;
-        for (RoadMarkerAlong rma : roadMarkerAlongList)
+        for (RoadMarkerAlong rma : roadMarkerAlongList) {
+        	rma.setCrossSectionElement(this);
         	objects.add(rma);
+        }
         if (null != turnArrowList)
         	for (TurnArrow ta : turnArrowList)
         		objects.add(ta);
@@ -342,23 +344,6 @@ public class CrossSectionElement implements XML_IO {
 			return false;
 		return width == other.width;
 	}
-
-	/**
-	 * Retrieve the list of {@link Lane Lanes} of this CrossSectionElement.
-	 * @return ArrayList&lt;{@link Lane}&gt;; the Lanes of this CrossSectionElement
-	 */
-    //public ArrayList<Lane> getLaneList() {
-	//	return laneList;
-	//}
-
-    /**
-     * Set/replace the lane list of this CrossSectionElement.
-     * @param laneList ArrayList&lt;{@link Lane}&gt;; the new lane list of this
-     * CrossSectionElement
-     */
-	//public void setLaneList(ArrayList<Lane> laneList) {
-	//	this.laneList = laneList;
-	//}
 
 	/**
 	 * Set/change the predecessor of this CrossSectionElement.
@@ -1144,8 +1129,7 @@ public class CrossSectionElement implements XML_IO {
 			firstPoint = false;
 		}
 		if (outer.size() < 2) {
-			System.err.println("let op");
-			getVerticesInner();
+			System.err.println("Oops: outer.size() is " + outer.size());
 		}
 		for (Vertex v : Reversed.reversed(outer))	// reverse the outer point list
 			 polygon.lineTo(v.getX(), v.getY());
@@ -1235,7 +1219,7 @@ public class CrossSectionElement implements XML_IO {
 		verticesInner = inner;
 		verticesOuter = outer;
 		if ((inner.size() < 2) || (outer.size() < 2))
-			System.err.println("oops");
+			System.err.println("Oops verticesInner.size() is " + inner.size() + " ...outer.size() is " + outer.size());
 	}
 
 }
