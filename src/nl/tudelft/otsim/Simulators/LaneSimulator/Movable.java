@@ -140,6 +140,21 @@ public abstract class Movable  {
     	}
     }
     
+    /**
+     * Create a string that describes a specified neighbor of this Movable
+     * @param direction Integer; direction of the neighbor
+     * @return String; description of the neighbor
+     */
+    public String neighborToString(int direction) {
+    	String result = directionToString(direction) + " is ";
+    	Movable neighbor = getNeighbor(direction);
+    	if (null == neighbor)
+    		result += "NULL";
+    	else
+    		result += neighbor.toString();
+    	return result;
+    }
+    
     /** Upstream movable, if any */
     //public Movable up;
 
@@ -259,12 +274,14 @@ public abstract class Movable  {
          */
     	final int[] directions = { LEFT_DOWN, RIGHT_DOWN, LEFT_UP, RIGHT_UP };
     	for (int direction : directions)
-    		for (Movable vehicleB = getNeighbor(direction); null != vehicleB; vehicleB = vehicleB.getNeighbor(alignDirection(direction)))
+    		for (Movable vehicleB = getNeighbor(direction); null != vehicleB; vehicleB = vehicleB.getNeighbor(alignDirection(direction))) {
+        		Lane neighborLane = (direction == LEFT_DOWN) || (direction == LEFT_UP) ? vehicleB.lane.right : vehicleB.lane.left;
     			if (((vehicleB.getNeighbor(flipDirection(direction, FLIP_DIAGONAL)) == getNeighbor(alignDirection(flipDirection(direction, FLIP_UD)))) && (null != getNeighbor(alignDirection(flipDirection(direction, FLIP_UD)))))
-    					|| ((null == vehicleB.getNeighbor(flipDirection(direction, FLIP_DIAGONAL))) && (null != vehicleB.lane.right) && vehicleB.lane.right.isSameLane(lane)))
+    					|| ((null == vehicleB.getNeighbor(flipDirection(direction, FLIP_DIAGONAL))) && (null != neighborLane) && neighborLane.isSameLane(lane)))
     				vehicleB.setNeighbor(flipDirection(direction, FLIP_DIAGONAL), this);
     			else
     				break;
+    		}
 
         // one-directional pointers
         /*
@@ -558,8 +575,8 @@ public abstract class Movable  {
          * -----------------------
          * Vehicle A will be deleted, vehicle C has A as leftDown but vehicle B
          * does not anymore because there is no adjacent lane. This can only
-         * happen as vehicles move beyond the end of the lane. Therefore only an
-         * upstream search is useful.
+         * happen as vehicles move beyond the end of the lane. Therefore only
+         * an upstream search is useful.
          */
         if (x > lane.l) {
             int[] twoDirections = { LEFT_DOWN, RIGHT_DOWN };
