@@ -109,7 +109,13 @@ public class Main extends JFrame implements ActionListener {
         			mainFrame.loadModel(right);
         		else if (left.equalsIgnoreCase("load"))
         			mainFrame.loadFile(right);
-        		else
+        		else if (left.equalsIgnoreCase("import"))
+					try {
+						mainFrame.importModel(right);
+					} catch (Exception e) {
+						WED.showProblem(WED.ENVIRONMENTERROR, "Could not import file \"%s\"\n%s", right, WED.exeptionStackTraceToString(e));
+					}
+				else
         			WED.showProblem(WED.ENVIRONMENTERROR, "Unknown program argument \"%s\" (ignored)", arg);
         	} else
     			WED.showProblem(WED.ENVIRONMENTERROR, "Unknown program argument \"%s\" (ignored)", arg);        		
@@ -118,7 +124,7 @@ public class Main extends JFrame implements ActionListener {
         Log.logMessage(null, false, "Ready");	// test that LogMessage can log to the Event log
     }
 
-    /** GraphicsPanel used in the main window */
+	/** GraphicsPanel used in the main window */
 	public GraphicsPanel graphicsPanel;
 	private String workingDir = System.getProperty("user.dir");
 	JPanel panelMeasurementPlan;
@@ -455,6 +461,21 @@ public class Main extends JFrame implements ActionListener {
     	menu.add(makeMenuItem("model ...", actionCommandPrefix + " model", null));
     	return menu;
     }
+
+    private boolean importModel(String fileName) throws Exception {
+    	int lastPos = fileName.lastIndexOf(".");
+    	if (lastPos < 0)
+    		throw new Exception("import file \"" + fileName + "\" has no file type");
+        String type = fileName.substring(lastPos + 1);
+    	if (type.equalsIgnoreCase("osm"))
+    		model.network = ImportOSM.loadOSM(fileName);
+    	else
+    		throw new Exception("don't know how to import file of type \"" + type + "\"");
+    	mainFrame.setTitle(fileName);
+    	zoomToScene();
+    	setActiveGraph();
+    	return true;
+	}
 
     /**
      * Load and display a traffic model.
@@ -972,7 +993,7 @@ public class Main extends JFrame implements ActionListener {
 		double xRatio = (maxX - minX) / (graphicsPanel.getWidth() - 2 * margin);
 		double yRatio = (maxY - minY) / (graphicsPanel.getHeight() - 2 * margin);
 		double ratio = xRatio > yRatio ? xRatio : yRatio;
-		//System.out.format("x: [%.2f - %.2f], y: [%.2f - %.2f], width %d, height %d ratio %.4f\r\n", minX, maxX, minY, maxY, graphicsPanel.getWidth(), graphicsPanel.getHeight(), ratio);
+		System.out.format("x: [%.2f - %.2f], y: [%.2f - %.2f], width %d, height %d ratio %.4f\r\n", minX, maxX, minY, maxY, graphicsPanel.getWidth(), graphicsPanel.getHeight(), ratio);
 		graphicsPanel.setZoom(1d / ratio, new Point2D.Double(0, 0));
 		graphicsPanel.setPan(graphicsPanel.getWidth() / 2 - (minX + maxX) / 2 / ratio, - graphicsPanel.getHeight() / 2 + (minY + maxY) / 2 / ratio);
 	}
