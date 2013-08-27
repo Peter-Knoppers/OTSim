@@ -14,6 +14,7 @@ import java.util.TreeSet;
 
 import nl.tudelft.otsim.Events.Scheduler;
 import nl.tudelft.otsim.Events.Step;
+import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.GUI.WED;
 
 
@@ -30,6 +31,7 @@ public class SimulatedTrafficLightController implements Step, ShutDownAble {
 	private PrintWriter serverWriter = null;
 	private BufferedReader serverReader = null;
 	Socket clientSocket = null;
+	private String program = null;
 	private Map<String, Boolean> currentDetectorState = new HashMap<String, Boolean>();
 
 	/**
@@ -44,61 +46,65 @@ public class SimulatedTrafficLightController implements Step, ShutDownAble {
 		this.scheduler = scheduler;
 		this.controllerURL = controllerURL;
 		if ((null != controllerURL) && (controllerURL != "")) {
-			// Extract port number from controllerURL
-			int portNumber = 6666;
-			int pos = controllerURL.lastIndexOf(":");
-			if (pos > 0)
-				try {
-					portNumber = Integer.parseInt(controllerURL.substring(pos + 1));
-				} catch (NumberFormatException e2) {
-					// Ignore;
-				}
-			ServerSocket serverSocket = null;
-			try {
-				serverSocket = new ServerSocket(portNumber);
-			} catch (IOException e1) {
-				WED.showProblem(WED.ENVIRONMENTERROR, "Cannot open port %d\r\n%s",
-						portNumber, WED.exeptionStackTraceToString(e1));
-				e1.printStackTrace();
-			}
-			// fire up an instance of the traffic control program
-			try {
-				Runtime.getRuntime().exec(controllerURL);
-			} catch (IOException e) {
-				WED.showProblem(WED.ENVIRONMENTERROR, "Cannot start external traffic control program\r\n\"%s\"\r\n%s", 
-						controllerURL, WED.exeptionStackTraceToString(e));
-				e.printStackTrace();
-			}
-			try {
-				clientSocket = serverSocket.accept();
-				Runtime.getRuntime().addShutdownHook(new Thread() {
-					@Override
-					public void run() {
-						if (null != clientSocket)
-							try {
-								clientSocket.close();
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-						clientSocket = null;
-					}
-				});
-				serverWriter = new PrintWriter(clientSocket.getOutputStream(), true);
-				serverReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-			} catch (IOException e) {
-				WED.showProblem(WED.ENVIRONMENTERROR, "Error in connection setup:\r\n%s", 
-						WED.exeptionStackTraceToString(e));
-				if (null != clientSocket)
+			if (controllerURL.startsWith("fixed:")) {
+				program = controllerURL.substring(6);
+			} else {
+				// Extract port number from controllerURL
+				int portNumber = 6666;
+				int pos = controllerURL.lastIndexOf(":");
+				if (pos > 0)
 					try {
-						clientSocket.close();
-					} catch (IOException e1) {
-						// ignore exceptions during exception handling
+						portNumber = Integer.parseInt(controllerURL.substring(pos + 1));
+					} catch (NumberFormatException e2) {
+						// Ignore;
 					}
-			}
-			try {
-				serverSocket.close();
-			} catch (IOException e) {
-				// ignored
+				ServerSocket serverSocket = null;
+				try {
+					serverSocket = new ServerSocket(portNumber);
+				} catch (IOException e1) {
+					WED.showProblem(WED.ENVIRONMENTERROR, "Cannot open port %d\r\n%s",
+							portNumber, WED.exeptionStackTraceToString(e1));
+					e1.printStackTrace();
+				}
+				// fire up an instance of the traffic control program
+				try {
+					Runtime.getRuntime().exec(controllerURL);
+				} catch (IOException e) {
+					WED.showProblem(WED.ENVIRONMENTERROR, "Cannot start external traffic control program\r\n\"%s\"\r\n%s", 
+							controllerURL, WED.exeptionStackTraceToString(e));
+					e.printStackTrace();
+				}
+				try {
+					clientSocket = serverSocket.accept();
+					Runtime.getRuntime().addShutdownHook(new Thread() {
+						@Override
+						public void run() {
+							if (null != clientSocket)
+								try {
+									clientSocket.close();
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
+							clientSocket = null;
+						}
+					});
+					serverWriter = new PrintWriter(clientSocket.getOutputStream(), true);
+					serverReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+				} catch (IOException e) {
+					WED.showProblem(WED.ENVIRONMENTERROR, "Error in connection setup:\r\n%s", 
+							WED.exeptionStackTraceToString(e));
+					if (null != clientSocket)
+						try {
+							clientSocket.close();
+						} catch (IOException e1) {
+							// ignore exceptions during exception handling
+						}
+				}
+				try {
+					serverSocket.close();
+				} catch (IOException e) {
+					// ignored
+				}
 			}
 		}
 		scheduler.enqueueEvent(0, this);
@@ -143,28 +149,59 @@ public class SimulatedTrafficLightController implements Step, ShutDownAble {
 		for (SimulatedTrafficLight stl : trafficLights)
 			trafficLightNames.add(stl.name());
 		if (null == clientSocket) {
-			// fixed time, on-leg-at-a-time controller
-			final double yellowTime = 3;
-			final double greenTime = 12;
-			final double clearanceTime = 1;
-			final double subCycleTime = greenTime + yellowTime + clearanceTime;
-			final int signalGroupCount = trafficLightNames.size();
-			final double cycleTime = subCycleTime * signalGroupCount;
-			final double state = now % cycleTime;
-			int subPhase = 0;
-			for (String name : trafficLightNames) {
-				final double subCycle = state - subPhase * subCycleTime;
-				if (subCycle < 0)
-					newColors += "r";
-				else if (subCycle < greenTime)
-					newColors += "g";
-				else if (subCycle < greenTime + yellowTime)
-					newColors += "y";
-				else
-					newColors += "r";
-				subPhase++;
+			if (null == program) { 
+				// create a totally dumb fixed time controller
+				System.out.println("hello world");
+				final double yellowTime = 3;
+				final double greenTime = 12;
+				final double clearanceTime = 1;
+				final double subCycleTime = greenTime + yellowTime + clearanceTime;
+				final double cycleTime = subCycleTime * trafficLightNames.size();
+				
+				program = String.format(Main.locale, "%.1f", cycleTime);
+				int phase = 0;
+				for (String name : trafficLightNames) {
+					program += String.format(Main.locale, "|%s,%.1f,%.1f,%.1f", name, 
+							(phase * subCycleTime) % cycleTime,
+							(phase * subCycleTime + greenTime) % cycleTime,
+							(phase * subCycleTime + greenTime + yellowTime) % cycleTime);
+					phase++;
+				}
 			}
-		} else {
+			// Interpret the fixed time controller program
+			// fixed time, on-leg-at-a-time controller
+			String[] fields = program.split("[|]");
+			final double cycleTime = Double.parseDouble(fields[0]);
+			double phaseTime = now % cycleTime;
+			for (String lightName : trafficLightNames)
+			{
+				int light;
+				for (light = 1; light < fields.length; light++)
+					if (fields[light].split(",")[0].equals(lightName))
+						break;
+				String[] subFields = fields[light].split(",");
+				final double startGreen = Double.parseDouble(subFields[1]);
+				final double startYellow = Double.parseDouble(subFields[2]);
+				final double startRed = Double.parseDouble(subFields[3]);
+				
+				if ((phaseTime >= startRed) && (phaseTime <= startGreen))
+					newColors += "r";
+				else if ((phaseTime >= startGreen) && (phaseTime < startYellow))
+					newColors += "g";
+				else if ((phaseTime >= startYellow) && (phaseTime < startRed))
+					newColors += "y";
+				else if (startRed > startGreen)
+					newColors += "r";
+				else if (startGreen > startYellow)
+					newColors += "g";
+				else if (startYellow > startRed)
+					newColors += "y";
+				else {
+					WED.showProblem(WED.ENVIRONMENTERROR, "Cannot determine color for light %s", subFields[0]);
+					return false;
+				}
+			}
+		} else {	// Communicate with external control program
 			// send the state of the detectors
 			for (SimulatedDetector sd : detectors.values()) {
 				boolean newState = sd.isOccupied();

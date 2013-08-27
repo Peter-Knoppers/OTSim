@@ -1,4 +1,4 @@
-version="1.0"?>
+<?xml version="1.0"?>
 <model>
   <Network>
     <node>
@@ -16,11 +16,11 @@ version="1.0"?>
       <Z>0.0</Z>
       <trafficLightController>
         <ID>TLC_1</ID>
-        <ControlURL>d:/cppb/trafcod/trafcod.exe d:/cppb/trafcod/4Arm/4Arm.tfc sumo://localhost:6789</ControlURL>
+        <ControlURL>fixed:60|TL_08,0,24,26|TL_11,30,52,55|TL_05,30,54,57</ControlURL>
         <Detector>VD_1051</Detector>
         <Detector>VD_1052</Detector>
-        <Detector>VD_1053</Detector>
         <Detector>VD_1083</Detector>
+        <Detector>VD_1053</Detector>
         <Detector>VD_1054</Detector>
         <Detector>VD_1111</Detector>
         <Detector>VD_1112</Detector>
@@ -152,14 +152,17 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>barrier</name>
           <width>1.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>road</name>
           <width>11.0</width>
+          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.2</lateralPosition>
@@ -176,6 +179,7 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
       </crossSection>
       <crossSection>
@@ -185,14 +189,17 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>barrier</name>
           <width>1.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>road</name>
           <width>3.5</width>
+          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.1</lateralPosition>
@@ -205,6 +212,7 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
       </crossSection>
     </link>
@@ -225,14 +233,17 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>barrier</name>
           <width>1.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>road</name>
           <width>11.0</width>
+          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.2</lateralPosition>
@@ -249,6 +260,7 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
       </crossSection>
       <crossSection>
@@ -258,14 +270,17 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>barrier</name>
           <width>1.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>road</name>
           <width>11.0</width>
+          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.2</lateralPosition>
@@ -282,6 +297,7 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
       </crossSection>
     </link>
@@ -297,14 +313,17 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>barrier</name>
           <width>1.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>road</name>
           <width>11.0</width>
+          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.2</lateralPosition>
@@ -321,6 +340,7 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
       </crossSection>
       <crossSection>
@@ -330,14 +350,17 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>barrier</name>
           <width>1.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>road</name>
           <width>11.0</width>
+          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.2</lateralPosition>
@@ -354,6 +377,7 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
       </crossSection>
       <crossSection>
@@ -363,14 +387,17 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>barrier</name>
           <width>1.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>road</name>
           <width>11.0</width>
+          <speedLimit>50</speedLimit>
           <vehicleDetector>
             <ID>VD_1084</ID>
             <lateralCenter>-2.5</lateralCenter>
@@ -422,6 +449,7 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
       </crossSection>
     </link>
@@ -437,14 +465,17 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>barrier</name>
           <width>1.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>road</name>
           <width>11.0</width>
+          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.2</lateralPosition>
@@ -461,6 +492,7 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
       </crossSection>
     </link>
@@ -476,14 +508,17 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>barrier</name>
           <width>1.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>road</name>
           <width>11.0</width>
+          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.2</lateralPosition>
@@ -500,6 +535,7 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
       </crossSection>
     </link>
@@ -515,14 +551,17 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>barrier</name>
           <width>1.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>road</name>
           <width>11.0</width>
+          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.2</lateralPosition>
@@ -539,6 +578,7 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
       </crossSection>
     </link>
@@ -554,14 +594,17 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>barrier</name>
           <width>1.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>road</name>
           <width>11.0</width>
+          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.2</lateralPosition>
@@ -578,6 +621,7 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
       </crossSection>
     </link>
@@ -593,14 +637,17 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>barrier</name>
           <width>1.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>road</name>
           <width>11.0</width>
+          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.2</lateralPosition>
@@ -617,6 +664,7 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
       </crossSection>
       <crossSection>
@@ -626,14 +674,17 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>barrier</name>
           <width>1.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>road</name>
           <width>16.0</width>
+          <speedLimit>50</speedLimit>
           <vehicleDetector>
             <ID>VD_1111</ID>
             <lateralCenter>-5.0</lateralCenter>
@@ -703,6 +754,7 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
       </crossSection>
     </link>
@@ -718,14 +770,17 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>barrier</name>
           <width>1.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>road</name>
           <width>11.0</width>
+          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.2</lateralPosition>
@@ -742,6 +797,7 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
       </crossSection>
       <crossSection>
@@ -751,14 +807,17 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>barrier</name>
           <width>1.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>road</name>
           <width>11.0</width>
+          <speedLimit>50</speedLimit>
           <vehicleDetector>
             <ID>VD_1054</ID>
             <lateralCenter>-3.0</lateralCenter>
@@ -810,6 +869,7 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
       </crossSection>
     </link>
@@ -825,14 +885,17 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>barrier</name>
           <width>1.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>road</name>
           <width>11.0</width>
+          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.2</lateralPosition>
@@ -849,6 +912,7 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
       </crossSection>
       <crossSection>
@@ -858,14 +922,17 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>barrier</name>
           <width>1.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>road</name>
           <width>11.0</width>
+          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.2</lateralPosition>
@@ -882,6 +949,7 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
       </crossSection>
     </link>
@@ -897,14 +965,17 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>barrier</name>
           <width>1.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>road</name>
           <width>11.0</width>
+          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.25</lateralPosition>
@@ -921,6 +992,7 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
       </crossSection>
       <crossSection>
@@ -930,14 +1002,17 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>barrier</name>
           <width>1.0</width>
+          <speedLimit>50</speedLimit>
         </element>
         <element>
           <name>road</name>
           <width>11.0</width>
+          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.25</lateralPosition>
@@ -954,6 +1029,7 @@ version="1.0"?>
         <element>
           <name>grass</name>
           <width>5.0</width>
+          <speedLimit>50</speedLimit>
         </element>
       </crossSection>
     </link>
