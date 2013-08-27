@@ -879,9 +879,10 @@ public class Main extends JFrame implements ActionListener {
 				ParsedNode subNode = pn.getSubNode(key,  0);
 				if (storable instanceof Network)
 					storable = model.network = new Network(subNode);
-				else if (storable instanceof TrafficDemand)
+				else if (storable instanceof TrafficDemand) {
 					storable = model.trafficDemand = new TrafficDemand(model, subNode);
-				else if (storable instanceof MeasurementPlan) {
+					model.trafficDemand.rebuild();
+				} else if (storable instanceof MeasurementPlan) {
 					model.addMeasurementPlan((MeasurementPlan)(storable = new MeasurementPlan(model, subNode)));
 					measurementPlanListChanged();
 				} else if (storable instanceof Model) {
