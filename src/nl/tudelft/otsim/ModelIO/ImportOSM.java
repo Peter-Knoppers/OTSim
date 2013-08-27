@@ -77,13 +77,13 @@ public class ImportOSM {
 				if (wayType.equals("pedestrian"))
 					continue;
 			}
-			ways.put(id,  way);
 			int nodeCount = way.size(ndEntry);
-			if (nodeCount < 2) {	// this line probably extends over the bounding box
-				//System.err.println("way " + id + " has too few " + ndEntry + " entries");
+			if (nodeCount < 2)	// this line probably extended over the bounding box
 				continue;
-			}
+			// This way will be added to the Network 
+			ways.put(id,  way);
 			long ref = Long.parseLong(way.getSubNode(ndEntry, 0).getAttributeValue(refEntry));
+			// Increment the reference counts of the first and last nodes of this way
 			OSMNode node = nodes.get(ref);
 			if (null == node)
 				throw new Exception("way " + id + " refers to undefined node " + ref);
@@ -97,10 +97,10 @@ public class ImportOSM {
 		Network result = new Network();
 		for (long key : nodes.keySet()) {
 			OSMNode node = nodes.get(key);
-			if (node.referenceCount > 0) {
+			if (node.referenceCount > 0) {	// nodes with referenceCount > 0 become nodes in the network
 				Point2D.Double location = converter.meters(new Point2D.Double(node.longitude, node.lattitude));
 				result.addNode(String.format("n%d", key), node.number, location.x, location.y, 0d);
-			}
+			} // nodes with referenceCount == 0 are only used as shape points; never as junctions
 		}
 		int lastLinkNumber = 0; 
 		for (long key : ways.keySet()) {
@@ -111,7 +111,8 @@ public class ImportOSM {
 			else
 				linkName += " ";
 			String speedLimitString = getOSMTag(wayNode, "maxspeed");
-			double maxSpeed = null == speedLimitString ? 50 : Double.parseDouble(speedLimitString);
+			final double defaultSpeedLimit = 50;	// Default in built-up areas in the Netherlands
+			double maxSpeed = null == speedLimitString ? defaultSpeedLimit : Double.parseDouble(speedLimitString);
 			int ndCount = wayNode.size(ndEntry);
 			if (ndCount < 2)
 				continue;
@@ -145,9 +146,8 @@ public class ImportOSM {
 						}
 						if ((prevNode.number == node.number) && (intermediateVertices.size() == 0))
 							System.err.println("Cannot handle circular roads with no intermediateVertices (" + linkName + ")");
-						else if (result.lookupNode(prevNode.number, false).getPoint().distance(result.lookupNode(node.number, false).getPoint()) <= tooClose) {
+						else if (result.lookupNode(prevNode.number, false).getPoint().distance(result.lookupNode(node.number, false).getPoint()) <= tooClose)
 							System.err.println(String.format("Node n%d is too close to node n%s", prevNode.number, node.number));
-						}
 						else {
 							Link newLink = result.addLink(linkName + ++lastLinkNumber, prevNode.number, node.number, 123, false, csList, intermediateVertices);
 							newLink.setMaxSpeed_w(maxSpeed);
