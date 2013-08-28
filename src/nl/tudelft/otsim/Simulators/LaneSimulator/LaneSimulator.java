@@ -332,7 +332,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 	}
 	
 	private void makeGenerator(ArrayList<Double> routeProbabilities, int node, ArrayList<Lane> lanes, ArrayList<ArrayList<Integer>> routes, double flow) {
-		System.out.println("Creating generator at node " + node);
+		System.out.println("Creating generator at node " + node + " flow " + flow);
 		int routeCount = routeProbabilities.size();
 		double probabilities[] = new double[routeCount];
 		Route[] routeEnds = new Route[routeCount];
@@ -346,7 +346,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
     		int routeLength = routes.get(index).size();
     		endOfRoute[0] = routes.get(index).get(routeLength - 1);
     		routeEnds[index] = new Route(endOfRoute);
-    		probabilities[index] = routeProbabilities.get(index);
+    		probabilities[index] = routeProbabilities.get(index) / flow;
     	}
     	int mergeCount = 0;
     	Lane priorityLane = null;
