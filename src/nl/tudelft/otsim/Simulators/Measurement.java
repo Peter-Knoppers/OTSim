@@ -64,10 +64,14 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
         getContentPane().setLayout(new java.awt.BorderLayout());
         ChartFactory.setChartTheme(new StandardChartTheme("JFree/Shadow", true));
-		JFreeChart chart = ChartFactory.createScatterPlot(name, "Time", "Distance", this, PlotOrientation.HORIZONTAL , false, false, false);
-		ValueAxis x = chart.getXYPlot().getRangeAxis();
-		x.setAutoRange(true);
-		x.setLowerBound(0);
+		JFreeChart chart = ChartFactory.createScatterPlot(name, "Distance", "Time", this, PlotOrientation.HORIZONTAL, false, false, false);
+        ValueAxis x = chart.getXYPlot().getRangeAxis();
+        x.setAutoRange(true);
+        x.setLowerBound(0);
+        x.setUpperBound(600);
+		ValueAxis y = chart.getXYPlot().getDomainAxis();
+		y.setAutoRange(true);
+		y.setLowerBound(0);
 		double length = 0;
 		Point2D.Double prevPoint = null;
 		for (Point2D.Double p : this.projectionPath) {
@@ -75,11 +79,7 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 				length += prevPoint.distance(p);
 			prevPoint = p;
 		}	
-		x.setUpperBound(length);
-        ValueAxis y = chart.getXYPlot().getDomainAxis();
-        y.setAutoRange(true);
-        y.setLowerBound(0);
-        y.setUpperBound(240);
+		y.setUpperBound(length);
         XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) chart.getXYPlot().getRenderer();
         renderer.setBaseLinesVisible(true);
         renderer.setBaseShapesVisible(false);
@@ -247,28 +247,28 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 	public Number getX(int series, int item) {
 		if ((series < 0) || (series >= trajectories.size()))
 			return null;
-		return trajectories.get(series).getTime(item);
+		return trajectories.get(series).getDistance(item);
 	}
 
 	@Override
 	public double getXValue(int series, int item) {
 		if ((series < 0) || (series >= trajectories.size()))
 			return Double.NaN;
-		return (Double) trajectories.get(series).getTime(item);
+		return trajectories.get(series).getDistance(item);
 	}
 
 	@Override
 	public Number getY(int series, int item) {
 		if ((series < 0) || (series >= trajectories.size()))
 			return null;
-		return trajectories.get(series).getDistance(item);
+		return trajectories.get(series).getTime(item);
 	}
 
 	@Override
 	public double getYValue(int series, int item) {
 		if ((series < 0) || (series >= trajectories.size()))
 			return Double.NaN;
-		return trajectories.get(series).getDistance(item);
+		return (Double) trajectories.get(series).getTime(item);
 	}
 
 	@Override
