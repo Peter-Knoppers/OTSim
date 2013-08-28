@@ -122,6 +122,19 @@ public class ConsistencyCheck {
 			}
 				
 		}
+		// Check the existence of a ConflictRSU on all lanes leading to a merge
+		for (Lane lane : model.network) {
+			if (! lane.isMerge())
+				continue;
+			for (Lane mergingLane : lane.ups) {
+				int conflictRSUsFound = 0;
+				for (RSU rsu : mergingLane.RSUs)
+					if (rsu.noticeable && (rsu instanceof Conflict.conflictRSU))
+						conflictRSUsFound++;
+				if (conflictRSUsFound == 0)
+					throw new Exception("merging lane " + describeLane(mergingLane) + " has " + conflictRSUsFound + " ConflictRSUs (should be 1)");
+			}
+		}
 	}
 	
 	private static void checkPosition(Lane lane, RSU rsu, String rsuTypeName) throws Exception {
