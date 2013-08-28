@@ -601,6 +601,8 @@ public class Conflict {
             while ((j != null) && (! j.isMerge()))
                 j = j.up;
             // stopped as merge was found?
+            if ((null != j) && (210 == j.id))
+            	System.out.println("watch...");
             if ((j != null) && j.isMerge()) {
                 for (Lane k : j.ups) {
                     // find appropriate rsu on lane

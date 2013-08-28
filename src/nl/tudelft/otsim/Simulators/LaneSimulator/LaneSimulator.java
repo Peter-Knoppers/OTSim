@@ -148,48 +148,48 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         				else
         					lane.down = downLane;
         			}
-        			if (fields[i].equals("crossingYieldTo:"))  {
-        				int laneCrossID  = Integer.parseInt(fields[i+1]);
+        			if (fields[i].equals("crossingYieldTo:")) {
+        				int laneCrossID  = Integer.parseInt(fields[i + 1]);
         				Lane crossLane = lookupLane(laneCrossID, microNetwork);
         				Conflict.createCrossing(lane, crossLane, true);
         			}
-        			if (fields[i].equals("mergingYieldTo:"))  {
-        				int laneMergeID  = Integer.parseInt(fields[i+1]);
+        			if (fields[i].equals("mergingYieldTo:")) {
+        				int laneMergeID  = Integer.parseInt(fields[i + 1]);
         				Lane mergeLane = lookupLane(laneMergeID, microNetwork);
         				Conflict.createMerge(lane, mergeLane);
         			}
-        			if (fields[i].equals("right:"))  {
-        				int right = Integer.parseInt(fields[i+1]);
+        			if (fields[i].equals("right:")) {
+        				int right = Integer.parseInt(fields[i + 1]);
         				Lane rightLane = lookupLane(right, microNetwork);
         				lane.right = rightLane;
         			}
-        			if (fields[i].equals("left:"))  {
-        				int left = Integer.parseInt(fields[i+1]);
+        			if (fields[i].equals("left:")) {
+        				int left = Integer.parseInt(fields[i + 1]);
         				Lane leftLane = lookupLane(left, microNetwork);
         				lane.left = leftLane;
         			}
-        			if (fields[i].equals("goRight:"))  {
-        				String goRight =fields[i+1];
+        			if (fields[i].equals("goRight:")) {
+        				String goRight = fields[i + 1];
         				lane.goRight = Boolean.parseBoolean(goRight);
         			}
-        			if (fields[i].equals("goLeft:"))  {
-        				String goLeft =fields[i+1];
+        			if (fields[i].equals("goLeft:")) {
+        				String goLeft = fields[i + 1];
         				lane.goLeft = Boolean.parseBoolean(goLeft);
         			}
-        			if (fields[i].equals("origin:"))  {
-        				int origin = Integer.parseInt(fields[i+1]);
+        			if (fields[i].equals("origin:")) {
+        				int origin = Integer.parseInt(fields[i + 1]);
         				lane.origin = origin;
         			}
-        			if (fields[i].equals("destination:"))  {
-        				int destination = Integer.parseInt(fields[i+1]);
+        			if (fields[i].equals("destination:")) {
+        				int destination = Integer.parseInt(fields[i + 1]);
         				lane.destination = destination; 
         			}
         			i = i + 2;
         		}
         		// detect conflicts
-        		if (lane.downs.size() >= 2)  {
+        		if (lane.downs.size() >= 2) {
         			int itel = 0;
-        			for (Lane down : lane.downs)   {
+        			for (Lane down : lane.downs) {
         				itel++;
         				for (int jj = itel; jj < lane.downs.size(); jj++)
         					Conflict.createSplit(down, lane.downs.get(jj));

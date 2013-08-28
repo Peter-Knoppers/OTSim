@@ -532,31 +532,31 @@ public class Lane {
         java.util.ArrayList<RSU> out = new java.util.ArrayList<RSU>();
         Lane atLane = this;
         double searchRange = 0;
-        while (atLane!=null && searchRange<=range) {
+        while ((null != atLane) && (searchRange <= range)) {
             // Loop all RSUs on this lane
-            for (int i=0; i<atLane.RSUcount(); i++) {
-                if (atLane.getRSU(i).noticeable && xAdj(atLane)+atLane.getRSU(i).x>startX 
-                        && xAdj(atLane)+atLane.getRSU(i).x-startX<=range) {
+            for (int i = 0; i < atLane.RSUcount(); i++) {
+                if (atLane.getRSU(i).noticeable && (xAdj(atLane) + atLane.getRSU(i).x > startX) 
+                        && (xAdj(atLane) + atLane.getRSU(i).x - startX <= range)) {
                     out.add(atLane.getRSU(i));
                     // Add additional RSUs at the same location
                     double xRsu = atLane.getRSU(i).x();
                     i++;
-                    while (i<atLane.RSUcount() && atLane.getRSU(i).x()==xRsu) {
+                    while ((i < atLane.RSUcount()) && (atLane.getRSU(i).x() == xRsu)) {
                         out.add(atLane.getRSU(i));
                         i++;
                     }
                     return out;
                 }
                 // Update search range and quit if possible
-                searchRange = xAdj(atLane)+atLane.getRSU(i).x-startX;
-                if (searchRange>range)
+                searchRange = xAdj(atLane) + atLane.getRSU(i).x - startX;
+                if (searchRange > range)
                     return out;
             }
             // If no noticeable RSUs, move to next lane
             atLane = atLane.down;
             // Update searchRange at start of new lane
-            if (atLane!=null)
-                searchRange = xAdj(atLane)-startX;
+            if (null != atLane)
+                searchRange = xAdj(atLane) - startX;
         }
         return out;
     }
