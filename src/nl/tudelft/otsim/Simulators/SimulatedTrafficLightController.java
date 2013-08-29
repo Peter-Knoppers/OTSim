@@ -151,7 +151,6 @@ public class SimulatedTrafficLightController implements Step, ShutDownAble {
 		if (null == clientSocket) {
 			if (null == program) { 
 				// create a totally dumb fixed time controller
-				System.out.println("hello world");
 				final double yellowTime = 3;
 				final double greenTime = 12;
 				final double clearanceTime = 1;
