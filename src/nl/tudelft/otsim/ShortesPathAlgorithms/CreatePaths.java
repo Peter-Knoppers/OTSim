@@ -20,7 +20,7 @@ public class CreatePaths {
      */
     private static final long MEGABYTE = 1024L * 1024L;
 
-    public static long bytesToMegabytes(long bytes) {
+    private static long bytesToMegabytes(long bytes) {
       return bytes / MEGABYTE;
     }
     
@@ -79,8 +79,7 @@ public class CreatePaths {
 	        if (ii > 50) {
 	        	ii = 0;
 		    	System.out.println("done  " + node.getNodeID());
-		        System.out.println("Used memory is megabytes: "
-	            + bytesToMegabytes(memory));
+		        System.out.println("Used memory is megabytes: " + bytesToMegabytes(memory));
 		        long stopTime = System.currentTimeMillis();
 		        long elapsedTime = stopTime - startTime;
 		        System.out.println("Elapsed time: " + elapsedTime);
