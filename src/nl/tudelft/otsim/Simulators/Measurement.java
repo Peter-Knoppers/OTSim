@@ -53,14 +53,14 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 	private HashMap<SimulatedObject, Integer> indices = new HashMap<SimulatedObject, Integer>();
 	private ArrayList<Trajectory> trajectories = new ArrayList<Trajectory>();
 	private transient EventListenerList listenerList = new EventListenerList();
-	DatasetGroup datasetGroup = null;
-	final javax.swing.JTabbedPane tabbedPaneGraphs;
+	private DatasetGroup datasetGroup = null;
+	private final javax.swing.JTabbedPane tabbedPaneGraphs;
 	private double distanceGranularity = 10.0; 		// [m]
 	private double timeGranularity = 2;				// [s]
 	private double minimumTimeRange = 600.0;		// [s]
-    private final double distanceRange;
+    private final double distanceRange;				// [m]
     private double timeRange = minimumTimeRange;	// [s]
-    XYPlot speedPlot;
+    private ArrayList<XYPlot> contourPlots = new ArrayList<XYPlot>();
 
 	/**
 	 * Create a new Measurement.
@@ -109,7 +109,13 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
         cp.setFillZoomRectangle(true);
         cp.setMouseWheelEnabled(true);
 		tabbedPaneGraphs.addTab("Trajectories", cp);
-		
+		contourGraph(tabbedPaneGraphs, "Speed contour graph", new SpeedDataSet(), 0, 40, 150, Color.RED, Color.YELLOW, Color.GREEN);
+		contourGraph(tabbedPaneGraphs, "Flow contour graph", new FlowDataSet(), 0, 1000, 3000, Color.RED, Color.YELLOW, Color.GREEN);
+		contourGraph(tabbedPaneGraphs, "Density contour graph", new DensityDataSet(), 0, 30, 100, Color.GREEN, Color.YELLOW, Color.RED);
+		setVisible(true);
+	}
+	
+	private void contourGraph (javax.swing.JTabbedPane parent, String name, XYZDataset dataset, double lowValue, double niceValue, double highValue, Color lowColor, Color niceColor, Color highColor) {
         NumberAxis xAxis = new NumberAxis("Time");
         xAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
         xAxis.setLowerMargin(0.0);
@@ -122,11 +128,12 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
         blockRenderer.setBlockHeight(distanceGranularity);
         blockRenderer.setBlockWidth(timeGranularity);
         blockRenderer.setBlockAnchor(RectangleAnchor.BOTTOM_LEFT);
-        double[] boundaries = { 0, 10,  50};
-        Color[] boundaryColors = { Color.RED, Color.YELLOW, Color.GREEN};
+        double[] boundaries = { lowValue, niceValue, highValue};
+        Color[] boundaryColors = { lowColor, niceColor, highColor};
         PaintScale scale = new ColorPaintScale(boundaries, boundaryColors);
         blockRenderer.setPaintScale(scale);
-        speedPlot = new XYPlot(createSpeedDataset(), xAxis, yAxis, blockRenderer);
+        XYPlot speedPlot = new XYPlot(dataset, xAxis, yAxis, blockRenderer);
+        contourPlots.add(speedPlot);
         speedPlot.setBackgroundPaint(Color.lightGray);
         speedPlot.setDomainGridlinesVisible(false);
         speedPlot.setRangeGridlinePaint(Color.white);
@@ -135,137 +142,184 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
         new StandardChartTheme("JFree").apply(chart);
         chart.removeLegend();
         chart.setBackgroundPaint(Color.white);
-        cp = new ChartPanel(chart);
-        tabbedPaneGraphs.addTab("Speed contours", cp);
-        System.out.println(String.format (Main.locale, "Block size %.2f x %.2f", blockRenderer.getBlockWidth(), blockRenderer.getBlockHeight()));
-
-		setVisible(true);
+        ChartPanel chartPanel = new ChartPanel(chart);
+        chartPanel.setFillZoomRectangle(true);
+        chartPanel.setMouseWheelEnabled(true);
+        parent.addTab(name, chartPanel);
 	}
 	
-    private XYZDataset createSpeedDataset() {
-        return new XYZDataset() {
-            @Override
-			public int getSeriesCount() {
-                return 1;
-            }
-            
-            private int distances() {
-            	return (int) Math.ceil(distanceRange / distanceGranularity);
-            }
-            
-            private int times() {
-            	return (int) Math.ceil(timeRange / timeGranularity);
-            }
-            @Override
-			public int getItemCount(int series) {
-            	return distances() * times();
-            }
-            @Override
-			public Number getX(int series, int item) {
-                return new Double(getXValue(series, item));
-            }
-            @Override
-			public double getXValue(int series, int item) {
-            	return item / distances() * timeGranularity;
-            }
-            @Override
-			public Number getY(int series, int item) {
-                return new Double(getYValue(series, item));
-            }
-            @Override
-			public double getYValue(int series, int item) {
-                return item % distances() * distanceGranularity;
-            }
-            @Override
-			public Number getZ(int series, int item) {
-                return new Double(getZValue(series, item));
-            }
-            @Override
-			public double getZValue(int series, int item) {
-                double t = getXValue(series, item);
-                double distance = getYValue(series, item);
-                double sumSpeed = 0;
-                int count = 0;
-                try {
-					for (Trajectory trajectory : trajectories) {
-						int step = trajectory.getItem(t + timeGranularity) - (int) (timeGranularity / trajectory.timeStep);
-						if (step < 0)
-							continue;
-						double trajectoryDistance = trajectory.getDistance(step);
-						if (Double.isNaN(trajectoryDistance))
-							continue;
-						if (trajectoryDistance > distance + distanceGranularity)
-							continue;
-						double endDistance = trajectory.getDistance(step + (int) (timeGranularity / trajectory.timeStep));
-						if (Double.isNaN(endDistance))
-							continue;
-						if (endDistance < distance)
-							continue;
-						double prevT = t;
-						while (trajectory.getTime(++step) <= t + timeGranularity) {
-							double nextTrajectoryDistance = trajectory.getDistance(step + 1);
-							if (Double.isNaN(nextTrajectoryDistance))
-								continue;
-							double thisT = trajectory.getTime(step);
-							double speed = (nextTrajectoryDistance - trajectoryDistance) / (thisT - prevT);
-							sumSpeed += speed;
-							count++;
-							trajectoryDistance = nextTrajectoryDistance;
-							prevT = thisT;
-						}
-					}
-				} catch (ConcurrentModificationException e) {
-					; // Ignore
-				}
-                if (0 == count)
-                	return Double.NaN;
-                return sumSpeed / count;
-                /*
-                double r = Math.sqrt((x * x + y * y) / 50);
-                // Sync function
-                if (0 == r)
-                	return 1;
-                return (Math.sin(r) / r);
-                //return Math.sin(Math.sqrt(x * x + y * y) / 5.0);
-                 */
-            }
-        	@Override
-        	public void addChangeListener(DatasetChangeListener listener) {
-        		listenerList.add(DatasetChangeListener.class, listener);
-        	}
+	abstract class ContourDataSet implements XYZDataset {
+        @Override
+		public int getSeriesCount() {
+            return 1;
+        }
+        
+        private int distances() {
+        	return (int) Math.ceil(distanceRange / distanceGranularity);
+        }
+        
+        private int times() {
+        	return (int) Math.ceil(timeRange / timeGranularity);
+        }
+        
+        @Override
+		public int getItemCount(int series) {
+        	return distances() * times();
+        }
+        @Override
+		public Number getX(int series, int item) {
+            return new Double(getXValue(series, item));
+        }
+        
+        @Override
+		public double getXValue(int series, int item) {
+        	return item / distances() * timeGranularity;
+        }
+        
+        @Override
+		public Number getY(int series, int item) {
+            return new Double(getYValue(series, item));
+        }
+        
+        @Override
+		public double getYValue(int series, int item) {
+            return item % distances() * distanceGranularity;
+        }
+        
+        @Override
+		public Number getZ(int series, int item) {
+            return new Double(getZValue(series, item));
+        }
+        
+        @Override
+    	public void addChangeListener(DatasetChangeListener listener) {
+    		listenerList.add(DatasetChangeListener.class, listener);
+    	}
 
-        	@Override
-        	public void removeChangeListener(DatasetChangeListener listener) {
-        		listenerList.remove(DatasetChangeListener.class, listener);
-        	}
-        	
-            @Override
-			public DatasetGroup getGroup() {
-                return null;
-            }
-            
-            @Override
-			public void setGroup(DatasetGroup group) {
-                // ignore
-            }
-            
-            @Override
-			public Comparable<String> getSeriesKey(int series) {
-                return "speed";
-            }
-            
-            @SuppressWarnings("rawtypes")
-			@Override
-			public int indexOf(Comparable seriesKey) {
-                return 0;
-            }
-            
-            @Override
-			public DomainOrder getDomainOrder() {
-                return DomainOrder.ASCENDING;
-            }        
-        };
-    }
+    	@Override
+    	public void removeChangeListener(DatasetChangeListener listener) {
+    		listenerList.remove(DatasetChangeListener.class, listener);
+    	}
+    	
+        @Override
+		public DatasetGroup getGroup() {
+            return null;
+        }
+        
+        @Override
+		public void setGroup(DatasetGroup group) {
+            // ignore
+        }
+        
+        @Override
+		public Comparable<String> getSeriesKey(int series) {
+            return "speed";
+        }
+        
+        @SuppressWarnings("rawtypes")
+		@Override
+		public int indexOf(Comparable seriesKey) {
+            return 0;
+        }
+        
+        @Override
+		public DomainOrder getDomainOrder() {
+            return DomainOrder.ASCENDING;
+        }        
+		
+	}
+	
+	class SpeedDataSet extends ContourDataSet {
+        @Override
+		public double getZValue(int series, int item) {
+            double t = getXValue(series, item);
+            double distance = getYValue(series, item);
+            double sumDistance = 0;
+            double sumTimeSpent = 0;
+			try {
+				for (Trajectory trajectory : trajectories) {
+					java.awt.geom.Point2D.Double[] clippedTrajectory = trajectory.clipTrajectory(t, t + timeGranularity, distance, distance + distanceGranularity);
+					if ((null == clippedTrajectory) || (0 == clippedTrajectory.length) || Double.isNaN(clippedTrajectory[0].y) || (Double.isNaN(clippedTrajectory[clippedTrajectory.length - 1].y)))
+						continue;
+					java.awt.geom.Point2D.Double prevPoint = null;
+					for (java.awt.geom.Point2D.Double p : clippedTrajectory) {
+						if (null != prevPoint) {
+							sumTimeSpent += p.x - prevPoint.x;
+							sumDistance += p.y - prevPoint.y;
+						}
+						prevPoint = p;
+					}
+				}
+			} catch (java.util.ConcurrentModificationException e) {
+				System.err.println("Caught ConcurrentModificationException");
+			}
+			return 3600 / 1000 * sumDistance / sumTimeSpent;
+			// returns NaN if sumTimeSpent == 0 and sumDistance == 0 which is good
+        }
+    			
+	}
+	
+	class FlowDataSet extends ContourDataSet {
+        @Override
+		public double getZValue(int series, int item) {
+            double t = getXValue(series, item);
+            double distance = getYValue(series, item);
+            double sumDistance = 0;
+            boolean dataUsed = false;
+			try {
+				for (Trajectory trajectory : trajectories) {
+					java.awt.geom.Point2D.Double[] clippedTrajectory = trajectory.clipTrajectory(t, t + timeGranularity, distance, distance + distanceGranularity);
+					if ((null == clippedTrajectory) || (0 == clippedTrajectory.length) || Double.isNaN(clippedTrajectory[0].y) || (Double.isNaN(clippedTrajectory[clippedTrajectory.length - 1].y)))
+						continue;
+					java.awt.geom.Point2D.Double prevPoint = null;
+					for (java.awt.geom.Point2D.Double p : clippedTrajectory) {
+						if (null != prevPoint) {
+							sumDistance += p.y - prevPoint.y;
+							dataUsed = true;
+						}
+						prevPoint = p;
+					}
+				}
+			} catch (java.util.ConcurrentModificationException e) {
+				System.err.println("Caught ConcurrentModificationException");
+			}
+			if (! dataUsed)
+				return Double.NaN;
+			return 3600 * sumDistance / timeGranularity / distanceGranularity;
+        }
+
+	}
+	
+	class DensityDataSet extends ContourDataSet {
+        @Override
+		public double getZValue(int series, int item) {
+            double t = getXValue(series, item);
+            double distance = getYValue(series, item);
+            double sumTime = 0;
+            boolean dataUsed = false;
+			try {
+				for (Trajectory trajectory : trajectories) {
+					java.awt.geom.Point2D.Double[] clippedTrajectory = trajectory.clipTrajectory(t, t + timeGranularity, distance, distance + distanceGranularity);
+					if ((null == clippedTrajectory) || (0 == clippedTrajectory.length) || Double.isNaN(clippedTrajectory[0].y) || (Double.isNaN(clippedTrajectory[clippedTrajectory.length - 1].y)))
+						continue;
+					java.awt.geom.Point2D.Double prevPoint = null;
+					for (java.awt.geom.Point2D.Double p : clippedTrajectory) {
+						if (null != prevPoint) {
+							sumTime += p.x - prevPoint.x;
+							dataUsed = true;
+						}
+						prevPoint = p;
+					}
+				}
+			} catch (java.util.ConcurrentModificationException e) {
+				System.err.println("Caught ConcurrentModificationException");
+			}
+			if (! dataUsed)
+				return Double.NaN;
+			return 1000 * sumTime / timeGranularity / distanceGranularity;
+        }
+		
+	}
 
 	@Override
 	public boolean step(double now) {
@@ -312,7 +366,8 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 		}
 		notifyListeners(new DatasetChangeEvent(this, null));	// This guess work actually works!
 		if (0 == now % timeGranularity)
-			speedPlot.notifyListeners(new PlotChangeEvent(speedPlot));
+			for (XYPlot plot : contourPlots)
+				plot.notifyListeners(new PlotChangeEvent(plot));
 		scheduler.enqueueEvent(now + 1, this);
 		return true;
 	}
@@ -364,6 +419,25 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 			return p.getX();
 		}
 		
+		public double getEstimatedDistance(int item) {
+			double result = getDistance(item);
+			if (! Double.isNaN(result))
+				return result;
+			int prevItem = item - 1;
+			double prevDistance = Double.NaN;
+			while ((prevItem >= 0) && (Double.isNaN(prevDistance)))
+				prevDistance = getDistance(--prevItem);
+			double nextDistance = Double.NaN;
+			int nextItem = item + 1;
+			while ((nextItem < size()) && (Double.isNaN(nextDistance)))
+				nextDistance = getDistance(++nextItem);
+			if (Double.isNaN(prevDistance))
+				return nextDistance;
+			if (Double.isNaN(nextDistance))
+				return prevDistance;
+			return (prevDistance + (item - prevItem) * (nextDistance - prevDistance) / (nextItem - prevItem));
+		}
+		
 		public int getItem(double time) {
 			time -= startTime;
 			if (time < 0)
@@ -373,6 +447,47 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 				return -1;
 			return step;
 		}
+		
+		public java.awt.geom.Point2D.Double[] clipTrajectory(double minTime, double maxTime, double minDistance, double maxDistance) {
+			if (startTime > maxTime)
+				return null;
+			if (startTime + timeStep * size() < minTime)
+				return null;
+			// Time-intersection is non-null
+			int startSample = (int) Math.round((minTime - startTime) / timeStep);
+			int endSample = (int) Math.round((maxTime - startTime) / timeStep);
+			while (startSample <= endSample) {
+				if (getEstimatedDistance(startSample + 1) > minDistance)
+					break;
+				startSample++;
+			}
+			while (endSample >= startSample) {
+				if (getEstimatedDistance(endSample - 1) < maxDistance)
+					break;
+				endSample--;
+			}
+			int length = endSample - startSample + 1;
+			if (length < 2) {
+				//System.err.println("Start sample is " + getEstimatedDistance(startSample));
+				return null;
+				//throw new Error("oops; length is " + length);
+			}
+			java.awt.geom.Point2D.Double[] result = new java.awt.geom.Point2D.Double[length];
+			for (int sample = 0; sample < result.length; sample++)
+				result[sample] = new Point2D.Double(startTime + timeStep * (startSample + sample), getDistance(startSample + sample));
+			if (result[0].y < minDistance) {
+				double ratio = (minDistance - result[0].y) / (result[1].y - result[0].y);
+				result[0].x += ratio * timeStep;
+				result[0].y = minDistance;
+			}
+			if (result[result.length - 1].y > maxDistance) {
+				double ratio = (maxDistance - result[length - 2].y) / (result[length - 1].y - result[length - 2].y);
+				result[length - 1].x = result[length - 2].x + ratio * timeStep;
+				result[length - 1].y = maxDistance;
+			}
+			return result;
+		}
+
 	}
 
 	@Override
