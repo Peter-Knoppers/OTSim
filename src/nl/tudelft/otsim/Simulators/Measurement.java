@@ -3,24 +3,29 @@ package nl.tudelft.otsim.Simulators;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Paint;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.WindowConstants;
 import javax.swing.event.EventListenerList;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.LegendItem;
+import org.jfree.chart.LegendItemCollection;
 import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.event.PlotChangeEvent;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.PaintScale;
 import org.jfree.chart.renderer.xy.XYBlockRenderer;
@@ -37,6 +42,7 @@ import nl.tudelft.otsim.Events.Scheduler;
 import nl.tudelft.otsim.Events.Step;
 import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GUI.Main;
+import nl.tudelft.otsim.GUI.StatusBar;
 import nl.tudelft.otsim.SpatialTools.Planar;
 
 /**
@@ -44,7 +50,7 @@ import nl.tudelft.otsim.SpatialTools.Planar;
  * 
  * @author Peter Knoppers
  */
-public class Measurement extends JFrame implements Step, SimulatedObject, XYDataset, ShutDownAble {
+public class Measurement extends JFrame implements Step, SimulatedObject, XYDataset, ShutDownAble, MouseMotionListener {
 	private static final long serialVersionUID = 1L;
 	private final Point2D.Double[] area;
 	private final Point2D.Double[] projectionPath;
@@ -61,6 +67,8 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
     private final double distanceRange;				// [m]
     private double timeRange = minimumTimeRange;	// [s]
     private ArrayList<XYPlot> contourPlots = new ArrayList<XYPlot>();
+    private StatusBar statusBar;
+    private JLabel statusLabel;
 
 	/**
 	 * Create a new Measurement.
@@ -78,6 +86,8 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 		tabbedPaneGraphs = new javax.swing.JTabbedPane();
 		tabbedPaneGraphs.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
 		getContentPane().add(tabbedPaneGraphs, java.awt.BorderLayout.CENTER);
+		getContentPane().add(statusBar = new StatusBar(), java.awt.BorderLayout.SOUTH);
+		statusBar.addZone(StatusBar.DEFAULT_ZONE, statusLabel = new JLabel(), "*");
 
 		this.area = Planar.coordinatesToPoints(area.replaceAll("[()m,]", "").split(" "));
 		this.projectionPath = Planar.coordinatesToPoints(projectionPath.replaceAll("[()m,]", "").split(" "));
@@ -85,12 +95,12 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 		this.scheduler = scheduler;
 		scheduler.enqueueEvent(0, this);
         ChartFactory.setChartTheme(new StandardChartTheme("JFree/Shadow", true));
-		JFreeChart trajectoryChart = ChartFactory.createScatterPlot(name, "Distance", "Time", this, PlotOrientation.HORIZONTAL, false, false, false);
-        ValueAxis x = trajectoryChart.getXYPlot().getRangeAxis();
+		JFreeChart trajectoryChart = ChartFactory.createScatterPlot(name, "Time [s]", "Distance [m]", this, PlotOrientation.VERTICAL, false, false, false);
+        ValueAxis x = trajectoryChart.getXYPlot().getDomainAxis();
         x.setAutoRange(true);
         x.setLowerBound(0);
         x.setUpperBound(minimumTimeRange);
-		ValueAxis y = trajectoryChart.getXYPlot().getDomainAxis();
+		ValueAxis y = trajectoryChart.getXYPlot().getRangeAxis();
 		y.setAutoRange(true);
 		y.setLowerBound(0);
 		double length = 0;
@@ -108,19 +118,20 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 		ChartPanel cp = new ChartPanel(trajectoryChart);
         cp.setFillZoomRectangle(true);
         cp.setMouseWheelEnabled(true);
+        cp.addMouseMotionListener(this);
 		tabbedPaneGraphs.addTab("Trajectories", cp);
-		contourGraph(tabbedPaneGraphs, "Speed contour graph", new SpeedDataSet(), 0, 40, 150, Color.RED, Color.YELLOW, Color.GREEN);
-		contourGraph(tabbedPaneGraphs, "Flow contour graph", new FlowDataSet(), 0, 1000, 3000, Color.RED, Color.YELLOW, Color.GREEN);
-		contourGraph(tabbedPaneGraphs, "Density contour graph", new DensityDataSet(), 0, 30, 100, Color.GREEN, Color.YELLOW, Color.RED);
+		contourGraph(tabbedPaneGraphs, "Speed contour graph", new SpeedDataSet(), 0, 40, 150, Color.RED, Color.YELLOW, Color.GREEN, 20, "%.0f km/h");
+		contourGraph(tabbedPaneGraphs, "Flow contour graph", new FlowDataSet(), 0, 1000, 3000, Color.RED, Color.YELLOW, Color.GREEN, 500, "%.0f veh/h");
+		contourGraph(tabbedPaneGraphs, "Density contour graph", new DensityDataSet(), 0, 30, 100, Color.GREEN, Color.YELLOW, Color.RED, 10, "%.0f veh/km");
 		setVisible(true);
 	}
 	
-	private void contourGraph (javax.swing.JTabbedPane parent, String name, XYZDataset dataset, double lowValue, double niceValue, double highValue, Color lowColor, Color niceColor, Color highColor) {
-        NumberAxis xAxis = new NumberAxis("Time");
+	private void contourGraph (javax.swing.JTabbedPane parent, String name, XYZDataset dataset, double lowValue, double niceValue, double highValue, Color lowColor, Color niceColor, Color highColor, double step, String format) {
+        NumberAxis xAxis = new NumberAxis("Time [s]");
         xAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
         xAxis.setLowerMargin(0.0);
         xAxis.setUpperMargin(0.0);
-        NumberAxis yAxis = new NumberAxis("Distance");
+        NumberAxis yAxis = new NumberAxis("Distance [m]");
         yAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
         yAxis.setLowerMargin(0.0);
         yAxis.setUpperMargin(0.0);
@@ -130,25 +141,34 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
         blockRenderer.setBlockAnchor(RectangleAnchor.BOTTOM_LEFT);
         double[] boundaries = { lowValue, niceValue, highValue};
         Color[] boundaryColors = { lowColor, niceColor, highColor};
-        PaintScale scale = new ColorPaintScale(boundaries, boundaryColors);
+        PaintScale scale = new ColorPaintScale(format, boundaries, boundaryColors);
         blockRenderer.setPaintScale(scale);
-        XYPlot speedPlot = new XYPlot(dataset, xAxis, yAxis, blockRenderer);
-        contourPlots.add(speedPlot);
-        speedPlot.setBackgroundPaint(Color.lightGray);
-        speedPlot.setDomainGridlinesVisible(false);
-        speedPlot.setRangeGridlinePaint(Color.white);
+        XYPlot xyPlot = new XYPlot(dataset, xAxis, yAxis, blockRenderer);
+        contourPlots.add(xyPlot);
+        xyPlot.setBackgroundPaint(Color.lightGray);
+        xyPlot.setDomainGridlinesVisible(false);
+        xyPlot.setRangeGridlinePaint(Color.white);
+        LegendItemCollection legend = new LegendItemCollection();
+        for (int i = 0; ; i++) {
+        	double value = lowValue + i * step;
+        	if (value > highValue)
+        		break;
+        	legend.add(new LegendItem(String.format(Main.locale, format, value), scale.getPaint(value)));
+        }
+        xyPlot.setFixedLegendItems(legend);
         // Apply the settings that the ChartFactory applies to the scatterPlot 
-        JFreeChart chart = new JFreeChart(name, JFreeChart.DEFAULT_TITLE_FONT, speedPlot, false);
+        JFreeChart chart = new JFreeChart(name, JFreeChart.DEFAULT_TITLE_FONT, xyPlot, true);
         new StandardChartTheme("JFree").apply(chart);
-        chart.removeLegend();
         chart.setBackgroundPaint(Color.white);
         ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setFillZoomRectangle(true);
         chartPanel.setMouseWheelEnabled(true);
+        chartPanel.addMouseMotionListener(this);
         parent.addTab(name, chartPanel);
 	}
 	
 	abstract class ContourDataSet implements XYZDataset {
+		// Implements everything except getZValue.
         @Override
 		public int getSeriesCount() {
             return 1;
@@ -211,11 +231,6 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
             // ignore
         }
         
-        @Override
-		public Comparable<String> getSeriesKey(int series) {
-            return "speed";
-        }
-        
         @SuppressWarnings("rawtypes")
 		@Override
 		public int indexOf(Comparable seriesKey) {
@@ -256,6 +271,12 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 			return 3600 / 1000 * sumDistance / sumTimeSpent;
 			// returns NaN if sumTimeSpent == 0 and sumDistance == 0 which is good
         }
+
+		@SuppressWarnings("rawtypes")
+		@Override
+		public Comparable getSeriesKey(int series) {
+			return "speed";
+		}
     			
 	}
 	
@@ -288,6 +309,12 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 			return 3600 * sumDistance / timeGranularity / distanceGranularity;
         }
 
+		@SuppressWarnings("rawtypes")
+		@Override
+		public Comparable getSeriesKey(int series) {
+			return "flow";
+		}
+
 	}
 	
 	class DensityDataSet extends ContourDataSet {
@@ -318,6 +345,12 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 				return Double.NaN;
 			return 1000 * sumTime / timeGranularity / distanceGranularity;
         }
+
+		@SuppressWarnings("rawtypes")
+		@Override
+		public Comparable getSeriesKey(int series) {
+			return "density";
+		}
 		
 	}
 
@@ -438,14 +471,31 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 			return (prevDistance + (item - prevItem) * (nextDistance - prevDistance) / (nextItem - prevItem));
 		}
 		
-		public int getItem(double time) {
-			time -= startTime;
-			if (time < 0)
-				return -1;
-			int step = (int) (time / timeStep);
-			if (step > path.size())
-				return -1;
-			return step;
+		public java.awt.geom.Point2D.Double getEstimatedPosition(double time) {
+			if (time < startTime)
+				return null;
+			if (time > startTime + path.size() * timeStep)
+				return null;
+			int baseStep = (int) Math.floor((time - startTime) / timeStep);
+			if (baseStep < 0)
+				baseStep = 0;
+			int nextStep;
+			for (nextStep = baseStep + 1; nextStep < path.size(); nextStep++)
+				if (null != path.get(nextStep))
+					break;
+			if (nextStep >= path.size())
+				return null;
+			while (baseStep >= 0) {
+				if (null != path.get(baseStep))
+					break;
+				baseStep--;
+			}
+			if (baseStep < 0)
+				return null;
+			double ratio = ((time - startTime) / timeStep - baseStep) / (nextStep - baseStep);
+			Point2D.Double p0 = path.get(baseStep);
+			Point2D.Double p1 = path.get(nextStep);
+			return new Point2D.Double (p0.x + (p1.x - p0.x) * ratio, p0.y + (p1.y - p0.y)* ratio);
 		}
 		
 		public java.awt.geom.Point2D.Double[] clipTrajectory(double minTime, double maxTime, double minDistance, double maxDistance) {
@@ -555,28 +605,28 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 	public Number getX(int series, int item) {
 		if ((series < 0) || (series >= trajectories.size()))
 			return null;
-		return trajectories.get(series).getDistance(item);
+		return trajectories.get(series).getTime(item);
 	}
 
 	@Override
 	public double getXValue(int series, int item) {
 		if ((series < 0) || (series >= trajectories.size()))
 			return Double.NaN;
-		return trajectories.get(series).getDistance(item);
+		return trajectories.get(series).getTime(item);
 	}
 
 	@Override
 	public Number getY(int series, int item) {
 		if ((series < 0) || (series >= trajectories.size()))
 			return null;
-		return trajectories.get(series).getTime(item);
+		return trajectories.get(series).getDistance(item);
 	}
 
 	@Override
 	public double getYValue(int series, int item) {
 		if ((series < 0) || (series >= trajectories.size()))
 			return Double.NaN;
-		return trajectories.get(series).getTime(item);
+		return trajectories.get(series).getDistance(item);
 	}
 
 	@Override
@@ -585,11 +635,12 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 	}
 	
 	private class ColorPaintScale implements PaintScale {
-
 		private double[] bounds;
 		private Color[] boundColors;
+		final String format;
 		
-		ColorPaintScale(double bounds[], Color boundColors[]) {
+		ColorPaintScale(String format, double bounds[], Color boundColors[]) {
+			this.format = format;
 			if (bounds.length < 2)
 				throw new Error("bounds must have >= 2 entries");
 			if (bounds.length != boundColors.length)
@@ -602,7 +653,7 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 		}
 		@Override
 		public double getLowerBound() {
-			return -1;
+			return bounds[0];
 		}
 
 		private int mixComponent (double ratio, int low, int high) {
@@ -633,9 +684,86 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 
 		@Override
 		public double getUpperBound() {
-			return 1;
+			return bounds[bounds.length - 1];
 		}
 
+	}
+
+	@Override
+	public void mouseDragged(MouseEvent arg0) {
+	}
+
+	@Override
+	public void mouseMoved(MouseEvent mouseEvent) {
+		ChartPanel cp = (ChartPanel) mouseEvent.getSource();
+		XYPlot plot = (XYPlot) cp.getChart().getPlot();
+		boolean showCrossHair = cp.getScreenDataArea().contains(mouseEvent.getPoint());
+		if (cp.getHorizontalAxisTrace() != showCrossHair) {
+			cp.setHorizontalAxisTrace(showCrossHair);
+			cp.setVerticalAxisTrace(showCrossHair);
+			plot.notifyListeners(new PlotChangeEvent(plot));
+		}
+		if (showCrossHair) {
+			Point2D p = cp.translateScreenToJava2D(mouseEvent.getPoint());
+			PlotRenderingInfo pi = cp.getChartRenderingInfo().getPlotInfo();
+			double t = plot.getDomainAxis().java2DToValue(p.getX(), pi.getDataArea(), plot.getDomainAxisEdge());
+			double distance = plot.getRangeAxis().java2DToValue(p.getY(), pi.getDataArea(), plot.getRangeAxisEdge()); 
+			XYDataset dataset = plot.getDataset();
+			String value = "";
+			if (dataset instanceof XYZDataset) {
+				for (int item = dataset.getItemCount(0); --item >= 0; ) {
+					double x = dataset.getXValue(0,  item);
+					if ((x + timeGranularity < t) || (x >= t))
+						continue;
+					double y = dataset.getYValue(0, item);
+					if ((y + distanceGranularity < distance) || (y >= distance))
+						continue;
+					double valueUnderMouse = ((XYZDataset) dataset).getZValue(0, item);
+					if (Double.isNaN(valueUnderMouse))
+						continue;
+					String format = ((ColorPaintScale) (((XYBlockRenderer) (plot.getRenderer(0))).getPaintScale())).format;
+					value = String.format(Main.locale, ": " + format, valueUnderMouse);
+				}
+			} else {	// must be on the trajectory graph
+				double bestDistance = Double.MAX_VALUE;
+				Trajectory bestTrajectory = null;
+				final int mousePrecision = 5;
+				java.awt.geom.Point2D.Double mousePoint = new java.awt.geom.Point2D.Double(t, distance);
+				double lowTime = plot.getDomainAxis().java2DToValue(p.getX() - mousePrecision, pi.getDataArea(), plot.getDomainAxisEdge()) - 1;
+				double highTime = plot.getDomainAxis().java2DToValue(p.getX() + mousePrecision, pi.getDataArea(), plot.getDomainAxisEdge()) + 1;
+				double lowDistance = plot.getRangeAxis().java2DToValue(p.getY() + mousePrecision, pi.getDataArea(), plot.getRangeAxisEdge()) - 20;
+				double highDistance = plot.getRangeAxis().java2DToValue(p.getY() - mousePrecision, pi.getDataArea(), plot.getRangeAxisEdge()) + 20;
+				//System.out.println(String.format("Searching area t[%.1f-%.1f], x[%.1f,%.1f]", lowTime, highTime, lowDistance, highDistance));
+				for (Trajectory trajectory : trajectories) {
+					java.awt.geom.Point2D.Double[] clippedTrajectory = trajectory.clipTrajectory(lowTime, highTime, lowDistance, highDistance);
+					if (null == clippedTrajectory)
+						continue;
+					java.awt.geom.Point2D.Double prevPoint = null;
+					for (java.awt.geom.Point2D.Double trajectoryPoint : clippedTrajectory) {
+						if (null != prevPoint) {
+							double thisDistance = Planar.distancePolygonToPoint(clippedTrajectory, mousePoint);
+							if (thisDistance < bestDistance) {
+								bestDistance = thisDistance;
+								bestTrajectory = trajectory;
+							}
+						}
+						prevPoint = trajectoryPoint;
+					}
+				}
+				if (null != bestTrajectory) {
+					for (SimulatedObject so : indices.keySet())
+						if (trajectories.get(indices.get(so)) == bestTrajectory) {
+							Point2D.Double bestPosition = bestTrajectory.getEstimatedPosition(t);
+							if (null == bestPosition)
+								continue;
+							value = String.format(Main.locale, ": vehicle %s; location on measurement path at t=%.1fs: longitudinal %.1fm, lateral %.1fm", so.toString(), t, bestPosition.x, bestPosition.y);
+						}
+				} else
+					value = "";
+			}
+			statusLabel.setText(String.format(Main.locale, "t=%.0fs, distance=%.0fm%s", t, distance, value));
+		} else
+			statusLabel.setText(" ");		
 	}
 
 }
