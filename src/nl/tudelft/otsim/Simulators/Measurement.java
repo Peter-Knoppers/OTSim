@@ -46,7 +46,7 @@ import nl.tudelft.otsim.GUI.StatusBar;
 import nl.tudelft.otsim.SpatialTools.Planar;
 
 /**
- * Runtime counterpart of a {@link MeasurementPlan}.
+ * Runtime counterpart of a {@link nl.tudelft.otsim.Charts.MeasurementPlan}.
  * 
  * @author Peter Knoppers
  */
@@ -168,7 +168,7 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 	}
 	
 	abstract class ContourDataSet implements XYZDataset {
-		// Implements everything except getZValue.
+		// Implements everything except getZValue and getSeriesKey.
         @Override
 		public int getSeriesCount() {
             return 1;
@@ -267,6 +267,7 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 				}
 			} catch (java.util.ConcurrentModificationException e) {
 				System.err.println("Caught ConcurrentModificationException");
+				// This happens when another Trajectory gets added while we're iterating through the set
 			}
 			return 3600 / 1000 * sumDistance / sumTimeSpent;
 			// returns NaN if sumTimeSpent == 0 and sumDistance == 0 which is good
@@ -303,6 +304,7 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 				}
 			} catch (java.util.ConcurrentModificationException e) {
 				System.err.println("Caught ConcurrentModificationException");
+				// This happens when another Trajectory gets added while we're iterating through the set
 			}
 			if (! dataUsed)
 				return Double.NaN;
@@ -340,6 +342,7 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 				}
 			} catch (java.util.ConcurrentModificationException e) {
 				System.err.println("Caught ConcurrentModificationException");
+				// This happens when another Trajectory gets added while we're iterating through the set
 			}
 			if (! dataUsed)
 				return Double.NaN;

@@ -40,7 +40,7 @@ public class DijkstraAlgorithm {
 	}
 	
 	/**
-	 * Run the Dijkstra algorithm to compute routes and distances to a specific {@Link Node}.
+	 * Run the Dijkstra algorithm to compute routes and distances to a specific {@link Node}.
 	 * @param nodeA {@link Node}; the Node to compute the routes and distances for 
 	 */
 	public void execute(Node nodeA) {
@@ -106,8 +106,8 @@ public class DijkstraAlgorithm {
 	}
 
 	/**
-	 * Create a path (a set of {@Link Link Links} connecting a set of {@link Node Nodes}. 
-	 * @param path LinkedList&lt;{@link NOde}&gt;; the set of Nodes.
+	 * Create a path (a set of {@link Link Links} connecting a set of {@link Node Nodes}. 
+	 * @param path LinkedList&lt;{@link Node}&gt;; the set of Nodes.
 	 * @return LinkedList&lt;{@link Link}&gt;; the list of Links that form the path
 	 */
 	public LinkedList<Link> getPathLinks(LinkedList<Node> path) {

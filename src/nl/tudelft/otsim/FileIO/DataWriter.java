@@ -27,7 +27,7 @@ public class DataWriter {
     /**
      * Write a {@link Model} in Paramics format.
      * @param pathName String; directory where the files will be stored
-     * @param model {@Link Model}; the model that must be written
+     * @param model {@link Model}; the model that must be written
      * @throws IOException
      */
     public static void WriteData(String pathName, Model model) throws IOException {
