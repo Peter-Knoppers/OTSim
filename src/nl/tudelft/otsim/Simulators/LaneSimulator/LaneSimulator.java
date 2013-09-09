@@ -384,15 +384,11 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
     		lanes.add(hiddenLane);
     	}
     	System.out.println("mergeCount is " + mergeCount);
-    	if (null == laneOrigin)
-    		System.err.println("Oops: Not creating a generator for a null lane");
-    	else {
-			Generator generator = new Generator(laneOrigin, Generator.distribution.EXPONENTIAL);
-			generator.routes = routeEnds;
-			generator.routeProb = probabilities;
-			generator.setClassProbabilities(new double[] { 0.9, 0.1 });
-			generator.setDemand(flow);
-    	}
+		Generator generator = new Generator(laneOrigin, Generator.distribution.EXPONENTIAL);
+		generator.routes = routeEnds;
+		generator.routeProb = probabilities;
+		generator.setClassProbabilities(new double[] { 0.9, 0.1 });
+		generator.setDemand(flow);
 	}
 	
 	static Lane lookupLane(int id, ArrayList<Lane> lanes) {

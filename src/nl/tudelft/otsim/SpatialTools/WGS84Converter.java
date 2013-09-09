@@ -1,7 +1,5 @@
 package nl.tudelft.otsim.SpatialTools;
 
-import java.awt.geom.Point2D;
-
 /**
  * This class will contain conversions from WGS (World Geodetic System) to
  * local coordinate systems (and possibly the reverse transforms as well).
