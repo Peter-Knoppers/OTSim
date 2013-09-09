@@ -26,9 +26,9 @@ public class Population {
 	}
 
 	public void addPersonTripPlan(String locationList, int personID, int patternID) {
-		String[] splitted = locationList.split("\\s");
+		String[] fields = locationList.split("\\s");
 		ArrayList<Integer> locList = new ArrayList<Integer>();
-		for (String location : splitted)
+		for (String location : fields)
 			locList.add(Integer.parseInt(location));
 		this.personTripPlanList.add(new PersonTripPlan(this, locList, personID, patternID));
 	}

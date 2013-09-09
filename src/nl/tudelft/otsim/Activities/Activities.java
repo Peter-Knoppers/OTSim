@@ -27,6 +27,7 @@ public class Activities {
 		
 	}
 
+	// TODO (NEVER USED); document, or remove
 	public void addActivityType(String name, String building, String startTime,
 			String varianceStartTime, String timeWindowStart,
 			String timeWindowEnd, String duration) {
@@ -40,6 +41,7 @@ public class Activities {
 		
 	}
 	
+	// TODO (NEVER USED); document, or remove
 	public void addActivityTypePattern(int ID, String activityNames) {
 		String[] splitted = activityNames.split("\\s");
 		ArrayList<String> activityList = new ArrayList<String>();

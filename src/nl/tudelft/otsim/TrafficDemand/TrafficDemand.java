@@ -57,7 +57,7 @@ public class TrafficDemand implements Storable {
 	
 	public void rebuild() {
 		if (this.tripPatternList != null)
-			createLocationToNodesList(this.tripPatternList);
+			createLocationToNodesList();
 	}
 
 	/**
@@ -69,7 +69,7 @@ public class TrafficDemand implements Storable {
 	 * {@link Node} objects
 	 * @param tripPatternList
 	 */
-	public void createLocationToNodesList(ArrayList<TripPattern> tripPatternList)   {
+	private void createLocationToNodesList()   {
 		/*		
 		 * Initially a list of TripPatterns is read with an ordered list of activity locations
 		 * This method connects the locations to nodes in the network
