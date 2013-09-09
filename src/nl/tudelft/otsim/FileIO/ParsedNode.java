@@ -89,7 +89,7 @@ public class ParsedNode {
 				String reduced = event.asCharacters().getData().trim();
 				if (reduced.length() == 0)
 					break;
-				addData(event.asCharacters().getData());
+				this.value = event.asCharacters().getData();
 				break;
 				
 			case XMLStreamConstants.START_DOCUMENT:
@@ -127,10 +127,6 @@ public class ParsedNode {
 			siblings = new ArrayList<ParsedNode>();
 		siblings.add(node);
 		subNodes.put(key, siblings);
-	}
-	
-	private void addData(String newValue) {
-		this.value = newValue;
 	}
 	
 	/**
