@@ -5,13 +5,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import nl.tudelft.otsim.FileIO.ParsedNode;
-import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.GeoObjects.CrossSection;
 import nl.tudelft.otsim.GeoObjects.CrossSectionElement;
 import nl.tudelft.otsim.GeoObjects.Link;
 import nl.tudelft.otsim.GeoObjects.Network;
 import nl.tudelft.otsim.GeoObjects.RoadMarkerAlong;
-import nl.tudelft.otsim.GeoObjects.TurnArrow;
 import nl.tudelft.otsim.GeoObjects.Vertex;
 import nl.tudelft.otsim.SpatialTools.DutchRD;
 import nl.tudelft.otsim.SpatialTools.WGS84Converter;

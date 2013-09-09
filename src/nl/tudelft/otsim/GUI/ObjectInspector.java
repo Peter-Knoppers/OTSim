@@ -332,7 +332,6 @@ public class ObjectInspector extends JFrame implements TreeSelectionListener, Fo
 			if ("ArrayList".equals(caption)) {
 				// Add all elements of the ArrayList to the tree
 				ArrayList<?> al = (ArrayList<?>) resultObject;
-				int i = 0;
 				for (Object o : al) {
 					//System.out.println("adding ArrayList element " + i++ + ": " + o.toString());
 					add(new InspectorTreeNode(reduceTypeName(o.getClass().getCanonicalName()), resultObject, o));

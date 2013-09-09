@@ -63,7 +63,7 @@ public class ParsedNode {
 			throw firstException;
 	}
 	
-	private void expand (XMLEventReader er, String name, Location location) throws XMLStreamException {
+	private void expand (XMLEventReader er, String eventName, Location location) throws XMLStreamException {
 		while (er.hasNext()) {
 			XMLEvent event = er.nextEvent();
 			switch(event.getEventType()) {
@@ -105,7 +105,7 @@ public class ParsedNode {
 				throw new Error("Do not know how to handle XMLStream event " + event.getEventType() + " near " + event.getLocation());
 			}
 		}
-		throw new Error("Unexpected EOF in event " + name + " started at " + location);		
+		throw new Error("Unexpected EOF in event " + eventName + " started at " + location);		
 	}
 	
 	private ParsedNode(XMLEventReader er, String name, Location location) throws XMLStreamException {

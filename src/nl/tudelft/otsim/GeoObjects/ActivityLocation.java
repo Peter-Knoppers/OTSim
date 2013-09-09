@@ -10,7 +10,6 @@ import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GUI.InputValidator;
 
 public class ActivityLocation extends Vertex implements XML_IO {
-	private static final long serialVersionUID = 1L;
 	/** Name for an ActivityLocation element when stored in XML format */
 	public static final String XMLTAG = "activityLocation";
 	
@@ -207,6 +206,7 @@ public class ActivityLocation extends Vertex implements XML_IO {
 	 * Paint this ActivityLocation on a {@link GraphicsPanel}.
 	 * @param graphicsPanel {@link GraphicsPanel}; the painting surface
 	 */
+	@Override
 	public void paint(GraphicsPanel graphicsPanel) {
         final int nonSelectedActivityLocationDiameter = 8;
         final int selectedActivityLocationDiameter = 25;

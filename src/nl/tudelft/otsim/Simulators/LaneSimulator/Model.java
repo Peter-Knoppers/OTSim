@@ -541,7 +541,7 @@ public class Model {
                 f = new java.io.File(settings.getString("outputDir"));
             else
                 f = new java.io.File(settings.getString("outputDir"), subPath);
-            boolean ok = f.mkdir();
+            f.mkdir();
             java.io.FileOutputStream fos;
             if (subPath==null || subPath.isEmpty())
                 fos = new java.io.FileOutputStream(settings.getString("outputDir") + "/" + fileName);

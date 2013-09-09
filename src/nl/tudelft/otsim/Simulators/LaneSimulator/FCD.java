@@ -65,7 +65,7 @@ public class FCD {
      * @param obj Object that is the field in underlying FCD object.
      * @return Primitive representation of non-primitive field.
      */
-    public Object asPrimitive(java.lang.String field, Object obj) {
+    public static Object asPrimitive(java.lang.String field, Object obj) {
         if (field.equals("lane"))
             return ((Lane) obj).id;
         return null;
