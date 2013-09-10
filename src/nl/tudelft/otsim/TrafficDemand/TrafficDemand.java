@@ -1,7 +1,11 @@
 package nl.tudelft.otsim.TrafficDemand;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import nl.tudelft.otsim.Activities.ConnectZones;
 import nl.tudelft.otsim.FileIO.ParsedNode;
@@ -14,6 +18,7 @@ import nl.tudelft.otsim.GeoObjects.MicroZone;
 import nl.tudelft.otsim.GeoObjects.Node;
 import nl.tudelft.otsim.ShortesPathAlgorithms.Path;
 import nl.tudelft.otsim.SpatialTools.SpatialQueries;
+import nl.tudelft.otsim.Utilities.Sorter;
 
 /**
  * Traffic Demand: describes the characteristics of trip patterns that arise from the activities by the population
@@ -28,6 +33,7 @@ public class TrafficDemand implements Storable {
 	
 	private Model model;
 	private ArrayList<TripPattern> tripPatternList = new ArrayList<TripPattern>();
+	private HashMap<String, TrafficClass> trafficClasses = new HashMap<String, TrafficClass>();
 	/** To identify  a Zone in the XML file with the description of TripPatterns */
 	public static final String ZONE_PREFIX = "z";
 	/** To identify  an Activity Location in the XML file with the description of TripPatterns */
@@ -42,6 +48,16 @@ public class TrafficDemand implements Storable {
     public TrafficDemand(Model model) {
 		this.model = model;
 	}
+    
+    /**
+     * Look up a {@link TrafficClass}.
+     * @param name String; name of the {@link TrafficClass}
+     * @return {@link TrafficClass}; the TrafficClass with the specified name, 
+     * or null if no TrafficClass with the specified name exists
+     */
+    public TrafficClass lookupTrafficClass(String name) {
+    	return trafficClasses.get(name);
+    }
 	
 	public TrafficDemand(Model model, ArrayList<TripPattern> tripPatternList) {
 		this.model = model;
@@ -51,6 +67,14 @@ public class TrafficDemand implements Storable {
 	public TrafficDemand(Model model, ParsedNode demandRoot) throws Exception {
 		this.model = model;
 		//System.out.print(demandRoot.toString(""));
+		double sumFractions = 0;
+		for (int index = 0; index < demandRoot.size(TrafficClass.XMLTAG); index++) {
+			TrafficClass tc = new TrafficClass(demandRoot.getSubNode(TrafficClass.XMLTAG, index));
+			trafficClasses.put(tc.getName(), tc);
+			sumFractions += tc.getDefaultFraction();
+		}
+		if ((trafficClasses.size() > 0) && (Math.abs(sumFractions - 1.0) > 0.0001))
+			throw new Exception("Sum of " + TrafficClass.XMLTAG + " probabilities is not 1.0");
 		for (int index = 0; index < demandRoot.size(TripPattern.XMLTAG); index++)
 			tripPatternList.add(new TripPattern(this, demandRoot.getSubNode(TripPattern.XMLTAG, index)));
 	}
@@ -292,10 +316,21 @@ public class TrafficDemand implements Storable {
 	@Override
 	public boolean writeXML(StaXWriter staXWriter) {
 		return staXWriter.writeNodeStart(XMLTAG)
+				&& writeTrafficClassesXML(staXWriter)
 				&& writeTripPatternsXML(staXWriter)
 				&& staXWriter.writeNodeEnd(XMLTAG);
 		// TODO Should also write the ActivityLocationIDList of the tripPattern
 		
+	}
+
+	private boolean writeTrafficClassesXML(StaXWriter staXWriter) {
+		System.out.println("classnames is " + trafficClasses.keySet());
+		for (String name : Sorter.asSortedList(trafficClasses.keySet())) {
+			System.out.println("writing TrafficClass " + name);
+			if (! trafficClasses.get(name).writeXML(staXWriter))
+				return false;
+		}
+		return true;
 	}
 
 	@Override
@@ -328,6 +363,14 @@ public class TrafficDemand implements Storable {
 	@Override
 	public void setStorageName(String name) {
 		fileName = name;
+	}
+
+	/**
+	 * Retrieve the set of names of the defined (@link TrafficClass TrafficClasses}.
+	 * @return Set&lt;String&gt;; the set of names of the defined {@link TrafficClass TrafficClasses}
+	 */
+	public Set<String> trafficClassNames() {
+		return trafficClasses.keySet();
 	}
 
 }

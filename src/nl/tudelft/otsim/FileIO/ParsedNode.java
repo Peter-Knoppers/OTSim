@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import javax.xml.stream.Location;
@@ -32,6 +33,8 @@ public class ParsedNode {
 	public final int lineNumber;
 	/** ColumnNumber in the line in the XML file that defined this ParsedNode */
 	public final int columnNumber;
+	/** Parent node if this ParsedNoded */
+	public final ParsedNode parent;
 	
 	/**
 	 * Create a tree from an XML file.
@@ -41,6 +44,7 @@ public class ParsedNode {
 	public ParsedNode(String fileName) throws Exception {
 		name = fileName;
 		lineNumber = columnNumber = -1;
+		parent = null;
 		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 		InputStream in = null;
 		Exception firstException = null;
@@ -70,7 +74,7 @@ public class ParsedNode {
 			case XMLStreamConstants.START_ELEMENT:
 				String childName = event.asStartElement().getName().getLocalPart();
 				//System.out.println("Adding child \"" + childName + "\"");
-				ParsedNode newNode = new ParsedNode(er, childName, event.getLocation());
+				ParsedNode newNode = new ParsedNode(er, childName, this, event.getLocation());
 				for (@SuppressWarnings("unchecked")
 				Iterator<Attribute> it = event.asStartElement().getAttributes(); it.hasNext(); ) {
 					Attribute attr = it.next();
@@ -108,7 +112,7 @@ public class ParsedNode {
 		throw new Error("Unexpected EOF in event " + eventName + " started at " + location);		
 	}
 	
-	private ParsedNode(XMLEventReader er, String name, Location location) throws XMLStreamException {
+	private ParsedNode(XMLEventReader er, String name, ParsedNode parent, Location location) throws XMLStreamException {
 		this.name = name;
 		if (null == location)
 			lineNumber = columnNumber = -1;
@@ -116,6 +120,7 @@ public class ParsedNode {
 			lineNumber = location.getLineNumber();
 			columnNumber = location.getColumnNumber();
 		}
+		this.parent = parent;
 		expand(er, name, location);
 	}
 	
@@ -245,6 +250,31 @@ public class ParsedNode {
 	 */
 	public String toString(String prefix) {
 		return toString (prefix, Integer.MAX_VALUE);
+	}
+	
+	/**
+	 * Retrieve the name of this tree of ParsedNodes.
+	 * @return String; the name of the tree
+	 */
+	public String treeName() {
+		ParsedNode parentNode = this;
+		while (null != parentNode.parent)
+			parentNode = parentNode.parent;
+		return parentNode.name;
+	}
+	
+	private static String lineOrColumn (int number) {
+		if (-1 == number)
+			return "";
+		return "." + number;
+	}
+	
+	/**
+	 * Return a description of this ParsedNode to be used in diagnostics.
+	 * @return String; description of this ParsedNode
+	 */
+	public String description() {
+		return String.format(Locale.US,  "%s%s%s", treeName(), lineOrColumn(lineNumber), lineOrColumn(columnNumber));
 	}
 
 }
