@@ -2,13 +2,18 @@ package nl.tudelft.otsim.FileIO;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.DTD;
 
 import nl.tudelft.otsim.GUI.WED;
+import nl.tudelft.otsim.Utilities.Sorter;
 
 /**
  * Write to an XML file.
@@ -57,11 +62,32 @@ public class StaXWriter {
 	 * @return Boolean; true on success; false if some error occurred
 	 */
 	public boolean writeNodeStart(String name) {
+		return writeNodeStart(name, null);
+	}
+	
+	private ArrayList<Attribute> buildAttributeList (HashMap<String, String> map) {
+		ArrayList<Attribute> result = new ArrayList<Attribute>();
+		for (String key : Sorter.asSortedList(map.keySet()))
+			result.add(eventFactory.createAttribute(key, map.get(key)));
+		return result;
+	}
+	
+	/**
+	 * Write a start node with attributes to the XML file.
+	 * <br > Exactly one end node should be written for each start node
+	 * @param name String; tag of the start node
+	 * @param attributes HashMap&lt;String, String&gt;; the list of attributes for the start node; may be null
+	 * @return Boolean; true on success; false if some error occurred
+	 */
+	public boolean writeNodeStart(String name, HashMap<String, String> attributes) {
 		if (errorOccurred)
 			return false;
 		try {
 			writeIndent();
-			eventWriter.add(eventFactory.createStartElement("", "", name));
+			if (null == attributes)
+				eventWriter.add(eventFactory.createStartElement("", "", name));
+			else
+				eventWriter.add(eventFactory.createStartElement("", "", name, buildAttributeList(attributes).iterator(), null));
 			eventWriter.add(lineEnd);
 			nestingLevel++;
 		} catch (XMLStreamException e) {
@@ -103,13 +129,27 @@ public class StaXWriter {
 	 * @return Boolean; true on success, false if some error occurred
 	 */
 	public boolean writeNode(String name, String value) {
+		return (writeNode(name, null, value));
+	}
+	
+	/**
+	 * Write a node with attributes and only one value and no embedded XML elements.
+	 * @param name String; tag of the node
+	 * @param attributes HashMap&lt;String, String&gt;; the list of attributes for the start node; may be null
+	 * @param value String; value of the node
+	 * @return Boolean; true on success, false if some error occurred
+	 */
+	public boolean writeNode(String name, HashMap<String, String> attributes, String value) {
 		if (errorOccurred)
 			return false;
 		try {
 			// Write indentation
 			writeIndent();
 			// Create start node
-			eventWriter.add(eventFactory.createStartElement("", "", name));
+			if (null == attributes)
+				eventWriter.add(eventFactory.createStartElement("", "", name));
+			else
+				eventWriter.add(eventFactory.createStartElement("", "", name, buildAttributeList(attributes).iterator(), null));
 			// Create content of the node
 			eventWriter.add(eventFactory.createCharacters(value));
 			// Create end node
@@ -184,84 +224,4 @@ public class StaXWriter {
 			eventWriter.add(tab);		
 	}
 	
-	/**
-	 * Save the Demand of a traffic Model to a file. 
-	 * @param fileName String; name of the file
-	 * @param model Model; traffic model with the demand data to write
-	 * @throws Exception
-	 */
-	/*
-	public static void saveDemand(String fileName, Model model) throws Exception {
-		XMLEventWriter eventWriter = null;
-		FileOutputStream fileOutputStream = null;
-		try {
-			nestingLevel = 0;
-			// Create a XMLOutputFactory
-			XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
-			// Create XMLEventWriter
-			fileOutputStream = new FileOutputStream(fileName);
-			eventWriter = outputFactory.createXMLEventWriter(fileOutputStream);
-			// Create a EventFactory
-			XMLEventFactory eventFactory = XMLEventFactory.newInstance();
-			// Create and write Start Tag
-			StartDocument startDocument = eventFactory.createStartDocument();
-			eventWriter.add(startDocument);
-			eventWriter.add(eventFactory.createDTD("\n"));
-			addStartElement(eventWriter, TrafficDemand.TrafficDemand.XMLTAG);
-			// Write the tripPatternList
-			for (TripPattern tripPattern : model.trafficDemand.getTripPatternList()) {
-				addStartElement(eventWriter, TripPattern.XMLTAG);
-					if (tripPattern.getMovingPerson() != null) {
-						addNode(eventWriter, TripPattern.XML_PERSONID, Integer.toString(tripPattern.getMovingPerson().getID()));
-					}
-					addNode(eventWriter, TripPattern.XML_NUMBEROFTRIPS, Double.toString(tripPattern.getNumberOfTrips()));
-					//TODO Guus make it correct 
-					//if (tripPattern.getActivityLocationIDList() != null)  { 
-					//	for (Integer ID : tripPattern.getActivityLocationIDList())  {
-					//		addNode(eventWriter, TripPattern.XML_activityID, Integer.toString(ID));
-					//	}					
-					//}
-				addEndElement(eventWriter, TripPattern.XMLTAG);
-			}
-			addEndElement(eventWriter, TrafficDemand.TrafficDemand.XMLTAG);
-			eventWriter.add(eventFactory.createEndDocument());
-		} finally {
-			if (null != eventWriter)
-				eventWriter.close();
-			if (null != fileOutputStream)
-				fileOutputStream.close();
-		}
-	}
-	
-	private static void addStartElement(XMLEventWriter eventWriter, String tag) throws XMLStreamException {
-		writeIndent(eventWriter);
-		XMLEventFactory eventFactory = XMLEventFactory.newInstance();
-		eventWriter.add(eventFactory.createStartElement("", "", tag));
-		eventWriter.add(eventFactory.createDTD("\n"));
-		nestingLevel++;
-	}
-	
-	private static void addEndElement(XMLEventWriter eventWriter, String tag) throws XMLStreamException {
-		nestingLevel--;
-		writeIndent(eventWriter);
-		XMLEventFactory eventFactory = XMLEventFactory.newInstance();
-		eventWriter.add(eventFactory.createEndElement("", "", tag));
-		eventWriter.add(eventFactory.createDTD("\n"));
-	}
-
-	private static void addNode(XMLEventWriter eventWriter, String name, String value) throws XMLStreamException {
-		// Write indentation
-		writeIndent(eventWriter);
-		// Create start node
-		XMLEventFactory eventFactory = XMLEventFactory.newInstance();
-		eventWriter.add(eventFactory.createStartElement("", "", name));
-		// Create content of the node
-		eventWriter.add(eventFactory.createCharacters(value));
-		// Create end node
-		eventWriter.add(eventFactory.createEndElement("", "", name));
-		// Write line termination
-		eventWriter.add(eventFactory.createDTD("\n"));
-	}
-	*/
-
 }
