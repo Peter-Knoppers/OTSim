@@ -8,7 +8,7 @@ import nl.tudelft.otsim.GUI.GraphicsPanel;
  * This class is the base for all road markings, detectors, traffic lights.
  * @author Peter Knoppers
  */
-public abstract class CrossSectionObject implements XML_IO {
+public abstract class CrossSectionObject implements XML_IO, Comparable<CrossSectionObject> {
 	final static int LateralReferenceEntireWidth = 4;
 	protected double longitudinalPosition = Double.NaN;
 	protected double longitudinalLength = Double.NaN;
@@ -22,8 +22,8 @@ public abstract class CrossSectionObject implements XML_IO {
 	/**
 	 * Retrieve the longitudinal position of this CrossSectionObject. Negative 
 	 * values mean that the position is measured from the end of the
-	 * {@link CrossSectionElement} that owns this StopLine). The value NaN
-	 * indicates that this CrossSectionObject does not have a longitudinal
+	 * {@link CrossSectionElement} that owns this CrossSectionObject). The value 
+	 * NaN indicates that this CrossSectionObject does not have a longitudinal
 	 * position.
 	 * <br /> If this CrossSectionObject has a valid 
 	 * {@link #longitudinalRepeat}, the longitudinal position returned applies
@@ -34,6 +34,17 @@ public abstract class CrossSectionObject implements XML_IO {
 	 */
 	public double getLongitudinalPosition() {
 		return longitudinalPosition;
+	}
+	
+	/**
+	 * Retrieve the effective longitudinalPosition of this CrossSectionObject
+	 * (adjusting negative values to their effective position).
+	 * @return Double; the longitudinalPosition of this CrossSectionObject
+	 */
+	public double getEffectiveLongitudinalPosition() {
+		if (longitudinalPosition >= 0)
+			return longitudinalPosition;
+		return longitudinalPosition + longitudinalLength;
 	}
 	
 	/** 
@@ -134,5 +145,24 @@ public abstract class CrossSectionObject implements XML_IO {
 	 */
 	@Override
 	public abstract boolean writeXML(StaXWriter staxWriter);
+	
+
+	@Override
+	public int compareTo(CrossSectionObject other) {
+		double positionDifference = getEffectiveLongitudinalPosition() - other.getEffectiveLongitudinalPosition();
+		if (positionDifference > 0)
+			return 1;
+		else if (positionDifference < 0)
+			return -1;
+		double lateralDifference = lateralPosition - other.lateralPosition;
+		if (lateralDifference > 0)
+			return 1;
+		else if (lateralDifference < 0)
+			return -1;
+		int classDifference = getClass().getName().compareTo(other.getClass().getName());
+		//if (classDifference != 0)
+			return classDifference;
+		//return toString().compareTo(other.toString());
+	}
 	
 }

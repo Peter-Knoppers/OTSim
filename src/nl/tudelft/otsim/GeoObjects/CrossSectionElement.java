@@ -5,6 +5,7 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.TreeSet;
 
 import nl.tudelft.otsim.FileIO.ParsedNode;
@@ -14,6 +15,7 @@ import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GUI.InputValidator;
 import nl.tudelft.otsim.SpatialTools.Planar;
 import nl.tudelft.otsim.Utilities.Reversed;
+import nl.tudelft.otsim.Utilities.Sorter;
 
 /**
  * A CrossSectionElement describes the surface of one lateral component in a
@@ -495,12 +497,17 @@ public class CrossSectionElement implements XML_IO {
 	 * CrossSectionObjects of this CrossSectionEleement that have the specified 
 	 * type
 	 */
-	public ArrayList<CrossSectionObject> getCrossSectionObjects(Class<?> klass) {
+	public List<CrossSectionObject> getCrossSectionObjects(Class<?> klass) {
 		ArrayList<CrossSectionObject> result = new ArrayList<CrossSectionObject> ();
 		for (CrossSectionObject cso : objects)
 			if (klass.isInstance(cso))
 				result.add(cso);
-		return result;
+		if (result.size() > 1) {
+			System.out.println("before sorting: " + result.toString());
+			List<CrossSectionObject> sorted = Sorter.asSortedList(result);
+			System.out.println("after sorting : " + sorted.toString());
+		}
+		return Sorter.asSortedList(result);
 	}
 	
 	/**
@@ -511,7 +518,7 @@ public class CrossSectionElement implements XML_IO {
 	 * @return ArrayList&lt;{@link CrossSectionObject}&gt; the list of all
 	 * CrossSectionObjects of this CrossSectionElement
 	 */
-	public ArrayList<CrossSectionObject> getCrossSectionObjects_r() {
+	public List<CrossSectionObject> getCrossSectionObjects_r() {
 		return getCrossSectionObjects(CrossSectionObject.class);
 	}
 	
@@ -758,9 +765,9 @@ public class CrossSectionElement implements XML_IO {
      */
     public void fixLaneJump(CrossSectionElement prevCSE) {
     	// retrieve the lanes from the previous (upstream) crossSection
-    	ArrayList<CrossSectionObject> prevCSECSO = prevCSE.getCrossSectionObjects(Lane.class);
+    	List<CrossSectionObject> prevCSECSO = prevCSE.getCrossSectionObjects(Lane.class);
     	// retrieve the lanes from the current crossSection
-    	ArrayList<CrossSectionObject> curCSO = getCrossSectionObjects(Lane.class);
+    	List<CrossSectionObject> curCSO = getCrossSectionObjects(Lane.class);
     	// is there an increase (or decrease: negative value) of the number of lanes?
     	int increaseOfLanes = curCSO.size() - prevCSECSO.size();
     	connectUnequalSections(prevCSE, prevCSECSO,  curCSO, increaseOfLanes);
@@ -774,7 +781,7 @@ public class CrossSectionElement implements XML_IO {
 		downLane.addUpLane(upLane);
     }
     
-    private static void ConnectLanes(ArrayList<CrossSectionObject> prevCSECSO, ArrayList<CrossSectionObject> curCSO, int prev, int current)   {
+    private static void ConnectLanes(List<CrossSectionObject> prevCSECSO, List<CrossSectionObject> curCSO, int prev, int current)   {
 		// all lanes of two crossSections are connected to each other: 
 		// 		prevLane(0) with curLane(0)
 		// 		prevLane(1) with curLane(1)  ... etc.
@@ -787,9 +794,9 @@ public class CrossSectionElement implements XML_IO {
     	}
     }
     
-    private static void connectUnequalSections(CrossSectionElement prevCSE, ArrayList<CrossSectionObject> prevCSECSO, ArrayList<CrossSectionObject> curCSO, int increaseOfLanes)   {
-    	ArrayList<CrossSectionObject> wide;
-    	ArrayList<CrossSectionObject> narrow;
+    private static void connectUnequalSections(CrossSectionElement prevCSE, List<CrossSectionObject> prevCSECSO, List<CrossSectionObject> curCSO, int increaseOfLanes)   {
+    	List<CrossSectionObject> wide;
+    	List<CrossSectionObject> narrow;
     	if (increaseOfLanes <= 0) {
     		wide = prevCSECSO;
     		narrow = curCSO;
@@ -888,7 +895,7 @@ public class CrossSectionElement implements XML_IO {
     }
 
     // Adjust geometry of vertices when number of lanes changes (narrow or widen)
-    public static void fixRoadMarkerPoint(ArrayList<CrossSectionObject> prevRMAList, ArrayList<CrossSectionObject> thisRMAList, ArrayList<CrossSectionObject> prevLanes, ArrayList<CrossSectionObject> thisLanes) { 
+    public static void fixRoadMarkerPoint(List<CrossSectionObject> prevRMAList, List<CrossSectionObject> thisRMAList, List<CrossSectionObject> prevLanes, List<CrossSectionObject> thisLanes) { 
     	ArrayList<Vertex> lpl = ((RoadMarkerAlong) prevRMAList.get(0)).getVertices();
     	if (null == lpl) {
     		System.err.println("Network.fixRoadMarkerPoint: rmaVertices is null");
@@ -1053,7 +1060,7 @@ public class CrossSectionElement implements XML_IO {
 			objects.add(lane);
 	}
 	
-	private static void createLaneVertices(ArrayList<CrossSectionObject> RMAList, ArrayList<CrossSectionObject> laneList)  {
+	private static void createLaneVertices(List<CrossSectionObject> RMAList, List<CrossSectionObject> laneList)  {
 		RoadMarkerAlong rmaPrev = null;
 		int j = 0;
 		for (CrossSectionObject cso : RMAList) {
