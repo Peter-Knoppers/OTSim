@@ -7,6 +7,7 @@ import nl.tudelft.otsim.FileIO.ParsedNode;
 import nl.tudelft.otsim.FileIO.StaXWriter;
 import nl.tudelft.otsim.FileIO.XML_IO;
 import nl.tudelft.otsim.GUI.InputValidator;
+import nl.tudelft.otsim.Utilities.Sorter;
 
 /**
  * This class connects a set of TrafficDetectors and a set of TrafficLights to 
@@ -97,7 +98,7 @@ public class TrafficLightController implements XML_IO {
 	}
 	
 	private boolean writeDetectors (StaXWriter staXWriter) {
-		for (String key : vehicleDetectors.keySet())
+		for (String key : Sorter.asSortedList(vehicleDetectors.keySet()))
 			if (! staXWriter.writeNode(XML_TRAFFICDETECTOR, key))
 				return false;
 		return true;
