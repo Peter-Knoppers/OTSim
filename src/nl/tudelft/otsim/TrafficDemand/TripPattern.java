@@ -202,5 +202,13 @@ public class TripPattern implements XML_IO {
 		}
 		return true;
 	}
+
+	/**
+	 * Add one {@link TripPatternPath} to this TripPattern.
+	 * @param tripPatternPath {@link TripPatternPath}; the TripPatternPath that must be added to this TripPattern
+	 */
+	public void addTripPatternPath(TripPatternPath tripPatternPath) {
+		tripPatternPathList.add(tripPatternPath);
+	}
 	
 }

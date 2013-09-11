@@ -9,7 +9,6 @@ import nl.tudelft.otsim.FileIO.ParsedNode;
 import nl.tudelft.otsim.FileIO.StaXWriter;
 import nl.tudelft.otsim.GeoObjects.Network;
 import nl.tudelft.otsim.Population.Population;
-import nl.tudelft.otsim.ShortesPathAlgorithms.CreatePaths;
 import nl.tudelft.otsim.TrafficDemand.TrafficDemand;
 
 /**
@@ -182,7 +181,6 @@ public class Model implements Storable {
 	 */
     public String exportToMicroSimulation() {
     	// Create the routes for all traffic demand
-    	CreatePaths.CreatePathsTripPatterns(network, trafficDemand.getTripPatternList());
     	//HashMap<Node, Double> tripsByNode = createTripsByNode(trafficDemand);
 		return network.exportLanes() 
 				+ trafficDemand.exportTripPattern()

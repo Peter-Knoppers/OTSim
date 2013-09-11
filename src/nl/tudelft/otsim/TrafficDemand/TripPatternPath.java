@@ -18,41 +18,29 @@ public class TripPatternPath {
 	private TripPattern tripPattern;
 	private double numberOfTrips;
 	private ArrayList<Node> nodeList;	
-	private ArrayList<Path> pathList;
+	private ArrayList<Path> pathList = new ArrayList<Path> ();
 
-	public TripPatternPath(TripPattern tripPattern, double numberOfTrips) {
-		this.tripPattern = tripPattern;
-		this.numberOfTrips = numberOfTrips;
-	}
-	
 	public TripPatternPath(TripPattern tripPattern, double numberOfTrips, ArrayList<Node> nodeList) {
 		this.tripPattern = tripPattern;
 		this.numberOfTrips = numberOfTrips;
 		this.setNodeList(nodeList);
 	}
 
-	public TripPatternPath(TripPattern tripPattern, double numberOfTrips, ArrayList<Node> nodeList, ArrayList<Path> pathList) {
-		this.tripPattern = tripPattern;
-		this.numberOfTrips = numberOfTrips;
-		this.setNodeList(nodeList);
-		this.pathList = pathList;
-	}
-	
 	public TripPattern getTripPattern() {
 		return tripPattern;
 	}
 
-	public void setTripPattern(TripPattern tripPattern) {
-		this.tripPattern = tripPattern;
-	}
+	//public void setTripPattern(TripPattern tripPattern) {
+	//	this.tripPattern = tripPattern;
+	//}
 
 	public double getNumberOfTrips() {
 		return numberOfTrips;
 	}
 
-	public void setNumberOfTrips(double numberOfTrips) {
-		this.numberOfTrips = numberOfTrips;
-	}
+	//public void setNumberOfTrips(double numberOfTrips) {
+	//	this.numberOfTrips = numberOfTrips;
+	//}
 
 	public ArrayList<Path> getPathList() {
 		return pathList;
@@ -64,10 +52,6 @@ public class TripPatternPath {
 
 	public void setNodeList(ArrayList<Node> nodeList) {
 		this.nodeList = nodeList;
-	}
-
-	public void clearPathList() {
-		pathList = new ArrayList<Path> ();
 	}
 
 	public void addPath(Path path) {

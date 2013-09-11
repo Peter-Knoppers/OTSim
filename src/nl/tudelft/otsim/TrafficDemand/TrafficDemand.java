@@ -2,6 +2,8 @@ package nl.tudelft.otsim.TrafficDemand;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -15,7 +17,9 @@ import nl.tudelft.otsim.GUI.Storable;
 import nl.tudelft.otsim.GUI.WED;
 import nl.tudelft.otsim.GeoObjects.ActivityLocation;
 import nl.tudelft.otsim.GeoObjects.MicroZone;
+import nl.tudelft.otsim.GeoObjects.Network;
 import nl.tudelft.otsim.GeoObjects.Node;
+import nl.tudelft.otsim.ShortesPathAlgorithms.DijkstraAlgorithm;
 import nl.tudelft.otsim.ShortesPathAlgorithms.Path;
 import nl.tudelft.otsim.SpatialTools.SpatialQueries;
 import nl.tudelft.otsim.Utilities.Sorter;
@@ -205,9 +209,8 @@ public class TrafficDemand implements Storable {
 				}
 				
 				tripPatternPath = new TripPatternPath(tripPattern,  weight * numberOfTrips, nodeList);
-				tripPatternPath.clearPathList();
 				// Create the associated Paths, with only the departing and arriving node
-				// the Path will be expanded later by the createShortestPath method
+				// the Paths will be expanded later by the createShortestPath method
 				Node prevNode = null;
 				for (Node node : nodeList) {
 					if (null != prevNode) {
@@ -218,7 +221,7 @@ public class TrafficDemand implements Storable {
 					}
 					prevNode = node;					
 				}
-				tripPattern.getTripPatternPathList().add(tripPatternPath);
+				tripPattern.addTripPatternPath(tripPatternPath);
 			}	
 		}
 	}
@@ -286,7 +289,8 @@ public class TrafficDemand implements Storable {
 	 * Export this TrafficDemand in textual form.
 	 * @return String; the textual representation of this TrafficDemand
 	 */
-    public String exportTripPattern() {    
+    public String exportTripPattern() {  
+    	CreatePathsTripPatterns();
     	String result = "";
         for (TripPattern tripPattern : getTripPatternList()) {
         	Double totalTrips = tripPattern.getNumberOfTrips();
@@ -365,5 +369,64 @@ public class TrafficDemand implements Storable {
 	public Set<String> trafficClassNames() {
 		return trafficClasses.keySet();
 	}
+	
+    /**
+     * Create paths between all pairs of nodes, if possible.
+     * Save the paths in a list of paths
+     */
+    private void CreatePathsTripPatterns() {
+    	class CompareNodeNumbers implements Comparator<Path> {
+			@Override
+			public int compare(Path path1, Path path2) {
+				return path1.getNodeList().get(0).getNodeID() - path2.getNodeList().get(0).getNodeID();
+			}
+		}
+    	
+    	// Generate a list of all paths from the tripPatternList
+    	ArrayList<Path> pathList = new ArrayList<Path>();
+		for (TripPattern tp : tripPatternList)
+			for (TripPatternPath tpp : tp.getTripPatternPathList())
+				pathList.addAll(tpp.getPathList());
+		// sort pathList by NodeID of start node
+		Collections.sort(pathList, new CompareNodeNumbers());
+		
+		DijkstraAlgorithm dijkstra = new DijkstraAlgorithm(model.network);
+		// Collect the starting nodes of all paths in pathList
+		ArrayList<Node> startNodes = new ArrayList<Node>();
+		Node prevNode = null;
+		for (Path path : pathList) {
+			Node startNode = path.getNodeList().get(0);
+			if ((null == prevNode) || (startNode.getNodeID() != prevNode.getNodeID()))
+				startNodes.add(startNode);
+			prevNode = startNode;
+		}
+		// TODO There is no need for ArrayList<Node> startNodes; the loop below 
+		// that uses one startNode at a time can be merged with the loop above 
+		// that generates the startNodes.
+        int pathIndex = 0;
+		for (Node startNode: startNodes) {
+	        // Find all routes from a certain node to all other nodes
+	        dijkstra.execute(startNode);
+	        
+	        while (pathIndex < pathList.size()) {
+	        	Path path = pathList.get(pathIndex);
+	        	if (path.getNodeList().get(0).getNodeID() > startNode.getNodeID())
+	        		break;
+	        	if (path.getNodeList().get(0).equals(startNode)) {
+			        Node toNode = path.getNodeList().get(path.getNodeList().size() - 1);
+			        Node fromNode = path.getNodeList().get(0);
+		        	if (fromNode.equals(startNode)) {
+		        		ArrayList<Node> getPath = dijkstra.getPathNodes(toNode);
+		        		if (getPath != null)
+		        			path.setNodeList(getPath);
+		        		else	// TODO Do you really want to continue when this happens???
+		        			System.out.println("no valid path found between " + fromNode.getNodeID() + " and " + toNode.getNodeID());
+		        	}
+				}
+	        	pathIndex++; 
+        	}
+        }
+    }
+
 
 }
