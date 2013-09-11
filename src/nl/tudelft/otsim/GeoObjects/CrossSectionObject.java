@@ -159,10 +159,7 @@ public abstract class CrossSectionObject implements XML_IO, Comparable<CrossSect
 			return 1;
 		else if (lateralDifference < 0)
 			return -1;
-		int classDifference = getClass().getName().compareTo(other.getClass().getName());
-		//if (classDifference != 0)
-			return classDifference;
-		//return toString().compareTo(other.toString());
+		return getClass().getName().compareTo(other.getClass().getName());
 	}
 	
 }

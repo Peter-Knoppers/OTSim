@@ -502,11 +502,6 @@ public class CrossSectionElement implements XML_IO {
 		for (CrossSectionObject cso : objects)
 			if (klass.isInstance(cso))
 				result.add(cso);
-		if (result.size() > 1) {
-			System.out.println("before sorting: " + result.toString());
-			List<CrossSectionObject> sorted = Sorter.asSortedList(result);
-			System.out.println("after sorting : " + sorted.toString());
-		}
 		return Sorter.asSortedList(result);
 	}
 	
@@ -1202,7 +1197,7 @@ public class CrossSectionElement implements XML_IO {
 		return staXWriter.writeNodeStart(XMLTAG)
 				&& staXWriter.writeNode(XML_NAME, getType_r())
 				&& staXWriter.writeNode(XML_WIDTH, Double.toString(getCrossSectionElementWidth()))
-				&& staXWriter.writeNode(XML_SPEEDLIMIT, getSpeedLimit_r())
+				&& ((! crossSectionElementTypology.getDrivable()) || staXWriter.writeNode(XML_SPEEDLIMIT, getSpeedLimit_r()))
 				&& writeCrossSectionObjectsXML(staXWriter)
 				&& staXWriter.writeNodeEnd(XMLTAG);
 	}
