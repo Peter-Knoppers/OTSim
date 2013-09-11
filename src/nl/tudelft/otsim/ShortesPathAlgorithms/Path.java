@@ -28,12 +28,6 @@ public class Path {
 	}
 
 	/**
-	 * Create an empty Path.
-	 */
-	public Path() {
-	}
-
-	/**
 	 * Retrieve the list of {@link Node Nodes} of this Path.
 	 * @return ArrayList&lt;{@link Node}&gt;; the Nodes of this Path
 	 */

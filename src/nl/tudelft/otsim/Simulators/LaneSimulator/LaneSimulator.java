@@ -331,8 +331,8 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         scheduler.enqueueEvent(0d, new Stepper(this));
 	}
 	
-	private void makeGenerator(ArrayList<Double> routeProbabilities, int node, ArrayList<Lane> lanes, ArrayList<ArrayList<Integer>> routes, double flow) {
-		System.out.println("Creating generator at node " + node + " flow " + flow);
+	private void makeGenerator(ArrayList<Double> routeProbabilities, int node, ArrayList<Lane> lanes, ArrayList<ArrayList<Integer>> routes, double numberOfTrips) {
+		System.out.println("Creating generator at node " + node + " flow " + numberOfTrips);
 		int routeCount = routeProbabilities.size();
 		double probabilities[] = new double[routeCount];
 		Route[] routeEnds = new Route[routeCount];
@@ -346,7 +346,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
     		int routeLength = routes.get(index).size();
     		endOfRoute[0] = routes.get(index).get(routeLength - 1);
     		routeEnds[index] = new Route(endOfRoute);
-    		probabilities[index] = routeProbabilities.get(index) / flow;
+    		probabilities[index] = routeProbabilities.get(index) / numberOfTrips;
     	}
     	int mergeCount = 0;
     	Lane priorityLane = null;
@@ -388,7 +388,8 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 		generator.routes = routeEnds;
 		generator.routeProb = probabilities;
 		generator.setClassProbabilities(new double[] { 0.9, 0.1 });
-		generator.setDemand(flow);
+		// TODO numberOfTrips must be converted to flow [veh/h]
+		generator.setDemand(numberOfTrips);
 	}
 	
 	static Lane lookupLane(int id, ArrayList<Lane> lanes) {

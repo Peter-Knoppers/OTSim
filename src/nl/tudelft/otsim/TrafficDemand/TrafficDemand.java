@@ -205,22 +205,18 @@ public class TrafficDemand implements Storable {
 				}
 				
 				tripPatternPath = new TripPatternPath(tripPattern,  weight * numberOfTrips, nodeList);
-				tripPatternPath.setPathList(new ArrayList<Path>());
+				tripPatternPath.clearPathList();
 				// Create the associated Paths, with only the departing and arriving node
-				// the complete Path will be included later by the createShortestPath method
-				Node oldNode = null;
-				for (int indexNode = 0; indexNode < nodeList.size(); indexNode++)  {				
-					Path path = new Path();
-					Node node = nodeList.get(indexNode);
-					if (indexNode > 0)  {
-						ArrayList<Node> pairOfNodes = new ArrayList<Node>();
-						pairOfNodes.add(oldNode);
-						pairOfNodes.add(node);
-						path.setNodeList(pairOfNodes);
-						path.setTripPatternPath(tripPatternPath);
-						tripPatternPath.getPathList().add(path);
+				// the Path will be expanded later by the createShortestPath method
+				Node prevNode = null;
+				for (Node node : nodeList) {
+					if (null != prevNode) {
+						ArrayList<Node> nodePair = new ArrayList<Node>(2);
+						nodePair.add(prevNode);
+						nodePair.add(node);
+						tripPatternPath.addPath(new Path(tripPatternPath, nodePair));
 					}
-					oldNode = node;					
+					prevNode = node;					
 				}
 				tripPattern.getTripPatternPathList().add(tripPatternPath);
 			}	
@@ -292,17 +288,17 @@ public class TrafficDemand implements Storable {
 	 */
     public String exportTripPattern() {    
     	String result = "";
-        for (TripPattern tripPattern : getTripPatternList())   {
+        for (TripPattern tripPattern : getTripPatternList()) {
         	Double totalTrips = tripPattern.getNumberOfTrips();
         	result += String.format(Locale.US, "TripPattern\tnumberOfTrips:\t%.2f\tLocationPattern:\t%s\n", totalTrips, tripPattern.getLocationList().toString());
-            for (TripPatternPath tripPatternPath : tripPattern.getTripPatternPathList())   {
+            for (TripPatternPath tripPatternPath : tripPattern.getTripPatternPathList()) {
             	double numberOfTrips = 0;
             	if (totalTrips > 0)
             		numberOfTrips = tripPatternPath.getNumberOfTrips();
             	result += String.format(Locale.US, "TripPatternPath\tnumberOfTrips:\t%.3f\tNodePattern:\t%s\n", numberOfTrips, tripPatternPath.getNodeList().toString());
 				int index = 0;
             	for (Path path : tripPatternPath.getPathList()) {
-		     		result += String.format("Path:\t%s\tnodes:", index);
+		     		result += String.format("Path:\t%d\tnodes:", index);
             		for (Node node : path.getNodeList())
 			     		result += String.format("\t%d", node.getNodeID());
     				result += "\n";
@@ -324,12 +320,9 @@ public class TrafficDemand implements Storable {
 	}
 
 	private boolean writeTrafficClassesXML(StaXWriter staXWriter) {
-		System.out.println("classnames is " + trafficClasses.keySet());
-		for (String name : Sorter.asSortedList(trafficClasses.keySet())) {
-			System.out.println("writing TrafficClass " + name);
+		for (String name : Sorter.asSortedList(trafficClasses.keySet()))
 			if (! trafficClasses.get(name).writeXML(staXWriter))
 				return false;
-		}
 		return true;
 	}
 

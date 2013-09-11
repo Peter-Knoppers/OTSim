@@ -54,13 +54,8 @@ public class TripPatternPath {
 		this.numberOfTrips = numberOfTrips;
 	}
 
-
 	public ArrayList<Path> getPathList() {
 		return pathList;
-	}
-
-	public void setPathList(ArrayList<Path> pathList) {
-		this.pathList = pathList;
 	}
 
 	public ArrayList<Node> getNodeList() {
@@ -69,6 +64,14 @@ public class TripPatternPath {
 
 	public void setNodeList(ArrayList<Node> nodeList) {
 		this.nodeList = nodeList;
+	}
+
+	public void clearPathList() {
+		pathList = new ArrayList<Path> ();
+	}
+
+	public void addPath(Path path) {
+		pathList.add(path);
 	}
 	
 }
