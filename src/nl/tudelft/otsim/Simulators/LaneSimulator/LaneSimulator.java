@@ -72,6 +72,8 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         ArrayList<Lane> microNetwork = new ArrayList<Lane>(); 
     	ArrayList<ExportTripPattern> tripList = new ArrayList<ExportTripPattern>(); 
     	ArrayList<Measurement> measurements = new ArrayList<Measurement>();
+    	int vehicleDriverCount = 0;
+    	double[] classProbabilities = null;
 
     	// Two passes; this is pass 1; extract the lane descriptions
         for(String line : definition.split("\n")) {
@@ -195,15 +197,24 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         					Conflict.createSplit(down, lane.downs.get(jj));
         			}
         		}
-        	} else if (fields[0].equals("TripPattern"))
-        		continue;	// FIXME: Field is not used. Why is it exported?
-        	else if (fields[0].equals("TripPatternPath"))
+        	} else if (fields[0].equals("TripPattern")) {
+        		classProbabilities = new double[vehicleDriverCount];
+        		int startField = 6;
+        		double sum = 0;
+        		for (int classIndex = 0; classIndex < fields.length - startField; classIndex++) {
+        			String[] subFields = fields[classIndex + startField].split("[:]");
+        			sum += classProbabilities[classIndex] = Double.parseDouble(subFields[1]);
+        		}
+        		if (Math.abs(sum - 1.0) > 0.0001)
+        			throw new Error("Sum of Fractions does not add up to 1");
+        		continue;
+        	} else if (fields[0].equals("TripPatternPath"))
         		numberOfTripsPath = Double.parseDouble(fields[2]);	// Only numberOfTrips is actually used
         	else if (fields[0].equals("Path:")) {
         		ArrayList<Integer> route = new ArrayList<Integer>(); 
         		for (int i = 3; i < fields.length; i++)
         			route.add(Integer.parseInt(fields[i]));
-        		tripList.add (new ExportTripPattern(numberOfTripsPath, route));
+        		tripList.add (new ExportTripPattern(numberOfTripsPath, route, classProbabilities));
         	} else if (fields[0].equals("Section LaneGeom"))
         		continue;
         	else if (fields[0].equals("Section LaneData"))
@@ -254,7 +265,26 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         		}
         	} else if (fields[0].equals("MeasurementPlan"))
         		measurements.add(new Measurement(fields[1], fields[2], fields[3], this, scheduler));
-        	else
+        	else if (fields[0].equals("TrafficClass")) {
+                Vehicle veh = new Vehicle(model);
+                veh.l = Double.parseDouble(fields[2]);
+                veh.vMax = Double.parseDouble(fields[3]);
+                veh.marker = fields[1];
+                veh.aMin = Double.parseDouble(fields[4]);
+                try {
+                    veh.trajectory = new Trajectory(veh, "nl.tudelft.otsim.Simulators.LaneSimulator.FCD");
+                } catch (ClassNotFoundException cnfe) {
+                    System.err.println("failed to make a new Trajectory");
+                }
+                Driver driver = new Driver(veh);
+                VehicleDriver clazz = new VehicleDriver(model, veh, ++vehicleDriverCount);
+                if (veh.l < 6)
+                	clazz.addStochasticDriverParameter("fSpeed", VehicleDriver.distribution.GAUSSIAN, 123.7/120, 12.0/120);
+                else {
+                    clazz.addStochasticVehicleParameter("vMax", VehicleDriver.distribution.GAUSSIAN, 85, 2.5);
+                    driver.a = 0.4;
+                }
+        	} else
         		throw new Error("Unknown object in LaneSimulator: \"" + fields[0] + "\"");        	
     	}
         
@@ -269,11 +299,12 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         ArrayList<Double> routeProbabilities = new ArrayList<Double>();
         ArrayList<ArrayList<Integer>> routeList = new ArrayList<ArrayList<Integer>>();
         double flow = 0;
+        double[] fractions = null;
         for (ExportTripPattern trip : tripList) {
 			int nextNode = trip.getRoute().get(0);
 			// When next node changes: create a generator for the current Node
 			if (nextNode > currentNode) {
-				makeGenerator(routeProbabilities, currentNode, microNetwork, routeList, flow);
+				makeGenerator(routeProbabilities, currentNode, microNetwork, routeList, flow, fractions);
 				routeProbabilities.clear();
 				routeList.clear();
 				flow = 0;
@@ -282,9 +313,10 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 			flow += trip.getFlow();
 			routeList.add(trip.getRoute());
 			routeProbabilities.add(trip.getFlow());
+			fractions = trip.getFractions();
 		}
         if (Integer.MAX_VALUE != currentNode) // Make the last generator
-        	makeGenerator(routeProbabilities, currentNode, microNetwork, routeList, flow);
+        	makeGenerator(routeProbabilities, currentNode, microNetwork, routeList, flow, fractions);
 
         model.network = microNetwork.toArray(new Lane[0]);
         // Add the tapers to the list of lane objects
@@ -295,6 +327,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         for (Lane lane : model.network)
         	if (lane.taper != lane)
         		laneGraphics.add(new LaneGraphic(lane));
+        /*
         // class
         Vehicle veh = new Vehicle(model);
         veh.l = 4;
@@ -323,6 +356,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         driver.a = 0.4;
         clazz = new VehicleDriver(model, veh, 2);
         clazz.addStochasticVehicleParameter("vMax", VehicleDriver.distribution.GAUSSIAN, 85, 2.5);
+        */
         ConsistencyCheck.checkPreInit(model);
         System.out.println("model.init()");
         model.init();
@@ -331,8 +365,11 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         scheduler.enqueueEvent(0d, new Stepper(this));
 	}
 	
-	private void makeGenerator(ArrayList<Double> routeProbabilities, int node, ArrayList<Lane> lanes, ArrayList<ArrayList<Integer>> routes, double numberOfTrips) {
-		System.out.println("Creating generator at node " + node + " flow " + numberOfTrips);
+	private void makeGenerator(ArrayList<Double> routeProbabilities, int node, ArrayList<Lane> lanes, ArrayList<ArrayList<Integer>> routes, double numberOfTrips, double classProbabilities[]) {
+		System.out.print("Creating generator at node " + node + " flow " + numberOfTrips + " with class probabilities [");
+		for (int i = 0; i < classProbabilities.length; i++)
+			System.out.print(String.format("%s%.6f", i > 0 ? ", " : "", classProbabilities[i]));
+		System.out.println("]");
 		int routeCount = routeProbabilities.size();
 		double probabilities[] = new double[routeCount];
 		Route[] routeEnds = new Route[routeCount];
@@ -387,7 +424,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 		Generator generator = new Generator(laneOrigin, Generator.distribution.EXPONENTIAL);
 		generator.routes = routeEnds;
 		generator.routeProb = probabilities;
-		generator.setClassProbabilities(new double[] { 0.9, 0.1 });
+		generator.setClassProbabilities(classProbabilities);
 		// TODO numberOfTrips must be converted to flow [veh/h]
 		generator.setDemand(numberOfTrips);
 	}
@@ -1112,15 +1149,17 @@ class Stepper implements Step {
 class ExportTripPattern {
 	Double flow;
 	ArrayList<Integer> route;
+	double[] fractions;
 	/**
 	 * @param startNode Integer; ID of the start node of the new ExportTripPattern
 	 * @param flow Double; flow on the new ExportTripPattern
 	 * @param route ArrayList&lt;Integer&gt;; IDs that define the route of the new ExportTripPattern
+	 * @param fractions double[]; list of fractions corresponding to the defined {@link TrafficClass TrafficClasses}
 	 */
-	public ExportTripPattern(Double flow,
-			ArrayList<Integer> route) {
+	public ExportTripPattern(Double flow, ArrayList<Integer> route, double[] fractions) {
 		this.flow = flow;
 		this.route = route;
+		this.fractions = fractions;
 	}
 
 	public Double getFlow() {
@@ -1129,6 +1168,10 @@ class ExportTripPattern {
 
 	public ArrayList<Integer> getRoute() {
 		return route;
+	}
+	
+	public double[] getFractions() {
+		return fractions;
 	}
 	
 }

@@ -289,12 +289,16 @@ public class TrafficDemand implements Storable {
 	 * Export this TrafficDemand in textual form.
 	 * @return String; the textual representation of this TrafficDemand
 	 */
-    public String exportTripPattern() {  
-    	CreatePathsTripPatterns();
+    public String exportTripPattern() {
     	String result = "";
+    	for (String tcName : trafficClassNames()) {
+    		TrafficClass tc = lookupTrafficClass(tcName);
+    		result += String.format(Locale.US, "TrafficClass\t%s\t%.3f\t%.3f\t%.3f\n", tcName, tc.getLength(), tc.getMaximumSpeed(), tc.getMaximumDeceleration());
+    	}
+    	CreatePathsTripPatterns();
         for (TripPattern tripPattern : getTripPatternList()) {
         	Double totalTrips = tripPattern.getNumberOfTrips();
-        	result += String.format(Locale.US, "TripPattern\tnumberOfTrips:\t%.2f\tLocationPattern:\t%s\n", totalTrips, tripPattern.getLocationList().toString());
+        	result += String.format(Locale.US, "TripPattern\tnumberOfTrips:\t%.2f\tLocationPattern:\t%s\tFractions%s\n", totalTrips, tripPattern.getLocationList().toString(), tripPattern.getClasslFlows());
             for (TripPatternPath tripPatternPath : tripPattern.getTripPatternPathList()) {
             	double numberOfTrips = 0;
             	if (totalTrips > 0)
@@ -366,8 +370,8 @@ public class TrafficDemand implements Storable {
 	 * Retrieve the set of names of the defined (@link TrafficClass TrafficClasses}.
 	 * @return Set&lt;String&gt;; the set of names of the defined {@link TrafficClass TrafficClasses}
 	 */
-	public Set<String> trafficClassNames() {
-		return trafficClasses.keySet();
+	public List<String> trafficClassNames() {
+		return Sorter.asSortedList(trafficClasses.keySet());
 	}
 	
     /**

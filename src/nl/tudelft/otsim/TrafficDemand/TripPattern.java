@@ -210,5 +210,32 @@ public class TripPattern implements XML_IO {
 	public void addTripPatternPath(TripPatternPath tripPatternPath) {
 		tripPatternPathList.add(tripPatternPath);
 	}
+
+	/**
+	 * Return the distribution over the various {@link TrafficClass TrafficClasses} of this TripPattern.
+	 * @return String; a text representation of the {@link TrafficClass} frequencies
+	 */
+	public String getClasslFlows() {
+		String result = "";
+		if (0 == classDemand.size()) {
+			for (String name : Sorter.asSortedList(trafficDemand.trafficClassNames()))
+				result += String.format(Locale.US, "\t%s:%.6f", name, trafficDemand.lookupTrafficClass(name).getDefaultFraction());
+			return result;
+		}
+		// FIXME: This code is very inefficient...
+		ArrayList<String> names = new ArrayList<String>();
+		for (TrafficClass tc : classDemand.keySet())
+			names.add(tc.getName());
+		for (String name : Sorter.asSortedList(names)) {
+			TrafficClass trafficClass = null;
+			for (TrafficClass tc : classDemand.keySet())
+				if (tc.getName().equals(name))
+					trafficClass = tc;
+			if (null == trafficClass)
+				throw new Error("Cannot happen");
+			result += String.format(Locale.US, "\t%s:%.6f", trafficClass.getName(), classDemand.get(trafficClass) / numberOfTrips);
+		}
+		return result;
+	}
 	
 }
