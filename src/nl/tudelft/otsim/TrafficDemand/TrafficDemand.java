@@ -83,7 +83,15 @@ public class TrafficDemand implements Storable {
 			tripPatternList.add(new TripPattern(this, demandRoot.getSubNode(TripPattern.XMLTAG, index)));
 	}
 	
+	/**
+	 * Rebuild this TrafficDemand after something may have changed.
+	 */
 	public void rebuild() {
+		if (0 == trafficClasses.size()) {
+			// Create two simple classes
+			trafficClasses.put("passengerCar", new TrafficClass("passengerCar", 0.9, 4.0, 160.0, 1.0));
+			trafficClasses.put("truck", new TrafficClass("truck", 0.1, 15.0, 85.0, 1.0));
+		}
 		if (this.tripPatternList != null)
 			createLocationToNodesList();
 	}
