@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<Demand>
+  <tripPattern>
+    <location>z1 z2</location>
+    <trips>2500.000000</trips>
+  </tripPattern>
+</Demand>
