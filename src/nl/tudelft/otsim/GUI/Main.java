@@ -1,6 +1,7 @@
 package nl.tudelft.otsim.GUI;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -15,8 +16,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.awt.geom.Point2D;
 import java.io.File;
 import java.util.Locale;
@@ -26,7 +25,6 @@ import java.util.regex.Pattern;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -35,7 +33,6 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
@@ -62,13 +59,14 @@ import nl.tudelft.otsim.TrafficDemand.TrafficDemand;
  * @author gftamminga, Peter Knoppers
  *
  */
-public class Main extends JFrame implements ActionListener {
+public class Main extends JPanel implements ActionListener {
 	private static final long serialVersionUID = 1L;
 	/** Locale value used in the application */
 	public static Locale locale = new Locale("en", "US");
-    private volatile static boolean initialized = false;
+    volatile static boolean initialized = false;
     /** Main Frame of OpenTraffic */
     public static Main mainFrame;
+    private Container parent = null;
     
     /**
      * Create main window and parse command line arguments.
@@ -76,27 +74,6 @@ public class Main extends JFrame implements ActionListener {
      * @param args Array of String; command line arguments
      */
     public static void main(String args[]) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            @Override
-			public void run() {
-                  mainFrame = new Main();
-                  mainFrame.setMinimumSize(new Dimension(1000, 800));
-                  mainFrame.setLocation(100, 100);
-                  initialized = true;
-                  mainFrame.setVisible(true);
-            }
-        });
-        // wait for start up of GUI
-        while (! initialized) {
-    		System.out.println("Waiting for initialization of GUI");
-    		try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				System.err.println("Sleep interrupted");
-				e.printStackTrace();
-			}
-        }
-        mainFrame.newModel();
         System.out.println("GUI initialized; process program arguments");
         for (String arg : args) {
         	int pos = arg.indexOf('=');
@@ -126,7 +103,7 @@ public class Main extends JFrame implements ActionListener {
 
 	/** GraphicsPanel used in the main window */
 	public GraphicsPanel graphicsPanel;
-	private String workingDir = System.getProperty("user.dir");
+	private String workingDir;
 	JPanel panelMeasurementPlan;
 	/** Directory that was specified on the command line */
     public String initialDirectory = workingDir; 
@@ -147,22 +124,16 @@ public class Main extends JFrame implements ActionListener {
     
     /**
      * Create the main window.
+     * @param parent Container; either a {@link StandAlone} javax.swing.JFrame or a {@link OTSim} java.applet.Applet
      */
-    public Main() {
+    public Main(Container parent) {
     	Main.mainFrame = this;
+    	this.parent = parent;
 
-        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     	// Build the GUI
         textAreaLogging = new javax.swing.JTextArea();	// Make this one early
-        getContentPane().setLayout(new java.awt.BorderLayout(10, 10));
+        setLayout(new java.awt.BorderLayout(10, 10));
         
-        addWindowListener(new WindowAdapter() {
-        	@Override
-			public void windowClosing(WindowEvent e) {
-        		closeProgramCheck();
-        	}
-        });
-
 		statusBar = new StatusBar();
 		
 		statusBar.addZone(StatusBar.DEFAULT_ZONE, mainStatusLabel = new JProgressBar(0, 100), "*");
@@ -174,9 +145,9 @@ public class Main extends JFrame implements ActionListener {
 			}
 		});
 		setStatus(-1, "");
-		getContentPane().add(statusBar, BorderLayout.SOUTH);
+		add(statusBar, BorderLayout.SOUTH);
 		
-		this.setTitle(myName);
+		setTitle(myName);
         
         tabbedPaneProperties = new javax.swing.JTabbedPane();
         tabbedPaneProperties.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
@@ -209,7 +180,7 @@ public class Main extends JFrame implements ActionListener {
         JScrollPane scrollPaneProperties = new javax.swing.JScrollPane();
         scrollPaneProperties.setViewportView(tabbedPaneProperties);
 
-        getContentPane().add(scrollPaneProperties, java.awt.BorderLayout.LINE_START);
+        add(scrollPaneProperties, java.awt.BorderLayout.LINE_START);
 
         //shape
         table = new JTable();
@@ -223,17 +194,17 @@ public class Main extends JFrame implements ActionListener {
         javax.swing.JMenu menuFile = new javax.swing.JMenu();
         menuFile.setText("File");
         
-        menuFile.add(makeMenuItem ("New model", "newModel", "New.png"));
-        menuFile.add(makeMenuItem ("Open model ...", "openDialogLoadModel", "Briefcase.png"));
-        menuFile.add(makeMenuItem ("Import model ...", "openDialogImportModel", "Back.png"));
+        menuFile.add(makeMenuItem ("New model", "newModel", "New.png", true));
+        menuFile.add(makeMenuItem ("Open model ...", "openDialogLoadModel", "Briefcase.png", haveDiskAccess()));
+        menuFile.add(makeMenuItem ("Import model ...", "openDialogImportModel", "Back.png", haveDiskAccess()));
         
-        menuFile.add(menuItemExportModel = makeMenuItem("Export model ...", "openDialogExportModel", "Forward.png"));
+        menuFile.add(menuItemExportModel = makeMenuItem("Export model ...", "openDialogExportModel", "Forward.png", haveDiskAccess()));
         menuItemExportModel.setEnabled(false);  
         
-        menuFile.add(menuItemSaveModel = makeMenuItem("Save model ...", "openDialogSaveModel", "Save.png"));
+        menuFile.add(menuItemSaveModel = makeMenuItem("Save model ...", "openDialogSaveModel", "Save.png", haveDiskAccess()));
         menuItemSaveModel.setEnabled(false);
         
-        menuFile.add(makeMenuItem("Exit", "Exit", "Exit.png"));
+        menuFile.add(makeMenuItem("Exit", "Exit", "Exit.png", haveDiskAccess()));
         
         menuBar = new javax.swing.JMenuBar();
         menuBar.add(menuFile);
@@ -243,12 +214,12 @@ public class Main extends JFrame implements ActionListener {
         JMenu menuFile2 = new JMenu();
         menuFile2.setText("File2");
         
-        menuFile2.add(makeMenu("New", "new", "New.png"));
-        menuFile2.add(makeMenu("Open", "load", "Briefcase.png"));
-        menuFile2.add(makeMenu("Save", "save", "Save.png"));
-        menuFile2.add(makeMenuItem("Import model ...", "openDialogImportModel", "Back.png"));
-        menuFile2.add(makeMenuItem("Import OpenStreetMap Network ...", "openDialogImportOSM", "Back.png"));
-        menuFile2.add(makeMenuItem("Exit", "Exit", "Exit.png"));
+        menuFile2.add(makeMenu("New", "new", "New.png", true));
+        menuFile2.add(makeMenu("Open", "load", "Briefcase.png", haveDiskAccess()));
+        menuFile2.add(makeMenu("Save", "save", "Save.png", haveDiskAccess()));
+        menuFile2.add(makeMenuItem("Import model ...", "openDialogImportModel", "Back.png", haveDiskAccess()));
+        menuFile2.add(makeMenuItem("Import OpenStreetMap Network ...", "openDialogImportOSM", "Back.png", haveDiskAccess()));
+        menuFile2.add(makeMenuItem("Exit", "Exit", "Exit.png", haveDiskAccess()));
         
         menuBar.add(menuFile2);
         
@@ -258,27 +229,23 @@ public class Main extends JFrame implements ActionListener {
         menuBar.add(menuView);
         
         // View zoom to scene (bounding box)
-        menuView.add(makeMenuItem("Entire network", "zoomToScene", "Expand.png"));
-        menuView.add(makeMenuItem("Zoom in", "zoomIn", "Zoom.png"));
-        menuView.add(makeMenuItem("Zoom out", "zoomOut", "Earth.png"));
+        menuView.add(makeMenuItem("Entire network", "zoomToScene", "Expand.png", true));
+        menuView.add(makeMenuItem("Zoom in", "zoomIn", "Zoom.png", true));
+        menuView.add(makeMenuItem("Zoom out", "zoomOut", "Earth.png", true));
 
-        // Charts menu
-        javax.swing.JMenu menuCharts = new javax.swing.JMenu();
-        menuCharts.setText("Charts");
-
-        javax.swing.JMenuItem menuItemChartsPie = new javax.swing.JMenuItem();
-        menuItemChartsPie.setText("PieChart");
-        menuItemChartsPie.setActionCommand("chartPie");
-        menuItemChartsPie.addActionListener(this);
-        menuCharts.add(menuItemChartsPie);
-
-        menuBar.add(menuCharts);
         // Show the menu (in the jFrame)
-        setJMenuBar(menuBar);
+        if (null != parent) {
+        	if (parent instanceof StandAlone)
+        		((StandAlone) parent).setMenuBar(menuBar);
+        	else if (parent instanceof OTSim)
+        		((OTSim) parent).setMenuBar(menuBar);
+        	else
+        		throw new Error("Cannot set menu bar in containing window");
+        }
 
     	graphicsPanel = new GraphicsPanel();
    
-    	getContentPane().add(graphicsPanel, java.awt.BorderLayout.CENTER);
+    	add(graphicsPanel, java.awt.BorderLayout.CENTER);
     	
         JPanel controls = new JPanel();
         controls.setLayout(new GridLayout(20,2));
@@ -339,8 +306,8 @@ public class Main extends JFrame implements ActionListener {
         measurementPlanIndex = tabbedPaneProperties.indexOfComponent(scrollPaneMeasurementPlans);
         
         measurementPlanPopup = new JPopupMenu();
-        measurementPlanPopup.add(makeMenuItem("Edit name", "EditMeasurementPlanName", "Bubble.png"));
-        measurementPlanPopup.add(makeMenuItem("Delete measurement plan", "DeleteMeasurementPlan", "Delete.png"));
+        measurementPlanPopup.add(makeMenuItem("Edit name", "EditMeasurementPlanName", "Bubble.png", true));
+        measurementPlanPopup.add(makeMenuItem("Delete measurement plan", "DeleteMeasurementPlan", "Delete.png", true));
         comboBoxMeasurementPlans.add(measurementPlanPopup);
         comboBoxMeasurementPlans.addMouseListener(new MouseAdapter() {
 			@Override
@@ -393,10 +360,33 @@ public class Main extends JFrame implements ActionListener {
         JScrollPane scrollPaneLaneSimulator = new JScrollPane();
         scrollPaneLaneSimulator.setViewportView(controls);
         tabbedPaneProperties.add("Lane Simulator", scrollPaneLaneSimulator);
-        laneSimulatorIndex = tabbedPaneProperties.indexOfComponent(scrollPaneLaneSimulator);       
+        laneSimulatorIndex = tabbedPaneProperties.indexOfComponent(scrollPaneLaneSimulator);
+        
+        try {
+			workingDir = System.getProperty("user.dir");
+		} catch (Exception e1) {
+			e1.printStackTrace();
+			workingDir = ".";
+		}
+        
+        mainFrame.newModel();
     }
     
-    private void maybeShowPopup (MouseEvent me) {
+    private boolean haveDiskAccess() {
+    	return parent instanceof StandAlone;
+    }
+
+    /**
+     * Change the text in the title bar of the main window.
+     * <br /> This method has no effect when running as an Applet.
+     * @param caption String; the new text for the title bar of the main window
+     */
+	public void setTitle(String caption) {
+    	if (parent instanceof StandAlone)
+    		((StandAlone) parent).setTitle(caption);
+	}
+
+	private void maybeShowPopup (MouseEvent me) {
 		if ((! me.isPopupTrigger()) || (comboBoxMeasurementPlans.getItemCount() == 0))
 			return;
 		Point p = new Point(me.getX(), me.getY());
@@ -428,8 +418,9 @@ public class Main extends JFrame implements ActionListener {
      * <code>this</code> is added to the ActionListeners of the JMenuItem
      * @return JMenuItem; the newly created JMenuItem
      */
-    javax.swing.JMenuItem makeMenuItem(String caption, String actionCommand, String iconName) {
+    javax.swing.JMenuItem makeMenuItem(String caption, String actionCommand, String iconName, boolean enabled) {
         javax.swing.JMenuItem menuItem = new javax.swing.JMenuItem();
+        menuItem.setEnabled(enabled);
         menuItem.setText(caption);
         if (null != actionCommand) {
         	menuItem.setActionCommand(actionCommand);
@@ -443,22 +434,23 @@ public class Main extends JFrame implements ActionListener {
         return menuItem;
     }
     
-    javax.swing.JMenu makeMenu(String caption, String actionCommandPrefix, String iconName) {
+    javax.swing.JMenu makeMenu(String caption, String actionCommandPrefix, String iconName, boolean enabled) {
     	javax.swing.JMenu menu = new javax.swing.JMenu();
+    	menu.setEnabled(enabled);
     	menu.setText(caption);
         // Try to load the image from the resources
         String imgLocation = "/nl/tudelft/otsim/Resources/" + iconName;
         java.net.URL imageURL = Main.mainFrame.getClass().getResource(imgLocation);
         if (imageURL != null)
             menu.setIcon(new ImageIcon(imageURL, caption));
-    	menu.add(makeMenuItem("network ...", actionCommandPrefix + " network", null));
-    	menu.add(makeMenuItem("demand ...", actionCommandPrefix + " demand", null));
+    	menu.add(makeMenuItem("network ...", actionCommandPrefix + " network", null, true));
+    	menu.add(makeMenuItem("demand ...", actionCommandPrefix + " demand", null, true));
     	if (actionCommandPrefix.equals("save")) {
     		menu.add(saveMeasurementPlan = new javax.swing.JMenu("measurement plan"));
     		saveMeasurementPlan.setEnabled(false);
     	} else
-    		menu.add(makeMenuItem("measurement plan ...", actionCommandPrefix + " measurementPlan", null));
-    	menu.add(makeMenuItem("model ...", actionCommandPrefix + " model", null));
+    		menu.add(makeMenuItem("measurement plan ...", actionCommandPrefix + " measurementPlan", null, true));
+    	menu.add(makeMenuItem("model ...", actionCommandPrefix + " model", null, true));
     	return menu;
     }
 
@@ -638,7 +630,7 @@ public class Main extends JFrame implements ActionListener {
 		while (saveMeasurementPlan.getItemCount() > 0)
 			saveMeasurementPlan.remove(0);
 		for (int i = 0; i < model.measurementPlanCount(); i++)
-			saveMeasurementPlan.add(makeMenuItem (model.getMeasurementPlan(i).getName(), "save measurementPlan", null));
+			saveMeasurementPlan.add(makeMenuItem (model.getMeasurementPlan(i).getName(), "save measurementPlan", null, haveDiskAccess()));
 		saveMeasurementPlan.setEnabled(saveMeasurementPlan.getItemCount() > 0);
 		comboBoxMeasurementPlans.removeAllItems();
 		for (int i = 0; i < model.measurementPlanCount(); i++) {
@@ -805,21 +797,18 @@ public class Main extends JFrame implements ActionListener {
 	
 	private Storable identifyStorable(String name) {
 		// TODO add support for Storable settings
-		if (name.equals("network")) {
-			if (null == model)
-				model = new Model();
+		if (null == model)
+			model = new Model();
+		if (name.equals("network"))
 			return model.network;
-		} else if (name.equals("demand")) {
-			if (null == model)
-				model = new Model();
+		else if (name.equals("demand"))
 			return model.trafficDemand;
-		} else if (name.equals("measurementPlan")) {
+		else if (name.equals("measurementPlan"))
 			return new MeasurementPlan(model);
-		} else if (name.equals("model")) {
+		else if (name.equals("model"))
 			return model;
-		} else if (name.equals("settings")) {
+		else if (name.equals("settings"))
 			throw new Error("settings is not yet storable");
-		}
 		throw new Error("Unknown storable type " + name);
 	}
 	
@@ -963,8 +952,8 @@ public class Main extends JFrame implements ActionListener {
         mainFrame.setTitle(myName);
     	setActiveGraph();
         System.out.println("created new empty network");
-		menuItemSaveModel.setEnabled(true);
-		menuItemExportModel.setEnabled(true);
+		menuItemSaveModel.setEnabled(haveDiskAccess());
+		menuItemExportModel.setEnabled(haveDiskAccess());
 	}
 	
 	/**
