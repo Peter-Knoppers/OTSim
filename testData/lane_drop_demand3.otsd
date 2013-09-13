@@ -3,14 +3,14 @@
     <trafficClass>
       <name>passengerCar</name>
       <activationLevel>0.7</activationLevel>
-      <defaultFraction>0.9</defaultFraction>
+      <defaultFraction>0.8</defaultFraction>
       <length>4.000</length>
       <maximumSpeed>160</maximumSpeed>
     </trafficClass>
     <trafficClass>
       <name>truck</name>
       <activationLevel>1.0</activationLevel>
-      <defaultFraction>0.1</defaultFraction>
+      <defaultFraction>0.2</defaultFraction>
       <length>15.000</length>
       <maximumSpeed>85</maximumSpeed>
     </trafficClass>
