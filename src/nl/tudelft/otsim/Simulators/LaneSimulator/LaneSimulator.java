@@ -284,6 +284,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
                     clazz.addStochasticVehicleParameter("vMax", VehicleDriver.distribution.GAUSSIAN, 85, 2.5);
                     driver.a = 0.4;
                 }
+                driver.activationLevel = Double.parseDouble(fields[5]);
         	} else
         		throw new Error("Unknown object in LaneSimulator: \"" + fields[0] + "\"");        	
     	}

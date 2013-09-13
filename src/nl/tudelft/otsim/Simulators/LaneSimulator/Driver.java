@@ -160,6 +160,9 @@ public class Driver {
     protected java.util.HashMap<String, Integer> kForActions = new java.util.HashMap<String, Integer>();
 
 	private double bDeadend = 5;	// max deceleration for required lane change or dead end [m/s/s]
+
+	/** Activation level of this driver */
+	public double activationLevel;
     
     /**
      * Constructor which links the driver with a vehicle and vice versa.
@@ -229,6 +232,8 @@ public class Driver {
      * desire which is set in <tt>notice()</tt> methods.
      */
     public void drive() {
+        //if ((630 == vehicle.id) && (vehicle.model.t >= 5 * 60 + 37.3))
+        //	System.out.println("watch");
         noticeRSUs();
         
         // Initialize interaction booleans to false

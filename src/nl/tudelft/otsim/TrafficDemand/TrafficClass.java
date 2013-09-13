@@ -121,4 +121,12 @@ public class TrafficClass implements XML_IO {
 	public double getMaximumDeceleration() {
 		return maxDeceleration;
 	}
+
+	/**
+	 * Retrieve the initial activation level of this TrafficClass.
+	 * @return Double; the initial activation level of this TrafficClass
+	 */
+	public double getActivationLevel() {
+		return activationLevel;
+	}
 }
