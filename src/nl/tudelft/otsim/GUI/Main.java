@@ -92,7 +92,9 @@ public class Main extends JPanel implements ActionListener {
 					} catch (Exception e) {
 						WED.showProblem(WED.ENVIRONMENTERROR, "Could not import file \"%s\"\n%s", right, WED.exeptionStackTraceToString(e));
 					}
-				else
+        		else if (left.equalsIgnoreCase("GenerateEvent"))
+    				Main.mainFrame.actionPerformed(new ActionEvent(Main.mainFrame, 0, right));
+        		else
         			WED.showProblem(WED.ENVIRONMENTERROR, "Unknown program argument \"%s\" (ignored)", arg);
         	} else
     			WED.showProblem(WED.ENVIRONMENTERROR, "Unknown program argument \"%s\" (ignored)", arg);        		
@@ -363,9 +365,8 @@ public class Main extends JPanel implements ActionListener {
         laneSimulatorIndex = tabbedPaneProperties.indexOfComponent(scrollPaneLaneSimulator);
         
         try {
-			workingDir = System.getProperty("user.dir");
+			workingDir = System.getProperty("user.dir");	// fails when running as Applet
 		} catch (Exception e1) {
-			e1.printStackTrace();
 			workingDir = ".";
 		}
         
@@ -984,6 +985,14 @@ public class Main extends JPanel implements ActionListener {
 		double yRatio = (maxY - minY) / (graphicsPanel.getHeight() - 2 * margin);
 		double ratio = xRatio > yRatio ? xRatio : yRatio;
 		System.out.format("x: [%.2f - %.2f], y: [%.2f - %.2f], width %d, height %d ratio %.4f\r\n", minX, maxX, minY, maxY, graphicsPanel.getWidth(), graphicsPanel.getHeight(), ratio);
+		if (Double.isInfinite(ratio))
+			ratio = 1;
+		if (ratio < 0)
+			ratio = 1;
+		if (maxX == Double.MAX_VALUE)
+			minX = maxX = 0;
+		if (maxY == Double.MAX_VALUE)
+			minY = maxY = 0;
 		graphicsPanel.setZoom(1d / ratio, new Point2D.Double(0, 0));
 		graphicsPanel.setPan(graphicsPanel.getWidth() / 2 - (minX + maxX) / 2 / ratio, - graphicsPanel.getHeight() / 2 + (minY + maxY) / 2 / ratio);
 	}
@@ -1021,10 +1030,10 @@ public class Main extends JPanel implements ActionListener {
         	Storable s;
         	if (command.endsWith("measurementPlan")) {
         		javax.swing.JMenuItem mpItem = (javax.swing.JMenuItem) actionEvent.getSource();
-        		javax.swing.JPopupMenu parent = (JPopupMenu) mpItem.getParent();
+        		javax.swing.JPopupMenu popupParent = (JPopupMenu) mpItem.getParent();
         		int rank;
-        		for (rank = parent.getComponentCount(); --rank >= 0; )
-        			if (parent.getComponent(rank) == mpItem)
+        		for (rank = popupParent.getComponentCount(); --rank >= 0; )
+        			if (popupParent.getComponent(rank) == mpItem)
         				break;
         		if (rank < 0)
         			throw new Error("Cannot find menu item that sent " + command);
@@ -1054,6 +1063,12 @@ public class Main extends JPanel implements ActionListener {
 			updateMeasurementPlanName();
 		else if ("DeleteMeasurementPlan".equals(command))
 			deleteMeasurementPlan();
+		else if (command.startsWith("SelectTab"))
+			try {
+				tabbedPaneProperties.setSelectedIndex(Integer.parseInt(command.split("[ ]")[1]));
+			} catch (NumberFormatException e) {
+				WED.showProblem(WED.ENVIRONMENTERROR, "Error switching to tab \"%s\"", command.split("[ ]")[1]);
+			}
 		else if ("statusBarClicked".equals(command)) {
 			testStep();
 			return;

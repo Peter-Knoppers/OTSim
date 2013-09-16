@@ -1,8 +1,11 @@
 package nl.tudelft.otsim.FileIO;
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -50,7 +53,12 @@ public class ParsedNode {
 		Exception firstException = null;
 		
 		try {
-			in = new FileInputStream(fileName);
+			if (name.startsWith("http://")) {
+				URL url = new URL(name);
+				in = url.openStream();
+			} else {
+				in = new FileInputStream(fileName);
+			}
 			XMLEventReader eventReader = inputFactory.createXMLEventReader(in);
 			expand (eventReader, fileName, null);
 		} catch (Exception e) {

@@ -13,16 +13,33 @@ import javax.swing.JMenuBar;
  */
 public class OTSim extends JApplet {
 	private static final long serialVersionUID = 1L;
+	JLabel initLabel;
 	
 	@Override
 	public void init() {
 		setLayout (new BorderLayout());
-		add(new JLabel("Loading OTSim resources ..."), BorderLayout.CENTER);
+		add(initLabel = new JLabel("Loading OTSim resources ...zv"), BorderLayout.CENTER);
 	}
 	
 	@Override
 	public void start() {
 		add(new Main(this), BorderLayout.CENTER);
+		revalidate();		// very important!
+		int count;
+		final String paramHeader = "param";
+		for (count = 0; ; count++)
+		{
+			String value = getParameter(paramHeader + count);
+			if ((null == value) || (value.length() == 0))
+				break;
+		}
+		Main.mainFrame.setStatus(-1, "Arg count is %d: \"%s\"", count, getParameter("param0"));
+		String[] params = new String[count + 1];
+		for (int i = 0; i < count; i++)
+			params[i] = getParameter(paramHeader + i);
+		initLabel.setText("");
+		params[count] = "generateEvent=zoomToScene";
+		Main.main(params);
 	}
 	
 	/**
