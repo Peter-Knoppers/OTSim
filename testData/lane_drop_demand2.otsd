@@ -5,7 +5,7 @@
       <activationLevel>0.7</activationLevel>
       <defaultFraction>0.9</defaultFraction>
       <length>4.000</length>
-      <maximumSpeed>160</maximumSpeed>
+      <maximumSpeed>130</maximumSpeed>
     </trafficClass>
     <trafficClass>
       <name>truck</name>
