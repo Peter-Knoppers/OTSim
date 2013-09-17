@@ -367,9 +367,9 @@ public class Main extends JPanel implements ActionListener {
         laneSimulatorIndex = tabbedPaneProperties.indexOfComponent(scrollPaneLaneSimulator);
         
         try {
-			workingDir = System.getProperty("user.dir");	// fails when running as Applet
+			initialDirectory = workingDir = System.getProperty("user.dir");	// fails when running as Applet
 		} catch (Exception e1) {
-			workingDir = ".";
+			initialDirectory = workingDir = ".";
 		}
         
         mainFrame.newModel();
