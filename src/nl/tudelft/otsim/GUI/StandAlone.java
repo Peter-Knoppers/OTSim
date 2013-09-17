@@ -38,6 +38,10 @@ public class StandAlone extends JFrame {
         setVisible(true);
 	}
 	
+    /**
+     * Create the main window for the stand-alone version of OTSim. 
+     * @param args String[]; arguments to be passed onto the main method in {@link Main}
+     */
     public static void main(final String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
