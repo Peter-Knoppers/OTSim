@@ -280,8 +280,8 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
                 VehicleDriver clazz = new VehicleDriver(model, veh, ++vehicleDriverCount);
                 /*
                 if (veh.l < 6)
-               	clazz.addStochasticDriverParameter("fSpeed", VehicleDriver.distribution.GAUSSIAN, 123.7/120, 12.0/120);
-               else {
+               		clazz.addStochasticDriverParameter("fSpeed", VehicleDriver.distribution.GAUSSIAN, 123.7/120, 12.0/120);
+                else {
                    clazz.addStochasticVehicleParameter("vMax", VehicleDriver.distribution.GAUSSIAN, 85, 2.5);
                    driver.a = 0.4;
                 }
@@ -293,12 +293,12 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
                     clazz.addStochasticVehicleParameter("vMax", VehicleDriver.distribution.GAUSSIAN, veh.vMax, 2.5);
                     driver.a = 0.4;
                 }
+                // Additional parameter(s) for evacuation modeling
                 driver.activationLevel = Double.parseDouble(fields[5]);
                 
-                if (driver.activationLevel == 0) {
+                if (driver.activationLevel == 0)
                 	driver.ActLevel = driver.activationLevel;
-                }
-                else if (driver.activationLevel<=1 && driver.activationLevel>0 ){
+                else if ((driver.activationLevel <= 1) && (driver.activationLevel > 0)) {
                 	//a. time function  @After 600s fully activated to the target level! #Ugly
                 	//Input the current time instant (s), targeted activationLevel
                 	driver.ActLevel = TemporalAct(model.t(), 600, driver.activationLevel); 
@@ -306,15 +306,13 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
                 	//b. Set stochastic activationLevel for individual drivers
                 	clazz.addStochasticDriverParameter("ActLevel", VehicleDriver.distribution.GAUSSIAN, driver.ActLevel, 0.1);
                 	
-                	
                 	//c. Value constraint:  //(actLevel<=1 && actLevel>=0 )
-                	driver.ActLevel = driver.ActLevel < 0? 0 : driver.ActLevel;
-                	driver.ActLevel = driver.ActLevel > 1? 1 : driver.ActLevel;
-                }else{
+                	driver.ActLevel = driver.ActLevel < 0 ? 0 : driver.ActLevel;
+                	driver.ActLevel = driver.ActLevel > 1 ? 1 : driver.ActLevel;
+                } else {
                 	throw new Error("The targeted ActivationLevel input is not a valid value!");
                 	//System.out.println("The ActivationLevel input is not a valid value!");
                 }
-                
         	} else
         		throw new Error("Unknown object in LaneSimulator: \"" + fields[0] + "\"");        	
     	}
