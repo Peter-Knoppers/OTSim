@@ -18,7 +18,7 @@ public class OTSim extends JApplet {
 	@Override
 	public void init() {
 		setLayout (new BorderLayout());
-		add(initLabel = new JLabel("Loading OTSim resources ...zv"), BorderLayout.CENTER);
+		add(initLabel = new JLabel("Loading OTSim resources ..."), BorderLayout.CENTER);
 	}
 	
 	@Override
@@ -33,12 +33,10 @@ public class OTSim extends JApplet {
 			if ((null == value) || (value.length() == 0))
 				break;
 		}
-		Main.mainFrame.setStatus(-1, "Arg count is %d: \"%s\"", count, getParameter("param0"));
-		String[] params = new String[count + 1];
+		String[] params = new String[count];
 		for (int i = 0; i < count; i++)
 			params[i] = getParameter(paramHeader + i);
 		initLabel.setText("");
-		params[count] = "generateEvent=zoomToScene";
 		Main.main(params);
 	}
 	

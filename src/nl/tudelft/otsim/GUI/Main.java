@@ -94,6 +94,8 @@ public class Main extends JPanel implements ActionListener {
 					}
         		else if (left.equalsIgnoreCase("GenerateEvent"))
     				Main.mainFrame.actionPerformed(new ActionEvent(Main.mainFrame, 0, right));
+        		else if (left.equalsIgnoreCase("SetStatus"))
+        			Main.mainFrame.setStatus(-1, "%s", right);
         		else
         			WED.showProblem(WED.ENVIRONMENTERROR, "Unknown program argument \"%s\" (ignored)", arg);
         	} else
