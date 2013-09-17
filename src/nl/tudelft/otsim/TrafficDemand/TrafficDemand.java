@@ -1,13 +1,11 @@
 package nl.tudelft.otsim.TrafficDemand;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 import nl.tudelft.otsim.Activities.ConnectZones;
 import nl.tudelft.otsim.FileIO.ParsedNode;
@@ -17,7 +15,6 @@ import nl.tudelft.otsim.GUI.Storable;
 import nl.tudelft.otsim.GUI.WED;
 import nl.tudelft.otsim.GeoObjects.ActivityLocation;
 import nl.tudelft.otsim.GeoObjects.MicroZone;
-import nl.tudelft.otsim.GeoObjects.Network;
 import nl.tudelft.otsim.GeoObjects.Node;
 import nl.tudelft.otsim.ShortesPathAlgorithms.DijkstraAlgorithm;
 import nl.tudelft.otsim.ShortesPathAlgorithms.Path;

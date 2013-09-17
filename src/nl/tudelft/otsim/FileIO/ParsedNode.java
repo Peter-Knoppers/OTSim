@@ -1,10 +1,8 @@
 package nl.tudelft.otsim.FileIO;
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,7 +39,7 @@ public class ParsedNode {
 	
 	/**
 	 * Create a tree from an XML file.
-	 * @param fileName String; name of the XML file
+	 * @param fileName String; name of the XML file, or URL starting with "http://"
 	 * @throws Exception 
 	 */
 	public ParsedNode(String fileName) throws Exception {
