@@ -15,17 +15,23 @@ public class Driver {
             new java.util.HashMap<Movable, java.util.HashMap<java.lang.String, Double>>();
 
     // PARAMETERS
+	/** Targeted Activation level of this driver....Interact with percentage of total demand! */
+	public double activationLevel;
+	
+	/** Actual Activation level of this driver (smoothing variable: [0, 1]) */
+	public double ActLevel;
+	
     /** Longitudinal stopping distance [m]. */
     public double s0 = 3;
     
     /** Longitudinal acceleration [m/s^2]. */
-    public double a = 1.25;
+    public double a = 1.25*(1-ActLevel) + ActLevel * 1.25 * (1.46/0.94);
     
     /** Regular longitudinal acceleration [m/s^2]. */
-    public double aMin = 1.25;
+    public double aMin = 1.25*(1-ActLevel) + ActLevel * 1.25 * (1.46/0.94);
     
     /** Longitudinal deceleration [m/s^2]. */
-    public double b = 2.09;
+    public double b = 2.09*(1-ActLevel) + ActLevel * 2.09 * (0.97/0.87);
     
     /** Maximum deceleration for v>vdes. */
     public double b0 = .5;
@@ -55,10 +61,10 @@ public class Driver {
     public double vCong = 60/3.6;
     
     /** LMRS deceleration for lane changes (default: equal to <tt>b</tt>). */
-    public double bSafe = 2.09;
+    public double bSafe = 2.09*(1-ActLevel) + ActLevel * 2.09 * (0.97/0.87);
     
     /** LMRS minimum time headway [s] for very desired lane change. */
-    public double Tmin = .56;
+    public double Tmin = .56*(1-ActLevel) + ActLevel * .56 * (.25/.78);
     
     /** LMRS relaxation time [s]. */
     public double tau = 25;
@@ -160,9 +166,6 @@ public class Driver {
     protected java.util.HashMap<String, Integer> kForActions = new java.util.HashMap<String, Integer>();
 
 	private double bDeadend = 5;	// max deceleration for required lane change or dead end [m/s/s]
-
-	/** Activation level of this driver */
-	public double activationLevel;
     
     /**
      * Constructor which links the driver with a vehicle and vice versa.
