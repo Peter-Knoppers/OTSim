@@ -144,6 +144,25 @@ public class StatusBar extends JComponent {
 			addZone(ids[i], zones[i], constraints[i]);
 	}
 
+	/**
+	 * Change the constraint of a zone.
+	 * @author Peter Knoppers
+	 * @param id String; the name of the zone
+	 * @param newConstraint String; the new constraint for the zone
+	 */
+	public void updateConstraint(String id, String newConstraint) {
+		((PercentLayout) getLayout()).setConstraint(getZone(id), newConstraint); 
+	}
+
+	/**
+	 * Change the gap between the status bar fields.
+	 * @author Peter Knoppers
+	 * @param newGap Integer; new size of the gap in pixels
+	 */
+	public void setGap(int newGap) {
+		((PercentLayout) getLayout()).setGap(newGap);		
+	}
+	
 }
 /**
  * L2FProd.com Common Components 7.3 License.

@@ -1,18 +1,29 @@
 package nl.tudelft.otsim.Simulators;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Paint;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.WindowConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 
 import org.jfree.chart.ChartFactory;
@@ -50,7 +61,7 @@ import nl.tudelft.otsim.SpatialTools.Planar;
  * 
  * @author Peter Knoppers
  */
-public class Measurement extends JFrame implements Step, SimulatedObject, XYDataset, ShutDownAble, MouseMotionListener {
+public class Measurement extends JFrame implements Step, SimulatedObject, XYDataset, ShutDownAble, MouseMotionListener, ActionListener, MouseListener {
 	private static final long serialVersionUID = 1L;
 	private final Point2D.Double[] area;
 	private final Point2D.Double[] projectionPath;
@@ -63,12 +74,53 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 	private final javax.swing.JTabbedPane tabbedPaneGraphs;
 	private double distanceGranularity = 10.0; 		// [m]
 	private double timeGranularity = 2;				// [s]
-	private double minimumTimeRange = 600.0;		// [s]
+	private double minimumTimeRange = 300.0;		// [s]
     private final double distanceRange;				// [m]
     private double timeRange = minimumTimeRange;	// [s]
+    JFreeChart trajectoryChart;
     private ArrayList<XYPlot> contourPlots = new ArrayList<XYPlot>();
     private StatusBar statusBar;
     private JLabel statusLabel;
+	private JLabel labelDistanceGranularity = new JLabel();
+	private JLabel labelTimeGranularity = new JLabel();
+	private final static String distanceFormat = "%.0f m";
+	private final static String timeFormat = "%.0f s";
+	private final static double[] distanceGranularities = { 10, 20, 50, 100 };
+	private final static double[] timeGranularities = { 1, 2, 5, 10, 20, 30, 60, 120, 300, 600 };
+	private JPopupMenu distancePopupMenu;
+	private JPopupMenu timePopupMenu;
+	
+	private JPopupMenu buildPopupMenu(String format, String commandPrefix, double[] values) {
+		JPopupMenu result = new JPopupMenu();
+		for (double value : values) {
+			JMenuItem item = new JMenuItem(String.format(Main.locale, format, value));
+			item.setActionCommand(commandPrefix + String.format(Locale.US, " %f", value));
+			item.addActionListener(this);
+			result.add(item);
+		}
+		return result;
+	}
+	
+	private void setGranularity(JLabel label, double value) {
+		String format;
+		if (labelDistanceGranularity == label)
+			format = distanceFormat;
+		else if (labelTimeGranularity == label)
+			format = timeFormat;
+		else
+			throw new Error("bad label");
+		label.setText(String.format(Main.locale, format, value));
+	}
+	
+	private static void configureAxis(ValueAxis a, double upperBound) {
+		a.setUpperBound(upperBound);
+		a.setLowerMargin(0);
+		a.setUpperMargin(0);
+		a.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+		a.setAutoRange(true);
+		a.setAutoRangeMinimumSize(upperBound);
+		a.centerRange(upperBound / 2);
+	}
 
 	/**
 	 * Create a new Measurement.
@@ -88,6 +140,15 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 		getContentPane().add(tabbedPaneGraphs, java.awt.BorderLayout.CENTER);
 		getContentPane().add(statusBar = new StatusBar(), java.awt.BorderLayout.SOUTH);
 		statusBar.addZone(StatusBar.DEFAULT_ZONE, statusLabel = new JLabel(), "*");
+		statusBar.addZone("distanceGranularity", labelDistanceGranularity, "0%");
+		statusBar.addZone("timeGranularity", labelTimeGranularity, "0%");
+		statusBar.setGap(0);
+		setGranularity(labelDistanceGranularity, distanceGranularity);
+		setGranularity(labelTimeGranularity, timeGranularity);
+		distancePopupMenu = buildPopupMenu(distanceFormat, "setDistanceGranularity", distanceGranularities);
+		labelDistanceGranularity.addMouseListener(this);
+		timePopupMenu = buildPopupMenu(timeFormat, "setTimeGranularity", timeGranularities);
+		labelTimeGranularity.addMouseListener(this);
 
 		this.area = Planar.coordinatesToPoints(area.replaceAll("[()m,]", "").split(" "));
 		this.projectionPath = Planar.coordinatesToPoints(projectionPath.replaceAll("[()m,]", "").split(" "));
@@ -95,14 +156,8 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 		this.scheduler = scheduler;
 		scheduler.enqueueEvent(0, this);
         ChartFactory.setChartTheme(new StandardChartTheme("JFree/Shadow", true));
-		JFreeChart trajectoryChart = ChartFactory.createScatterPlot(name, "Time [s]", "Distance [m]", this, PlotOrientation.VERTICAL, false, false, false);
-        ValueAxis x = trajectoryChart.getXYPlot().getDomainAxis();
-        x.setAutoRange(true);
-        x.setLowerBound(0);
-        x.setUpperBound(minimumTimeRange);
-		ValueAxis y = trajectoryChart.getXYPlot().getRangeAxis();
-		y.setAutoRange(true);
-		y.setLowerBound(0);
+		trajectoryChart = ChartFactory.createScatterPlot(name, "Time [s]", "Distance [m]", this, PlotOrientation.VERTICAL, false, false, false);
+        configureAxis(trajectoryChart.getXYPlot().getDomainAxis(), minimumTimeRange);
 		double length = 0;
 		Point2D.Double prevPoint = null;
 		for (Point2D.Double p : this.projectionPath) {
@@ -111,7 +166,7 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 			prevPoint = p;
 		}
 		distanceRange = length;
-		y.setUpperBound(distanceRange);
+		configureAxis(trajectoryChart.getXYPlot().getRangeAxis(), distanceRange);
         XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) trajectoryChart.getXYPlot().getRenderer();
         renderer.setBaseLinesVisible(true);
         renderer.setBaseShapesVisible(false);
@@ -123,22 +178,37 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 		contourGraph(tabbedPaneGraphs, "Speed contour graph", new SpeedDataSet(), 0, 40, 150, Color.RED, Color.YELLOW, Color.GREEN, 20, "%.0f km/h");
 		contourGraph(tabbedPaneGraphs, "Flow contour graph", new FlowDataSet(), 0, 1000, 3000, Color.RED, Color.YELLOW, Color.GREEN, 500, "%.0f veh/h");
 		contourGraph(tabbedPaneGraphs, "Density contour graph", new DensityDataSet(), 0, 30, 100, Color.GREEN, Color.YELLOW, Color.RED, 10, "%.0f veh/km");
+        tabbedPaneGraphs.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent arg0) {
+				// hide the granularity fields if the time-distance diagram is shown
+				// show the granularity fields if a contour-graph is shown
+				int index = tabbedPaneGraphs.getSelectedIndex();
+				if (index < 0)
+					return;		// no tab is currently selected;
+				String fieldWidth = "10%";
+				if (0 == index) {
+					fieldWidth = "0%";
+					statusBar.setGap(0);
+				} else
+					statusBar.setGap(10);
+				statusBar.updateConstraint("timeGranularity", fieldWidth);
+				statusBar.updateConstraint("distanceGranularity", fieldWidth);
+				statusBar.doLayout();
+			}
+        });
 		setVisible(true);
 	}
 	
 	private void contourGraph (javax.swing.JTabbedPane parent, String name, XYZDataset dataset, double lowValue, double niceValue, double highValue, Color lowColor, Color niceColor, Color highColor, double step, String format) {
         NumberAxis xAxis = new NumberAxis("Time [s]");
-        xAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
-        xAxis.setLowerMargin(0.0);
-        xAxis.setUpperMargin(0.0);
+        configureAxis(xAxis, minimumTimeRange);
         NumberAxis yAxis = new NumberAxis("Distance [m]");
-        yAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
-        yAxis.setLowerMargin(0.0);
-        yAxis.setUpperMargin(0.0);
+        configureAxis(yAxis, distanceRange);
         XYBlockRenderer blockRenderer = new XYBlockRenderer();
         blockRenderer.setBlockHeight(distanceGranularity);
         blockRenderer.setBlockWidth(timeGranularity);
-        blockRenderer.setBlockAnchor(RectangleAnchor.BOTTOM_LEFT);
+        blockRenderer.setBlockAnchor(RectangleAnchor.CENTER);
         double[] boundaries = { lowValue, niceValue, highValue};
         Color[] boundaryColors = { lowColor, niceColor, highColor};
         PaintScale scale = new ColorPaintScale(format, boundaries, boundaryColors);
@@ -400,12 +470,25 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 				trajectory.extend(now, new Point2D.Double(bestLongitudinal, bestLateral));
 			}
 		}
-		notifyListeners(new DatasetChangeEvent(this, null));	// This guess work actually works!
-		if (0 == now % timeGranularity)
+		if (now == minimumTimeRange) {
+			((XYPlot) trajectoryChart.getPlot()).getDomainAxis().setAutoRange(true);
 			for (XYPlot plot : contourPlots)
-				plot.notifyListeners(new PlotChangeEvent(plot));
+				plot.getDomainAxis().setAutoRange(true);
+		}
+		if (0 == now % timeGranularity)
+			reGraph();
 		scheduler.enqueueEvent(now + 1, this);
 		return true;
+	}
+	
+	private void reGraph() {
+		notifyListeners(new DatasetChangeEvent(this, null));	// This guess work actually works!
+		for (XYPlot plot : contourPlots) {
+			plot.notifyListeners(new PlotChangeEvent(plot));
+	        XYBlockRenderer blockRenderer = (XYBlockRenderer) plot.getRenderer();
+	        blockRenderer.setBlockHeight(distanceGranularity);
+	        blockRenderer.setBlockWidth(timeGranularity);
+		}
 	}
 
 	@Override
@@ -767,6 +850,68 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 			statusLabel.setText(String.format(Main.locale, "t=%.0fs, distance=%.0fm%s", t, distance, value));
 		} else
 			statusLabel.setText(" ");		
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		String command = arg0.getActionCommand();
+		System.out.println("command is \"" + command + "\"");
+		String[] fields = command.split("[ ]");
+		if (fields.length == 2) {
+			NumberFormat nf = NumberFormat.getInstance(Locale.US);
+			double value;
+			try {
+				value = nf.parse(fields[1]).doubleValue();
+			} catch (ParseException e) {
+				e.printStackTrace();
+				return;
+			}
+			if (fields[0].equalsIgnoreCase("setDistanceGranularity")) {
+				distanceGranularity = value;
+				setGranularity (labelDistanceGranularity, value);
+			} else if (fields[0].equalsIgnoreCase("setTimeGranularity")) {
+				timeGranularity = value;
+				setGranularity (labelTimeGranularity, value);
+			}
+			reGraph();
+		}
+		else
+			throw new Error("Unknown ActionEvent");
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent arg0) {
+		// Ignored		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+		// Ignored		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+		// Ignored		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent arg0) {
+		maybeShowPopup(arg0);
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent arg0) {
+		maybeShowPopup(arg0);		
+	}
+	
+	private void maybeShowPopup(MouseEvent e) {
+		if (e.isPopupTrigger()) {
+			Component c = e.getComponent();
+			if (c == labelDistanceGranularity)
+				distancePopupMenu.show(c, e.getX(), e.getY());
+			else if (c == labelTimeGranularity)
+				timePopupMenu.show(c, e.getX(), e.getY());
+		}
 	}
 
 }
