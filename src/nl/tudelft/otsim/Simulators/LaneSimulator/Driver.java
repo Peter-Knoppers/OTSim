@@ -85,7 +85,7 @@ public class Driver {
     public double duration = 3;
     
     /** Factor applied to time estimates at conflicts. */
-    public double estTimeFactor = 1.5; // Prevent collisions; increased safety factor; WJS; old value: 1.25;
+    public double estTimeFactor = 1.75; // Prevent collisions; increased safety factor; WJS; old value: 1.25;
     
     /** Stopping distance for conflicts, for numerical [m]. */
     public double s0conflict = .5;
