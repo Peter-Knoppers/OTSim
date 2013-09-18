@@ -135,6 +135,13 @@ public class MeasurementPlan extends JPanel implements GraphicsPanelClient, Stor
 		routeChanged();
 	}
 	
+	/**
+	 * Create a dummy MeasurementPlan.
+	 */
+	public MeasurementPlan() {
+		model = null;
+	}
+	
 	private JMenuItem makeMenuItem(String caption, String actionCommand) {
 		JMenuItem result = new JMenuItem(caption);
 		result.addActionListener(this);

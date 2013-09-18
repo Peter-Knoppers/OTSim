@@ -822,6 +822,8 @@ public class Main extends JPanel implements ActionListener {
 			return model.trafficDemand;
 		else if (extension.equals(Model.FILETYPE))
 			return model;
+		else if (extension.equals(MeasurementPlan.FILETYPE))
+			return new MeasurementPlan();
 		return null;
 	}
 	
@@ -906,7 +908,7 @@ public class Main extends JPanel implements ActionListener {
 		String extension = fileName.substring(pos + 1);
 		Storable storable = identifyStorableExtension(extension);
 		if (null == storable)
-			WED.showProblem(WED.ENVIRONMENTERROR, "Cannot identify file type of \"%s\"", fileName);
+			WED.showProblem(WED.ENVIRONMENTERROR, "Cannot identify file type (\"%s\") of \"%s\"", extension, fileName);
 		else
 			loadStorable(storable, fileName);
 	}
