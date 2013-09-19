@@ -27,12 +27,8 @@ public class OTSim extends JApplet {
 		revalidate();		// very important!
 		int count;
 		final String paramHeader = "param";
-		for (count = 0; ; count++)
-		{
-			String value = getParameter(paramHeader + count);
-			if ((null == value) || (value.length() == 0))
-				break;
-		}
+		for (count = 0; null != getParameter(paramHeader + count); count++)
+			;	// count the number of parameters
 		String[] params = new String[count];
 		for (int i = 0; i < count; i++)
 			params[i] = getParameter(paramHeader + i);
