@@ -154,7 +154,6 @@ public class LoadModel implements ActionListener {
 	        Main.mainFrame.setTitle("Imported");
 	        Main.mainFrame.setActiveGraph();
 	        Main.mainFrame.zoomToScene();
-	        Main.mainFrame.menuItemSaveModel.setEnabled(true);
 	        this.frame.dispose();
 		}
 		if (command.startsWith("Cancel")) {

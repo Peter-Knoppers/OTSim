@@ -116,10 +116,7 @@ public class Main extends JPanel implements ActionListener {
     private String fileSelectedNetwork;
     /** Currently loaded traffic model */
     public Model model;
-    /** JMenuItem of the Save Model ... menu */
-    public javax.swing.JMenuItem menuItemSaveModel;
     /** JMenuItem of the Export Model ... menu */
-    public javax.swing.JMenuItem menuItemExportModel;
     private JPopupMenu measurementPlanPopup;
     
     /** Name of the OpenTraffic application */
@@ -196,38 +193,20 @@ public class Main extends JPanel implements ActionListener {
         //shape
         
         // Build the main menu
-        // File menu
-        javax.swing.JMenu menuFile = new javax.swing.JMenu();
+        menuBar = new javax.swing.JMenuBar();
+        
+        // File menu        
+        JMenu menuFile = new JMenu();
         menuFile.setText("File");
         
-        menuFile.add(makeMenuItem ("New model", "newModel", "New.png", true));
-        menuFile.add(makeMenuItem ("Open model ...", "openDialogLoadModel", "Briefcase.png", haveDiskAccess()));
-        menuFile.add(makeMenuItem ("Import model ...", "openDialogImportModel", "Back.png", haveDiskAccess()));
-        
-        menuFile.add(menuItemExportModel = makeMenuItem("Export model ...", "openDialogExportModel", "Forward.png", haveDiskAccess()));
-        menuItemExportModel.setEnabled(false);  
-        
-        menuFile.add(menuItemSaveModel = makeMenuItem("Save model ...", "openDialogSaveModel", "Save.png", haveDiskAccess()));
-        menuItemSaveModel.setEnabled(false);
-        
+        menuFile.add(makeMenu("New", "new", "New.png", true));
+        menuFile.add(makeMenu("Open", "load", "Briefcase.png", haveDiskAccess()));
+        menuFile.add(makeMenu("Save", "save", "Save.png", haveDiskAccess()));
+        menuFile.add(makeMenuItem("Import model ...", "openDialogImportModel", "Back.png", haveDiskAccess()));
+        menuFile.add(makeMenuItem("Import OpenStreetMap Network ...", "openDialogImportOSM", "Back.png", haveDiskAccess()));
         menuFile.add(makeMenuItem("Exit", "Exit", "Exit.png", haveDiskAccess()));
         
-        menuBar = new javax.swing.JMenuBar();
         menuBar.add(menuFile);
-        
-        // Experimental File2 menu
-        
-        JMenu menuFile2 = new JMenu();
-        menuFile2.setText("File2");
-        
-        menuFile2.add(makeMenu("New", "new", "New.png", true));
-        menuFile2.add(makeMenu("Open", "load", "Briefcase.png", haveDiskAccess()));
-        menuFile2.add(makeMenu("Save", "save", "Save.png", haveDiskAccess()));
-        menuFile2.add(makeMenuItem("Import model ...", "openDialogImportModel", "Back.png", haveDiskAccess()));
-        menuFile2.add(makeMenuItem("Import OpenStreetMap Network ...", "openDialogImportOSM", "Back.png", haveDiskAccess()));
-        menuFile2.add(makeMenuItem("Exit", "Exit", "Exit.png", haveDiskAccess()));
-        
-        menuBar.add(menuFile2);
         
         // View menu
         javax.swing.JMenu menuView = new javax.swing.JMenu();
@@ -239,7 +218,7 @@ public class Main extends JPanel implements ActionListener {
         menuView.add(makeMenuItem("Zoom in", "zoomIn", "Zoom.png", true));
         menuView.add(makeMenuItem("Zoom out", "zoomOut", "Earth.png", true));
 
-        // Show the menu (in the jFrame)
+        // Show the menu
         if (null != parent) {
         	if (parent instanceof StandAlone)
         		((StandAlone) parent).setMenuBar(menuBar);
@@ -493,8 +472,6 @@ public class Main extends JPanel implements ActionListener {
     	setActiveGraph();
     	zoomToScene();
         System.out.printf("Loaded network \"%s\"\r\n", filename);
-		menuItemSaveModel.setEnabled(true);
-		menuItemExportModel.setEnabled(true);
         return true;
     }
         
@@ -959,8 +936,6 @@ public class Main extends JPanel implements ActionListener {
         mainFrame.setTitle(myName);
     	setActiveGraph();
         System.out.println("created new empty network");
-		menuItemSaveModel.setEnabled(haveDiskAccess());
-		menuItemExportModel.setEnabled(haveDiskAccess());
 	}
 	
 	/**

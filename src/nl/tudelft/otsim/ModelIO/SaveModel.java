@@ -178,7 +178,6 @@ public class SaveModel implements ActionListener {
 
 	        Main.mainFrame.setTitle("Saved");
 	        Main.mainFrame.setActiveGraph();
-	        Main.mainFrame.menuItemSaveModel.setEnabled(true); 
 	        this.frame.dispose();
 		}
 		if (command.startsWith("Cancel")) {

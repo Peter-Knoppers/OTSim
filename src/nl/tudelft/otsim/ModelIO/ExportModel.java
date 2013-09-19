@@ -162,7 +162,6 @@ public class ExportModel implements ActionListener {
 			}
 	        Main.mainFrame.setTitle("Exported");
 	        Main.mainFrame.setActiveGraph();
-	        Main.mainFrame.menuItemExportModel.setEnabled(true); 
 	        this.frame.dispose();
 		}
 		if (command.startsWith("Cancel")) {
