@@ -364,7 +364,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         scheduler.enqueueEvent(0d, new Stepper(this));
 	}
 	
-	private double TemporalAct(double t, double actT, double actL) {
+	private static double TemporalAct(double t, double actT, double actL) {
     	double activationLevel;
     	double dt = 30;
     	if (t<=actT) {
