@@ -168,10 +168,6 @@ public class Model implements Storable {
 	 * Create a new (empty) Traffic Model
 	 */
 	public Model() {
-		network = new Network();
-		activities = new Activities();
-		population = new Population(this);
-		trafficDemand = new TrafficDemand(this);
 	}
 	
 	/**
@@ -198,10 +194,10 @@ public class Model implements Storable {
      */
     public String exportToSubMicroSimulation() {
 		return network.exportDrivableBoundaries() 
-		+ network.exportDetectors() 
-		+ network.exportTrafficLights() 
-		+ network.exportTrafficLightControllers()
-		+ exportMeasurementPlans();
+				+ network.exportDetectors() 
+				+ network.exportTrafficLights() 
+				+ network.exportTrafficLightControllers()
+				+ exportMeasurementPlans();
     }
     
     private String exportMeasurementPlans() {
