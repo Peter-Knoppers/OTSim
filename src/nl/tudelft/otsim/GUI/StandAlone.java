@@ -24,7 +24,6 @@ public class StandAlone extends JFrame {
 	 * Create the GUI window for running as a Java application
 	 */
 	public StandAlone () {
-		frame = getContentPane();
 	    setMinimumSize(new Dimension(1000, 800));
 	    setLocation(100, 100);
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);

@@ -65,7 +65,7 @@ public class Main extends JPanel implements ActionListener {
 	public static Locale locale = new Locale("en", "US");
     volatile static boolean initialized = false;
     /** Main Frame of OpenTraffic */
-    public static Main mainFrame;
+    public static Main mainFrame = null;
     private Container parent = null;
     
     /**
@@ -74,6 +74,8 @@ public class Main extends JPanel implements ActionListener {
      * @param args Array of String; command line arguments
      */
     public static void main(String args[]) {
+    	if (null == Main.mainFrame)
+    		throw new Error("GUI has not been (properly) created");
         System.out.println("GUI initialized; process program arguments");
         for (String arg : args) {
         	int pos = arg.indexOf('=');
