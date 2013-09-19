@@ -356,36 +356,6 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         for (Lane lane : model.network)
         	if (lane.taper != lane)
         		laneGraphics.add(new LaneGraphic(lane));
-        /*
-        // class
-        Vehicle veh = new Vehicle(model);
-        veh.l = 4;
-        veh.vMax = 160;
-        veh.marker = "o";
-        veh.aMin = -6;
-        try {
-            veh.trajectory = new Trajectory(veh, "nl.tudelft.otsim.Simulators.LaneSimulator.FCD");
-        } catch (ClassNotFoundException cnfe) {
-            System.err.println("failed to make a new Trajectory");
-        }
-        Driver driver = new Driver(veh);
-        VehicleDriver clazz = new VehicleDriver(model, veh, 1);
-        clazz.addStochasticDriverParameter("fSpeed", VehicleDriver.distribution.GAUSSIAN, 123.7/120, 12.0/120);
-        
-        veh = new Vehicle(model);
-        veh.l = 15;
-        veh.marker = "s";
-        veh.aMin = -6;
-        try {
-            veh.trajectory = new Trajectory(veh, "nl.tudelft.otsim.Simulators.LaneSimulator.FCD");
-        } catch (ClassNotFoundException cnfe) {
-            System.err.println("failed to make a new Trajectory");
-        }
-        driver = new Driver(veh);
-        driver.a = 0.4;
-        clazz = new VehicleDriver(model, veh, 2);
-        clazz.addStochasticVehicleParameter("vMax", VehicleDriver.distribution.GAUSSIAN, 85, 2.5);
-        */
         ConsistencyCheck.checkPreInit(model);
         System.out.println("model.init()");
         model.init();
