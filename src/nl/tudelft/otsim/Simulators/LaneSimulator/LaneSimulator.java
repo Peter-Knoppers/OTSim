@@ -15,6 +15,7 @@ import nl.tudelft.otsim.GUI.ObjectInspector;
 import nl.tudelft.otsim.GUI.WED;
 import nl.tudelft.otsim.Simulators.Measurement;
 import nl.tudelft.otsim.Simulators.LaneSimulator.Conflict;
+import nl.tudelft.otsim.Simulators.LaneSimulator.VehicleDriver.gaussian;
 import nl.tudelft.otsim.Simulators.ShutDownAble;
 import nl.tudelft.otsim.Simulators.SimulatedObject;
 import nl.tudelft.otsim.Simulators.SimulatedTrafficLightController;
@@ -288,28 +289,20 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
                 */
                 
                 if (veh.l < 6)
-                	clazz.addStochasticDriverParameter("fSpeed", VehicleDriver.distribution.GAUSSIAN, veh.vMax/120, 12.0/120);
+                	clazz.addStochasticDriverParameter("fSpeed", VehicleDriver.distribution.GAUSSIAN, 123.7/120, 12.0/120);
                 else {
-                    clazz.addStochasticVehicleParameter("vMax", VehicleDriver.distribution.GAUSSIAN, veh.vMax, 2.5);
+                    clazz.addStochasticVehicleParameter("vMax", VehicleDriver.distribution.GAUSSIAN, 85, 2.5);
                     driver.a = 0.4;
                 }
                 // Additional parameter(s) for evacuation modeling
                 driver.activationLevel = Double.parseDouble(fields[5]);
                 
-                if (driver.activationLevel == 0)
+                if (driver.activationLevel == 0) {
                 	driver.ActLevel = driver.activationLevel;
-                else if ((driver.activationLevel <= 1) && (driver.activationLevel > 0)) {
-                	//a. time function  @After 600s fully activated to the target level! #Ugly
-                	//Input the current time instant (s), targeted activationLevel
-                	driver.ActLevel = TemporalAct(model.t(), 600, driver.activationLevel); 
-                	
-                	//b. Set stochastic activationLevel for individual drivers
-                	clazz.addStochasticDriverParameter("ActLevel", VehicleDriver.distribution.GAUSSIAN, driver.ActLevel, 0.1);
-                	
-                	//c. Value constraint:  //(actLevel<=1 && actLevel>=0 )
-                	driver.ActLevel = driver.ActLevel < 0 ? 0 : driver.ActLevel;
-                	driver.ActLevel = driver.ActLevel > 1 ? 1 : driver.ActLevel;
-                } else {
+                    driver.RandomAct = 0;
+                }else if ((driver.activationLevel <= 1) && (driver.activationLevel > 0)) {
+                	clazz.addStochasticDriverParameter("RandomAct", VehicleDriver.distribution.GAUSSIAN, 0, 0.1);
+                }else {
                 	throw new Error("The targeted ActivationLevel input is not a valid value!");
                 	//System.out.println("The ActivationLevel input is not a valid value!");
                 }
@@ -362,17 +355,6 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         ConsistencyCheck.checkPostInit(model);
         System.out.println(String .format("model created: %d lanes", model.network.length));
         scheduler.enqueueEvent(0d, new Stepper(this));
-	}
-	
-	private static double TemporalAct(double t, double actT, double actL) {
-    	double activationLevel;
-    	double dt = 30;
-    	if (t<=actT) {
-    		activationLevel = Math.round(t/dt)/(actT/dt)*(actL-0);
-    	} else {
-    		activationLevel = actL;
-    	}
-    	return activationLevel;
 	}
 	
 	private void makeGenerator(ArrayList<Double> routeProbabilities, int node, ArrayList<Lane> lanes, ArrayList<ArrayList<Integer>> routes, double numberOfTrips, double classProbabilities[]) {

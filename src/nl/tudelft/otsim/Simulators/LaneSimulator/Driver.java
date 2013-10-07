@@ -21,17 +21,20 @@ public class Driver {
 	/** Actual Activation level of this driver (smoothing variable: [0, 1]) */
 	public double ActLevel;
 	
+	/** Random value of ActLevel for individual vehicles */
+	public double RandomAct;
+	
     /** Longitudinal stopping distance [m]. */
     public double s0 = 3;
     
     /** Longitudinal acceleration [m/s^2]. */
-    public double a = 1.25*(1-ActLevel) + ActLevel * 1.25 * (1.46/0.94);
+    public double a = 1.25;
     
     /** Regular longitudinal acceleration [m/s^2]. */
-    public double aMin = 1.25*(1-ActLevel) + ActLevel * 1.25 * (1.46/0.94);
+    public double aMin = 1.25;
     
     /** Longitudinal deceleration [m/s^2]. */
-    public double b = 2.09*(1-ActLevel) + ActLevel * 2.09 * (0.97/0.87);
+    public double b = 2.09;
     
     /** Maximum deceleration for v>vdes. */
     public double b0 = .5;
@@ -61,10 +64,10 @@ public class Driver {
     public double vCong = 60/3.6;
     
     /** LMRS deceleration for lane changes (default: equal to <tt>b</tt>). */
-    public double bSafe = 2.09*(1-ActLevel) + ActLevel * 2.09 * (0.97/0.87);
+    public double bSafe = 2.09;
     
     /** LMRS minimum time headway [s] for very desired lane change. */
-    public double Tmin = .56*(1-ActLevel) + ActLevel * .56 * (.25/.78);
+    public double Tmin = .56;
     
     /** LMRS relaxation time [s]. */
     public double tau = 25;
@@ -86,6 +89,7 @@ public class Driver {
     
     /** Factor applied to time estimates at conflicts. */
     public double estTimeFactor = 1.75; // Prevent collisions; increased safety factor; WJS; old value: 1.25;
+    //YY: 1.25 -> 1.75, the CAPACITY at conflicting area might decrease...
     
     /** Stopping distance for conflicts, for numerical [m]. */
     public double s0conflict = .5;
@@ -234,7 +238,36 @@ public class Driver {
      * An additional voluntary lane change incentive is intersection lane change 
      * desire which is set in <tt>notice()</tt> methods.
      */
-    public void drive() {
+    public void drive() { 	
+    	//a. time function @After 600s fully activated to the target level! #Ugly
+    	ActLevel = TemporalAct(vehicle.model.t(), 600, 30, activationLevel); 
+    	
+    	//b. Set stochastic driver parameters'
+    	ActLevel = ActLevel * (1 + RandomAct);
+    	
+    	//c. value constraint:  //(activationLevel<=1 && activationLevel>=0 )
+    	ActLevel = ActLevel < 0? 0 : ActLevel;
+    	ActLevel = ActLevel > 1? 1 : ActLevel;
+    	
+    	// set parameters
+    	/* Longitudinal acceleration [m/s^2]. */
+        a = 1.25*(1-ActLevel) + ActLevel * 1.25 * (1.46/0.94);
+        
+        /* Regular longitudinal acceleration [m/s^2]. */
+        aMin = a;
+        
+        /* Longitudinal deceleration [m/s^2]. */
+        b = 2.09*(1-ActLevel) + ActLevel * 2.09 * (0.97/0.87);
+        
+        /* LMRS deceleration for lane changes (default: equal to <tt>b</tt>). */
+        bSafe = b;
+        
+        /* LMRS minimum time headway [s] for very desired lane change. */
+        Tmin = .56*(1-ActLevel) + ActLevel * .56 * (.25/.78);
+    	
+        /* Maximum acceleration [m/s^2] for intersections. */
+        aInter = 2*(1-ActLevel) + ActLevel * 2 * (1.46/0.94);
+        
         //if ((630 == vehicle.id) && (vehicle.model.t >= 5 * 60 + 37.3))
         //	System.out.println("watch");
         noticeRSUs();
@@ -535,6 +568,24 @@ public class Driver {
             	lowerAcceleration(-bMin * bMin / bDeadend);
         }
     }
+    
+    /**
+     * Determine ActLevel as a function of the current time, fully-activated period, and targeted activationLevel
+     * @param t    The current time during simulation
+     * @param actT Fully activated time period
+     * @param dt Time step interval
+     * @param actL Targeted activation level
+     * @return Time-dependent ActLevel
+     */
+	private static double TemporalAct(double t, double actT, double dt, double actL) {
+    	double activationLevel;
+    	if (t<=actT) {
+    		activationLevel = Math.round(t/dt)/(actT/dt)*(actL-0);
+    	} else {
+    		activationLevel = actL;
+    	}
+    	return activationLevel;
+	}
     
     /**
      * Sets the acceleration of the vehicle only if the given value is lower 
@@ -1430,7 +1481,7 @@ public class Driver {
      * parameter correlations.
      */
     public void correlateParameters() {
-        T = Tmax;
+    	T = Tmax;
         aMin = a;
     }
 
