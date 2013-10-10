@@ -332,7 +332,7 @@ public class GraphicsPanel extends JPanel implements MouseListener, MouseMotionL
         		Point2D.Double p = new Point2D.Double(coords[0],coords[1]);
         		Point2D.Double translatedPoint = translate(p);
         		drawPath.moveTo(translatedPoint.getX(), translatedPoint.getY());
-                ++ numSubPaths;
+                ++numSubPaths;
                 break;
             case PathIterator.SEG_LINETO:
         		p = new Point2D.Double(coords[0],coords[1]);

@@ -38,6 +38,7 @@ public class PriorityConflict {
      * 
      */
     protected PriorityConflict(Lane priorityLane, Lane yieldLane, conflictType type, Polygon conflictArea) {
+    	assert(priorityLane != yieldLane);
         this.setStopLine(stopLine);
         this.conflictType = type;
         this.conflictArea = conflictArea;

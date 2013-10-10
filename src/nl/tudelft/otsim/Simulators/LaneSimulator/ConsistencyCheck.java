@@ -127,12 +127,12 @@ public class ConsistencyCheck {
 			if (! lane.isMerge())
 				continue;
 			for (Lane mergingLane : lane.ups) {
-				int conflictRSUsFound = 0;
+				int mergeConflictRSUsFound = 0;
 				for (RSU rsu : mergingLane.RSUs)
-					if (rsu.noticeable && (rsu instanceof Conflict.conflictRSU))
-						conflictRSUsFound++;
-				if (conflictRSUsFound == 0)
-					throw new Exception("merging lane " + describeLane(mergingLane) + " has " + conflictRSUsFound + " ConflictRSUs (should be 1)");
+					if (rsu.noticeable && (rsu instanceof Conflict.conflictRSU) && (((Conflict.conflictRSU) rsu).isMerge()))
+						mergeConflictRSUsFound++;
+				if (mergeConflictRSUsFound == 0)
+					throw new Exception("merging lane " + describeLane(mergingLane) + " has " + mergeConflictRSUsFound + " ConflictRSUs (should be 1)");
 			}
 		}
 	}

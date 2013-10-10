@@ -965,7 +965,7 @@ public class Main extends JPanel implements ActionListener {
 		double xRatio = (maxX - minX) / (graphicsPanel.getWidth() - 2 * margin);
 		double yRatio = (maxY - minY) / (graphicsPanel.getHeight() - 2 * margin);
 		double ratio = xRatio > yRatio ? xRatio : yRatio;
-		System.out.format("x: [%.2f - %.2f], y: [%.2f - %.2f], width %d, height %d ratio %.4f\r\n", minX, maxX, minY, maxY, graphicsPanel.getWidth(), graphicsPanel.getHeight(), ratio);
+		//System.out.format("x: [%.2f - %.2f], y: [%.2f - %.2f], width %d, height %d ratio %.4f\r\n", minX, maxX, minY, maxY, graphicsPanel.getWidth(), graphicsPanel.getHeight(), ratio);
 		if (Double.isInfinite(ratio))
 			ratio = 1;
 		if (ratio < 0)

@@ -57,16 +57,15 @@ public class Lane extends CrossSectionObject {
      * @param destination Integer; node ID of the end of this lane or NODESTINATION
      */
     public Lane (CrossSectionElement cse, TurnArrow turnArrow, StopLine stopLine, double lateralPosition, double width, int origin, int destination) {
+    	this();
     	this.lateralWidth = width;
     	this.lateralPosition = lateralPosition;
-    	this.id = laneCount;
     	this.origin = origin;
     	this.destination = destination;
     	this.turnArrow = turnArrow;
     	this.stopLineLane = stopLine;
     	// TODO should be illegal for cse to be null
     	this.cse = cse;
-    	laneCount++;
     }
     
     /**
@@ -75,9 +74,9 @@ public class Lane extends CrossSectionObject {
      * @param lane Example Lane to copy some properties from
      */
     public Lane(Lane lane) {
+    	this();
     	this.lateralWidth = lane.getLateralWidth();
     	this.lateralPosition = lane.getLateralPosition();
-    	this.id = laneCount;
     	this.origin = lane.getOrigin();
     	this.destination = lane.getDestination();
     	this.turnArrow = lane.getTurnArrow();
@@ -88,13 +87,16 @@ public class Lane extends CrossSectionObject {
     	this.downLanes = lane.getDown();
     	this.upLanes = lane.getUp();
     	this.cse = lane.getCse();
-    	laneCount++;
 	}
     /**
      * Create a Lane with default values.
      * TODO: make this creator unneeded; it should not exist. 
      */
     public Lane() {
+    	this.id = laneCount;
+    	laneCount++;
+    	if (622 == id)
+    		System.out.println("created lane " + id);
 	}
 
 	/**
