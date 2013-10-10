@@ -477,13 +477,16 @@ public class GraphicsPanel extends JPanel implements MouseListener, MouseMotionL
     	g2.drawOval((int) (p.x - diameter / 2),(int) (p.y - diameter / 2), diameter, diameter);
     }
    
+    enum Anchor {
+    	CENTER, LEFT, RIGHT, TOP, BOTTOM, TOPLEFT, TOPRIGHT, BOTTOMLEFT, BOTTOMRIGHT
+    }
     
     /**
      * Draw a text. Size, font, style, etc. can not be specified (yet).
      * @param string String; text to draw
      * @param position Point2D.Double; location where the text is drawn
      */
-    public void drawString(String string, Point2D.Double position) {
+    public void drawString(String string, Point2D.Double position/*, Anchor anchor*/) {
     	if (null == g2)
     		throw new Error("not painting");
     	position = translate(position);

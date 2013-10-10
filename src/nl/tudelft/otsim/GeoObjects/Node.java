@@ -742,26 +742,6 @@ public class Node extends Vertex implements XML_IO {
 		// TODO Later on: these turning lanes will only be generated if turning arrows show if a turn exists
 
 		ArrayList<Link> newLinks = new ArrayList<Link>();
-		// the simple case: two links 
-		
-		if ((inCount == 2) && (outCount == 2)) {
-			int incomingArm = 0; // index of the incoming arm: start at zero
-			for (DirectionalLink incoming : dlList) {
-				if (incoming.incoming) {
-					for (int arm = 1; arm < dlList.size(); arm++) {
-						int itel = arm + incomingArm;
-						if (arm + incomingArm > dlList.size() - 1)
-							itel  = arm + incomingArm - dlList.size();
-						DirectionalLink leaving = dlList.get(itel);
-						// select all leaving lanes from this junction
-						if (! leaving.incoming && incoming.link.getFromNode_r().equals(leaving.link.getToNode_r()))
-							outCount--;
-					}
-				}
-				incomingArm++;
-			}
-		}
-		// a type of junction 
 		if ((inCount >= 1) && (outCount >= 1) && (inCount + outCount > 2)) {
 			// Expand nodes and create junction connecting links/lanes (connectors)
 			int incomingArm = -1; // index of the incoming arm: start at zero
@@ -994,7 +974,9 @@ public class Node extends Vertex implements XML_IO {
 		    					createCurve = true;
 		    				if (newLane != null)
 		    					oldLane = new Lane(newLane);
-							newLane = newLaneConnection(currentInLane, currentOutLane, createCurve, oldLane, sameOutLink);				    					
+							newLane = newLaneConnection(currentInLane, currentOutLane, createCurve, oldLane, sameOutLink);	
+							if (newLane.getID() == 17)
+								System.out.println("Created lane " + newLane.getID());
 		    				newLanes.add(0, newLane);
 	    				}
 	    				if (outLaneIndex == outLanesAndLinkList.size() - 1) {
@@ -1010,7 +992,10 @@ public class Node extends Vertex implements XML_IO {
 			// revisit the new Links to investigate conflicting lanes (merge, split, cross)
 			for (Link link : newLinks) {
 				for (Link compareToLink : newLinks) {
-					// Hmmm do we really want to find conflicts of a link with itself???
+					if (compareToLink == link)
+						continue;
+					if (compareToLink.getName_r().compareTo(link.getName_r()) <= 0)
+						continue;
 					PriorityConflict priorityConflict = null;
 					conflictType cType;
 					if (link.getToNode_r().getPoint().equals(compareToLink.getToNode_r().getPoint()))
@@ -1028,6 +1013,10 @@ public class Node extends Vertex implements XML_IO {
 									continue;	// take care of the easy cases first
 								Lane laneA = (Lane) csoA;
 								Lane laneB = (Lane) csoB;
+								if (13 == laneA.getID())
+									System.out.println("laneA is " + laneA.getID());
+								//if (17 == laneB.getID())
+								//	System.out.println("laneB is " + laneB.getID());
 								// we only visit pairs of lanes once
 								// Peter believes the above comment might be false!
 								// identify yield and priority lane
@@ -1108,17 +1097,11 @@ public class Node extends Vertex implements XML_IO {
 									}
 								}
 								// Determine location at the lanes at the start of the conflict Area:
-								Point2D.Double pInIn = new Point2D.Double(); 
-								Point2D.Double pInOut = new Point2D.Double(); 
-								Point2D.Double pOutIn = new Point2D.Double(); 
-								Point2D.Double pOutOut = new Point2D.Double(); 
-								
-								pInIn = getConflictIntersectionPoint(yLane.getLaneVerticesInner(), pLane.getLaneVerticesInner());
-								pInOut = getConflictIntersectionPoint(yLane.getLaneVerticesInner(), pLane.getLaneVerticesOuter());
-								pOutIn = getConflictIntersectionPoint(yLane.getLaneVerticesOuter(), pLane.getLaneVerticesInner());
-								pOutOut = getConflictIntersectionPoint(yLane.getLaneVerticesOuter(), pLane.getLaneVerticesOuter());
-								// FIXME: if statement below is crazy
-								if (! (pInIn == null & pInOut == null & pInIn == null & pInIn == null) ) {
+								Point2D.Double pInIn = getConflictIntersectionPoint(yLane.getLaneVerticesInner(), pLane.getLaneVerticesInner());
+								Point2D.Double pInOut = getConflictIntersectionPoint(yLane.getLaneVerticesInner(), pLane.getLaneVerticesOuter());
+								Point2D.Double pOutIn = getConflictIntersectionPoint(yLane.getLaneVerticesOuter(), pLane.getLaneVerticesInner());
+								Point2D.Double pOutOut = getConflictIntersectionPoint(yLane.getLaneVerticesOuter(), pLane.getLaneVerticesOuter());
+								if ((conflictType.MERGE == cType) || (pInIn != null) || (pInOut != null) || (pOutIn != null) || (pOutOut != null)) {
 									Polygon cArea = new Polygon();
 									// determine the stopLines of the incoming Link
 									StopLine stopLine = yLane.getUp().get(0).getStopLine();
@@ -1154,6 +1137,8 @@ public class Node extends Vertex implements XML_IO {
 										System.err.println("no Stopline created or found");
 									else
 										stopLine.addConflicts(priorityConflict);
+								} else {
+									System.out.println("Conflict has not no intersection...");
 								}
 							}
 						}
@@ -1166,27 +1151,22 @@ public class Node extends Vertex implements XML_IO {
     
     private static Point2D.Double getConflictIntersectionPoint(ArrayList<Vertex> verticesA, ArrayList<Vertex> verticesB)   {
 		Vertex prevA = null;
-		Vertex prevB = null;
-		Point2D.Double p = null; 
 		for (Vertex vA : verticesA)  {
 			if (! (prevA == null)) {
+				Line2D.Double lineA = new Line2D.Double(prevA.getX(),prevA.getY(),vA.getX(),vA.getY());
+				Vertex prevB = null;
 				for (Vertex vB : verticesB) {
 					if (! (prevB == null))   {
-						Line2D.Double l1 = new Line2D.Double(prevA.getX(),prevA.getY(),vA.getX(),vA.getY());
-						Line2D.Double l2 = new Line2D.Double(prevB.getX(),prevB.getY(),vB.getX(),vB.getY());
-						if (Planar.lineIntersectsLine(l1, l2))
-							p = Planar.intersection(l1, l2);
-						if (p != null)
-							break;
+						Line2D.Double lineB = new Line2D.Double(prevB.getX(),prevB.getY(),vB.getX(),vB.getY());
+						if (Planar.lineIntersectsLine(lineA, lineB))
+							return Planar.intersection(lineA,  lineB);
 					}
 					prevB = vB;
 				}
-				if (p != null)
-					break;
 			}
 			prevA = vA;												
 		}
-		return p;
+		return null;
     }
     
     private static Lane newLaneConnection(Lane upLane, Lane downLane, boolean createCurve, Lane oldLane, boolean sameOutlink) {

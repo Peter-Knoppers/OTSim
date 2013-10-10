@@ -1154,7 +1154,7 @@ public class CrossSectionElement implements XML_IO {
 	            Color fillColor = Color.darkGray;
 	    		if (this.crossSection.getLink().getFromNode_r().hasConflictArea())  {
 	    			polygonJunction = this.crossSection.getLink().getFromNode_r().createJunctionPolygon();
-	    			graphicsPanel.drawGeneralPath(polygonJunction, lineColor, fillColor);
+	    			//graphicsPanel.drawGeneralPath(polygonJunction, lineColor, fillColor);
 	    		}	    		
 	    		graphicsPanel.setColor(getCrossSectionElementTypology().getColor_r());	
 	    		lineColor = Color.BLUE;
