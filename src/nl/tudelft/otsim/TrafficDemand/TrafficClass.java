@@ -20,12 +20,14 @@ public class TrafficClass implements XML_IO {
 	final static private String XML_ACTIVATIONLEVEL = "activationLevel";
 	final static private String XML_MAXIMUMSPEED = "maximumSpeed";
 	final static private String XML_DEFAULTFRACTION = "defaultFraction";
+	final static private String XML_TRANSITIONTIME = "transitionTime";
 	
     private String name = null;
     private double defaultFraction = Double.NaN;
     private double length = Double.NaN;
     private double maxSpeed = Double.NaN;
     private double activationLevel = Double.NaN;
+    private double transitionTime = Double.NaN;
 	private double maxDeceleration = -6;	// STUB
     
     /**
@@ -46,6 +48,8 @@ public class TrafficClass implements XML_IO {
 				maxSpeed = Double.parseDouble(value);
 			else if (fieldName.equals(XML_DEFAULTFRACTION))
 				defaultFraction = Double.parseDouble(value);
+			else if (fieldName.equals(XML_TRANSITIONTIME))
+				transitionTime = Double.parseDouble(value);
 			else
 				throw new Exception("Unknown field \"" + fieldName + "\" near " + pn.description());
 		}
@@ -53,6 +57,10 @@ public class TrafficClass implements XML_IO {
 			throw new Exception("" + XML_MAXIMUMSPEED + " not defined near " + pn.description());
 		if ((defaultFraction < 0) || (defaultFraction > 1.0))
 			throw new Exception("Bad " + XML_DEFAULTFRACTION + " value near " + pn.description());
+		if ((activationLevel < 0) || (activationLevel > 1.0))
+			throw new Exception("Bad " + XML_ACTIVATIONLEVEL + " value near " + pn.description());
+		if ((transitionTime < 0))
+			throw new Exception("Bad " + XML_TRANSITIONTIME + " value near " + pn.description());
 
     }
 
@@ -64,11 +72,12 @@ public class TrafficClass implements XML_IO {
      * @param maxSpeed Double; maximum speed of the objects in the new TrafficClass
      * @param activationLevel Double; activationLevel of the objects in the new TrafficClass
      */
-    public TrafficClass(String name, double fraction, double length, double maxSpeed, double activationLevel) {
+    public TrafficClass(String name, double fraction, double length, double maxSpeed, double activationLevel, double transitionTime) {
     	this.defaultFraction = fraction;
     	this.length = length;
     	this.maxSpeed = maxSpeed;
     	this.activationLevel = activationLevel;
+    	this.transitionTime = transitionTime;
 	}
 
 	/**
@@ -95,6 +104,7 @@ public class TrafficClass implements XML_IO {
 				&& staXWriter.writeNode(XML_DEFAULTFRACTION, String.format(Locale.US, "%.5f", defaultFraction))
 				&& staXWriter.writeNode(XML_LENGTH, String.format(Locale.US, "%.3f", length))
 				&& staXWriter.writeNode(XML_MAXIMUMSPEED, String.format(Locale.US, "%.0f", maxSpeed))
+				&& staXWriter.writeNode(XML_TRANSITIONTIME, String.format(Locale.US, "%.0f", transitionTime))
 				&& staXWriter.writeNodeEnd(XMLTAG);
 	}
 
@@ -128,5 +138,13 @@ public class TrafficClass implements XML_IO {
 	 */
 	public double getActivationLevel() {
 		return activationLevel;
+	}
+	
+	/**
+	 * Retrieve the targeted transition time of this TrafficClass.
+	 * @return Double; the targeted transition time of this TrafficClass
+	 */
+	public double getTransitionTime() {
+		return transitionTime;
 	}
 }

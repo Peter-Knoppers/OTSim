@@ -296,6 +296,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
                 }
                 // Additional parameter(s) for evacuation modeling
                 driver.activationLevel = Double.parseDouble(fields[5]);
+                driver.transitionTime = Double.parseDouble(fields[6]);
                 
                 if (driver.activationLevel == 0) {
                 	driver.ActLevel = driver.activationLevel;

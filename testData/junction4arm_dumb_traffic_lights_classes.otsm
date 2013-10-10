@@ -993,6 +993,7 @@
       <defaultFraction>0.9</defaultFraction>
       <length>4.000</length>
       <maximumSpeed>160</maximumSpeed>
+      <transitionTime>0</transitionTime>
     </trafficClass>
     <trafficClass>
       <name>truck</name>
@@ -1000,6 +1001,7 @@
       <defaultFraction>0.1</defaultFraction>
       <length>15.000</length>
       <maximumSpeed>85</maximumSpeed>
+      <transitionTime>0</transitionTime>
     </trafficClass>
     <tripPattern>
       <location>z10 z13</location>

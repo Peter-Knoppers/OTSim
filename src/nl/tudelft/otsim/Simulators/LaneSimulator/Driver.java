@@ -24,6 +24,9 @@ public class Driver {
 	/** Random value of ActLevel for individual vehicles */
 	public double RandomAct;
 	
+	/** Fully evacuation-activated time period */
+	public double transitionTime;
+	
     /** Longitudinal stopping distance [m]. */
     public double s0 = 3;
     
@@ -239,8 +242,8 @@ public class Driver {
      * desire which is set in <tt>notice()</tt> methods.
      */
     public void drive() { 	
-    	//a. time function @After 600s fully activated to the target level! #Ugly
-    	ActLevel = TemporalAct(vehicle.model.t(), 600, 30, activationLevel); 
+    	//a. time function @After TransitionTime(600s) fully activated to the target level! #Ugly
+    	ActLevel = TemporalAct(vehicle.model.t(), transitionTime, 30, activationLevel); 
     	
     	//b. Set stochastic driver parameters'
     	ActLevel = ActLevel * (1 + RandomAct);
@@ -579,7 +582,7 @@ public class Driver {
      */
 	private static double TemporalAct(double t, double actT, double dt, double actL) {
     	double activationLevel;
-    	if (t<=actT) {
+    	if (t<actT) {
     		activationLevel = Math.round(t/dt)/(actT/dt)*(actL-0);
     	} else {
     		activationLevel = actL;

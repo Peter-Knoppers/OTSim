@@ -6,6 +6,7 @@
       <defaultFraction>0.18</defaultFraction>
       <length>4.000</length>
       <maximumSpeed>130</maximumSpeed>
+      <transitionTime>0</transitionTime>
     </trafficClass>
     <trafficClass>
       <name>truck_normal</name>
@@ -13,6 +14,7 @@
       <defaultFraction>0.02</defaultFraction>
       <length>15.000</length>
       <maximumSpeed>85</maximumSpeed>
+      <transitionTime>0</transitionTime>
     </trafficClass>
     <trafficClass>
       <name>passengerCar_act</name>
@@ -20,6 +22,7 @@
       <defaultFraction>0.76</defaultFraction>
       <length>4.000</length>
       <maximumSpeed>140</maximumSpeed>
+      <transitionTime>600</transitionTime>
     </trafficClass>
     <trafficClass>
       <name>truck_act</name>
@@ -27,6 +30,7 @@
       <defaultFraction>0.04</defaultFraction>
       <length>15.000</length>
       <maximumSpeed>90</maximumSpeed>
+      <transitionTime>600</transitionTime>
     </trafficClass>
   <tripPattern>
     <location>z1 z2</location>
