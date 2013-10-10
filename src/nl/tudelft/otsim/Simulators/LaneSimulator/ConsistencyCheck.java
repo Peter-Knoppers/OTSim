@@ -124,20 +124,18 @@ public class ConsistencyCheck {
 		}
 		// Check the existence of a ConflictRSU on all lanes leading to a merge
 		for (Lane lane : model.network) {
-			// Waiting for Wouter to tell us how many lanes leading to conflict nees a Merge Conflict RSU
 			if (333 == lane.id)
 				System.out.println("checking lane " + lane.id);
 			if (! lane.isMerge())
 				continue;
-			// TODO: this code is probably wrong.
 			int mergeConflictRSUsFound = 0;
 			for (Lane mergingLane : lane.ups) {
 				for (RSU rsu : mergingLane.RSUs)
 					if (rsu.noticeable && (rsu instanceof Conflict.conflictRSU) && (((Conflict.conflictRSU) rsu).isMerge()))
 						mergeConflictRSUsFound++;
+				if (mergeConflictRSUsFound == 0)
+					throw new Exception("feeeding lane " + describeLane(mergingLane) + " of lane " + describeLane(lane) + " has " + mergeConflictRSUsFound + " mergeConflictRSUs (should be 1)");
 			}
-			if (mergeConflictRSUsFound == 0)
-				throw new Exception("merging lane " + describeLane(lane) + " has " + mergeConflictRSUsFound + " mergeConflictRSUs on feeding lanes (should be 1)");
 		}
 	}
 	
