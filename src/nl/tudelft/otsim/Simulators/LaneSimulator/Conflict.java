@@ -92,6 +92,14 @@ public class Conflict {
         if (intersect == null)
             return null;
         coord[] clearance = findClearanceSpace(pLane, yLane, intersect, false);
+        // Horrible workaround for cases where findCLearanceSpace fails follows
+        double saveD_Conf = D_CONF;
+        while (((null == clearance) || (null == clearance[0])) && (D_CONF > 0.1)) {
+        	D_CONF = D_CONF * 0.8;
+        	clearance = findClearanceSpace(pLane, yLane, intersect, false);
+        }
+        D_CONF = saveD_Conf;
+        // End of horrible workaround
         if ((clearance != null) && (clearance[0] != null))
             return new Conflict(pLane, intersect.x1, yLane, intersect.x2, false, conflictType.MERGE, intersect.x1 - clearance[0].x1);
         return null;

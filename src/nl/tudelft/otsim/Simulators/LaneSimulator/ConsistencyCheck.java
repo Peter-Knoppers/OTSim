@@ -124,8 +124,6 @@ public class ConsistencyCheck {
 		}
 		// Check the existence of a ConflictRSU on all lanes leading to a merge
 		for (Lane lane : model.network) {
-			if (333 == lane.id)
-				System.out.println("checking lane " + lane.id);
 			if (! lane.isMerge())
 				continue;
 			int mergeConflictRSUsFound = 0;
@@ -174,8 +172,7 @@ public class ConsistencyCheck {
 									if (! connectionFound)
 										throw new Exception("lane " + describeLane(lane) + " has route to " + describeRoute(route) + " but none of the downLanes leads to desctination " + route.destinations[index + 1]); 
 								}
-							}
-								
+							}	
 						}
 					}					
 				}
