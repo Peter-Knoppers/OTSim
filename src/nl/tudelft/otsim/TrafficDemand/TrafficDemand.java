@@ -86,8 +86,8 @@ public class TrafficDemand implements Storable {
 	public void rebuild() {
 		if (0 == trafficClasses.size()) {
 			// Create two simple classes
-			trafficClasses.put("passengerCar", new TrafficClass("passengerCar", 0.9, 4.0, 160.0, 0.0));
-			trafficClasses.put("truck", new TrafficClass("truck", 0.1, 15.0, 85.0, 0.0));
+			trafficClasses.put("passengerCar", new TrafficClass("passengerCar", 0.9, 4.0, 160.0, 0.0, 0.0));
+			trafficClasses.put("truck", new TrafficClass("truck", 0.1, 15.0, 85.0, 0.0, 0.0));
 		}
 		if (this.tripPatternList != null)
 			createLocationToNodesList();
@@ -298,7 +298,7 @@ public class TrafficDemand implements Storable {
     	String result = "";
     	for (String tcName : trafficClassNames()) {
     		TrafficClass tc = lookupTrafficClass(tcName);
-    		result += String.format(Locale.US, "TrafficClass\t%s\t%.3f\t%.3f\t%.3f\t%.6f\n", tcName, tc.getLength(), tc.getMaximumSpeed(), tc.getMaximumDeceleration(), tc.getActivationLevel());
+    		result += String.format(Locale.US, "TrafficClass\t%s\t%.3f\t%.3f\t%.3f\t%.6f\t%.3f\n", tcName, tc.getLength(), tc.getMaximumSpeed(), tc.getMaximumDeceleration(), tc.getActivationLevel(), tc.getTransitionTime());
     	}
     	CreatePathsTripPatterns();
         for (TripPattern tripPattern : getTripPatternList()) {
