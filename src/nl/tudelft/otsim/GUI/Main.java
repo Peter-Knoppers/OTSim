@@ -16,15 +16,19 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.Locale;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -41,8 +45,11 @@ import nl.tudelft.otsim.Charts.MeasurementPlan;
 import nl.tudelft.otsim.Events.Scheduler;
 import nl.tudelft.otsim.FileIO.ParsedNode;
 import nl.tudelft.otsim.FileIO.StaXWriter;
+import nl.tudelft.otsim.GeoObjects.Lane;
+import nl.tudelft.otsim.GeoObjects.Link;
 import nl.tudelft.otsim.GeoObjects.Network;
 import nl.tudelft.otsim.GeoObjects.Node;
+import nl.tudelft.otsim.GeoObjects.Vertex;
 import nl.tudelft.otsim.ModelIO.ExportModel;
 import nl.tudelft.otsim.ModelIO.ImportModelShapeWizard;
 import nl.tudelft.otsim.ModelIO.ImportOSM;
@@ -51,7 +58,9 @@ import nl.tudelft.otsim.ModelIO.SaveModel;
 import nl.tudelft.otsim.Simulators.Simulator;
 import nl.tudelft.otsim.Simulators.LaneSimulator.LaneSimulator;
 import nl.tudelft.otsim.Simulators.RoadwaySimulator.RoadwaySimulator;
+import nl.tudelft.otsim.SpatialTools.Planar;
 import nl.tudelft.otsim.TrafficDemand.TrafficDemand;
+import nl.tudelft.otsim.Utilities.Sorter;
 
 /**
  * This class implements the Main window of OpenTraffic.
@@ -217,6 +226,9 @@ public class Main extends JPanel implements ActionListener {
         menuView.add(makeMenuItem("Entire network", "zoomToScene", "Expand.png", true));
         menuView.add(makeMenuItem("Zoom in", "zoomIn", "Zoom.png", true));
         menuView.add(makeMenuItem("Zoom out", "zoomOut", "Earth.png", true));
+        menuView.add(makeMenuItem("Zoom to link ...", "zoomToLink", null, true));
+        menuView.add(makeMenuItem("Zoom to node ...", "zoomToNode", null, true));
+        menuView.add(makeMenuItem("Zoom to lane ...", "zoomToLane", null, true));
 
         // Show the menu
         if (null != parent) {
@@ -948,34 +960,29 @@ public class Main extends JPanel implements ActionListener {
 		graphicsPanel.setZoom(1, new Point2D.Double(0, 0));
 		if ((null == model) || (null == model.network))
 			return;
-		double minX = Double.MAX_VALUE;
-		double maxX = - Double.MAX_VALUE;
-		double minY = Double.MAX_VALUE;
-		double maxY = - Double.MAX_VALUE;
-		for (Node node : model.network.getAllNodeList(true)) {
-			if (minX > node.getX())
-				minX = node.getX();
-			if (maxX < node.getX())
-				maxX = node.getX();
-			if (minY > node.getY())
-				minY = node.getY();
-			if (maxY < node.getY())
-				maxY = node.getY();
-		}
-		double xRatio = (maxX - minX) / (graphicsPanel.getWidth() - 2 * margin);
-		double yRatio = (maxY - minY) / (graphicsPanel.getHeight() - 2 * margin);
+		Line2D.Double bbox = new Line2D.Double(Double.MAX_VALUE, Double.MAX_VALUE, - Double.MAX_VALUE, - Double.MAX_VALUE);
+		for (Node node : model.network.getAllNodeList(true))
+			bbox = Planar.expandBoundingBox(bbox, node.getX(), node.getY());
+		setZoomRect(bbox, margin);
+	}
+	
+	private void setZoomRect(Line2D.Double bbox, int margin) {
+		double xRatio = (bbox.getX2() - bbox.getX1() + margin) / (graphicsPanel.getWidth() - 2 * margin);
+		double yRatio = (bbox.getY2() - bbox.getY1() + margin) / (graphicsPanel.getHeight() - 2 * margin);
 		double ratio = xRatio > yRatio ? xRatio : yRatio;
 		//System.out.format("x: [%.2f - %.2f], y: [%.2f - %.2f], width %d, height %d ratio %.4f\r\n", minX, maxX, minY, maxY, graphicsPanel.getWidth(), graphicsPanel.getHeight(), ratio);
 		if (Double.isInfinite(ratio))
 			ratio = 1;
-		if (ratio < 0)
+		if (ratio <= 0)
 			ratio = 1;
-		if (maxX == Double.MAX_VALUE)
-			minX = maxX = 0;
-		if (maxY == Double.MAX_VALUE)
-			minY = maxY = 0;
+		double meanX = 0;
+		if (bbox.getX2() != Double.MAX_VALUE)
+			meanX = (bbox.getX1() + bbox.getX2()) / 2;
+		double meanY = 0;
+		if (bbox.getY2() != Double.MAX_VALUE)
+			meanY = (bbox.getY1() + bbox.getY2()) / 2;
 		graphicsPanel.setZoom(1d / ratio, new Point2D.Double(0, 0));
-		graphicsPanel.setPan(graphicsPanel.getWidth() / 2 - (minX + maxX) / 2 / ratio, - graphicsPanel.getHeight() / 2 + (minY + maxY) / 2 / ratio);
+		graphicsPanel.setPan(graphicsPanel.getWidth() / 2 - meanX / ratio, - graphicsPanel.getHeight() / 2 + meanY / ratio);		
 	}
 	
 	int testStepState = 0;
@@ -984,6 +991,48 @@ public class Main extends JPanel implements ActionListener {
 	 * <br /> Execute some action when the user clicks in the status bar.
 	 */
 	public void testStep() {
+	}
+	
+	/**
+	 * Show a list of all instances of some Geo Object type; let the user
+	 * select one item from the list and zoom to the selected object.
+	 * @param what String; the kind of Geo Object to zoom to
+	 */
+	public void showZoomDialog(String what) {
+		TreeMap<String, Object> mapping = new TreeMap<String, Object>();
+		if ("link".equals(what))
+			for (Link link : model.network.getLinks())
+				mapping.put(link.getName_r(), link);
+		else if ("node".equals(what))
+			for (Node node : model.network.getNodeList(true))
+				mapping.put (node.getName_r(), node);
+		else if ("lane".equals(what))
+			for (Lane lane : model.network.getLanes())
+				mapping.put ("lane_" + lane.getID(), lane);
+		String selected = (String) JOptionPane.showInputDialog(new JFrame(), "", "Please select", JOptionPane.PLAIN_MESSAGE, null, mapping.keySet().toArray(), "");
+		if (null == selected)
+			return;
+		int margin = 20;
+		Line2D.Double bbox = new Line2D.Double(Double.MAX_VALUE, Double.MAX_VALUE, - Double.MAX_VALUE, - Double.MAX_VALUE);
+		if ("link".equals(what)) {
+			Link link = (Link) mapping.get(selected);
+			if (null == link)
+				WED.showProblem(WED.PROGRAMERROR, "Cannot find link %s", selected);
+			for (Vertex v : link.getVertices())
+				bbox = Planar.expandBoundingBox(bbox, v.getX(), v.getY());
+		} else if ("node".equals(what)) {
+			Node node = (Node) mapping.get(selected);
+			if ((null != node.getCircle()) && (node.getCircle().radius() < margin))
+				margin = (int) node.getCircle().radius();
+			bbox = Planar.expandBoundingBox(bbox, node.getX(), node.getY());
+		} else if ("lane".equals(what)) {
+			Lane lane = (Lane) mapping.get(selected);
+			for (Vertex v : lane.getLaneVerticesInner())
+				bbox = Planar.expandBoundingBox(bbox, v.getX(), v.getY());
+			for (Vertex v : lane.getLaneVerticesOuter())
+				bbox = Planar.expandBoundingBox(bbox, v.getX(), v.getY());
+		}
+		setZoomRect(bbox, margin);			
 	}
 	
 	@Override
@@ -1036,6 +1085,12 @@ public class Main extends JPanel implements ActionListener {
 			graphicsPanel.setZoom(graphicsPanel.getZoom() * 2, new Point2D.Double(graphicsPanel.getWidth() / 2, graphicsPanel.getHeight() / 2));
 		else if ("zoomOut".equals(command))
 			graphicsPanel.setZoom(graphicsPanel.getZoom() / 2, new Point2D.Double(graphicsPanel.getWidth() / 2, graphicsPanel.getHeight() / 2));
+		else if ("zoomToLane".equals(command))
+			showZoomDialog("lane");
+		else if ("zoomToLink".equals(command))
+			showZoomDialog("link");
+		else if ("zoomToNode".equals(command))
+			showZoomDialog("node");
 		else if ("MeasurementPlanChanged".equals(command))
 			switchMeasurementPlan();
 		else if ("EditMeasurementPlanName".equals(command))

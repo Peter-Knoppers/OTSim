@@ -1215,6 +1215,26 @@ public class Planar {
 			result[index] = polyLine.get(index);	
 		return result;
 	}
+	
+	/**
+	 * Expand a bounding box.
+	 * @param rect Line2D.Double; initial bounding box
+	 * @param x Double; x of point to expand bounding box to
+	 * @param y Double; y of point to expand bounding box to
+	 * @return Line2D.Double; expanded bounding box
+	 */
+	public static Line2D.Double expandBoundingBox (Line2D.Double rect, double x, double y) {
+		Line2D.Double result = new Line2D.Double(rect.x1, rect.y1, rect.x2, rect.y2);
+		if (x < result.x1)
+			result.x1 = x;
+		if (x > result.x2)
+			result.x2 = x;
+		if (y < result.y1)
+			result.y1 = y;
+		if (y > result.y2)
+			result.y2 = y;
+		return result;
+	}
 
 }
 

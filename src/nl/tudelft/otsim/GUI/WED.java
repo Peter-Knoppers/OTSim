@@ -88,8 +88,7 @@ public class WED {
 		}
 		System.err.println(severityText);
 		System.err.println(problem);
-		JFrame frame = new JFrame();
-		JOptionPane.showMessageDialog(frame/* getContentPane()*/, problem, severityText, option);
+		JOptionPane.showMessageDialog(new JFrame(), problem, severityText, option);
 
 		return (PROGRAMERROR == severity);
 	}

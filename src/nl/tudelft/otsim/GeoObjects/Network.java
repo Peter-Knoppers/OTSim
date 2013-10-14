@@ -30,6 +30,7 @@ import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.GUI.ObjectInspector;
 import nl.tudelft.otsim.GUI.Storable;
 import nl.tudelft.otsim.SpatialTools.Planar;
+import nl.tudelft.otsim.Utilities.Sorter;
 
 /**
  * The Network class holds the geographical information about a network.
@@ -1658,6 +1659,29 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
     		objectInspector = null;
     	}
     	objectInspector = new ObjectInspector(trafficLightController, this);
+	}
+
+	/**
+	 * Retrieve a list of all {@link Link Links} in this Network.
+	 * @return ArrayList&lt;{@link Link}&gt;; the list of all Links in this Network
+	 */
+	public ArrayList<Link> getLinks() {
+		ArrayList<Link> result = new ArrayList<Link>();
+		for (String linkName : links.keySet())
+			result.add(links.get(linkName));
+		return result;
+	}
+
+	/**
+	 * Build and return a list of all {@link Lane Lanes} in this Network.
+	 * @return ArrayList&lt;{@link Lane}&gt;; the list of all Lanes in this Network
+	 */
+	public ArrayList<Lane> getLanes() {
+		ArrayList<Lane> result = new ArrayList<Lane>();
+		for (Link link : getLinks())
+			for (CrossSection cs : link.getCrossSections_r())
+				result.addAll(cs.collectLanes());
+		return result;
 	}
 
 }
