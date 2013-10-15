@@ -152,9 +152,11 @@ public class ConsistencyCheck {
 	public static void checkPostInit(Model model) throws Exception {
 		for (Lane lane : model.network) {
 			if (null != lane.generator) {
+				System.out.println("Checking routes for generator on lane " + describeLane(lane));
 				for (Route route : lane.generator.routes) {
+					System.out.println("Checking route " + describeRoute(route));
 					if (! lane.leadsTo(route.destinations[0]))
-						throw new Exception("lane " + describeLane(lane) + " does not lead to destination " + route.destinations[0]);
+						throw new Exception("lane " + describeLane(lane) + " does not lead to destination " + route.destinations[0] + " (entire route is " + describeRoute(route) + ")");
 					for (int index = 1; index < route.destinations.length - 1; index++) {
 						for (Lane otherLane : model.network) {
 							if (otherLane.destination == route.destinations[index]) {

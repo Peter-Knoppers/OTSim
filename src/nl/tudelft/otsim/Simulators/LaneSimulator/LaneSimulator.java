@@ -374,6 +374,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
     			mergeCount++;
     			priorityLane = lane;
     		}
+    	System.out.println("mergeCount is " + mergeCount);
     	if (mergeCount > 1) {
     		System.err.println ("Don't know how to create an N-merge for N=" + mergeCount + " at lane " + laneOrigin.id);
     		return;
@@ -402,7 +403,6 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
     		hiddenLane.setVisible(false);
     		lanes.add(hiddenLane);
     	}
-    	System.out.println("mergeCount is " + mergeCount);
 		Generator generator = new Generator(laneOrigin, Generator.distribution.EXPONENTIAL);
 		generator.routes = routeEnds;
 		generator.routeProb = probabilities;

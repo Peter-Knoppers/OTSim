@@ -30,12 +30,14 @@ public class DijkstraAlgorithm {
 	private Set<Node> unSettledNodes;
 	private Map<Node, Node> predecessors;
 	private Map<Node, Double> distance;
+	private final int totalNodes;
 
 	/**
 	 * Prepare to run the Dijkstra algorithm.
 	 * @param network {@link Network}; the Network to run Dijkstra on
 	 */
 	public DijkstraAlgorithm(Network network) {
+		totalNodes = network.getAllNodeList(true).size();
 		edges = network.getLinkList();
 	}
 	
@@ -56,6 +58,8 @@ public class DijkstraAlgorithm {
 			unSettledNodes.remove(node);
 			findMinimalDistances(node);
 		}
+		if (totalNodes != settledNodes.size())
+			System.out.println(String.format("Dijkstra: Disjunct network: total nodes; %s, settled nodes: %d, start node %s", totalNodes, settledNodes.size(), nodeA.toString()));
 	}
 
 	private void findMinimalDistances(Node node) {

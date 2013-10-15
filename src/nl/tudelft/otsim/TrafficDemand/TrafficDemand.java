@@ -429,7 +429,10 @@ public class TrafficDemand implements Storable {
 		        		if (getPath != null)
 		        			path.setNodeList(getPath);
 		        		else	// TODO Do you really want to continue when this happens???
+		        		{
 		        			System.out.println("no valid path found between " + fromNode.getNodeID() + " and " + toNode.getNodeID());
+		        			dijkstra.getPathNodes(toNode);
+		        		}
 		        	}
 				}
 	        	pathIndex++; 

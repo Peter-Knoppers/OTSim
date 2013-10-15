@@ -1138,7 +1138,7 @@ public class Node extends Vertex implements XML_IO {
 									else
 										stopLine.addConflicts(priorityConflict);
 								} else {
-									System.out.println("Conflict has not no intersection...");
+									System.out.println(String.format("Conflict of y%s and p%s at node %d has no intersection...", yLane.toString(), pLane.toString(), nodeID));
 								}
 							}
 						}
