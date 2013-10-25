@@ -23,54 +23,65 @@ import nl.tudelft.otsim.GeoObjects.Node;
  * http://www.vogella.com/articles/JavaAlgorithmsDijkstra/article.html#dijkstra
  * @author gtamminga
  */
-public class DijkstraAlgorithm {
+public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 	//private final List<Node> nodes;
 	private final Collection<Link> edges;
 	private Set<Node> settledNodes;
 	private Set<Node> unSettledNodes;
 	private Map<Node, Node> predecessors;
-	private Map<Node, Double> distance;
+	private Map<Node, Double> cost;
 	private final int totalNodes;
+	private Node startNode;
+	private Node endNode;
+	int pathNumber;	// Ensure that plain Dijkstra returns only one path
 
 	/**
 	 * Prepare to run the Dijkstra algorithm.
 	 * @param network {@link Network}; the Network to run Dijkstra on
 	 */
 	public DijkstraAlgorithm(Network network) {
+		super (network);
 		totalNodes = network.getAllNodeList(true).size();
 		edges = network.getLinkList();
 	}
 	
 	/**
 	 * Run the Dijkstra algorithm to compute routes and distances to a specific {@link Node}.
-	 * @param nodeA {@link Node}; the Node to compute the routes and distances for 
+	 * @param startNode {@link Node}; the Node to compute the routes and distances for 
 	 */
-	public void execute(Node nodeA) {
+	@Override
+	public void execute(Node startNode, Node endNode) {
+		pathNumber = 0;
+		this.endNode = endNode;
+		if (this.startNode == startNode)
+			return;
+		this.startNode = startNode;
 		settledNodes = new HashSet<Node>();
 		unSettledNodes = new HashSet<Node>();
-		distance = new HashMap<Node, Double>();
+		cost = new HashMap<Node, Double>();
 		predecessors = new HashMap<Node, Node>();
-		distance.put(nodeA, 0.0);
-		unSettledNodes.add(nodeA);
+		cost.put(startNode, 0.0);
+		unSettledNodes.add(startNode);
 		while (unSettledNodes.size() > 0) {
 			Node node = getMinimum(unSettledNodes);
 			settledNodes.add(node);
 			unSettledNodes.remove(node);
-			findMinimalDistances(node);
-		}
-		if (totalNodes != settledNodes.size())
-			System.out.println(String.format("Dijkstra: Disjunct network: total nodes; %s, settled nodes: %d, start node %s", totalNodes, settledNodes.size(), nodeA.toString()));
-	}
-
-	private void findMinimalDistances(Node node) {
-		List<Node> adjacentNodes = getNeighbors(node);
-		for (Node target : adjacentNodes) {
-			if (getShortestDistance(target) > getShortestDistance(node) + getDistance(node, target)) {
-				distance.put(target, getShortestDistance(node) + getDistance(node, target));
-				predecessors.put(target, node);
-				unSettledNodes.add(target);
+			List<Node> adjacentNodes = getNeighbors(node);
+			for (Node target : adjacentNodes) {
+				if (getShortestDistance(target) > getShortestDistance(node) + getDistance(node, target)) {
+					cost.put(target, getShortestDistance(node) + getDistance(node, target));
+					predecessors.put(target, node);
+					unSettledNodes.add(target);
+				}
 			}
 		}
+		if (totalNodes != settledNodes.size())
+			System.out.println(String.format("Dijkstra: Disjunct network: total nodes; %s, settled nodes: %d, start node %s", totalNodes, settledNodes.size(), startNode.toString()));
+	}
+
+	@Override
+	public double getCost () {
+		return cost.get(endNode);
 	}
 
 	private double getDistance(Node node, Node target) {
@@ -103,48 +114,44 @@ public class DijkstraAlgorithm {
 	}
 
 	private double getShortestDistance(Node nodeB) {
-		Double d = distance.get(nodeB);
+		Double d = cost.get(nodeB);
 		if (d == null)
 			return Double.MAX_VALUE;
 		return d;
 	}
 
 	/**
-	 * Create a path (a set of {@link Link Links} connecting a set of {@link Node Nodes}. 
-	 * @param path LinkedList&lt;{@link Node}&gt;; the set of Nodes.
-	 * @return LinkedList&lt;{@link Link}&gt;; the list of Links that form the path
+	 * Create a path (a set of {@link Link Links} connecting a set of {@link Node Nodes}.
+	 * <br /> Remark: assumes that there is no more than one link between any pair of nodes. 
+	 * @return ArrayList&lt;{@link Link}&gt;; the list of Links that form the path
 	 */
-	public LinkedList<Link> getPathLinks(LinkedList<Node> path) {
-    	LinkedList<Link> pathLinks = new LinkedList<Link>();
-        Node nodeStart = null;
-        int i = 0;
-        for (Node pathNodes : path) {
-            i++;
-            Node nodeEnd = pathNodes;
-            if (i > 1)
+	@Override
+	public ArrayList<Link> getPathLinks () {
+    	ArrayList<Link> pathLinks = new ArrayList<Link>();
+        Node previousNode = null;
+        for (Node node : getPathNodes()) {
+            if (null != previousNode)
                 for (Link link : edges)
-                    if (link.getFromNodeExpand().equals(nodeStart) && link.getToNodeExpand().equals(nodeEnd))
+                    if (link.getFromNodeExpand().equals(previousNode) && link.getToNodeExpand().equals(node))
                     	pathLinks.add(link);
-            nodeStart = pathNodes;
+            previousNode = node;
         }
         Collections.reverse(pathLinks);
         return pathLinks;
     }
 	
 	/**
-	 * This method returns the path from the source to the selected target or
-	 * NULL if no path exists
-	 * @param target {@link Node} End point of the path.
+	 * This method returns the path from the source to the selected target
 	 * @return ArrayList&lt;{@link Node}&gt;; the set of Nodes that form the
 	 * source to the target 
 	 */
-	public ArrayList<Node> getPathNodes(Node target) {
-
-		ArrayList<Node> pathNodes = new ArrayList<Node>();
-		Node step = target;
+	@Override
+	public ArrayList<Node> getPathNodes() {
 		// Check if a path exists
-		if (null == predecessors.get(step))
-			return null;
+		if ((null == predecessors.get(endNode)) || (pathNumber != 1))
+			throw new Error("No (additional) path exists");
+		ArrayList<Node> pathNodes = new ArrayList<Node>();
+		Node step = endNode;
 		pathNodes.add(step);
 		while (predecessors.get(step) != null) {
 			step = predecessors.get(step);
@@ -153,6 +160,11 @@ public class DijkstraAlgorithm {
 		// Put it into the correct order
 		Collections.reverse(pathNodes);		
 		return pathNodes;
+	}
+
+	@Override
+	public boolean hasNext() {
+		return (0 == pathNumber++) && (cost.get(endNode) != null);
 	}
 
 }

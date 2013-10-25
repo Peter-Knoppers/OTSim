@@ -2,6 +2,7 @@ package nl.tudelft.otsim.ShortesPathAlgorithms;
 
 import java.util.ArrayList;
 
+import nl.tudelft.otsim.GeoObjects.Link;
 import nl.tudelft.otsim.GeoObjects.Network;
 import nl.tudelft.otsim.GeoObjects.Node;
 
@@ -12,7 +13,7 @@ import nl.tudelft.otsim.GeoObjects.Node;
  * <br />1: call ShortestPathAlgorithm (network) to create an instance of this class.
  * <br />2: call execute (startNode, endNode) to set the start and end nodes.
  * <br />3: call hasNext to verify that a path exist (if none exists go to step 6, or go to step 2)
- * <br />4: call getCost and getPath to obtain the properties of the path
+ * <br />4: call getCost, getPathLinks and getPathNodes to obtain the properties of the path
  * <br />5: call hasNext to check if another path exists (if none exists go to step 6, or go to step 2; otherwise go to step 4)
  * <br />6: dispose this instance of ShortedPathAlgorithm
  * 
@@ -20,7 +21,7 @@ import nl.tudelft.otsim.GeoObjects.Node;
  */
 public abstract class ShortestPathAlgorithm {
 	@SuppressWarnings("unused")
-	private Network network;	// will be used in the implementation of execute
+	private final Network network;	// will be used in the implementation of execute
 	
 	/**
 	 * Create an instance of the ShortestPathAlgorithm
@@ -33,7 +34,7 @@ public abstract class ShortestPathAlgorithm {
 	/**
 	 * Find lowest cost paths between two {@link Node Nodes}.
 	 * @param startNode {@link Node}; starting point of all paths
-	 * @param endNode {@Link Node}; end point of all paths
+	 * @param endNode {@link Node}; end point of all paths
 	 */
 	public abstract void execute (Node startNode, Node endNode);
 	
@@ -52,8 +53,14 @@ public abstract class ShortestPathAlgorithm {
 	
 	/**
 	 * Retrieve the lowest cost path from {@link Node startNode} to the endNode.
-	 * @return ArrayList&lt;{@link Node}&gt;; the list of nodes visited in the lowest cost path
+	 * @return ArrayList&lt;{@link Link}&gt;; the ordered list of links passed in the lowest cost path
 	 */
-	public abstract ArrayList<Node> getPath ();
+	public abstract ArrayList<Link> getPathLinks ();
+	
+	/**
+	 * Retrieve the lowest cost path from {@link Node startNode} to the endNode.
+	 * @return ArrayList&lt;{@link Node}&gt;; the ordered list of nodes passed in the lowest cost path
+	 */
+	public abstract ArrayList<Node> getPathNodes ();
 		
 }

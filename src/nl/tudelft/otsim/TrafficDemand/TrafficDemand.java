@@ -17,7 +17,7 @@ import nl.tudelft.otsim.GeoObjects.ActivityLocation;
 import nl.tudelft.otsim.GeoObjects.MicroZone;
 import nl.tudelft.otsim.GeoObjects.Node;
 import nl.tudelft.otsim.ShortesPathAlgorithms.DijkstraAlgorithm;
-import nl.tudelft.otsim.ShortesPathAlgorithms.Path;
+import nl.tudelft.otsim.ShortesPathAlgorithms.ShortestPathAlgorithm;
 import nl.tudelft.otsim.SpatialTools.SpatialQueries;
 import nl.tudelft.otsim.Utilities.Sorter;
 
@@ -118,16 +118,15 @@ public class TrafficDemand implements Storable {
 			 * For instance we have a Pattern "Z12 Z13 Z15" that represents activities at three locations
 			 * And the corresponding nodes are:
 			 * - Z12: node numbers 6, 8 and 9
-			 * - Z13: node numbers 7, 12 and 12
+			 * - Z13: node numbers 7, 12 and 13
 			 * - Z15: node numbers 122 and 125
 			 *  the total amount of paths is 18 (3*3*2)
 			*/
 			int totalPathCombinations = 1;
-			for (int i=0; i < numberOfLocations; i++) {
+			for (int i = 0; i < numberOfLocations; i++) {
 				String locationList = (String) tripPattern.getLocationList().get(i);
 				// Retrieve the separate locations 
 				for (String location: locationList.split("\\s")) { 
-					int n = 0;
 					ArrayList<Node> nodeList = new ArrayList<Node>();
 					/*
 					 * If the trip pattern uses a {@link Zone} as location type, connect the zones with 
@@ -143,7 +142,6 @@ public class TrafficDemand implements Storable {
 							for (Integer nodeNumber : microZone.getNodeList())  {
 								Node node = model.network.lookupNode(nodeNumber, true);
 								nodeList.add(node);
-								n++;
 							}
 					} else if (location.startsWith(ACTIVTITYLOCATION_PREFIX))  {
 						int locationNumber = Integer.parseInt(location.substring(1));
@@ -155,117 +153,61 @@ public class TrafficDemand implements Storable {
 							// find the nearest node 
 							ConnectZones.NearestPointAtLink(SpatialQueries.createLinkQuery(model.network.getLinkList(), bound), activityLocation, maxSearchDistance, maxSpeed);
 							nodeList.add(activityLocation.getFromNodeNearLocation());
-						}
-						n++;
+						} else
+							WED.showProblem(WED.ENVIRONMENTERROR, "Cannot find activity location %d", locationNumber);
 					}
-					totalPathCombinations = totalPathCombinations * n;
+					if (0 == nodeList.size())
+						throw new Error("There is no node in " + location);
+					totalPathCombinations *= nodeList.size();
 					listNodeList.add(nodeList);
 				}
 			}
-			numberOfLocations = listNodeList.size();
+			if (listNodeList.size() != numberOfLocations)
+				throw new Error("Cannot happen");
+			//numberOfLocations = listNodeList.size();
+			if (2 > numberOfLocations)
+				throw new Error("Too few locations in listNodeList");
+			if (totalPathCombinations == 0)
+				throw new Error("No path found");
 			double weight = 1.0 / totalPathCombinations;
-			// for every ActivityLocation or Zone we create an index pointing to the corresponding Nodes 
-			int[] index = new int[numberOfLocations];
 			// loop through all corresponding nodes and start with activity/zone with index 0 and 1
-			int start = 0;
-			int next = 1;
-			int step = 1;
-			TripPatternPath tripPatternPath = null;
-			tripPattern.setTripPatternPathList(new ArrayList<TripPatternPath>());
-			// for all combinations of nodes (associated to a tripPattern from A, B, C etc.) 
-			// the routes are being prepared
-			for (int i = 0; i < totalPathCombinations; i++) {				
-				ArrayList<Node> nodeList = new ArrayList<Node>();
-				// add the first combination of nodes (all index values are 0)
-				for (int j = 0; j < numberOfLocations; j++)
-					nodeList.add(listNodeList.get(j).get(index[j]));
-				index[start]++;
-				// when reaching the last item 
-				if (index[start] >= listNodeList.get(start).size()) {
-					// reset the index[start] to 0
-					index[start] = 0;
-					if (next > start + step) {
-						index[start + step]++;
-						if (index[start + step] >= listNodeList.get(start + step).size())  {
-							index[start + step] = 0;
-							step++;
-							index[start + step]++;
-							if (next == start + step) {
-								start = 0;
-								index[next] = 0;
-								next++;
-								index[next]++;
-								step = 1;
-							}
-							step = 1;
-						}
-					} else {
-						start = 0;
-						index[next]++;
-						while (index[next] >= listNodeList.get(next).size()  && next < index.length) {
-							index[next] = 0;
-							next = next + 1;
-							if (next < index.length)
-								index[next]++;
-							else
-								break;
-						}							
-					}
+			tripPattern.clearTripPatternPaths();
+			int depth = 0;
+			int[] indices = new int[numberOfLocations];
+			indices[0] = 0;
+			/*
+			for (int i = 0; i < numberOfLocations; i++) {
+				System.out.print("zone " + i + " is " + (String) tripPattern.getLocationList().get(i) + ": ");
+				for (int j = 0; j < listNodeList.get(i).size(); j++)
+					System.out.print(listNodeList.get(i).get(j) + " ");
+				System.out.println("");
+			}
+			*/
+			while (indices[0] < listNodeList.get(0).size()) {
+				if (depth == numberOfLocations) {
+					// create a route
+					//System.out.println("Adding a route");
+					ArrayList<Node> path = new ArrayList<Node> (numberOfLocations);
+					for (int i = 0; i < numberOfLocations; i++)
+						path.add(listNodeList.get(i).get(indices[i]));
+					TripPatternPath tripPatternPath = new TripPatternPath(tripPattern,  weight * numberOfTrips, path);
+					tripPattern.addTripPatternPath(tripPatternPath);
+					depth--;
+					indices[depth]++;
 				}
-				
-				tripPatternPath = new TripPatternPath(tripPattern,  weight * numberOfTrips, nodeList);
-				// Create the associated Paths, with only the departing and arriving node
-				// the Paths will be expanded later by the createShortestPath method
-				Node prevNode = null;
-				for (Node node : nodeList) {
-					if (null != prevNode) {
-						ArrayList<Node> nodePair = new ArrayList<Node>(2);
-						nodePair.add(prevNode);
-						nodePair.add(node);
-						tripPatternPath.addPath(new Path(tripPatternPath, nodePair));
-					}
-					prevNode = node;					
-				}
-				tripPattern.addTripPatternPath(tripPatternPath);
-			}	
-		}
-	}
-
-/*	public TripPattern createTripPatternList(PersonTripPlan personTripPlan) {
-		LinkedList<Long> timeList = new LinkedList<Long>();
-		for (ActivityType activityType: personTripPlan.getActivityTypeList()) {
-			Long startTimeSeconds = ( activityType.getPreferredStartTime().getTime() - model.settings.getSimulationSettings().getStartTimeSimulation().getTime() ) / 1000;
-			timeList.add(startTimeSeconds);
-		}		
-		TripPattern tripPattern = new TripPattern(personTripPlan.getMovingPerson(), 
-				personTripPlan.getActivityLocationList(), timeList);
-		return tripPattern;
-	}*/
-	
-	/**
-	 * The export of traffic demand to the simulation invokes conversion the list of trip patterns 
-	 * Data are written to the result and imported in the LaneSimulator
-	 * As we have sequential trips, we have to check that a connecting trip does not start before finishing the activity!
-	 */
-/*    public String exportTrafficDemand() {
-    	String result = "";
-    	//List<Lane> laneList = createLaneList();
-		for(TripPattern tripPattern: tripPatternList) {
-			result += String.format(Main.locale, "TripChain\tPersonID\t%d", tripPattern.getMovingPerson().getID());
-			java.util.Iterator<ActivityLocation> itActivityLocation = tripPattern.getActivityLocationList().iterator();
-			java.util.Iterator<Long> itDepartureTime = tripPattern.getDepartureTimeList().iterator();
-			while (itActivityLocation.hasNext())  {
-				ActivityLocation activityLocation = itActivityLocation.next();
-				Long time = itDepartureTime.next();
-				result += String.format(Main.locale, "\tTime\t%d", time);
-				result += String.format(Main.locale, "\tBuilding\tX\t%f", activityLocation.getX());
-				result += String.format(Main.locale, "\tY\t%f", activityLocation.getY());
-				result += String.format(Main.locale, "\tZ\t%f", activityLocation.getZ());
-				result += "\n";
+				int limit = listNodeList.get(depth).size();
+				if (indices[depth] >= limit) {
+					depth--;
+					if (depth >= 0)
+						indices[depth]++;
+				} else {
+					depth++;
+					if (depth < indices.length)
+						indices[depth] = 0;
+				}				
 			}
 		}
-		return result;
-    }*/
+	}
 
 	public ArrayList<TripPattern> getTripPatternList() {
 		return tripPatternList;
@@ -300,7 +242,7 @@ public class TrafficDemand implements Storable {
     		TrafficClass tc = lookupTrafficClass(tcName);
     		result += String.format(Locale.US, "TrafficClass\t%s\t%.3f\t%.3f\t%.3f\t%.6f\t%.3f\n", tcName, tc.getLength(), tc.getMaximumSpeed(), tc.getMaximumDeceleration(), tc.getActivationLevel(), tc.getTransitionTime());
     	}
-    	CreatePathsTripPatterns();
+    	createRoutes();
         for (TripPattern tripPattern : getTripPatternList()) {
         	Double totalTrips = tripPattern.getNumberOfTrips();
         	result += String.format(Locale.US, "TripPattern\tnumberOfTrips:\t%.2f\tLocationPattern:\t%s\tFractions%s\n", totalTrips, tripPattern.getLocationList().toString(), tripPattern.getClasslFlows());
@@ -310,9 +252,9 @@ public class TrafficDemand implements Storable {
             		numberOfTrips = tripPatternPath.getNumberOfTrips();
             	result += String.format(Locale.US, "TripPatternPath\tnumberOfTrips:\t%.3f\tNodePattern:\t%s\n", numberOfTrips, tripPatternPath.getNodeList().toString());
 				int index = 0;
-            	for (Path path : tripPatternPath.getPathList()) {
+            	for (ArrayList<Node> path : tripPatternPath.getDetailedPathList()) {
 		     		result += String.format("Path:\t%d\tnodes:", index);
-            		for (Node node : path.getNodeList())
+            		for (Node node : path)
 			     		result += String.format("\t%d", node.getNodeID());
     				result += "\n";
     				index++;
@@ -379,66 +321,39 @@ public class TrafficDemand implements Storable {
 		return Sorter.asSortedList(trafficClasses.keySet());
 	}
 	
+	
     /**
      * Create paths between all pairs of nodes, if possible.
      * Save the paths in a list of paths
      */
-    private void CreatePathsTripPatterns() {
-    	class CompareNodeNumbers implements Comparator<Path> {
-			@Override
-			public int compare(Path path1, Path path2) {
-				return path1.getNodeList().get(0).getNodeID() - path2.getNodeList().get(0).getNodeID();
-			}
-		}
-    	
-    	// Generate a list of all paths from the tripPatternList
-    	ArrayList<Path> pathList = new ArrayList<Path>();
+    private void createRoutes() {
+		ShortestPathAlgorithm shortestPathAlgorithm = new DijkstraAlgorithm(model.network);
+		ArrayList<TripPatternPath> ptps = new ArrayList<TripPatternPath>();
 		for (TripPattern tp : tripPatternList)
 			for (TripPatternPath tpp : tp.getTripPatternPathList())
-				pathList.addAll(tpp.getPathList());
-		// sort pathList by NodeID of start node
-		Collections.sort(pathList, new CompareNodeNumbers());
+				ptps.add(tpp);
 		
-		DijkstraAlgorithm dijkstra = new DijkstraAlgorithm(model.network);
-		// Collect the starting nodes of all paths in pathList
-		ArrayList<Node> startNodes = new ArrayList<Node>();
-		Node prevNode = null;
-		for (Path path : pathList) {
-			Node startNode = path.getNodeList().get(0);
-			if ((null == prevNode) || (startNode.getNodeID() != prevNode.getNodeID()))
-				startNodes.add(startNode);
-			prevNode = startNode;
+		class CompareTripPatternPaths implements Comparator<TripPatternPath> {
+			@Override
+			public int compare(TripPatternPath o1, TripPatternPath o2) {
+				return o1.getFromNode().getNodeID() - o2.getFromNode().getNodeID();
+			}
 		}
-		// TODO There is no need for ArrayList<Node> startNodes; the loop below 
-		// that uses one startNode at a time can be merged with the loop above 
-		// that generates the startNodes.
-        int pathIndex = 0;
-		for (Node startNode: startNodes) {
-	        // Find all routes from a certain node to all other nodes
-	        dijkstra.execute(startNode);
-	        
-	        while (pathIndex < pathList.size()) {
-	        	Path path = pathList.get(pathIndex);
-	        	if (path.getNodeList().get(0).getNodeID() > startNode.getNodeID())
-	        		break;
-	        	if (path.getNodeList().get(0).equals(startNode)) {
-			        Node toNode = path.getNodeList().get(path.getNodeList().size() - 1);
-			        Node fromNode = path.getNodeList().get(0);
-		        	if (fromNode.equals(startNode)) {
-		        		ArrayList<Node> getPath = dijkstra.getPathNodes(toNode);
-		        		if (getPath != null)
-		        			path.setNodeList(getPath);
-		        		else	// TODO Do you really want to continue when this happens???
-		        		{
-		        			System.out.println("no valid path found between " + fromNode.getNodeID() + " and " + toNode.getNodeID());
-		        			dijkstra.getPathNodes(toNode);
-		        		}
-		        	}
-				}
-	        	pathIndex++; 
-        	}
-        }
+		Collections.sort(ptps, new CompareTripPatternPaths());
+		for (TripPatternPath tpp : ptps) {
+			Node startNode = tpp.getFromNode();
+			Node endNode = tpp.getToNode();
+			shortestPathAlgorithm.execute(startNode, endNode);
+			boolean routeFound = false;
+			while (shortestPathAlgorithm.hasNext()) {
+    			routeFound = true;
+        		ArrayList<Node> path = shortestPathAlgorithm.getPathNodes();
+        		double cost = shortestPathAlgorithm.getCost();
+				tpp.addDetailedPath(path, cost);
+			}
+    		if (! routeFound)
+    			System.out.println("no valid path found between " + startNode.getNodeID() + " and " + endNode.getNodeID());	
+		}	
     }
-
 
 }

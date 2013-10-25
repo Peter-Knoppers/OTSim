@@ -15,16 +15,13 @@ import nl.tudelft.otsim.TrafficDemand.TripPatternPath;
  */
 public class Path {
 	private ArrayList<Node> nodeList;
-	private TripPatternPath tripPatternPath;
 	
 	/**
 	 * Create a new Path with {@link TripPatternPath} and {@link Node} list.
-	 * @param tripPatternPath {@link TripPatternPath} trip pattern of the new Path
 	 * @param nodeList ArrayList&lt;{@link Node}&gt; list of nodes of the new Path
 	 */
-	public Path(TripPatternPath tripPatternPath, ArrayList<Node> nodeList) {
+	public Path(ArrayList<Node> nodeList) {
 		this.nodeList = nodeList;
-		this.tripPatternPath = tripPatternPath;
 	}
 
 	/**
@@ -42,24 +39,6 @@ public class Path {
 	 */
 	public void setNodeList(ArrayList<Node> nodeList) {
 		this.nodeList = nodeList;
-	}
-
-	/**
-	 * Retrieve the {@link TripPatternPath} of this Path.
-	 * @return ArrayList&lt;{@link TripPatternPath}&gt;; the tripPatternPath of
-	 * this Path
-	 */
-	public TripPatternPath getTripPatternPath() {
-		return tripPatternPath;
-	}
-
-	/**
-	 * Set/replace the {@link TripPatternPath} of this Path.
-	 * @param tripPatternPath {@link TripPatternPath}; the new TripPatternPath
-	 * of this Path
-	 */
-	public void setTripPatternPath(TripPatternPath tripPatternPath) {
-		this.tripPatternPath = tripPatternPath;
 	}
 	
 }

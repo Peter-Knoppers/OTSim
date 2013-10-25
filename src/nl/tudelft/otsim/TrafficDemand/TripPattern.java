@@ -38,7 +38,6 @@ public class TripPattern implements XML_IO {
 	private double numberOfTrips;
 	private ArrayList<TripPatternPath> tripPatternPathList;	
 	
-	
 	public TripPattern(TrafficDemand trafficDemand, double numberOfTrips, ArrayList<Object> locationList) {
 		this.trafficDemand = trafficDemand;
 		this.numberOfTrips = numberOfTrips;
@@ -155,9 +154,13 @@ public class TripPattern implements XML_IO {
 		return tripPatternPathList;
 	}
 
-	public void setTripPatternPathList(ArrayList<TripPatternPath> tripPatternPathList) {
-		this.tripPatternPathList = tripPatternPathList;
+	public void clearTripPatternPaths() {
+		tripPatternPathList.clear();
 	}
+	
+	//public void setTripPatternPathList(ArrayList<TripPatternPath> tripPatternPathList) {
+	//	this.tripPatternPathList = tripPatternPathList;
+	//}
 	
 	private boolean writeMovingPerson(StaXWriter staXWriter) {
 		MovingPerson mp = getMovingPerson();
