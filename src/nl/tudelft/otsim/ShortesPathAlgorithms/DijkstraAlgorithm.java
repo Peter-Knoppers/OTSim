@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,31 +30,41 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 	private Map<Node, Node> predecessors;
 	private Map<Node, Double> cost;
 	private final int totalNodes;
+	private final double maximumTotalCostRatio;
+	private double shortestPathCosts = Double.NaN;
 	private Node startNode;
 	private Node endNode;
-	int pathNumber;	// Ensure that plain Dijkstra returns only one path
+	private ArrayList<ArrayList<Node>> returnedPaths = new ArrayList<ArrayList<Node>>(); 
+	
+	HashMap<Link,Double> penalties = new HashMap<Link,Double>();
 
 	/**
 	 * Prepare to run the Dijkstra algorithm.
 	 * @param network {@link Network}; the Network to run Dijkstra on
 	 */
-	public DijkstraAlgorithm(Network network) {
+	public DijkstraAlgorithm(Network network, double maximumTotalCostRatio) {
 		super (network);
 		totalNodes = network.getAllNodeList(true).size();
 		edges = network.getLinkList();
+		this.maximumTotalCostRatio = maximumTotalCostRatio;
 	}
 	
 	/**
 	 * Run the Dijkstra algorithm to compute routes and distances to a specific {@link Node}.
-	 * @param startNode {@link Node}; the Node to compute the routes and distances for 
+	 * @param newStartNode {@link Node}; the Node to compute the routes and distances for 
+	 * @param newEndNode {@link Node}; the Node to compute the route to
 	 */
 	@Override
-	public void execute(Node startNode, Node endNode) {
-		pathNumber = 0;
-		this.endNode = endNode;
-		if (this.startNode == startNode)
+	public void execute(Node newStartNode, Node newEndNode) {
+		this.endNode = newEndNode;
+		penalties.clear();
+		returnedPaths.clear();
+		if (this.startNode == newStartNode)
 			return;
-		this.startNode = startNode;
+		this.startNode = newStartNode;
+	}
+	
+	private ArrayList<Node> findPath() {
 		settledNodes = new HashSet<Node>();
 		unSettledNodes = new HashSet<Node>();
 		cost = new HashMap<Node, Double>();
@@ -68,8 +77,8 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 			unSettledNodes.remove(node);
 			List<Node> adjacentNodes = getNeighbors(node);
 			for (Node target : adjacentNodes) {
-				if (getShortestDistance(target) > getShortestDistance(node) + getDistance(node, target)) {
-					cost.put(target, getShortestDistance(node) + getDistance(node, target));
+				if (getLowestCost(target) > getLowestCost(node) + getCost(node, target)) {
+					cost.put(target, getLowestCost(node) + getCost(node, target));
 					predecessors.put(target, node);
 					unSettledNodes.add(target);
 				}
@@ -77,17 +86,44 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 		}
 		if (totalNodes != settledNodes.size())
 			System.out.println(String.format("Dijkstra: Disjunct network: total nodes; %s, settled nodes: %d, start node %s", totalNodes, settledNodes.size(), startNode.toString()));
+		if (null == cost.get(endNode))
+			return null;
+		ArrayList<Node> pathNodes = new ArrayList<Node>();
+		Node step = endNode;
+		pathNodes.add(step);
+		while (predecessors.get(step) != null) {
+			step = predecessors.get(step);
+			pathNodes.add(step);
+		}
+		// Put it into the correct order
+		Collections.reverse(pathNodes);		
+		return pathNodes;
 	}
 
 	@Override
 	public double getCost () {
-		return cost.get(endNode);
+		double totalCost = 0;
+		ArrayList<Link> links = getPathLinks();
+		for (Link link : links)
+			totalCost += computeCost(link, true);
+		return totalCost;
 	}
 
-	private double getDistance(Node node, Node target) {
+	private double computeCost(Link link, boolean ignorePenalties) {
+		// Currently the cost is the driving time (in seconds) of a link
+		double result = link.getLength() / (link.getMaxSpeed_r() / 3.6);
+		if (ignorePenalties)
+			return result;
+		Double penalty = penalties.get(link);
+		if (null != penalty)
+			result *= (1 + penalty);
+		return result;
+	}
+	
+	private double getCost(Node node, Node target) {
 		for (Link link : edges)
 			if (link.getFromNodeExpand().equals(node) && link.getToNodeExpand().equals(target))
-				return link.getLength();
+				return computeCost(link, false);
 		throw new RuntimeException("Should not happen");
 	}
 
@@ -104,7 +140,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 		for (Node node : vertexes)
 			if (minimum == null)
 				minimum = node;
-			else if (getShortestDistance(node) < getShortestDistance(minimum))
+			else if (getLowestCost(node) < getLowestCost(minimum))
 				minimum = node;
 		return minimum;
 	}
@@ -113,7 +149,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 		return settledNodes.contains(nodes);
 	}
 
-	private double getShortestDistance(Node nodeB) {
+	private double getLowestCost(Node nodeB) {
 		Double d = cost.get(nodeB);
 		if (d == null)
 			return Double.MAX_VALUE;
@@ -127,9 +163,13 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 	 */
 	@Override
 	public ArrayList<Link> getPathLinks () {
+		return nodeListToLinkList(getPathNodes());
+    }
+	
+	private ArrayList<Link> nodeListToLinkList (ArrayList<Node> path) {
     	ArrayList<Link> pathLinks = new ArrayList<Link>();
         Node previousNode = null;
-        for (Node node : getPathNodes()) {
+        for (Node node : path) {
             if (null != previousNode)
                 for (Link link : edges)
                     if (link.getFromNodeExpand().equals(previousNode) && link.getToNodeExpand().equals(node))
@@ -137,8 +177,8 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
             previousNode = node;
         }
         Collections.reverse(pathLinks);
-        return pathLinks;
-    }
+        return pathLinks;		
+	}
 	
 	/**
 	 * This method returns the path from the source to the selected target
@@ -148,7 +188,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 	@Override
 	public ArrayList<Node> getPathNodes() {
 		// Check if a path exists
-		if ((null == predecessors.get(endNode)) || (pathNumber != 1))
+		if (null == predecessors.get(endNode))
 			throw new Error("No (additional) path exists");
 		ArrayList<Node> pathNodes = new ArrayList<Node>();
 		Node step = endNode;
@@ -162,9 +202,54 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 		return pathNodes;
 	}
 
+	private static boolean comparePaths(ArrayList<Node> path1, ArrayList<Node> path2) {
+		if (path1.size() != path2.size())
+			return false;
+		for (int i = 0; i < path1.size(); i++)
+			if (path1.get(i) != path2.get(i))
+				return false;
+		return true;
+	}
+	
+	private final double penaltyIncrease = 0.1;
+	
+	private void increasePenalties (ArrayList<Node> path) {
+		ArrayList<Link> links = nodeListToLinkList(path);
+		for (Link link : links) {
+			Double penalty = penalties.get(link);
+			if (null == penalty)
+				penalty = 0d;
+			penalty += penaltyIncrease;
+			penalties.put(link, penalty);
+		}
+	}
+	
+	private final int maxIteration = 20;
+	
 	@Override
 	public boolean hasNext() {
-		return (0 == pathNumber++) && (cost.get(endNode) != null);
+		if (returnedPaths.size() == 0) {
+			ArrayList<Node> path = findPath();
+			if (null == path)
+				return false;
+			returnedPaths.add(path);
+			shortestPathCosts = cost.get(endNode);
+			return true;
+		} 
+		for (int iteration = 0; iteration < maxIteration; iteration++) {
+			ArrayList<Node> path = findPath();
+			boolean known = false;
+			for (ArrayList<Node> knownPath : returnedPaths)
+				if (comparePaths(path, knownPath)) {
+					known = true;
+					increasePenalties(path);
+				}
+			if ((! known) && (cost.get(endNode) <= shortestPathCosts * maximumTotalCostRatio)) {
+				returnedPaths.add(path);
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

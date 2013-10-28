@@ -25,6 +25,7 @@ public class TripPatternPath {
 	//private ArrayList<ArrayList<Node>> coursePaths = new ArrayList<ArrayList<Node>> ();
 	private ArrayList<ArrayList<Node>> detailedPaths = new ArrayList<ArrayList<Node>> ();
 	private ArrayList<Double> costs = new ArrayList<Double> ();
+	private ArrayList<Double> probabilities = null;
 
 	public TripPatternPath(TripPattern tripPattern, double numberOfTrips, Node fromNode, Node toNode) {
 		this.tripPattern = tripPattern;
@@ -81,10 +82,12 @@ public class TripPatternPath {
 	public void addDetailedPath(ArrayList<Node> path, double cost) {
 		detailedPaths.add(path);
 		costs.add(cost);
+		probabilities = null;
 	}
 	
 	public void clearDetailedPath() {
 		detailedPaths.clear();
+		probabilities = null;
 	}
 
 	public ArrayList<ArrayList<Node>> getDetailedPathList() {
@@ -105,6 +108,19 @@ public class TripPatternPath {
 	 */
 	public Node getToNode() {
 		return toNode;
+	}
+
+	private void computeRouteProbabilities() {
+		if (costs.size() < 1)
+			throw new Error("No routes");
+		CostsToProbabilities costsToProbabilities = new LogitModel(-0.2);
+		probabilities = costsToProbabilities.probabilities(costs);
+	}
+
+	public double getProbability(int index) {
+		if (null == probabilities)
+			computeRouteProbabilities();
+		return probabilities.get(index);
 	}
 
 }

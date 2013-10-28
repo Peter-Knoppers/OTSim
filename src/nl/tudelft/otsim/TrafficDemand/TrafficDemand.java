@@ -253,7 +253,7 @@ public class TrafficDemand implements Storable {
             	result += String.format(Locale.US, "TripPatternPath\tnumberOfTrips:\t%.3f\tNodePattern:\t%s\n", numberOfTrips, tripPatternPath.getNodeList().toString());
 				int index = 0;
             	for (ArrayList<Node> path : tripPatternPath.getDetailedPathList()) {
-		     		result += String.format("Path:\t%d\tnodes:", index);
+		     		result += String.format(Locale.US, "Path:\t%f\tnodes:", tripPatternPath.getProbability(index));
             		for (Node node : path)
 			     		result += String.format("\t%d", node.getNodeID());
     				result += "\n";
@@ -327,7 +327,7 @@ public class TrafficDemand implements Storable {
      * Save the paths in a list of paths
      */
     private void createRoutes() {
-		ShortestPathAlgorithm shortestPathAlgorithm = new DijkstraAlgorithm(model.network);
+		ShortestPathAlgorithm shortestPathAlgorithm = new DijkstraAlgorithm(model.network, 2);
 		ArrayList<TripPatternPath> ptps = new ArrayList<TripPatternPath>();
 		for (TripPattern tp : tripPatternList)
 			for (TripPatternPath tpp : tp.getTripPatternPathList())
@@ -352,7 +352,7 @@ public class TrafficDemand implements Storable {
 				tpp.addDetailedPath(path, cost);
 			}
     		if (! routeFound)
-    			System.out.println("no valid path found between " + startNode.getNodeID() + " and " + endNode.getNodeID());	
+    			System.out.println("no valid path found between " + startNode.getNodeID() + " and " + endNode.getNodeID());
 		}	
     }
 

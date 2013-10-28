@@ -6,6 +6,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Random;
 
 import nl.tudelft.otsim.Events.Scheduler;
 import nl.tudelft.otsim.Events.Step;
@@ -15,7 +16,6 @@ import nl.tudelft.otsim.GUI.ObjectInspector;
 import nl.tudelft.otsim.GUI.WED;
 import nl.tudelft.otsim.Simulators.Measurement;
 import nl.tudelft.otsim.Simulators.LaneSimulator.Conflict;
-import nl.tudelft.otsim.Simulators.LaneSimulator.VehicleDriver.gaussian;
 import nl.tudelft.otsim.Simulators.ShutDownAble;
 import nl.tudelft.otsim.Simulators.SimulatedObject;
 import nl.tudelft.otsim.Simulators.SimulatedTrafficLightController;
@@ -110,6 +110,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         	}
         }
     	double numberOfTripsPath = 0;
+    	ExportTripPattern exportTripPattern = null;
     	// pass 2; extract everything else
         for(String line : definition.split("\n")) {
         	String[] fields = line.split("\t");
@@ -175,6 +176,8 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         				lane.origin = origin;
         			} else if (fields[i].equals("destination:")) {
         				int destination = Integer.parseInt(fields[i + 1]);
+        				if (lane.id == 6)
+        					System.out.println("Setting destination of lane " + lane.id + " to " + destination);
         				lane.destination = destination; 
         			}
         		}
@@ -201,10 +204,16 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         	} else if (fields[0].equals("TripPatternPath"))
         		numberOfTripsPath = Double.parseDouble(fields[2]);	// Only numberOfTrips is actually used
         	else if (fields[0].equals("Path:")) {
+        		if (numberOfTripsPath > 0) {
+        			if (null != exportTripPattern)
+        				tripList.add(exportTripPattern);
+        			exportTripPattern = new ExportTripPattern(numberOfTripsPath, classProbabilities);
+        		}		
         		ArrayList<Integer> route = new ArrayList<Integer>(); 
         		for (int i = 3; i < fields.length; i++)
         			route.add(Integer.parseInt(fields[i]));
-        		tripList.add (new ExportTripPattern(numberOfTripsPath, route, classProbabilities));
+        		double routeProbability = Double.parseDouble(fields[1]);
+        		exportTripPattern.addRoute(route, routeProbability);
         	} else if (fields[0].equals("Section LaneGeom"))
         		continue;
         	else if (fields[0].equals("Section LaneData"))
@@ -299,36 +308,38 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         	} else
         		throw new Error("Unknown object in LaneSimulator: \"" + fields[0] + "\"");        	
     	}
-        
+		if (null != exportTripPattern)
+			tripList.add(exportTripPattern);
         Collections.sort(tripList, new Comparator<ExportTripPattern>() {
 			@Override
 			public int compare(ExportTripPattern arg0, ExportTripPattern arg1) {
-				return arg0.getRoute().get(0) - arg1.getRoute().get(0);
+				return arg0.getRoutes().get(0).get(0) - arg1.getRoutes().get(0).get(0);
 			}
         });
-		
         int currentNode = Integer.MAX_VALUE;
-        ArrayList<Double> routeProbabilities = new ArrayList<Double>();
+        ArrayList<Double> routeFlows = new ArrayList<Double>();
         ArrayList<ArrayList<Integer>> routeList = new ArrayList<ArrayList<Integer>>();
         double flow = 0;
         double[] fractions = null;
         for (ExportTripPattern trip : tripList) {
-			int nextNode = trip.getRoute().get(0);
+			int nextNode = trip.getRoutes().get(0).get(0);
 			// When next node changes: create a generator for the current Node
 			if (nextNode > currentNode) {
-				makeGenerator(routeProbabilities, currentNode, microNetwork, routeList, flow, fractions);
-				routeProbabilities.clear();
+				makeGenerator(routeFlows, currentNode, microNetwork, routeList, flow, fractions);
+				routeFlows.clear();
 				routeList.clear();
 				flow = 0;
 			}
 			currentNode = nextNode;
-			flow += trip.getFlow();
-			routeList.add(trip.getRoute());
-			routeProbabilities.add(trip.getFlow());
+			for (int i = 0; i < trip.routeProbabilities.size(); i++) {
+				flow += trip.getFlow(i);
+				routeList.add(trip.getRoutes().get(i));
+				routeFlows.add(trip.getFlow(i));
+			}
 			fractions = trip.getFractions();
 		}
         if (Integer.MAX_VALUE != currentNode) // Make the last generator
-        	makeGenerator(routeProbabilities, currentNode, microNetwork, routeList, flow, fractions);
+        	makeGenerator(routeFlows, currentNode, microNetwork, routeList, flow, fractions);
 
         model.network = microNetwork.toArray(new Lane[0]);
         // Add the tapers to the list of lane objects
@@ -347,25 +358,33 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         scheduler.enqueueEvent(0d, new Stepper(this));
 	}
 	
-	private void makeGenerator(ArrayList<Double> routeProbabilities, int node, ArrayList<Lane> lanes, ArrayList<ArrayList<Integer>> routes, double numberOfTrips, double classProbabilities[]) {
+	private void makeGenerator(ArrayList<Double> routeFlows, int node, ArrayList<Lane> lanes, ArrayList<ArrayList<Integer>> routes, double numberOfTrips, double classProbabilities[]) {
 		System.out.print("Creating generator at node " + node + " flow " + numberOfTrips + " with class probabilities [");
 		for (int i = 0; i < classProbabilities.length; i++)
 			System.out.print(String.format("%s%.6f", i > 0 ? ", " : "", classProbabilities[i]));
+		System.out.print("] and path flows [");
+		for (int i = 0; i < routeFlows.size(); i++)
+			System.out.print(String.format("%.2f ", routeFlows.get(i)));
 		System.out.println("]");
-		int routeCount = routeProbabilities.size();
+		int routeCount = routeFlows.size();
 		double probabilities[] = new double[routeCount];
-		Route[] routeEnds = new Route[routeCount];
+		Route[] routePaths = new Route[routeCount];
 		Lane laneOrigin = lookupOrigin(node, lanes);
 		if (null == laneOrigin) {
 			System.err.println("LookupOrigin failed for node " + node);
 			return;
 		}
     	for (int index = 0; index < routeCount; index++) {
-        	int[] endOfRoute = new int[1]; //last node of route
-    		int routeLength = routes.get(index).size();
-    		endOfRoute[0] = routes.get(index).get(routeLength - 1);
-    		routeEnds[index] = new Route(endOfRoute);
-    		probabilities[index] = routeProbabilities.get(index) / numberOfTrips;
+    		// This unreadable code works for two routes; not tested for more complex situations
+    		// We should probably try to find all splitRSU on the route and use those; then append the final destination
+    		ArrayList<Integer> routePath = routes.get(index);
+    		int routeLength = (routePath.size() + 1) / 2;
+        	int[] routeNodes = new int[routeLength];
+        	for (int i = 0; i < routeLength - 1; i++)
+        		routeNodes[i] = routePath.get(i * 2 + 2);
+        	routeNodes[routeLength - 1] = routePath.get(routePath.size() - 1);
+    		routePaths[index] = new Route(routeNodes);
+    		probabilities[index] = routeFlows.get(index) / numberOfTrips;
     	}
     	int mergeCount = 0;
     	Lane priorityLane = null;
@@ -404,7 +423,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
     		lanes.add(hiddenLane);
     	}
 		Generator generator = new Generator(laneOrigin, Generator.distribution.EXPONENTIAL);
-		generator.routes = routeEnds;
+		generator.routes = routePaths;
 		generator.routeProb = probabilities;
 		generator.setClassProbabilities(classProbabilities);
 		// TODO numberOfTrips must be converted to flow [veh/h]
@@ -1129,31 +1148,50 @@ class Stepper implements Step {
 }
 
 class ExportTripPattern {
-	Double flow;
-	ArrayList<Integer> route;
-	double[] fractions;
+	final Double flow;
+	final ArrayList<ArrayList<Integer>> routes = new ArrayList<ArrayList<Integer>>();
+	final ArrayList<Double> routeProbabilities = new ArrayList<Double>();
+	final double[] fractions;
+	final Random randomGenerator = new Random(54321);
 	/**
 	 * @param startNode Integer; ID of the start node of the new ExportTripPattern
 	 * @param flow Double; flow on the new ExportTripPattern
+	 * @param routes ArrayList&lt;ArrayList&lt<Integer&gt;&gt;; the list of routes
+	 * @param routeProbabilities ArrayList&lt;Double&gt;; the probabilities of the routes
 	 * @param route ArrayList&lt;Integer&gt;; IDs that define the route of the new ExportTripPattern
-	 * @param fractions double[]; list of fractions corresponding to the defined {@link TrafficClass TrafficClasses}
+	 * @param vehiclyTypeFractions double[]; list of fractions corresponding to the defined {@link TrafficClass TrafficClasses}
+	 * @throws Exception if the routeProbabilities do not add up to (approximately) 1.0
 	 */
-	public ExportTripPattern(Double flow, ArrayList<Integer> route, double[] fractions) {
+	public ExportTripPattern(Double flow, double[] vehiclyTypeFractions) throws Exception {
 		this.flow = flow;
-		this.route = route;
-		this.fractions = fractions;
-	}
-
-	public Double getFlow() {
-		return flow;
-	}
-
-	public ArrayList<Integer> getRoute() {
-		return route;
+		this.fractions = vehiclyTypeFractions;
+		double sum = 0;
+		for (int i = 0; i < fractions.length; i++)
+			sum += fractions[i];
+		if (Math.abs(sum - 1.0) > 0.001)
+			throw new Exception("Route probabilities add up to " + sum + " which is not (nearly) equal to one");
 	}
 	
+	public void addRoute(ArrayList<Integer> route, double probability) {
+		if (routes.size() != 0)
+			if (routes.get(0).get(0) != route.get(0))
+				throw new Error("All routes in ExportTripPattern must start at the same node");
+		routes.add(route);
+		routeProbabilities.add(probability);
+	}
+
+	public Double getFlow(int routeIndex) {
+		if ((routeIndex < 0) || (routeIndex >= routeProbabilities.size()))
+			throw new Error("no routes defined");
+		return flow * routeProbabilities.get(routeIndex);
+	}
+
 	public double[] getFractions() {
 		return fractions;
+	}
+	
+	public ArrayList<ArrayList<Integer>> getRoutes() {
+		return routes;
 	}
 	
 }

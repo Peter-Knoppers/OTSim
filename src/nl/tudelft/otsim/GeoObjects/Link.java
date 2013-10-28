@@ -141,6 +141,10 @@ public class Link implements XML_IO {
 				for (int index = 0; index < pn.size(fieldName); index++)
 					crossSections.add(new CrossSection(this, pn.getSubNode(fieldName, index)));
 		}
+		if (null == toNode)
+			throw new Exception("toNode not defined " + pn.description());
+		if (null == fromNode)
+			throw new Exception("fromNode not defined " + pn.description());
 	}
 
 	/**
@@ -201,6 +205,8 @@ public class Link implements XML_IO {
 		result.add(0, getFromNode_r());
 		//result.add(getToNodeExpand());		// append to node Vertex at tail
 		result.add(getToNode_r());
+		if (null == toNode)
+			throw new Error("Cannot happen");
 		if (null != toNode.getCircle()) {
 			// Insert an extra vertex where this link (if it were infinitely wide) enters the circle of toNode
 			Line2D.Double line = new Line2D.Double(result.get(result.size() - 2).getPoint(), result.get(result.size() - 1).getPoint());
@@ -313,6 +319,8 @@ public class Link implements XML_IO {
 	 * @param fromNode New starting {@link Node} of the Link
 	 */
 	public void setFromNode_w(Node fromNode) {
+		if (null == toNode)
+			throw new Error("WTF");
 		this.fromNode = fromNode;
 	}
 	
@@ -333,6 +341,8 @@ public class Link implements XML_IO {
 	 * @param toNode New ending {@link Node} of the Link
 	 */
 	public void setToNode_w(Node toNode) {
+		if (null == toNode)
+			throw new Error("WTF");
 		this.toNode = toNode;
 	}
 	
@@ -355,6 +365,8 @@ public class Link implements XML_IO {
      * @param fromNodeExpand The new inserted {@link Node} near the start of this link 
      */
 	public void setFromNodeExpand(Node fromNodeExpand) {
+		if (null == toNode)
+			throw new Error("WTF");
 		this.fromNodeExpand = fromNodeExpand;
 	}
 
@@ -377,6 +389,8 @@ public class Link implements XML_IO {
      * @param toNodeExpand The new inserted {@link Node} near the end of this link 
      */
 	public void setToNodeExpand(Node toNodeExpand) {
+		if (null == toNode)
+			throw new Error("WTF");
 		this.toNodeExpand = toNodeExpand;
 	}
 
