@@ -254,6 +254,8 @@ public class Main extends JPanel implements ActionListener {
         controls.add(showBuildings = makeCheckBox("Show Buildings", "redrawMap", true));
         controls.add(showPolyZones = makeCheckBox("Show PolyZones", "redrawMap", true));
         controls.add(showLaneIDs = makeCheckBox("Show Lane IDs", "redrawMap", false));
+        controls.add(showFormPoints = makeCheckBox("Show form points", "redrawMap", false));
+        controls.add(showFormLines = makeCheckBox("Show form lines", "redrawMap", false));
         
         JScrollPane scrollPaneNetworkEditor = new JScrollPane();
         scrollPaneNetworkEditor.setViewportView(controls);
@@ -594,10 +596,20 @@ public class Main extends JPanel implements ActionListener {
      */
     public JCheckBox showPolyZones;
     /**
-     * Lane IDs should be drawn if and only if the showLaneIDs check bos is
+     * Lane IDs should be drawn if and only if the showLaneIDs check box is
      * checked.
      */
     public JCheckBox showLaneIDs;
+    /**
+     * Form points of lanes should be drawn as circles if this check box is 
+     * checked.
+     */
+    public JCheckBox showFormPoints;
+    /**
+     * Form points of lanes should be drawn by connecting lines if this check
+     * box is checked.
+     */
+    public JCheckBox showFormLines;
     
     private JPanel laneSimulatorControlPanel;
     private JPanel roadwaySimulatorControlPanel;

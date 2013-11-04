@@ -30,7 +30,6 @@ import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.GUI.ObjectInspector;
 import nl.tudelft.otsim.GUI.Storable;
 import nl.tudelft.otsim.SpatialTools.Planar;
-import nl.tudelft.otsim.Utilities.Sorter;
 
 /**
  * The Network class holds the geographical information about a network.
@@ -427,7 +426,7 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 			throw new Error(String.format("Node ID %d already exists", nodeID));
 		if (null != lookupNode(nodeName, false))
 			throw new Error(String.format("Node name %s already exists",  nodeName));
-		nodes.put(nodeID, new Node(this, nodeName, nodeID, X, Y, Z));
+		nodes.put(nodeID, new Node(this, nodeName, nodeID, X, Y, Z, false));
 		setModified();
 	}
 
@@ -651,13 +650,15 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 	 * will be drawn
 	 * @param showLaneIDs Boolean; if true, the Lane IDs are drawn; if false,
 	 * the lane IDs are not drawn
+	 * @param showFormPoints TODO
+	 * @param showFormLines TODO
 	 */
-    private void paintLinks(GraphicsPanel graphicsPanel, boolean showOnlyDrivable, boolean showLaneIDs) {
+    private void paintLinks(GraphicsPanel graphicsPanel, boolean showOnlyDrivable, boolean showLaneIDs, boolean showFormPoints, boolean showFormLines) {
         for (Link link :  getLinkList())
         	for (CrossSection cs : link.getCrossSections_r())
                 for (CrossSectionElement cse : cs.getCrossSectionElementList_r())
                     if ((! showOnlyDrivable) || cse.getCrossSectionElementTypology().getDrivable())
-                    	cse.paint(graphicsPanel);
+                    	cse.paint(graphicsPanel, showFormPoints, showFormLines);
         if (showLaneIDs) // These must be drawn last; else some might be invisible
             for (Link link :  getLinkList())
             	for (CrossSection cs : link.getCrossSections_r())
@@ -1098,7 +1099,7 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 	public void repaintGraph(GraphicsPanel graphicsPanel) {
 		Main mf = Main.mainFrame;
         if (mf.showLinks.isSelected())
-        	paintLinks(graphicsPanel, mf.showDrivable.isSelected(), mf.showLaneIDs.isSelected());
+        	paintLinks(graphicsPanel, mf.showDrivable.isSelected(), mf.showLaneIDs.isSelected(), mf.showFormPoints.isSelected(), mf.showFormLines.isSelected());
         if (mf.showNodes.isSelected())
         	paintNodes(graphicsPanel);
         //if (mf.showPaths.isSelected()) 

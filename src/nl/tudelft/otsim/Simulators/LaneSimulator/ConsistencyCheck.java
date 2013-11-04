@@ -132,7 +132,7 @@ public class ConsistencyCheck {
 					if (rsu.noticeable && (rsu instanceof Conflict.conflictRSU) && (((Conflict.conflictRSU) rsu).isMerge()))
 						mergeConflictRSUsFound++;
 				if (mergeConflictRSUsFound == 0)
-					throw new Exception("feeeding lane " + describeLane(mergingLane) + " of lane " + describeLane(lane) + " has " + mergeConflictRSUsFound + " mergeConflictRSUs (should be 1)");
+					throw new Exception("feeding lane " + describeLane(mergingLane) + " of lane " + describeLane(lane) + " has " + mergeConflictRSUsFound + " mergeConflictRSUs (should be >= 1)");
 			}
 		}
 	}

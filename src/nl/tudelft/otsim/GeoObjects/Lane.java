@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import nl.tudelft.otsim.FileIO.StaXWriter;
 import nl.tudelft.otsim.GUI.GraphicsPanel;
+import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.Utilities.Reversed;
 
 // TODO: Guus: Remove unused methods or document them.
@@ -454,7 +455,15 @@ public class Lane extends CrossSectionObject {
 	public void setLaneVerticesOuter(ArrayList<Vertex> laneVerticesOuter) {
 		this.laneVerticesOuter = laneVerticesOuter;
 	}
-
+	
+	public ArrayList<Lane> getUpLanes_r () {
+		return upLanes;
+	}
+	
+	public ArrayList<Lane> getDownLanes_r () {
+		return downLanes;
+	}
+	
 	@Override
 	public String toString() {
 		return String.format("Lane %d from %d to %d, left %.3fm, right %.3fm", id, origin, destination, lateralPosition, lateralPosition + lateralWidth);

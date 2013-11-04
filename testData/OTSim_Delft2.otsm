@@ -663,13 +663,6 @@
       <nodes>7094</nodes>
     </microZone>
     <microZone>
-      <name>19</name>
-      <ID>19</ID>
-      <X>86073.453125</X>
-      <Y>444506.90625</Y>
-      <Z>NaN</Z>
-    </microZone>
-    <microZone>
       <name>18</name>
       <ID>18</ID>
       <X>85991.516349288</X>
@@ -6710,10 +6703,6 @@
       <trips>20.000000</trips>
     </tripPattern>
     <tripPattern>
-      <location>z15 z19</location>
-      <trips>66.000000</trips>
-    </tripPattern>
-    <tripPattern>
       <location>z16 z1</location>
       <trips>2.000000</trips>
     </tripPattern>
@@ -6774,10 +6763,6 @@
       <trips>8.000000</trips>
     </tripPattern>
     <tripPattern>
-      <location>z17 z19</location>
-      <trips>19.000000</trips>
-    </tripPattern>
-    <tripPattern>
       <location>z18 z1</location>
       <trips>7.000000</trips>
     </tripPattern>
@@ -6808,14 +6793,6 @@
     <tripPattern>
       <location>z18 z17</location>
       <trips>5.000000</trips>
-    </tripPattern>
-    <tripPattern>
-      <location>z18 z19</location>
-      <trips>12.000000</trips>
-    </tripPattern>
-    <tripPattern>
-      <location>z19 z15</location>
-      <trips>8.000000</trips>
     </tripPattern>
   </Demand>
 </model>
