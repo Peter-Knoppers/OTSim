@@ -18,7 +18,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.Locale;
 import java.util.TreeMap;
@@ -60,7 +59,6 @@ import nl.tudelft.otsim.Simulators.LaneSimulator.LaneSimulator;
 import nl.tudelft.otsim.Simulators.RoadwaySimulator.RoadwaySimulator;
 import nl.tudelft.otsim.SpatialTools.Planar;
 import nl.tudelft.otsim.TrafficDemand.TrafficDemand;
-import nl.tudelft.otsim.Utilities.Sorter;
 
 /**
  * This class implements the Main window of OpenTraffic.
@@ -1003,6 +1001,7 @@ public class Main extends JPanel implements ActionListener {
 	 * <br /> Execute some action when the user clicks in the status bar.
 	 */
 	public void testStep() {
+		
 	}
 	
 	/**
