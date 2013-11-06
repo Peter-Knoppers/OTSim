@@ -20,6 +20,7 @@ import nl.tudelft.otsim.ShortesPathAlgorithms.DijkstraAlgorithm;
 import nl.tudelft.otsim.ShortesPathAlgorithms.ShortestPathAlgorithm;
 import nl.tudelft.otsim.SpatialTools.SpatialQueries;
 import nl.tudelft.otsim.Utilities.Sorter;
+import nl.tudelft.otsim.Utilities.TimeScaleFunction;
 
 /**
  * Traffic Demand: describes the characteristics of trip patterns that arise from the activities by the population
@@ -39,6 +40,7 @@ public class TrafficDemand implements Storable {
 	public static final String ZONE_PREFIX = "z";
 	/** To identify  an Activity Location in the XML file with the description of TripPatterns */
     public static final String ACTIVTITYLOCATION_PREFIX = "a";
+    private TimeScaleFunction timeScaleFunction = null;
     private boolean modified = false;
 
     /**
@@ -68,6 +70,8 @@ public class TrafficDemand implements Storable {
 	public TrafficDemand(Model model, ParsedNode demandRoot) throws Exception {
 		this.model = model;
 		//System.out.print(demandRoot.toString(""));
+		if (demandRoot.size(TimeScaleFunction.XMLTAG) > 0)
+			timeScaleFunction = new TimeScaleFunction(this, demandRoot.getSubNode(TimeScaleFunction.XMLTAG, 0));
 		double sumFractions = 0;
 		for (int index = 0; index < demandRoot.size(TrafficClass.XMLTAG); index++) {
 			TrafficClass tc = new TrafficClass(demandRoot.getSubNode(TrafficClass.XMLTAG, index));
@@ -78,6 +82,16 @@ public class TrafficDemand implements Storable {
 			throw new Exception("Sum of " + TrafficClass.XMLTAG + " probabilities is not 1.0");
 		for (int index = 0; index < demandRoot.size(TripPattern.XMLTAG); index++)
 			tripPatternList.add(new TripPattern(this, demandRoot.getSubNode(TripPattern.XMLTAG, index)));
+		/*
+		// Debugging... make a non-trivial TimeScaleFunction
+		if (null == timeScaleFunction) {
+			timeScaleFunction = new TimeScaleFunction(this);
+			timeScaleFunction.insertPair(60, 1);
+			timeScaleFunction.insertPair(60.1, 0);
+			timeScaleFunction.insertPair(120, 0);
+			timeScaleFunction.insertPair(120.1, 2);
+		}
+		*/
 	}
 	
 	/**
@@ -226,6 +240,9 @@ public class TrafficDemand implements Storable {
 	 * write the TripPattern list to file.
 	 */
 	private boolean writeTripPatternsXML(StaXWriter staXWriter) {
+		if ((null != timeScaleFunction) && (! timeScaleFunction.isTrivial()))
+			if (! timeScaleFunction.writeXML(staXWriter))
+				return false;
 		for (TripPattern tp : getTripPatternList())
 			if (! tp.writeXML(staXWriter))
 				return false;
