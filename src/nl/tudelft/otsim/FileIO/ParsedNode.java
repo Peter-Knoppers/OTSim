@@ -73,6 +73,20 @@ public class ParsedNode {
 			throw firstException;
 	}
 	
+	/**
+	 * Create a ParsedNode from an InputStream.
+	 * @param inputStream InputStream that should yield XML
+	 * @throws Exception
+	 */
+	public ParsedNode(InputStream inputStream) throws Exception {
+		name = "";
+		lineNumber = columnNumber = -1;
+		parent = null;
+		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+		XMLEventReader eventReader = inputFactory.createXMLEventReader(inputStream);
+		expand (eventReader, "[InputStream]", null);
+	}
+	
 	private void expand (XMLEventReader er, String eventName, Location location) throws XMLStreamException {
 		while (er.hasNext()) {
 			XMLEvent event = er.nextEvent();
