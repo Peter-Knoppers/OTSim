@@ -9,16 +9,16 @@ import nl.tudelft.otsim.GeoObjects.Network;
 
 import org.junit.Test;
 
-public class FlowTest {
+public class TimeScaleFunctionTest {
 
 	@Test
 	public void testFlowNetwork() {
 		Network n = new Network();
 		n.clearModified();
-		Flow f = new Flow(n);
+		TimeScaleFunction f = new TimeScaleFunction(n);
 		f.insertPair(10, 10);
 		assertTrue("Inserting a pair must set the modified flag in the network", n.isModified());
-		f = new Flow((Network) null);
+		f = new TimeScaleFunction((Network) null);
 		try {
 			f.insertPair(10, 20);	// should NOT try to set the modified flag in the null-network
 		} catch (Exception e) {
@@ -33,7 +33,7 @@ public class FlowTest {
 
 	@Test
 	public void testInsertPair() {
-		Flow f = new Flow((Network) null);
+		TimeScaleFunction f = new TimeScaleFunction((Network) null);
 		f.insertPair(10,  20);
 		assertEquals("Single entry time value can be retrieved", f.getTime(0), 10, 0.000001);
 		assertEquals("Single entry flow value can be retrieved", f.getFlow(0), 20, 0.000001);
@@ -41,7 +41,7 @@ public class FlowTest {
 
 	@Test
 	public void testSize() {
-		Flow f = new Flow((Network) null);
+		TimeScaleFunction f = new TimeScaleFunction((Network) null);
 		for (int i = 0; i < 100; i++) {
 			assertEquals("Number of inserted values should match number in insertPair calls", f.size(), i);
 			f.insertPair(10 * i, 5 + 20 * i);
@@ -50,7 +50,7 @@ public class FlowTest {
 
 	@Test
 	public void testGetTime() {
-		Flow f = new Flow((Network) null);
+		TimeScaleFunction f = new TimeScaleFunction((Network) null);
 		for (int i = 0; i < 100; i++)
 			f.insertPair(10 * i, 5 + 20 * i);
 		for (int i = 0; i < 100; i++)
@@ -73,7 +73,7 @@ public class FlowTest {
 
 	@Test
 	public void testGetFlowInt() {
-		Flow f = new Flow((Network) null);
+		TimeScaleFunction f = new TimeScaleFunction((Network) null);
 		for (int i = 0; i < 100; i++)
 			f.insertPair(10 * i, 5 + 20 * i);
 		for (int i = 0; i < 100; i++)
@@ -96,7 +96,7 @@ public class FlowTest {
 
 	@Test
 	public void testDeletePair() {
-		Flow f = new Flow((Network) null);
+		TimeScaleFunction f = new TimeScaleFunction((Network) null);
 		for (int i = 0; i < 100; i++)
 			f.insertPair(10 * i, 5 + 20 * i);
 		boolean exceptionThrown = false;
@@ -136,7 +136,7 @@ public class FlowTest {
 
 	@Test
 	public void testGetFlowDouble() {
-		Flow f = new Flow((Network) null);
+		TimeScaleFunction f = new TimeScaleFunction((Network) null);
 		boolean exceptionThrown = false;
 		try {
 			f.getFlow(0d);
@@ -170,7 +170,7 @@ public class FlowTest {
 		} catch (Exception e) {
 			fail("Caught unexpected exception in creation of the StaXWriter");
 		}
-		Flow f = new Flow((Network) null);
+		TimeScaleFunction f = new TimeScaleFunction((Network) null);
 		f.insertPair(40, 100);
 		f.insertPair(70, 50);
 		f.writeXML(writer);
@@ -191,7 +191,7 @@ public class FlowTest {
 
 	@Test
 	public void testExport() {
-		Flow f = new Flow((Network) null);
+		TimeScaleFunction f = new TimeScaleFunction((Network) null);
 		assertEquals("empty Flow exports as empty string", f.export().length(), 0);
 		f.insertPair(20, 10d / 30);
 		assertEquals("check value and number of decimal digits", f.export(), "20.000/0.333");
@@ -201,7 +201,7 @@ public class FlowTest {
 
 	@Test
 	public void testFlowString() {
-		Flow f = new Flow((Network) null);
+		TimeScaleFunction f = new TimeScaleFunction((Network) null);
 		for (int i = 0; i < 5; i++) {
 			// Generate values with 3 decimal digits (which is the guaranteed precision)
 			double time = Math.round(i * 10000000d / 333) / 1000d;
@@ -209,7 +209,7 @@ public class FlowTest {
 			f.insertPair(time, flow);
 		}
 		System.out.println("export is \"" + f.export() + "\"");
-		Flow f2 = new Flow(f.export());
+		TimeScaleFunction f2 = new TimeScaleFunction(f.export());
 		assertEquals("Number of pairs in copy should be the same", f.size(), f2.size());
 		for (int i = 0; i < 5; i++) {
 			assertEquals("There should be no rounding error due to conversion to text and back", f.getTime(i), f2.getTime(i), 0.0000001);

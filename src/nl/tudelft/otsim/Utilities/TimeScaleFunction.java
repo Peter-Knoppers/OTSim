@@ -14,7 +14,7 @@ import nl.tudelft.otsim.GeoObjects.Network;
  * 
  * @author Peter Knoppers
  */
-public class Flow implements XML_IO {
+public class TimeScaleFunction implements XML_IO {
 	/** Tag of a Flow when stored in XML */
 	public static final String XMLTAG = "TimeFlowSets";
 	private static final String XML_TIMEFLOWPAIR = "Set";
@@ -29,7 +29,7 @@ public class Flow implements XML_IO {
 	 * Create an empty instance of Flow.
 	 * @param network {@link Network}; the Network that will own this Flow (may be null)
 	 */
-	public Flow(Network network) {
+	public TimeScaleFunction(Network network) {
 		this.network = network;
 	}
 	
@@ -39,7 +39,7 @@ public class Flow implements XML_IO {
 	 * @param pn {@link ParsedNode} XML node of the Flow object 
 	 * @throws Exception
 	 */
-	public Flow(Network network, ParsedNode pn) throws Exception {
+	public TimeScaleFunction(Network network, ParsedNode pn) throws Exception {
 		this(network);
 		for (int index = 0; index < pn.size(); index++) {
 			ParsedNode subNode = pn.getSubNode(XML_TIMEFLOWPAIR, index);
@@ -186,7 +186,7 @@ public class Flow implements XML_IO {
 	 * <br /> This can be useful in {@link Simulators}.
 	 * @param description
 	 */
-	public Flow (String description) {
+	public TimeScaleFunction (String description) {
 		network = null;
 		String pairs[] = description.split("\t");
 		for(String pair : pairs) {
