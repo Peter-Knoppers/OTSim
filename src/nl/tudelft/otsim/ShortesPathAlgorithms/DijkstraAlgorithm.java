@@ -42,6 +42,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 	/**
 	 * Prepare to run the Dijkstra algorithm.
 	 * @param network {@link Network}; the Network to run Dijkstra on
+	 * @param maximumTotalCostRatio maximum ratio of cost of most expensive path considered in hasNext and the lowest cost path 
 	 */
 	public DijkstraAlgorithm(Network network, double maximumTotalCostRatio) {
 		super (network);
