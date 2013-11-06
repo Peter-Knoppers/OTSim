@@ -197,7 +197,15 @@ public class TimeScaleFunctionTest {
 	public void testIsTrivial() {
 		TimeScaleFunction f = new TimeScaleFunction((Storable) null);
 		assertTrue("empty TimeScaleFunction is always trivial", f.isTrivial());
-		
+		f.insertPair(10, 20);
+		assertFalse("TimeScaleFunction that is constant non-1.0 is not trivial", f.isTrivial());
+		f.insertPair(20, 1);
+		assertFalse("TimeScaleFunction that is constant non-1.0 is not trivial", f.isTrivial());
+		f.deletePair(0);
+		assertTrue("TimeScaleFunction with one value that equals 1.0 is trivial", f.isTrivial());
+		for (int i = 1; i < 10; i++)
+			f.insertPair(100 * i, 1);
+		assertTrue("TimeScaleFunction with only values that equal 1.0 is trivial", f.isTrivial());
 	}
 
 	@Test
