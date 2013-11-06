@@ -226,7 +226,7 @@ public class TimeScaleFunctionTest {
 		//System.out.println(result);
 		assertEquals("check expected XML output", result, 
 				"<?xml version=\"1.0\"?>\n"
-				+ "<TimeFactorScaleFunction>\n"
+				+ "<TimeScaleFunction>\n"
 				+ "  <Pair>\n"
 				+ "    <Time>40.000</Time>\n"
 				+ "    <Factor>100.000000</Factor>\n"
@@ -234,7 +234,7 @@ public class TimeScaleFunctionTest {
 				+ "    <Time>70.000</Time>\n"
 				+ "    <Factor>50.000000</Factor>\n"
 				+ "  </Pair>\n"
-				+ "</TimeFactorScaleFunction>\n");
+				+ "</TimeScaleFunction>\n");
 	}
 
 	@Test

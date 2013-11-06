@@ -16,7 +16,7 @@ import nl.tudelft.otsim.GUI.Storable;
  */
 public class TimeScaleFunction implements XML_IO {
 	/** Tag of a TimeScaleFunction when stored in XML */
-	public static final String XMLTAG = "TimeFactorScaleFunction";
+	public static final String XMLTAG = "TimeScaleFunction";
 	private static final String XML_TIMEFACTORPAIR = "Pair";
 	private static final String XML_TIME = "Time";
 	private static final String XML_FACTOR = "Factor";
