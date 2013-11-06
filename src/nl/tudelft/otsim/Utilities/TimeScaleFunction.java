@@ -137,7 +137,7 @@ public class TimeScaleFunction implements XML_IO {
 	 */
 	public double getFactor(double time) {
 		if (factors.size() == 0)
-			throw new Error("undefined factor (no value defined for any time)");
+			return 1.0;		// Trivial case
 		double prevTime = 0;
 		double prevFactor = factors.get(0);
 		for (int i = 0; i < times.size(); i++) {
@@ -152,6 +152,17 @@ public class TimeScaleFunction implements XML_IO {
 				return thisFactor;
 		}
 		return prevFactor;
+	}
+	
+	/**
+	 * Determine if this TimeScaleFunction returns 1.0 for all time values.
+	 * @return Boolean; true if this TimeScaleFunction always return 1.0
+	 */
+	public boolean isTrivial() {
+		for (Double factor : factors)
+			if (1.0d != factor)
+				return false;
+		return true;
 	}
 
 	private boolean writePairs(StaXWriter staXWriter) {

@@ -110,7 +110,7 @@ public class TimeScaleFunctionTest {
 	}
 
 	@Test
-	public void testGetFlowInt() {
+	public void testGetFactorInt() {
 		TimeScaleFunction f = new TimeScaleFunction((Storable) null);
 		for (int i = 0; i < 100; i++)
 			f.insertPair(10 * i, 5 + 20 * i);
@@ -175,13 +175,7 @@ public class TimeScaleFunctionTest {
 	@Test
 	public void testGetFactorDouble() {
 		TimeScaleFunction f = new TimeScaleFunction((Storable) null);
-		boolean exceptionThrown = false;
-		try {
-			f.getFactor(0d);
-		} catch (Error e) {
-			exceptionThrown = true;
-		}
-		assertTrue("Trying to get a flow value from an empty list throws exception", exceptionThrown);
+		assertEquals("Empty TimeScaleFunction returns value 1.0", f.getFactor(0d), 1.0d, 0.0000000000001);
 		f.insertPair(10,  20);
 		assertEquals("Only one value results in a uniform flow", f.getFactor(0d), 20, 0.00001);
 		assertEquals("Only one value results in a uniform flow", f.getFactor(100d), 20, 0.00001);
@@ -197,6 +191,13 @@ public class TimeScaleFunctionTest {
 			assertEquals("Flow changes linearly between time values (2)", f.getFactor(t), 100 + (t - 40) * (50 - 100) / 30, 0.000001);
 		for ( ; t < 100.1; t += 0.5) 
 			assertEquals("Flow stays constant after last time value", f.getFactor(t), 50, 0.000001);
+	}
+	
+	@Test
+	public void testIsTrivial() {
+		TimeScaleFunction f = new TimeScaleFunction((Storable) null);
+		assertTrue("empty TimeScaleFunction is always trivial", f.isTrivial());
+		
 	}
 
 	@Test
