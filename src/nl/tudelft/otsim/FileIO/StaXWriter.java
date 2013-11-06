@@ -2,6 +2,7 @@ package nl.tudelft.otsim.FileIO;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -49,10 +50,31 @@ public class StaXWriter {
 		else
 			temporaryFileName = fileName;
 		fileOutputStream = new FileOutputStream(temporaryFileName);
-		eventWriter = outputFactory.createXMLEventWriter(fileOutputStream);
-		// Create and write Start Document event
+		startUp(fileOutputStream);
+	}
+	
+	/**
+	 * Create a new StaXWriter that outputs to a caller-created OutputStream.
+	 * <br /> This is mostly used for testing (where it is convenient to store
+	 * the entire output in memory for verification afterwards).
+	 * @param outputStream OutputStream where the output is sent to
+	 * @throws Exception
+	 */
+	public StaXWriter(OutputStream outputStream) throws Exception {
+		finalFileName = null;
+		temporaryFileName = null;
+		startUp(outputStream);
+	}
+	
+	/**
+	 * Create the XMLEventWriter and write Start Document event.
+	 * @param outputStream OutputStream to send the XML text to
+	 * @throws Exception
+	 */
+	private void startUp(OutputStream outputStream) throws Exception {
+		eventWriter = outputFactory.createXMLEventWriter(outputStream);
 		eventWriter.add(eventFactory.createStartDocument("UTF-8", "1.0"));
-		eventWriter.add(lineEnd);
+		eventWriter.add(lineEnd);		
 	}
 	
 	/**
@@ -188,7 +210,7 @@ public class StaXWriter {
 			WED.showProblem(WED.PROGRAMERROR, "XML nesting level error (%d end node tag(s) missing)", nestingLevel);
 			errorOccurred = true;
 		}
-		if ((! errorOccurred) && (! finalFileName.equals(temporaryFileName))) {
+		if ((! errorOccurred) && (null != finalFileName) && (! finalFileName.equals(temporaryFileName))) {
 			File tempFile = new File(temporaryFileName);
 			File finalFile = new File(finalFileName);
 			// first try to rename atomically

@@ -1,4 +1,4 @@
-package nl.tudelft.otsim.TrafficDemand;
+package nl.tudelft.otsim.Utilities;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -16,7 +16,7 @@ import nl.tudelft.otsim.GeoObjects.Network;
  */
 public class Flow implements XML_IO {
 	/** Tag of a Flow when stored in XML */
-	public static final String XMLTAG = "FlowSet";
+	public static final String XMLTAG = "TimeFlowSets";
 	private static final String XML_TIMEFLOWPAIR = "Set";
 	private static final String XML_TIME = "Time";
 	private static final String XML_FLOW = "Flow";

@@ -1,7 +1,10 @@
-package nl.tudelft.otsim.TrafficDemand;
+package nl.tudelft.otsim.Utilities;
 
 import static org.junit.Assert.*;
 
+import java.io.ByteArrayOutputStream;
+
+import nl.tudelft.otsim.FileIO.StaXWriter;
 import nl.tudelft.otsim.GeoObjects.Network;
 
 import org.junit.Test;
@@ -160,7 +163,30 @@ public class FlowTest {
 
 	@Test
 	public void testWriteXML() {
-		fail("Not yet implemented");
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		StaXWriter writer = null;
+		try {
+			writer = new StaXWriter(outputStream);
+		} catch (Exception e) {
+			fail("Caught unexpected exception in creation of the StaXWriter");
+		}
+		Flow f = new Flow((Network) null);
+		f.insertPair(40, 100);
+		f.insertPair(70, 50);
+		f.writeXML(writer);
+		writer.close();
+		String result = outputStream.toString();
+		assertEquals("check expected XML output", result, 
+				"<?xml version=\"1.0\"?>\n"
+				+ "<TimeFlowSets>\n"
+				+ "  <Set>\n"
+				+ "    <Time>40.000</Time>\n"
+				+ "    <Flow>100.000</Flow>\n"
+				+ "  </Set>\n  <Set>\n"
+				+ "    <Time>70.000</Time>\n"
+				+ "    <Flow>50.000</Flow>\n"
+				+ "  </Set>\n"
+				+ "</TimeFlowSets>\n");
 	}
 
 	@Test
