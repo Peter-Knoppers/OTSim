@@ -2,9 +2,12 @@ package nl.tudelft.otsim.Utilities;
 
 import static org.junit.Assert.*;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
+import nl.tudelft.otsim.FileIO.ParsedNode;
 import nl.tudelft.otsim.FileIO.StaXWriter;
+import nl.tudelft.otsim.GUI.Storable;
 import nl.tudelft.otsim.GeoObjects.Network;
 
 import org.junit.Test;
@@ -12,28 +15,63 @@ import org.junit.Test;
 public class TimeScaleFunctionTest {
 
 	@Test
-	public void testTimeScaleFunctionNetwork() {
-		Network n = new Network();
-		n.clearModified();
-		TimeScaleFunction f = new TimeScaleFunction(n);
+	public void testTimeScaleFunctionStorable() {
+		Network network = new Network();
+		network.clearModified();
+		TimeScaleFunction f = new TimeScaleFunction(network);
 		f.insertPair(10, 10);
-		assertTrue("Inserting a pair must set the modified flag in the network", n.isModified());
-		f = new TimeScaleFunction((Network) null);
+		assertTrue("Inserting a pair must set the modified flag in the Storable", network.isModified());
+		f = new TimeScaleFunction((Storable) null);
 		try {
 			f.insertPair(10, 20);	// should NOT try to set the modified flag in the null-network
 		} catch (Exception e) {
-			fail("If network is null, setting the modified flag should not be attempted");
+			fail("If Storable is null, calling the setModified method should not be attempted");
 		}		
 	}
 
 	@Test
-	public void testTimeScaleFunctionNetworkParsedNode() {
-		fail("Not yet implemented");
+	public void testTimeScaleFunctionStorableParsedNode() {
+		TimeScaleFunction f = new TimeScaleFunction((Storable) null);
+		for (int i = 0; i < 5; i++) {
+			// Generate values with 3 decimal digits (which is the guaranteed precision)
+			double time = Math.round(i * 10000000d / 333) / 1000d;
+			double factor = Math.round(1000000000d - i * 200000000000d / 987) / 1000000d;
+			f.insertPair(time, factor);
+		}
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		StaXWriter writer = null;
+		try {
+			writer = new StaXWriter(outputStream);
+		} catch (Exception e) {
+			fail("Caught unexpected exception in creation of the StaXWriter");
+		}
+		f.writeXML(writer);
+		writer.close();
+		String xmlText = outputStream.toString();
+		//System.out.println(xmlText);
+		ByteArrayInputStream inputStream = new ByteArrayInputStream(xmlText.getBytes());
+		TimeScaleFunction f2 = null;
+		try {
+			ParsedNode pn = new ParsedNode(inputStream);
+			//System.out.println(pn.toString("All XML "));
+			ParsedNode tsf = pn.getSubNode(TimeScaleFunction.XMLTAG, 0);
+			f2 = new TimeScaleFunction((Storable) null, tsf);
+		} catch (Exception e) {
+			fail("Parsing the XML should not throw any Exception");
+		}
+		assertEquals("Number of pairs in copy should be the same", f.size(), f2.size());
+		for (int i = 0; i < 5; i++) {
+			assertEquals("There should be no rounding error due to conversion to text and back", f.getTime(i), f2.getTime(i), 0.0000001);
+			assertEquals("There should be no rounding error due to conversion to text and back", f.getFactor(i), f2.getFactor(i), 0.0000001);
+		}
+		// Now test that values between the pairs are also close enough
+		for (double t = 0; t < 150.1; t += 0.5)
+			assertEquals("There should be no significant rounding error due to the time/factor pairs being (virtually) identical", f.getFactor(t), f2.getFactor(t), 0.0000001);
 	}
 
 	@Test
 	public void testInsertPair() {
-		TimeScaleFunction f = new TimeScaleFunction((Network) null);
+		TimeScaleFunction f = new TimeScaleFunction((Storable) null);
 		f.insertPair(10,  20);
 		assertEquals("Single entry time value can be retrieved", f.getTime(0), 10, 0.000001);
 		assertEquals("Single entry factor value can be retrieved", f.getFactor(0), 20, 0.000001);
@@ -41,7 +79,7 @@ public class TimeScaleFunctionTest {
 
 	@Test
 	public void testSize() {
-		TimeScaleFunction f = new TimeScaleFunction((Network) null);
+		TimeScaleFunction f = new TimeScaleFunction((Storable) null);
 		for (int i = 0; i < 100; i++) {
 			assertEquals("Number of inserted values should match number in insertPair calls", f.size(), i);
 			f.insertPair(10 * i, 5 + 20 * i);
@@ -50,7 +88,7 @@ public class TimeScaleFunctionTest {
 
 	@Test
 	public void testGetTime() {
-		TimeScaleFunction f = new TimeScaleFunction((Network) null);
+		TimeScaleFunction f = new TimeScaleFunction((Storable) null);
 		for (int i = 0; i < 100; i++)
 			f.insertPair(10 * i, 5 + 20 * i);
 		for (int i = 0; i < 100; i++)
@@ -73,7 +111,7 @@ public class TimeScaleFunctionTest {
 
 	@Test
 	public void testGetFlowInt() {
-		TimeScaleFunction f = new TimeScaleFunction((Network) null);
+		TimeScaleFunction f = new TimeScaleFunction((Storable) null);
 		for (int i = 0; i < 100; i++)
 			f.insertPair(10 * i, 5 + 20 * i);
 		for (int i = 0; i < 100; i++)
@@ -96,7 +134,7 @@ public class TimeScaleFunctionTest {
 
 	@Test
 	public void testDeletePair() {
-		TimeScaleFunction f = new TimeScaleFunction((Network) null);
+		TimeScaleFunction f = new TimeScaleFunction((Storable) null);
 		for (int i = 0; i < 100; i++)
 			f.insertPair(10 * i, 5 + 20 * i);
 		boolean exceptionThrown = false;
@@ -135,8 +173,8 @@ public class TimeScaleFunctionTest {
 	}
 
 	@Test
-	public void testGetFlowDouble() {
-		TimeScaleFunction f = new TimeScaleFunction((Network) null);
+	public void testGetFactorDouble() {
+		TimeScaleFunction f = new TimeScaleFunction((Storable) null);
 		boolean exceptionThrown = false;
 		try {
 			f.getFactor(0d);
@@ -170,28 +208,29 @@ public class TimeScaleFunctionTest {
 		} catch (Exception e) {
 			fail("Caught unexpected exception in creation of the StaXWriter");
 		}
-		TimeScaleFunction f = new TimeScaleFunction((Network) null);
+		TimeScaleFunction f = new TimeScaleFunction((Storable) null);
 		f.insertPair(40, 100);
 		f.insertPair(70, 50);
 		f.writeXML(writer);
 		writer.close();
 		String result = outputStream.toString();
+		//System.out.println(result);
 		assertEquals("check expected XML output", result, 
 				"<?xml version=\"1.0\"?>\n"
-				+ "<TimeFlowSets>\n"
-				+ "  <Set>\n"
+				+ "<TimeFactorScaleFunction>\n"
+				+ "  <Pair>\n"
 				+ "    <Time>40.000</Time>\n"
-				+ "    <Flow>100.000</Flow>\n"
-				+ "  </Set>\n  <Set>\n"
+				+ "    <Factor>100.000000</Factor>\n"
+				+ "  </Pair>\n  <Pair>\n"
 				+ "    <Time>70.000</Time>\n"
-				+ "    <Flow>50.000</Flow>\n"
-				+ "  </Set>\n"
-				+ "</TimeFlowSets>\n");
+				+ "    <Factor>50.000000</Factor>\n"
+				+ "  </Pair>\n"
+				+ "</TimeFactorScaleFunction>\n");
 	}
 
 	@Test
 	public void testExport() {
-		TimeScaleFunction f = new TimeScaleFunction((Network) null);
+		TimeScaleFunction f = new TimeScaleFunction((Storable) null);
 		assertEquals("empty Flow exports as empty string", f.export().length(), 0);
 		f.insertPair(20, 10d / 30);
 		assertEquals("check value and number of decimal digits", f.export(), "20.000/0.333333");
@@ -200,15 +239,15 @@ public class TimeScaleFunctionTest {
 	}
 
 	@Test
-	public void testFactorString() {
-		TimeScaleFunction f = new TimeScaleFunction((Network) null);
+	public void testTimeScaleFunctionString() {
+		TimeScaleFunction f = new TimeScaleFunction((Storable) null);
 		for (int i = 0; i < 5; i++) {
 			// Generate values with 3 decimal digits (which is the guaranteed precision)
 			double time = Math.round(i * 10000000d / 333) / 1000d;
-			double factor = Math.round(1000000 - i * 200000000d / 987) / 1000d;
+			double factor = Math.round(1000000000d - i * 200000000000d / 987) / 1000000d;
 			f.insertPair(time, factor);
 		}
-		System.out.println("export is \"" + f.export() + "\"");
+		//System.out.println("export is \"" + f.export() + "\"");
 		TimeScaleFunction f2 = new TimeScaleFunction(f.export());
 		assertEquals("Number of pairs in copy should be the same", f.size(), f2.size());
 		for (int i = 0; i < 5; i++) {

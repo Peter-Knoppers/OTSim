@@ -7,7 +7,6 @@ import nl.tudelft.otsim.FileIO.ParsedNode;
 import nl.tudelft.otsim.FileIO.StaXWriter;
 import nl.tudelft.otsim.FileIO.XML_IO;
 import nl.tudelft.otsim.GUI.Storable;
-import nl.tudelft.otsim.GeoObjects.Network;
 
 /**
  * This class holds a list of time/factor pairs and allows retrieval of 
@@ -17,8 +16,8 @@ import nl.tudelft.otsim.GeoObjects.Network;
  */
 public class TimeScaleFunction implements XML_IO {
 	/** Tag of a TimeScaleFunction when stored in XML */
-	public static final String XMLTAG = "TimeFactorSets";
-	private static final String XML_TIMEFACTORPAIR = "Set";
+	public static final String XMLTAG = "TimeFactorScaleFunction";
+	private static final String XML_TIMEFACTORPAIR = "Pair";
 	private static final String XML_TIME = "Time";
 	private static final String XML_FACTOR = "Factor";
 	private ArrayList<Double> times = new ArrayList<Double>();
@@ -29,7 +28,7 @@ public class TimeScaleFunction implements XML_IO {
 	
 	/**
 	 * Create an empty instance of a TimeScaleFunction.
-	 * @param storable {@link Network}; the Storable that will be notified on changes to this TimeScaleFunction (may be null)
+	 * @param storable {@link Storable}; the Storable that will be notified on changes to this TimeScaleFunction (may be null)
 	 */
 	public TimeScaleFunction(Storable storable) {
 		this.storable = storable;
@@ -37,31 +36,41 @@ public class TimeScaleFunction implements XML_IO {
 	
 	/**
 	 * Create a TimeScaleFunction from an XML description
-	 * @param network {@link Network}; the Network that will own this TimeScaleFunction (may be null)
+	 * @param storable {@link Storable}; the Storable that will be notified of changes in this TimeScaleFunction (may be null)
 	 * @param pn {@link ParsedNode} XML node of the TimeScaleFunction object 
 	 * @throws Exception
 	 */
-	public TimeScaleFunction(Network network, ParsedNode pn) throws Exception {
-		this(network);
-		for (int index = 0; index < pn.size(); index++) {
+	public TimeScaleFunction(Storable storable, ParsedNode pn) throws Exception {
+		this(storable);
+		for (int index = 0; index < pn.size(XML_TIMEFACTORPAIR); index++) {
 			ParsedNode subNode = pn.getSubNode(XML_TIMEFACTORPAIR, index);
-			for (String fieldName : subNode.getKeys()) {
-				if (fieldName.equals(XML_TIMEFACTORPAIR)) {
-					for (int i = 0; i < subNode.size(fieldName); i++) {
-						double time = Double.NaN;
-						double factor = Double.NaN;
-						ParsedNode valueNode = subNode.getSubNode(XML_TIME, 0);
-						if (null != valueNode)
-							time = Double.parseDouble(valueNode.getValue());
-						valueNode = subNode.getSubNode(XML_FACTOR, 0);
-						if (null != valueNode)
-							factor = Double.parseDouble(valueNode.getValue());
-						if (Double.isNaN(time) || Double.isNaN(factor))
-							throw new Exception("incompletely defined time/factor pair near " + subNode.description());
-						insertPair(time, factor);
-					}
-				}
-			}
+			double time = Double.NaN;
+			double factor = Double.NaN;
+			ParsedNode valueNode = subNode.getSubNode(XML_TIME, 0);
+			if (null != valueNode)
+				time = Double.parseDouble(valueNode.getValue());
+			valueNode = subNode.getSubNode(XML_FACTOR, 0);
+			if (null != valueNode)
+				factor = Double.parseDouble(valueNode.getValue());
+			if (Double.isNaN(time) || Double.isNaN(factor))
+				throw new Exception("incompletely defined time/factor pair near " + subNode.description());
+			insertPair(time, factor);
+		}
+	}
+	
+	/**
+	 * Create a TimeScaleFunction from a textual description with no Storable.
+	 * <br /> This can be useful in traffic generators in the traffic simulators.
+	 * @param description
+	 */
+	public TimeScaleFunction (String description) {
+		storable = null;
+		String pairs[] = description.split("\t");
+		for(String pair : pairs) {
+			String fields[] = pair.split("/");
+			double time = Double.parseDouble(fields[0]);
+			double factor = Double.parseDouble(fields[1]);
+			insertPair(time, factor);
 		}
 	}
 	
@@ -181,20 +190,5 @@ public class TimeScaleFunction implements XML_IO {
 		return result;
 	}
 	
-	/**
-	 * Create a TimeScaleFunction from a textual description with no owning Network.
-	 * <br /> This can be useful in {@link Simulators}.
-	 * @param description
-	 */
-	public TimeScaleFunction (String description) {
-		storable = null;
-		String pairs[] = description.split("\t");
-		for(String pair : pairs) {
-			String fields[] = pair.split("/");
-			double time = Double.parseDouble(fields[0]);
-			double factor = Double.parseDouble(fields[1]);
-			insertPair(time, factor);
-		}
-	}
 }
 
