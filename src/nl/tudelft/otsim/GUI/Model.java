@@ -271,6 +271,11 @@ public class Model implements Storable {
 		fileName = name;
 	}
 
+	@Override
+	public void setModified() {
+		modified = true;
+	}
+
     /**
      * Create a string representation of the lanes and the connectivity between
      * the lanes in the Network and the traffic demand

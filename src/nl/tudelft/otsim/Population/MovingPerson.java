@@ -17,6 +17,7 @@ public class MovingPerson  implements Storable {
 	private int ID;
 	private double carAvailability;
 	private Population population;
+	private boolean isModified = false;
 	
 	public MovingPerson(Population population, int id, double carAvailability) {
 		ID = id;
@@ -66,14 +67,12 @@ public class MovingPerson  implements Storable {
 
 	@Override
 	public boolean isModified() {
-		// TODO Auto-generated method stub
-		return false;
+		return isModified;
 	}
 
 	@Override
 	public void clearModified() {
-		// TODO Auto-generated method stub
-		
+		isModified = false;
 	}
 
 	@Override
@@ -86,6 +85,11 @@ public class MovingPerson  implements Storable {
 	public void setStorageName(String name) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public void setModified() {
+		isModified = true;
 	}
 	
 }

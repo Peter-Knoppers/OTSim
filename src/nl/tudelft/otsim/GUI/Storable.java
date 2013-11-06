@@ -24,6 +24,11 @@ public interface Storable extends nl.tudelft.otsim.FileIO.XML_IO {
 	 * are no modifications, or all modifications have already been written
 	 */
 	public boolean isModified();
+	
+	/**
+	 * Set the modified flag of this Storable.
+	 */
+	public void setModified();
 
 	/**
 	 * Clear the modified flag. This method shall be called after this

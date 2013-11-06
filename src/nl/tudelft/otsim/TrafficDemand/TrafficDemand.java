@@ -356,4 +356,9 @@ public class TrafficDemand implements Storable {
 		}	
     }
 
+	@Override
+	public void setModified() {
+		modified = true;
+	}
+
 }
