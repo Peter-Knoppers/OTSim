@@ -12,8 +12,13 @@ import nl.tudelft.otsim.GeoObjects.Network;
 
 import org.junit.Test;
 
+/** Test the methods in the TimeScaleFunction class */
 public class TimeScaleFunctionTest {
 
+	/**
+	 * Check that the setModified method in the storable gets called
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testTimeScaleFunctionStorable() {
 		Network network = new Network();
@@ -29,6 +34,10 @@ public class TimeScaleFunctionTest {
 		}		
 	}
 
+	/**
+	 * Create a TimeScaleFunction from a ParsedNode
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testTimeScaleFunctionStorableParsedNode() {
 		TimeScaleFunction f = new TimeScaleFunction((Storable) null);
@@ -69,6 +78,10 @@ public class TimeScaleFunctionTest {
 			assertEquals("There should be no significant rounding error due to the time/factor pairs being (virtually) identical", f.getFactor(t), f2.getFactor(t), 0.0000001);
 	}
 
+	/**
+	 * Test the InsertPair method.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testInsertPair() {
 		TimeScaleFunction f = new TimeScaleFunction((Storable) null);
@@ -77,6 +90,10 @@ public class TimeScaleFunctionTest {
 		assertEquals("Single entry factor value can be retrieved", f.getFactor(0), 20, 0.000001);
 	}
 
+	/**
+	 * Check the results of the size method
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testSize() {
 		TimeScaleFunction f = new TimeScaleFunction((Storable) null);
@@ -86,6 +103,10 @@ public class TimeScaleFunctionTest {
 		}
 	}
 
+	/**
+	 * Check the getTime(integer) method
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testGetTime() {
 		TimeScaleFunction f = new TimeScaleFunction((Storable) null);
@@ -109,13 +130,17 @@ public class TimeScaleFunctionTest {
 		assertTrue("Too large index is not permitted in getTime", exceptionThrown);
 	}
 
+	/**
+	 * Check the getFactor method
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testGetFactorInt() {
 		TimeScaleFunction f = new TimeScaleFunction((Storable) null);
 		for (int i = 0; i < 100; i++)
 			f.insertPair(10 * i, 5 + 20 * i);
 		for (int i = 0; i < 100; i++)
-			assertEquals("Flow values can be retrieved and are correct", f.getFactor(i), 5 + 20 * i, 0.0001);
+			assertEquals("Factor values can be retrieved and are correct", f.getFactor(i), 5 + 20 * i, 0.0001);
 		boolean exceptionThrown = false;
 		try {
 			f.getFactor(-1);
@@ -132,6 +157,10 @@ public class TimeScaleFunctionTest {
 		assertTrue("Too large index is not permitted in getFlow", exceptionThrown);
 	}
 
+	/**
+	 * Check the deletePair method
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testDeletePair() {
 		TimeScaleFunction f = new TimeScaleFunction((Storable) null);
@@ -172,6 +201,10 @@ public class TimeScaleFunctionTest {
 		
 	}
 
+	/**
+	 * Check the getFactor method for linearity
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testGetFactorDouble() {
 		TimeScaleFunction f = new TimeScaleFunction((Storable) null);
@@ -193,6 +226,10 @@ public class TimeScaleFunctionTest {
 			assertEquals("Flow stays constant after last time value", f.getFactor(t), 50, 0.000001);
 	}
 	
+	/**
+	 * Check the isTrivial method
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testIsTrivial() {
 		TimeScaleFunction f = new TimeScaleFunction((Storable) null);
@@ -208,6 +245,10 @@ public class TimeScaleFunctionTest {
 		assertTrue("TimeScaleFunction with only values that equal 1.0 is trivial", f.isTrivial());
 	}
 
+	/**
+	 * Check the export to XML
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testWriteXML() {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -237,16 +278,24 @@ public class TimeScaleFunctionTest {
 				+ "</TimeScaleFunction>\n");
 	}
 
+	/**
+	 * Check the export to String method
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testExport() {
 		TimeScaleFunction f = new TimeScaleFunction((Storable) null);
-		assertEquals("empty Flow exports as empty string", f.export().length(), 0);
+		assertTrue("empty Flow exports as string with only two brackets", f.export().equals("[]"));
 		f.insertPair(20, 10d / 30);
-		assertEquals("check value and number of decimal digits", f.export(), "20.000/0.333333");
+		assertEquals("check value and number of decimal digits", f.export(), "[20.000/0.333333]");
 		f.insertPair(30,  40);
-		assertEquals("check single tab char between entries", f.export(), "20.000/0.333333\t30.000/40.000000");
+		assertEquals("check single tab char between entries", f.export(), "[20.000/0.333333\t30.000/40.000000]");
 	}
 
+	/**
+	 * Check the import from String method
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testTimeScaleFunctionString() {
 		TimeScaleFunction f = new TimeScaleFunction((Storable) null);
@@ -266,6 +315,41 @@ public class TimeScaleFunctionTest {
 		// Now test that values between the pairs are also close enough
 		for (double t = 0; t < 150.1; t += 0.5)
 			assertEquals("There should be no significant rounding error due to the time/factor pairs being (virtually) identical", f.getFactor(t), f2.getFactor(t), 0.0000001);
+	}
+	
+	/**
+	 * Check the multiplyWith method
+	 */
+	@SuppressWarnings("static-method")
+	@Test
+	public void testMultiplyWith() {
+		// Make two TimeScaleFunctions that share SOME time time points
+		TimeScaleFunction f = new TimeScaleFunction((Storable) null);
+		for (int i = 0; i < 10; i++)
+			f.insertPair(i * 10, i * 123 % 500);
+		TimeScaleFunction f2 = new TimeScaleFunction((Storable) null);
+		for (int i = 0; i < 10; i++)
+			f2.insertPair(i * 30, i * 321 % 400);
+		TimeScaleFunction f3 = new TimeScaleFunction ((Storable) null, f, f2);
+		for (double t = 0; t < 400.1; t += 0.5)
+			assertEquals("Multiplication returns the product", f3.getFactor(t), f.getFactor(t) * f2.getFactor(t), 0.000001);
+		String export = f3.export();
+		//System.out.println("export of multiplied is \"" + export + "\"");
+		TimeScaleFunction f4 = new TimeScaleFunction (export);
+		for (double t = 0; t < 400.1; t += 0.5)
+			assertEquals("Multiplication returns the product", f4.getFactor(t), f.getFactor(t) * f2.getFactor(t), 0.000001);	
+		TimeScaleFunction f5 = new TimeScaleFunction((Storable) null);
+		for (int i = 0; i < 2; i++)
+			f5.insertPair(i * 43, i * 234 % 500);
+		TimeScaleFunction f6 = new TimeScaleFunction((Storable) null, f4, f5);
+		System.out.println(f6.export());
+		for (double t = 0; t < 400.1; t += 0.5)
+			assertEquals("Multiplication of three returns the product of three", f6.getFactor(t), f.getFactor(t) * f2.getFactor(t) * f5.getFactor(t), 0.000001);
+		// Test that a * (b * c) does the same as c * (a * b)
+		TimeScaleFunction f7 = new TimeScaleFunction((Storable) null, f5, f4);
+		System.out.println(f7.export());
+		for (double t = 0; t < 400.1; t += 0.5)
+			assertEquals("Multiplication of three returns the product of three", f7.getFactor(t), f.getFactor(t) * f2.getFactor(t) * f5.getFactor(t), 0.000001);		
 	}
 
 }

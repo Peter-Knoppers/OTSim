@@ -25,6 +25,7 @@ public class TimeScaleFunction implements XML_IO {
 	private final Storable storable;
 	private final static String timeFormat = "%.3f"; 
 	private final static String factorFormat = "%.6f";
+	private TimeScaleFunction multiplyWith;
 	
 	/**
 	 * Create an empty instance of a TimeScaleFunction.
@@ -32,6 +33,7 @@ public class TimeScaleFunction implements XML_IO {
 	 */
 	public TimeScaleFunction(Storable storable) {
 		this.storable = storable;
+		multiplyWith = null;
 	}
 	
 	/**
@@ -65,6 +67,14 @@ public class TimeScaleFunction implements XML_IO {
 	 */
 	public TimeScaleFunction (String description) {
 		storable = null;
+		description = description.trim();
+		if (! description.startsWith("["))
+			throw new Error ("Bad TimeScaleFunction description (no \"[\" at start)");
+		int pos = description.indexOf("]");
+		if (pos < 0)
+			throw new Error ("Bad TimeScaleFunction description (no terminating \"]\" found)");
+		String remainder = description.substring(pos + 1).trim();
+		description = description.substring(1, pos);
 		String pairs[] = description.split("\t");
 		for(String pair : pairs) {
 			String fields[] = pair.split("/");
@@ -72,6 +82,39 @@ public class TimeScaleFunction implements XML_IO {
 			double factor = Double.parseDouble(fields[1]);
 			insertPair(time, factor);
 		}
+		if (remainder.length() > 0)
+			multiplyWith = new TimeScaleFunction(remainder);
+		else
+			multiplyWith = null;
+	}
+	
+	/**
+	 * Create a TimeScaleFunction that is a copy of another one; except for the
+	 * Storable.
+	 * @param owner {@link Storable} the Storable that will be notified of changes
+	 * @param original TimeScaleFunction whose time/factor values will be copied into the new TimeScaleFunction
+	 */
+	public TimeScaleFunction (Storable owner, TimeScaleFunction original) {
+		this (owner);
+		times.addAll (original.times);
+		factors.addAll (original.factors);
+		if (null != original.multiplyWith)
+			multiplyWith = new TimeScaleFunction(owner, original.multiplyWith);
+	}
+	
+	/**
+	 * Return a new TimeScaleFunction that implements the multiplication of
+	 * one TimeScaleFunction with another TimeScaleFunction.
+	 * @param storable {@link Storable}; the Storable that will be notified on changes to the new TimeScaleFunction (may be null)
+	 * @param first TimeScaleFunction; 
+	 * @param second TimeScaleFunction
+	 */
+	public TimeScaleFunction (Storable storable, TimeScaleFunction first, TimeScaleFunction second) {
+		this (storable, first);
+		TimeScaleFunction tsf;
+		for (tsf = this; null != tsf.multiplyWith; tsf = tsf.multiplyWith)
+			;
+		tsf.multiplyWith = new TimeScaleFunction (null, second);
 	}
 	
 	/**
@@ -136,8 +179,11 @@ public class TimeScaleFunction implements XML_IO {
 	 * @return Double; the (interpolated) factor at the specified time 
 	 */
 	public double getFactor(double time) {
+		double result = 1.0;
+		if (null != multiplyWith)
+			result *= multiplyWith.getFactor(time);
 		if (factors.size() == 0)
-			return 1.0;		// Trivial case
+			return result;		// Trivial case
 		double prevTime = 0;
 		double prevFactor = factors.get(0);
 		for (int i = 0; i < times.size(); i++) {
@@ -147,11 +193,11 @@ public class TimeScaleFunction implements XML_IO {
 				prevTime = thisTime;
 				prevFactor = thisFactor;
 			} else if (thisTime > prevTime )
-				return prevFactor + (thisFactor - prevFactor) * (time - prevTime) / (thisTime - prevTime);
+				return result * (prevFactor + (thisFactor - prevFactor) * (time - prevTime) / (thisTime - prevTime));
 			else
-				return thisFactor;
+				return result * thisFactor;
 		}
-		return prevFactor;
+		return result * prevFactor;
 	}
 	
 	/**
@@ -191,13 +237,16 @@ public class TimeScaleFunction implements XML_IO {
 	 * @return String; this TimeScaleFunction in a textual format
 	 */
 	public String export () {
-		String result = "";
+		String result = "[";
 		final String formatPair = timeFormat + "/" + factorFormat;
 		for (int i = 0; i < size(); i++) {
 			double time = times.get(i);
 			double factor = factors.get(i);
-			result += String.format(Locale.US, "%s" + formatPair, result.length() > 0 ? "\t" : "", time, factor);
+			result += String.format(Locale.US, "%s" + formatPair, result.length() > 1 ? "\t" : "", time, factor);
 		}
+		result += "]";
+		if (null != multiplyWith)
+			result += multiplyWith.export();
 		return result;
 	}
 	
