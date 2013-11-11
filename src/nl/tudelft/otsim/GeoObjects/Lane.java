@@ -407,14 +407,28 @@ public class Lane extends CrossSectionObject {
     	}
 		GeneralPath polygon = new GeneralPath(Path2D.WIND_EVEN_ODD);
 		boolean firstPoint = true;
-		for (Vertex v : inner)  {
+		ArrayList<Vertex> v1 = new ArrayList<Vertex>();
+		ArrayList<Vertex> v2 = new ArrayList<Vertex>();
+		double scale = 0.33;
+		for (int i = 0; i < inner.size(); i++)  {
+			Vertex vTemp = new Vertex();
+			vTemp.x  = inner.get(i).getX() + scale * (outer.get(i).getX() - inner.get(i).getX()); 
+			vTemp.y  = inner.get(i).getY() + scale * (outer.get(i).getY() - inner.get(i).getY()); 
+			v1.add(vTemp);
+			vTemp = new Vertex();
+			vTemp.x  = inner.get(i).getX() + (1 - scale) * (outer.get(i).getX() - inner.get(i).getX()); 
+			vTemp.y  = inner.get(i).getY() + (1 - scale) * (outer.get(i).getY() - inner.get(i).getY()); 
+			v2.add(vTemp);			
+		}
+		
+		for (Vertex v : v1) {
 			if (firstPoint)
 				polygon.moveTo(v.getX(), v.getY());
 			else
 				polygon.lineTo(v.getX(), v.getY());
 			firstPoint = false;
 		}
-		for (Vertex v : Reversed.reversed(outer))	// reverse the outer point list
+		for (Vertex v : Reversed.reversed(v2))	// reverse the outer point list
 			 polygon.lineTo(v.getX(), v.getY());
 		polygon.closePath();
 		return polygon;
