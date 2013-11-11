@@ -498,7 +498,7 @@ public class Lane extends CrossSectionObject {
     	GeneralPath polygon = createLanePolygon();
     	graphicsPanel.setStroke(0f);	// hair line
     	Color lineColor = Color.WHITE;
-    	//graphicsPanel.drawGeneralPath(polygon, lineColor, fillColor);
+    	graphicsPanel.drawGeneralPath(polygon, lineColor, fillColor);
     	graphicsPanel.setColor(Color.RED);
     	if (stopLineLane != null)  {
     		boolean oldOpaque = stopLineLane.isOpaque();
