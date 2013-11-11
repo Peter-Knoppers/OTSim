@@ -1191,7 +1191,7 @@ class ExportTripPattern {
 		for (int i = 0; i < fractions.length; i++)
 			sum += fractions[i];
 		if (Math.abs(sum - 1.0) > 0.001)
-			throw new Exception("Route probabilities add up to " + sum + " which is not (nearly) equal to one");
+			throw new Exception("vehicleTypeFractions add up to " + sum + " which is not (nearly) equal to one");
 	}
 	
 	public void addRoute(ArrayList<Integer> route, double probability) {
