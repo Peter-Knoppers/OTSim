@@ -420,14 +420,17 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 	 * @param X Double; X-coordinate of the new Node
 	 * @param Y Double; Y-coordinate of the new Node
 	 * @param Z Double; Z-coordinate of the new Node
+	 * @return Node; the new Node
 	 */
-	public void addNode(String nodeName, int nodeID, double X, double Y, double Z) {
+	public Node addNode(String nodeName, int nodeID, double X, double Y, double Z) {
 		if (null != lookupNode(nodeID, false))
 			throw new Error(String.format("Node ID %d already exists", nodeID));
 		if (null != lookupNode(nodeName, false))
 			throw new Error(String.format("Node name %s already exists",  nodeName));
-		nodes.put(nodeID, new Node(this, nodeName, nodeID, X, Y, Z, false));
+		Node result = new Node(this, nodeName, nodeID, X, Y, Z, false);
+		nodes.put(nodeID, result);
 		setModified();
+		return result;
 	}
 
 	/**

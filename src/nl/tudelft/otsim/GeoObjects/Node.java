@@ -252,7 +252,7 @@ public class Node extends Vertex implements XML_IO {
 	
 	@Override
 	public String toString() {
-		return String.format(Main.locale, "%s (%.2fm, %.2fm, %.2fm)", name, getX(), getY(), getZ());
+		return String.format(Main.locale, "%s ID=%d (%.2fm, %.2fm, %.2fm)", name, nodeID, getX(), getY(), getZ());
 	}
 	
 	/**
