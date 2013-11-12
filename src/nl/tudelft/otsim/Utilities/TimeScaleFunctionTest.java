@@ -47,16 +47,12 @@ public class TimeScaleFunctionTest {
 			double factor = Math.round(1000000000d - i * 200000000000d / 987) / 1000000d;
 			f.insertPair(time, factor);
 		}
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		StaXWriter writer = null;
+		String xmlText = null;
 		try {
-			writer = new StaXWriter(outputStream);
+			xmlText = StaXWriter.XMLString(f);
 		} catch (Exception e) {
-			fail("Caught unexpected exception in creation of the StaXWriter");
+			fail("Caught unexpected exception in creation of the XML text");
 		}
-		f.writeXML(writer);
-		writer.close();
-		String xmlText = outputStream.toString();
 		//System.out.println(xmlText);
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(xmlText.getBytes());
 		TimeScaleFunction f2 = null;
