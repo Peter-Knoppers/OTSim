@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
-import java.util.Locale;
 
 import nl.tudelft.otsim.FileIO.StaXWriter;
 
@@ -56,6 +55,33 @@ public class NodeTest {
 	 */
 	@Test
 	public void testFixLinkConnections() {
+		/**
+		 * Format of the description of the testJunctions:
+		 * Each String describes a test junction.
+		 * Each String consists of three fields separated by a colon (:):
+		 * 1: network description
+		 * 2: expected connections
+		 * 3: textual description of the test
+		 * 
+		 * The network description consists of N fields separated by a slash (/).
+		 * Each of these fields describes one leg of the junction.
+		 * Each leg consists of three comma-separated fields
+		 * 1: number of incoming lanes
+		 * 2: number of outgoing lanes
+		 * 3: angle of the link containing the incoming and outgoing lanes
+		 * The angle is expressed in degrees; 0 is towards the right of the
+		 * screen (increasing X), 90 is towards the top of the screen (decreasing
+		 * Y).
+		 * 
+		 * The expected connections are listed per incoming leg. The descriptions
+		 * of the connections per incoming leg are separated by a slash (/).
+		 * Each incoming leg has a (possibly empty) list of expected connections.
+		 * Expected connections must be described for each lane of the leg, separated by a comma (,).
+		 * If multiple connections are expected for a lane; these must be separated by a plus (+).
+		 * Each expected connections is described with two numbers separated by a dot (.):
+		 * 1: Number of the outgoing leg that the connection connects to
+		 * 2: Rank of the lane in the outgoing leg that the connection connects to
+		 */
 		String[] testJunctions = {
 				// Fully constrained cases (sum of exiting lanes == sum of feeding lanes)
 				"2,0,-90/0,1,0/0,1,180:2.0,1.0//:T junction single left single right",
@@ -75,38 +101,37 @@ public class NodeTest {
 				"1,0,-90/0,1,0/0,1,90/0,1,180:3.0+2.0+1.0///:X with single left, single straight, single right",
 		};
 		// TODO check that no unexpected connections were built
-		double cx = 0;
-		double cy = 0; 
-		double cz = 0;
 		for (String testJunction : testJunctions) {
 			System.out.println("Running test " + testJunction.split(":")[2]);
 			Junction junction = new Junction(testJunction.split(":")[0]);
+			// Create a Network that matches this junction
 			Network network = new Network();
+			// Location of the junction Node
+			final double cx = 0;
+			final double cy = 0; 
+			final double cz = 0;
+			final double distance = 100;	// distance of neighboring Nodes (from the junction) in m
 			Node junctionNode = network.addNode ("junction", network.nextNodeID(), cx, cy, cz);
-			int legCount = junction.legCount();
+			final int legCount = junction.legCount();
 			Node[] otherNodes = new Node[legCount];
 			Link[] incomingLinks = new Link[legCount];
 			Link[] outgoingLinks = new Link[legCount];
 			
 			for (int legNo = 0; legNo < legCount; legNo++) {
 				Junction.Leg leg = junction.getLeg(legNo);
-				final double distance = 100;
 				otherNodes[legNo] = network.addNode ("neighborNode" + legNo, network.nextNodeID(), round(cx + distance * Math.cos(Math.toRadians(leg.angle)), 3), round(cy + distance * Math.sin(Math.toRadians(leg.angle)), 3), cz);
 				incomingLinks[legNo] = createLink(network, "feedLink" + legNo, otherNodes[legNo], junctionNode, leg.inLaneCount);
 				outgoingLinks[legNo] = createLink(network, "exitLink" + legNo, junctionNode, otherNodes[legNo], leg.outLaneCount);
 			}
 			assertEquals("Network rebuild should succeed", Network.RebuildResult.SUCCESS, network.rebuild());
-			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-			StaXWriter writer = null;
+			
 			try {
-				writer = new StaXWriter(outputStream);
+				String xmlText = StaXWriter.XMLString(network);
+				System.out.println(xmlText);
 			} catch (Exception e) {
 				fail("Caught unexpected exception in creation of the StaXWriter");
 			}
-			network.writeXML(writer);
-			writer.close();
-			String xmlText = outputStream.toString();
-			System.out.println(xmlText);
+			
 			System.out.println("Test: " + testJunction);
 			String expected = testJunction.split(":")[1];
 			assertEquals("Test description error; number of exits mismatches", legCount, expected.split("/", -1).length);

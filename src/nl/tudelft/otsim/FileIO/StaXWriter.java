@@ -1,7 +1,11 @@
 package nl.tudelft.otsim.FileIO;
 
+import static org.junit.Assert.fail;
+
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,6 +55,28 @@ public class StaXWriter {
 			temporaryFileName = fileName;
 		fileOutputStream = new FileOutputStream(temporaryFileName);
 		startUp(fileOutputStream);
+	}
+	
+	/**
+	 * Catch an XML representation without creating any real file.
+	 * <br /> Used primarily for testing. 
+	 * @param xml_writing_object {@link XML_IO} object whose writeXML method will be called
+	 * @return String; XML output of the xml_writing_object
+	 * @throws Exception
+	 */
+	public static String XMLString(XML_IO xml_writing_object) throws Exception {
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		StaXWriter writer = null;
+		try {
+			writer = new StaXWriter(outputStream);
+		} catch (Exception e) {
+			fail("Caught unexpected exception in creation of the StaXWriter");
+		}
+		xml_writing_object.writeXML(writer);
+		writer.close();
+		String xmlText = outputStream.toString();
+		outputStream.close();
+		return xmlText;
 	}
 	
 	/**
