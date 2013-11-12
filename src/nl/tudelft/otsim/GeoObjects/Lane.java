@@ -96,9 +96,14 @@ public class Lane extends CrossSectionObject {
     public Lane() {
     	this.id = laneCount;
     	laneCount++;
-    	if (14 == id)
-    		System.out.println("created lane " + id);
 	}
+    
+    /**
+     * Reset lane ID counter to 0.
+     */
+    public static void resetLaneIDGenerator() {
+    	laneCount = 0;
+    }
 
 	/**
      * Retrieve the CrossSectionElement that owns this Lane.
