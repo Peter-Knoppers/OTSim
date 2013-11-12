@@ -99,10 +99,11 @@ public class Curves {
 		Line2D.Double line1 = new Line2D.Double(prevStart.getX(), prevStart.getY(), start.getX(), start.getY());
 		Line2D.Double line2 = new Line2D.Double(end.getX(), end.getY(), endNext.getX(), endNext.getY());
 		Point2D.Double ctrlPoint1 = Planar.intersection(line1, line2);
-		if (difAngle(line1, line2) < 0.3 * Math.PI)   {
-			Double x = line1.getX2() + (line2.getX1()  - line1.getX2()) / 2;
-			Double y = line1.getY2() + (line2.getY1()  - line1.getY2()) / 2;
-			ctrlPoint1.setLocation(x, y);
+		if (difAngle(line1, line2) < 0.3 * Math.PI) {
+			// This covers the case that the lines are parallel (and ctrlPoint1 is null)
+			Double x = line1.getX2() + (line2.getX1() - line1.getX2()) / 2;
+			Double y = line1.getY2() + (line2.getY1() - line1.getY2()) / 2;
+			ctrlPoint1 = new Point2D.Double(x, y);
 		}
 		Point2D.Double p1 = new Point2D.Double(start.getX(), start.getY());
 		Point2D.Double p2 = new Point2D.Double(end.getX(), end.getY());
