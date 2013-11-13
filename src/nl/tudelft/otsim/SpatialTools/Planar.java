@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
 
+import nl.tudelft.otsim.GUI.Log;
 import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.GeoObjects.ActivityLocation;
 import nl.tudelft.otsim.GeoObjects.CrossSection;
@@ -464,9 +465,9 @@ public class Planar {
 	 * @return The minimal circle covering the points
 	 */
 	public static Circle circleCoveringPoints(ArrayList<Point2D.Double> points) {
-		//Log.logToFile("d:/circleCovering.txt", false, "Entering; points:");
+		//Log.logMessage("d:/circleCovering.txt", false, "Entering; points:");
 		//for (Point2D.Double p : points)
-		//	Log.logToFile("d:/circleCovering.txt", false, "Point2D.Double(%f, %f)", p.x, p.y);
+		//	Log.logMessage("d:/circleCovering.txt", false, "Point2D.Double(%f, %f)", p.x, p.y);
 		//System.out.println("Enter circleCoveringPoints: pointCloud: " + points.toString());
 		// Find the smallest circle that covers the pointCloud
 		// http://www.ces.clemson.edu//~pmdrn/Dearing/location/minimax.pdf
@@ -487,25 +488,25 @@ public class Planar {
 		
 		while (0 != stage) {
 			//if (null == pk)
-			//	Log.logToFile("d:/circleCovering.txt", false, "step=%d, pi=%f,%f, pj=%f,%f", stage, pi.x, pi.y, pj.x, pj.y);
+			//	Log.logMessage("d:/circleCovering.txt", false, "step=%d, pi=%f,%f, pj=%f,%f", stage, pi.x, pi.y, pj.x, pj.y);
 			//else
-			//	Log.logToFile("d:/circleCovering.txt", false, "step=%d, pi=%f,%f, pj=%f,%f, pk=%f,%f", stage, pi.x, pi.y, pj.x, pj.y, pk.x, pk.y);
+			//	Log.logMessage("d:/circleCovering.txt", false, "step=%d, pi=%f,%f, pj=%f,%f, pk=%f,%f", stage, pi.x, pi.y, pj.x, pj.y, pk.x, pk.y);
 			switch (stage) {
 			case 2:
 				center = new Point2D.Double((pi.x + pj.x) / 2, (pi.y + pj.y) / 2);
 				double newRadius = pi.distance(pj) / 2 + margin;
-				//Log.logToFile("d:/circleCovering.txt", false, "New circle (crossing 2 points) is %f,%f, radius %f", center.x, center.y, newRadius);
+				//Log.logMessage("d:/circleCovering.txt", false, "New circle (crossing 2 points) is %f,%f, radius %f", center.x, center.y, newRadius);
 				if (newRadius <= radius - margin) {
 					System.err.println("newRadius " + newRadius + " is not bigger than old radius " + radius);
 					stage = 0;
-					//Log.logToFile("d:/circleCovering.txt", false, "Failure: newRadius %f is not bigger than old radius %f", newRadius, radius);
+					//Log.logMessage("d:/circleCovering.txt", false, "Failure: newRadius %f is not bigger than old radius %f", newRadius, radius);
 					break;
 				}
 				radius = newRadius;
 				pk = null;
 				for (Point2D.Double p : points) {
 					if (p.distance(center) > radius) {
-						//Log.logToFile("d:/circleCovering.txt", false, "point %f,%f lies outside circle", p.x, p.y);
+						//Log.logMessage("d:/circleCovering.txt", false, "point %f,%f lies outside circle", p.x, p.y);
 						pk = p;
 						stage = 3;
 						break;
@@ -513,7 +514,7 @@ public class Planar {
 				}
 				if (null == pk) {
 					stage = 0;
-					//Log.logToFile("d:/circleCovering.txt", false, "All points lie within the circle");
+					//Log.logMessage("d:/circleCovering.txt", false, "All points lie within the circle");
 				}
 				break;
 				
@@ -524,20 +525,20 @@ public class Planar {
 				double d2ik = pi.distanceSq(pk);
 				double d2jk = pj.distanceSq(pk);
 				if (d2jk >= d2ij + d2ik) {
-					//Log.logToFile("d:/circleCovering.txt", false, "d2jk (%f) >= d2ik (%f) + d2jk (%f) not acute; deleting pi", d2jk, d2ik, d2jk);
+					//Log.logMessage("d:/circleCovering.txt", false, "d2jk (%f) >= d2ik (%f) + d2jk (%f) not acute; deleting pi", d2jk, d2ik, d2jk);
 					pi = pj;
 					pj = pk;
 					pk = null;
 					stage = 2;
 					break;
 				} else if (d2ik >= d2ij + d2jk) {
-					//Log.logToFile("d:/circleCovering.txt", false, "d2ik (%f) >= d2ij (%f) + d2jk (%f) not acute; deleting pj", d2ik, d2ij, d2jk);
+					//Log.logMessage("d:/circleCovering.txt", false, "d2ik (%f) >= d2ij (%f) + d2jk (%f) not acute; deleting pj", d2ik, d2ij, d2jk);
 					pj = pk;
 					pk = null;
 					stage = 2;
 					break;
 				} else if (d2ij > d2ik + d2jk) {
-					//Log.logToFile("d:/circleCovering.txt", false, "d2ij (%f) >= d2ik (%f) + d2jk (%f) not acute; deleting pk", d2ij, d2ik, d2jk);
+					//Log.logMessage("d:/circleCovering.txt", false, "d2ij (%f) >= d2ik (%f) + d2jk (%f) not acute; deleting pk", d2ij, d2ik, d2jk);
 					pk = null;
 					stage = 2;
 					break;
@@ -553,11 +554,11 @@ public class Planar {
 					Line2D.Double line2 = new Line2D.Double(p21, p22);
 					center = intersection(line1, line2);
 					newRadius = pi.distance(center) + margin;
-					//Log.logToFile("d:/circleCovering.txt", false, "New circle (crossing 3 points) %f,%f, radius %f", center.x, center.y, newRadius);
+					//Log.logMessage("d:/circleCovering.txt", false, "New circle (crossing 3 points) %f,%f, radius %f", center.x, center.y, newRadius);
 					if (newRadius <= radius - margin) {
 						System.err.println("newRadius " + newRadius + " is not bigger than old radius " + radius);
 						stage = 0;
-						//Log.logToFile("d:/circleCovering.txt", false, "Failure: newRadius %f is not bigger than old radius %f", newRadius, radius);
+						//Log.logMessage("d:/circleCovering.txt", false, "Failure: newRadius %f is not bigger than old radius %f", newRadius, radius);
 						break;
 					}
 					radius = newRadius;
@@ -571,7 +572,7 @@ public class Planar {
 					pl = null;
 					for (Point2D.Double p : points) {
 						if (p.distance(center) > radius) {
-							//Log.logToFile("d:/circleCovering.txt", false, "point %f,%f lies outside circle", p.x, p.y);
+							//Log.logMessage("d:/circleCovering.txt", false, "point %f,%f lies outside circle", p.x, p.y);
 							pl = p;
 							stage = 4;
 							break;
@@ -579,7 +580,7 @@ public class Planar {
 					}
 					if (null == pl) {
 						stage = 0;
-						//Log.logToFile("d:/circleCovering.txt", false, "All points lie within the circle");
+						//Log.logMessage("d:/circleCovering.txt", false, "All points lie within the circle");
 					}
 					break;
 				}
@@ -593,13 +594,14 @@ public class Planar {
 				Point2D.Double pq = null;
 				if ((dli > dlj) && (dli > dlk))
 					pq = pi;
-				else if ((dlj > dli) && (dlj > dlk))
+				else if ((dlj >= dli) && (dlj > dlk))	// 20130913/PK: changed first ">" into ">="
 					pq = pj;
 				else 
 					pq = pk;
-				//Log.logToFile("d:/circleCovering.txt", false, "The point furthest from pl (%f,%f) is pq (%f,%f)", pl.x, pl.y, pq.x, pq.y);
+				//Log.logMessage("d:/circleCovering.txt", false, "The point furthest from pl (%f,%f) is pq (%f,%f)", pl.x, pl.y, pq.x, pq.y);
 				// This code is hard to read; verify the result
 				double furthestDistance = pq.distance(pl);
+				//Log.logMessage("d:/circleCovering.txt", false, "furthestDistance=%.5f, dli=%.5f, dlj=%.5f, dlk=%.5f", furthestDistance, dli, dlj, dlk);
 				if (furthestDistance < dli)
 					throw new Error("Cannot happen");
 				if (furthestDistance < dlj)
@@ -612,7 +614,7 @@ public class Planar {
 				// Then find the point pr among pi, pj, pk that is in the half plane opposite pl
 				// NB. the point pq lies exactly on that line.
 				Line2D.Double referenceLine = new Line2D.Double(pq, center);
-				//Log.logToFile("d:/circleCovering.txt", false, "Reference line through pq is %f,%f -> %f,%f", referenceLine.x1, referenceLine.y1, referenceLine.x2, referenceLine.y2);
+				//Log.logMessage("d:/circleCovering.txt", false, "Reference line through pq is %f,%f -> %f,%f", referenceLine.x1, referenceLine.y1, referenceLine.x2, referenceLine.y2);
 				double goodSide = pointSideOfLine(pl, referenceLine);
 				if (0 == goodSide)
 					throw new Error ("Cannot happen");
@@ -625,9 +627,9 @@ public class Planar {
 						if (p == pq)
 							continue;	// ignore this one; it should lie ON the line
 						double signedPosition = pointSideOfLine (p, referenceLine) * sign;
-						//Log.logToFile("d:/circleCovering.txt", false, "signedPosition of %f,%f is %f", p.x, p.y, signedPosition);
+						//Log.logMessage("d:/circleCovering.txt", false, "signedPosition of %f,%f is %f", p.x, p.y, signedPosition);
 						if (signedPosition <= errorMargin) {
-							//Log.logToFile("d:/circleCovering.txt", false, "Setting pr to %f,%f", p.x, p.y);
+							//Log.logMessage("d:/circleCovering.txt", false, "Setting pr to %f,%f", p.x, p.y);
 							pr = p;
 						}
 					}
@@ -647,7 +649,7 @@ public class Planar {
 			}
 		}
 		}
-		//Log.logToFile("d:/circleCovering.txt", false, "Final result: circle centered at %f,%f, radius %f", center.x, center.y, radius);
+		//Log.logMessage("d:/circleCovering.txt", false, "Final result: circle centered at %f,%f, radius %f", center.x, center.y, radius);
 		return new Circle(center, radius);
 	}
 	
