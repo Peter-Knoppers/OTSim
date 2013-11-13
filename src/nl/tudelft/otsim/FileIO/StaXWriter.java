@@ -1,11 +1,8 @@
 package nl.tudelft.otsim.FileIO;
 
-import static org.junit.Assert.fail;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,12 +63,7 @@ public class StaXWriter {
 	 */
 	public static String XMLString(XML_IO xml_writing_object) throws Exception {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		StaXWriter writer = null;
-		try {
-			writer = new StaXWriter(outputStream);
-		} catch (Exception e) {
-			fail("Caught unexpected exception in creation of the StaXWriter");
-		}
+		StaXWriter writer = new StaXWriter(outputStream);
 		xml_writing_object.writeXML(writer);
 		writer.close();
 		String xmlText = outputStream.toString();
