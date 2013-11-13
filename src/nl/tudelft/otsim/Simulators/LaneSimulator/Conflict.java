@@ -86,8 +86,9 @@ public class Conflict {
      */
     private static Conflict createMerge(Lane pLane, Lane yLane) throws Exception {
         coord intersect;
-        if ((pLane.x[pLane.x.length - 1] == yLane.x[yLane.x.length - 1]) &&
-                (pLane.y[pLane.y.length - 1] == yLane.y[yLane.y.length - 1])) // equal end coordinates
+        final int snap = 1; // we accept a small difference
+        if (Math.abs(pLane.x[pLane.x.length - 1] - yLane.x[yLane.x.length - 1]) < snap &&
+        		Math.abs(pLane.y[pLane.y.length - 1] - yLane.y[yLane.y.length - 1]) < snap) // equal end coordinates
             intersect = new coord(pLane.l, yLane.l, pLane.x[pLane.x.length-1], pLane.y[pLane.y.length-1]);
         else	// find intersection
             intersect = intersect(pLane, yLane);
