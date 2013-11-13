@@ -1335,6 +1335,8 @@ public class Node extends Vertex implements XML_IO {
 	    		// 
 				nextArm = incomingArm;	
 				int numberOfLeavingLanes = 0;
+				int numberOfIncomingArms = 1;
+				
 	    		for (int arm = 1; arm < dlList.size(); arm++) {
 	    			nextArm++;
 					// explore all links excluding the current incoming arm
@@ -1343,7 +1345,9 @@ public class Node extends Vertex implements XML_IO {
 	    			DirectionalLink leaving = dlList.get(nextArm);
 					double angleDif;
 					// if this is a leaving link:
-					if (! leaving.incoming) {   					
+					if (leaving.incoming)
+						numberOfIncomingArms++;
+					else {   					
 						//compute the angle in radians between the incoming and leaving link
 		    			if (incoming.angle > leaving.angle)
 	        				angleDif = 2 * Math.PI - incoming.angle + leaving.angle ;
@@ -1369,7 +1373,7 @@ public class Node extends Vertex implements XML_IO {
 				int numberOfLeavingLinks = linkRank;
         		ArrayList<RoadMarkerAlong> rmaList = new ArrayList<RoadMarkerAlong>();
 				//  only if we do have a junction we perform step 2 and 3
-				if (outLanesAndLinkList.size() > 0) {
+				if (outLanesAndLinkList.size() > 0 && (numberOfIncomingArms + outLanesAndLinkList.size()) > 2) {
 					// STEP 2: determine the turning movements
 
 		    		// STEP 2A
@@ -1456,6 +1460,7 @@ public class Node extends Vertex implements XML_IO {
         				int[] ceilShareOfLanes = new int[numberOfLeavingLinks];
         				int[] shareLaneNextMovement = new int[numberOfLeavingLinks];
         				int[] priorityShare = new int[numberOfLeavingLinks];
+        				int mergeLanes = 0;
         				double[] exitLanes = new double[numberOfLeavingLinks];
         				boolean uTurn[] =  new boolean[numberOfLeavingLinks];        				 
         				int numberOfTurnLanes = inLanesAll.size();
@@ -1484,24 +1489,24 @@ public class Node extends Vertex implements XML_IO {
 							shareOfLanes[outLink] = ((double) inLanesAll.size() * currentOutLinkInfo.numberOfLanes) / numberOfLeavingLanes;
 							ceilShareOfLanes[outLink] = (int) (Math.max(Math.ceil(shareOfLanes[outLink]), 1));
 							exitLanes[outLink] = currentOutLinkInfo.numberOfLanes;
+							if (ceilShareOfLanes[outLink] > exitLanes[outLink])
+								ceilShareOfLanes[outLink] = (int) exitLanes[outLink];
 							uTurn[outLink] = currentOutLinkInfo.isUTurn();
 							sumCeil = sumCeil + ceilShareOfLanes[outLink];
         				}
     					
         				int indexFirst = 0;
         				int indexLast = numberOfLeavingLinks - 1;
-        				int shareLanes = 0;
-        				if (sumCeil > numberOfTurnLanes)          						
-    						shareLanes = sumCeil - numberOfTurnLanes;        						
+        				int lanesToShare = sumCeil - numberOfTurnLanes;        						
     					
 						// a shortage of lanes: either share lanes or less than demanded         					
 
     					if (sumCeil > numberOfTurnLanes  )  { 
-    						int lanesToShare = numberOfLeavingLinks - 1;
-    						while (indexFirst < indexLast && shareLanes > 0) {
-        						if (priorityShare[indexFirst] < priorityShare[indexFirst + 1]) {
+    						// int lanesToShare = numberOfLeavingLinks - 1;
+    						while (indexFirst < indexLast && lanesToShare > 0) {
+        						if (priorityShare[indexFirst] <= priorityShare[indexFirst + 1]) {
         							// if the right-side movement has lower priority, than share lanes
-        							if (priorityShare[indexFirst] < priorityShare[indexLast] )  {
+        							if (priorityShare[indexFirst] <= priorityShare[indexLast] )  {
         								if (shareLaneNextMovement[indexFirst] == 0 && laneSharing) {
         									shareLaneNextMovement[indexFirst]++;
         								}
@@ -1524,7 +1529,10 @@ public class Node extends Vertex implements XML_IO {
         									shareLaneNextMovement[indexFirst + 1]++;
         								}
         								else
-        									ceilShareOfLanes[indexFirst + 1]--; 
+        									if (ceilShareOfLanes[indexFirst + 1] > 1)
+        										ceilShareOfLanes[indexFirst + 1]--;
+        									else
+        										shareLaneNextMovement[indexFirst]++;
         								indexFirst++;
         								indexFirst++;        								
         							}
@@ -1532,22 +1540,24 @@ public class Node extends Vertex implements XML_IO {
         								if (shareLaneNextMovement[indexLast] == 0 && laneSharing) {
         									shareLaneNextMovement[indexLast - 1]++;
         								}
-        								else
-        									ceilShareOfLanes[indexLast]--;
+        								else {
+        									if (ceilShareOfLanes[indexLast] > 1)
+        										ceilShareOfLanes[indexLast]--;
+        									else
+        										shareLaneNextMovement[indexLast - 1]++;
+        								}
         								indexLast--;
         							}
         						}
-        						shareLanes--;    						        						
+        						lanesToShare--;    						        						
     						}
     					}
-    					// Strange junction !!
-    					if (sumCeil < numberOfTurnLanes  )  { 
-    						while (indexFirst < indexLast && shareLanes < 0) {
-    							ceilShareOfLanes[indexFirst]++;
-    							indexFirst++;
-        						shareLanes++;    	
-        						if (indexFirst == indexLast)
-        							indexFirst = 0;
+    					// Strange junction or a merge!!
+    					if (sumCeil < numberOfTurnLanes  )  {  
+    						// int lanesToShare = numberOfLeavingLinks - 1;
+    						while (lanesToShare < 0) {
+    							mergeLanes++;
+        						lanesToShare++;    						        						
     						}
     					}
     					
@@ -1557,7 +1567,13 @@ public class Node extends Vertex implements XML_IO {
     						OutLinkInfo currentOutLinkInfo = outLanesAndLinkList.get(outLink);
     						ArrayList<Lane> outLanes = currentOutLinkInfo.getOutLanes();
     						int outLaneIndex = 0;
+    						//connect the in-coming and exiting lanes 
     						for (int i = 0; i < ceilShareOfLanes[outLink]; i++)  {
+/*    							if (indexCurrentInlane == inLanesAll.size())
+    								System.out.print("error junction");
+    							
+    							if (i == outLanes.size())
+    								System.out.print("error junction");*/
     							currentInLane = inLanesAll.get(indexCurrentInlane);
     							if (currentOutLinkInfo.isStartRight()) {						
 	        						currentOutLane = outLanes.get(i);
@@ -1565,19 +1581,45 @@ public class Node extends Vertex implements XML_IO {
     							else {
 	        						currentOutLane = outLanes.get(currentOutLinkInfo.numberOfLanes - ceilShareOfLanes[outLink] + i);
     							}
+    							if (currentInLane == null)
+    								System.out.print("no inlane??");
     							LaneConnect laneConnect = new LaneConnect(currentInLane, currentOutLane, outLink);
     							connectedLanesList.add(laneConnect);
+    							// if there are more incoming lanes than leaving ones, connect all inlanes
+    							if (mergeLanes > 0 && indexCurrentInlane == ceilShareOfLanes[outLink] - 1)  {
+        							indexCurrentInlane++;
+    								currentInLane = inLanesAll.get(indexCurrentInlane);
+        							laneConnect = new LaneConnect(currentInLane, currentOutLane, outLink);
+        							connectedLanesList.add(laneConnect);
+    							}
+/*    							if (indexCurrentInlane < numberOfTurnLanes)
+    								indexCurrentInlane++;*/
     							indexCurrentInlane++;
 	    						outLaneIndex++;
     						}
+    						// in case of any remaining exit lanes that are not yet connected
+    						// i.e. if there are 2 right turning lanes and 3 exit lanes, 
+    						// the second right lane (counting from outer to inner) here gets 
+    						// connected to the third exit lane)
 							for (int i = outLaneIndex; i < currentOutLinkInfo.numberOfLanes ; i++) {
 								if (currentOutLinkInfo.isStartRight()) {
 									currentOutLane = outLanes.get(i);
+	    							if (currentInLane == null)
+	    								System.out.print("no inlane??");
+
 									LaneConnect laneConnect = new LaneConnect(currentInLane, currentOutLane, outLink);
 									connectedLanesList.add(laneConnect);
 								}
 								else  {
+/*	    							if (outLink == ceilShareOfLanes.length)
+	    								System.out.print("error junction");
+	    							if (indexCurrentInlane - ceilShareOfLanes[outLink] == inLanesAll.size())
+	    								System.out.print("error junction");*/
+	    							
 									currentInLane = inLanesAll.get(indexCurrentInlane - ceilShareOfLanes[outLink]);
+	    							if (currentInLane == null)
+	    								System.out.print("no inlane??");
+
 									currentOutLane = outLanes.get(currentOutLinkInfo.numberOfLanes - 1 - i);
 									LaneConnect laneConnect = new LaneConnect(currentInLane, currentOutLane, outLink);
 									connectedLanesList.add(0,laneConnect);
@@ -1651,36 +1693,52 @@ public class Node extends Vertex implements XML_IO {
 			// revisit all new Turning Links at this node (junction) to investigate conflicting lanes (merge, split, cross)
 			for (Link link : newLinks) {
 				for (Link compareToLink : newLinks) {
+					//only different links
 					if (compareToLink == link)
 						continue;
+					// visit pairs of links only once
 					if (compareToLink.getName_r().compareTo(link.getName_r()) <= 0)
 						continue;
 					PriorityConflict priorityConflict = null;
-					conflictType cType;
+					conflictType cType = null;
+
+					// if these links have the same point of destination it is a merge
 					if (link.getToNode_r().getPoint().equals(compareToLink.getToNode_r().getPoint()))
 						cType =  conflictType.MERGE;
+					// if these links leave from the same point it is a merge
 					else if (link.getFromNode_r().getPoint().equals(compareToLink.getFromNode_r().getPoint()))
 						cType =  conflictType.SPLIT;
-					else
-						cType =  conflictType.CROSSING;
+					else {
+						// Determine if there is a conflict area
+						for (CrossSectionObject csoA : link.getCrossSections_r().get(0).getCrossSectionElementList_r().get(0).getCrossSectionObjects(Lane.class)) {
+							for (CrossSectionObject csoB : compareToLink.getCrossSections_r().get(0).getCrossSectionElementList_r().get(0).getCrossSectionObjects(Lane.class)) {									
+								if (null == csoA)
+									System.err.println("fixLinkConnections: skipping null lane");
+								else {
+									Lane laneA = (Lane) csoA;
+									Lane laneB = (Lane) csoB;
+									// Determine location at the lanes at the start of the conflict Area:
+									Point2D.Double pInIn = getConflictIntersectionPoint(laneA.getLaneVerticesInner(), laneB.getLaneVerticesInner());
+									Point2D.Double pInOut = getConflictIntersectionPoint(laneA.getLaneVerticesInner(), laneB.getLaneVerticesInner());
+									Point2D.Double pOutIn = getConflictIntersectionPoint(laneA.getLaneVerticesInner(), laneB.getLaneVerticesInner());
+									Point2D.Double pOutOut = getConflictIntersectionPoint(laneA.getLaneVerticesInner(), laneB.getLaneVerticesInner());
+									// if there is no intersection there is no conflict
+									if ((pInIn != null) || (pInOut != null) || (pOutIn != null) || (pOutOut != null))
+										cType =  conflictType.CROSSING;
+								}
+							}
+						}
+					}
+					// After determining the type of conflict, the priority rules are applied (traffic from the right has priority)
 					for (CrossSectionObject csoA : link.getCrossSections_r().get(0).getCrossSectionElementList_r().get(0).getCrossSectionObjects(Lane.class)) {
 						for (CrossSectionObject csoB : compareToLink.getCrossSections_r().get(0).getCrossSectionElementList_r().get(0).getCrossSectionObjects(Lane.class)) {									
 							if (null == csoA)
 								System.err.println("fixLinkConnections: skipping null lane");
 							else {
-								if (conflictType.SPLIT == cType)
-									continue;	// take care of the easy cases first
 								Lane laneA = (Lane) csoA;
 								Lane laneB = (Lane) csoB;
-								if (13 == laneA.getID())
-									System.out.println("laneA is " + laneA.getID());
-								//if (17 == laneB.getID())
-								//	System.out.println("laneB is " + laneB.getID());
-								// we only visit pairs of lanes once
-								// Peter believes the above comment might be false!
-								// identify yield and priority lane
-								Lane pLane;// = null;//new Lane();
-								Lane yLane;// = null;//new Lane();										
+								Lane priorityLane;// = null;//new Lane();
+								Lane yieldLane;// = null;//new Lane();										
 
 								Lane upA = laneA.getUp().get(0);
 								Lane upB = laneB.getUp().get(0);
@@ -1698,11 +1756,11 @@ public class Node extends Vertex implements XML_IO {
 								if ((upB.getStopLine() != null) && (upB.getStopLine().getType() == StopLine.PRIORITYSTOPLINE))
 									yieldB = false;
 								if (yieldA && (! yieldB)) {
-									yLane = laneA;
-									pLane = laneB;
+									yieldLane = laneA;
+									priorityLane = laneB;
 								} else if ((! yieldA) && yieldB) {
-									yLane = laneB;
-									pLane = laneA;
+									yieldLane = laneB;
+									priorityLane = laneA;
 								} else {	// Stop lines did not resolve this conflict.
 									// Apply traffic law priority rules
 									// could be on a junction with no rules or two opposing roads (both priority or yield)
@@ -1729,11 +1787,11 @@ public class Node extends Vertex implements XML_IO {
 			            			else
 			            				angleDif = angleIncomingA - angleIncomingB;
 									if (angleDif < 0.75 * Math.PI) {	// lane B comes from right
-										yLane = laneA;
-										pLane = laneB;
+										yieldLane = laneA;
+										priorityLane = laneB;
 									} else if (angleDif > 1.25 * Math.PI) {	// lane B comes from left
-										pLane = laneA;
-										yLane = laneB;
+										priorityLane = laneA;
+										yieldLane = laneB;
 									} else { // Opposing flows: turning movement determines priority rules
 										double turnAngleA;
 										double turnAngleB;
@@ -1747,57 +1805,58 @@ public class Node extends Vertex implements XML_IO {
 				            				turnAngleB = angleIncomingB - angleLeavingB;
 				            			// turn with smallest angle has priority
 				            			if (turnAngleA < turnAngleB) {
-											pLane = laneA;
-											yLane = laneB;
+											priorityLane = laneA;
+											yieldLane = laneB;
 				            			} else {
-											yLane = laneA;
-											pLane = laneB;
+											yieldLane = laneA;
+											priorityLane = laneB;
 				            			}	
 									}
 								}
+								StopLine stopLine = yieldLane.getUp().get(0).getStopLine();
+								Polygon cArea = new Polygon();
 								// Determine location at the lanes at the start of the conflict Area:
-								Point2D.Double pInIn = getConflictIntersectionPoint(yLane.getLaneVerticesInner(), pLane.getLaneVerticesInner());
-								Point2D.Double pInOut = getConflictIntersectionPoint(yLane.getLaneVerticesInner(), pLane.getLaneVerticesOuter());
-								Point2D.Double pOutIn = getConflictIntersectionPoint(yLane.getLaneVerticesOuter(), pLane.getLaneVerticesInner());
-								Point2D.Double pOutOut = getConflictIntersectionPoint(yLane.getLaneVerticesOuter(), pLane.getLaneVerticesOuter());
-								if ((conflictType.MERGE == cType) || (pInIn != null) || (pInOut != null) || (pOutIn != null) || (pOutOut != null)) {
-									Polygon cArea = new Polygon();
-									// determine the stopLines of the incoming Link
-									StopLine stopLine = yLane.getUp().get(0).getStopLine();
-									Double cX = null;
-									Double cY = null;
-									if (pInIn != null) {
-										cX = pInIn.getX();
-										cY = pInIn.getY();
-										cArea.addPoint(cX.intValue(), cY.intValue());
-									}
-									if (pInOut != null) {
-										cX = pInOut.getX();
-										cY = pInOut.getY();
-										cArea.addPoint(cX.intValue(), cY.intValue());
-									}
-									if (pOutIn != null) {
-										cX = pOutIn.getX();
-										cY = pOutIn.getY();
-										cArea.addPoint(cX.intValue(), cY.intValue());
-									}
-									if (pOutOut != null) {	
-										cX = pOutOut.getX();
-										cY = pOutOut.getY();
-										cArea.addPoint(cX.intValue(), cY.intValue());
-									}
+								Point2D.Double pInIn = getConflictIntersectionPoint(laneA.getLaneVerticesInner(), laneB.getLaneVerticesInner());
+								Point2D.Double pInOut = getConflictIntersectionPoint(laneA.getLaneVerticesInner(), laneB.getLaneVerticesInner());
+								Point2D.Double pOutIn = getConflictIntersectionPoint(laneA.getLaneVerticesInner(), laneB.getLaneVerticesInner());
+								Point2D.Double pOutOut = getConflictIntersectionPoint(laneA.getLaneVerticesInner(), laneB.getLaneVerticesInner());
+								// determine the stopLines of the incoming Link
+								Double cX = null;
+								Double cY = null;
+								if (pInIn != null) {
+									cX = pInIn.getX();
+									cY = pInIn.getY();
+									cArea.addPoint(cX.intValue(), cY.intValue());
+								}
+								if (pInOut != null) {
+									cX = pInOut.getX();
+									cY = pInOut.getY();
+									cArea.addPoint(cX.intValue(), cY.intValue());
+								}
+								if (pOutIn != null) {
+									cX = pOutIn.getX();
+									cY = pOutIn.getY();
+									cArea.addPoint(cX.intValue(), cY.intValue());
+								}
+								if (pOutOut != null) {	
+									cX = pOutOut.getX();
+									cY = pOutOut.getY();
+									cArea.addPoint(cX.intValue(), cY.intValue());
+								}
+								
+								if (conflictType.MERGE == cType || conflictType.CROSSING == cType)  {
 									if (cType.equals(conflictType.MERGE))
-										yLane.addMergingYieldToLaneList(pLane);
+										yieldLane.addMergingYieldToLaneList(priorityLane);
 									else if (cType.equals(conflictType.CROSSING))
-										yLane.addCrossingYieldToLaneList(pLane);
-									priorityConflict = new PriorityConflict(pLane, yLane, cType, cArea);
+										yieldLane.addCrossingYieldToLaneList(priorityLane);
+									priorityConflict = new PriorityConflict(priorityLane, yieldLane, cType, cArea);
 									//  add conflict to the relevant stopLine 
 									if (stopLine == null)		
 										System.err.println("no Stopline created or found");
 									else
 										stopLine.addConflicts(priorityConflict);
 								} else {
-									System.out.println(String.format("Conflict of y%s and p%s at node %d has no intersection...", yLane.toString(), pLane.toString(), nodeID));
+									System.out.println(String.format("Conflict of y%s and p%s at node %d has no intersection...", yieldLane.toString(), priorityLane.toString(), nodeID));
 								}
 							}
 						}
