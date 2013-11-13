@@ -1575,6 +1575,10 @@ public class Node extends Vertex implements XML_IO {
     							if (i == outLanes.size())
     								System.out.print("error junction");*/
     							currentInLane = inLanesAll.get(indexCurrentInlane);
+					    		if (currentInLane.getStopLine() == null) {
+					    			StopLine stopLine = new StopLine(currentInLane.getCse(), StopLine.NOSTOPLINE,-4.0, 2.0, 0.0); 
+					    			currentInLane.setStopLine(stopLine);
+					    		}
     							if (currentOutLinkInfo.isStartRight()) {						
 	        						currentOutLane = outLanes.get(i);
 	    						}
@@ -1589,6 +1593,10 @@ public class Node extends Vertex implements XML_IO {
     							if (mergeLanes > 0 && indexCurrentInlane == ceilShareOfLanes[outLink] - 1)  {
         							indexCurrentInlane++;
     								currentInLane = inLanesAll.get(indexCurrentInlane);
+    					    		if (currentInLane.getStopLine() == null) {
+    					    			StopLine stopLine = new StopLine(currentInLane.getCse(), StopLine.NOSTOPLINE,-4.0, 2.0, 0.0); 
+    					    			currentInLane.setStopLine(stopLine);
+    					    		}
         							laneConnect = new LaneConnect(currentInLane, currentOutLane, outLink);
         							connectedLanesList.add(laneConnect);
     							}
