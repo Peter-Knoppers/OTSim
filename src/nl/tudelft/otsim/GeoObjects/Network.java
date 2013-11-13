@@ -937,13 +937,16 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 						laneA.getLaneVerticesInner().get(0).setPoint(upA.getLaneVerticesOuter().get(size-1));			
 						size = upA.getLaneVerticesOuter().size();
 						laneA.getLaneVerticesOuter().get(0).setPoint(upA.getLaneVerticesInner().get(size-1));	
+						size = upA.getLaneVerticesCenter().size();
+						laneA.getLaneVerticesCenter().get(0).setPoint(upA.getLaneVerticesCenter().get(size-1));	
 						
 						Lane downA = laneA.getDown().get(0);
 						size = laneA.getLaneVerticesInner().size();
 						laneA.getLaneVerticesInner().get(size-1).setPoint(downA.getLaneVerticesOuter().get(0));			
 						size = laneA.getLaneVerticesOuter().size();
 						laneA.getLaneVerticesOuter().get(size-1).setPoint(downA.getLaneVerticesInner().get(0));		
-						
+						size = laneA.getLaneVerticesCenter().size();
+						laneA.getLaneVerticesCenter().get(size-1).setPoint(downA.getLaneVerticesCenter().get(0));							
 					}
 				}
     			//TODO point smooth
