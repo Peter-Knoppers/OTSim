@@ -156,7 +156,10 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         			} else if (fields[i].equals("mergingYieldTo:")) {
         				int laneMergeID  = Integer.parseInt(fields[i + 1]);
         				Lane mergeLane = lookupLane(laneMergeID, microNetwork);
-        				Conflict.createMerge(lane, mergeLane);
+        				Lane downLane = lane.down;
+        				if (null == downLane)
+        					throw new Exception("Cannot create merge onto lane " + lane.id() + " because it does has " + (null == lane.downs ? 0 : lane.downs.size()) + " downs (should be 1)");
+        				Conflict.createMerge(downLane, lane, mergeLane);
         			} else if (fields[i].equals("right:")) {
         				int right = Integer.parseInt(fields[i + 1]);
         				Lane rightLane = lookupLane(right, microNetwork);
