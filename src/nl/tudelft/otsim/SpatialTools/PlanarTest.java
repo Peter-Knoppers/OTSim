@@ -5,6 +5,8 @@ import static org.junit.Assert.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
+import nl.tudelft.otsim.GeoObjects.Vertex;
+
 import org.junit.Test;
 
 /**
@@ -14,6 +16,9 @@ import org.junit.Test;
  */
 public class PlanarTest {
 
+	/**
+	 * Test parser for String[] to Point2D.Double[]
+	 */
 	@SuppressWarnings("static-method")
 	@Test
 	public void testCoordinatesToPointsStringArray() {
@@ -33,6 +38,9 @@ public class PlanarTest {
 		Planar.coordinatesToPoints(in3);
 	}
 
+	/**
+	 * Test slicing of String[] and parsing to Point2D.Double[]
+	 */
 	@SuppressWarnings("static-method")
 	@Test
 	public void testCoordinatesToPointsStringArrayIntInt() {
@@ -55,6 +63,9 @@ public class PlanarTest {
 		}
 	}
 
+	/**
+	 * Test fixRadix
+	 */
 	@SuppressWarnings("static-method")
 	@Test
 	public void testFixRadix() {
@@ -64,9 +75,24 @@ public class PlanarTest {
 		assertEquals("Only first comma should be replaced", Planar.fixRadix(in2), "123.456,78");
 	}
 
+	/**
+	 * Test computation of the length of an ArrayList<Vertex>
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testLength() {
-		fail("Not yet implemented");
+		ArrayList<Vertex> in = new ArrayList<Vertex> ();
+		assertEquals("empty list has effective length of 0 (this is actually debatable)", 0, Planar.length(in), 0.000001);
+		in.add(new Vertex(10, 20, 30));
+		assertEquals("List of one vertex has effective length of 0", 0, Planar.length(in), 0.000001);
+		in.add(new Vertex(10, 20, 30));
+		assertEquals("List of two identical vertices has effective length of 0", 0, Planar.length(in), 0.000001);
+		in.remove(1);
+		assertEquals("check remove op", 1, in.size());
+		in.add(new Vertex(110, 220, 330));
+		assertEquals("Length of two-vertex list", Math.sqrt(100 * 100 + 200 * 200 + 300 * 300), Planar.length(in), 0.0001);
+		in.add(new Vertex(10, 20, 30));
+		assertEquals("Length of three-vertex list", 2 * Math.sqrt(100 * 100 + 200 * 200 + 300 * 300), Planar.length(in), 0.0001);
 	}
 
 	@Test
