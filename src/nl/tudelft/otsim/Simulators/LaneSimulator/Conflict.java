@@ -82,7 +82,7 @@ public class Conflict {
      * @param yLane Lane without priority.
      * @return Merge conflict, <tt>null</tt> if lanes do not intersect.
      */
-    protected static Conflict createMerge(Lane pLane, Lane yLane) {
+    private static Conflict createMerge(Lane pLane, Lane yLane) {
         coord intersect;
         if ((pLane.x[pLane.x.length - 1] == yLane.x[yLane.x.length - 1]) &&
                 (pLane.y[pLane.y.length - 1] == yLane.y[yLane.y.length - 1])) // equal end coordinates
