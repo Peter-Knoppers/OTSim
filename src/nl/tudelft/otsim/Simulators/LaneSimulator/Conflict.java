@@ -69,8 +69,9 @@ public class Conflict {
      * @param pLane Lane with priority.
      * @param yLane Lane without priority.
      * @return Merge conflict, <tt>null</tt> if lanes do not intersect.
+     * @throws Exception 
      */
-    public static Conflict createMerge(Lane mLane, Lane pLane, Lane yLane) {
+    public static Conflict createMerge(Lane mLane, Lane pLane, Lane yLane) throws Exception {
         mLane.addMergeLane(pLane);
         mLane.addMergeLane(yLane);
         return createMerge(pLane, yLane);
@@ -81,8 +82,9 @@ public class Conflict {
      * @param pLane Lane with priority.
      * @param yLane Lane without priority.
      * @return Merge conflict, <tt>null</tt> if lanes do not intersect.
+     * @throws Exception 
      */
-    private static Conflict createMerge(Lane pLane, Lane yLane) {
+    private static Conflict createMerge(Lane pLane, Lane yLane) throws Exception {
         coord intersect;
         if ((pLane.x[pLane.x.length - 1] == yLane.x[yLane.x.length - 1]) &&
                 (pLane.y[pLane.y.length - 1] == yLane.y[yLane.y.length - 1])) // equal end coordinates
@@ -90,7 +92,7 @@ public class Conflict {
         else	// find intersection
             intersect = intersect(pLane, yLane);
         if (intersect == null)
-            return null;
+            throw new Exception("Merging lanes " + pLane.id + " and " + yLane.id + " do not intersect");
         coord[] clearance = findClearanceSpace(pLane, yLane, intersect, false);
         // Horrible workaround for cases where findCLearanceSpace fails follows
         double saveD_Conf = D_CONF;
