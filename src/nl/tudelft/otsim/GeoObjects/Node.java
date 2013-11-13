@@ -1710,13 +1710,10 @@ public class Node extends Vertex implements XML_IO {
 					PriorityConflict priorityConflict = null;
 					conflictType cType = null;
 
-					// if these links have the same point of destination it is a merge
-					if (link.getToNode_r().getPoint().equals(compareToLink.getToNode_r().getPoint()))
-						cType =  conflictType.MERGE;
 					// if these links leave from the same point it is a merge
-					else if (link.getFromNode_r().getPoint().equals(compareToLink.getFromNode_r().getPoint()))
+					if (link.getFromNode_r().getPoint().equals(compareToLink.getFromNode_r().getPoint()))
 						cType =  conflictType.SPLIT;
-					else {
+/*					else {
 						// Determine if there is a conflict area
 						for (CrossSectionObject csoA : link.getCrossSections_r().get(0).getCrossSectionElementList_r().get(0).getCrossSectionObjects(Lane.class)) {
 							for (CrossSectionObject csoB : compareToLink.getCrossSections_r().get(0).getCrossSectionElementList_r().get(0).getCrossSectionObjects(Lane.class)) {									
@@ -1731,18 +1728,23 @@ public class Node extends Vertex implements XML_IO {
 									Point2D.Double pOutIn = getConflictIntersectionPoint(laneA.getLaneVerticesInner(), laneB.getLaneVerticesInner());
 									Point2D.Double pOutOut = getConflictIntersectionPoint(laneA.getLaneVerticesInner(), laneB.getLaneVerticesInner());
 									// if there is no intersection there is no conflict
-									if ((pInIn != null) || (pInOut != null) || (pOutIn != null) || (pOutOut != null))
-										cType =  conflictType.CROSSING;
+									// if these links have the same point of destination it is a merge
+									if (link.getToNode_r().getPoint().equals(compareToLink.getToNode_r().getPoint()))
+										if (laneA.getDown().get(0).equals(laneB.getDown().get(0)))
+											cType =  conflictType.MERGE;
+									else if ((pInIn != null) || (pInOut != null) || (pOutIn != null) || (pOutOut != null))
+										cType = conflictType.CROSSING;
 								}
 							}
 						}
-					}
+					}*/
 					// After determining the type of conflict, the priority rules are applied (traffic from the right has priority)
 					for (CrossSectionObject csoA : link.getCrossSections_r().get(0).getCrossSectionElementList_r().get(0).getCrossSectionObjects(Lane.class)) {
 						for (CrossSectionObject csoB : compareToLink.getCrossSections_r().get(0).getCrossSectionElementList_r().get(0).getCrossSectionObjects(Lane.class)) {									
 							if (null == csoA)
 								System.err.println("fixLinkConnections: skipping null lane");
 							else {
+								cType = null;
 								Lane laneA = (Lane) csoA;
 								Lane laneB = (Lane) csoB;
 								Lane priorityLane;// = null;//new Lane();
@@ -1829,6 +1831,12 @@ public class Node extends Vertex implements XML_IO {
 								Point2D.Double pOutIn = getConflictIntersectionPoint(laneA.getLaneVerticesInner(), laneB.getLaneVerticesInner());
 								Point2D.Double pOutOut = getConflictIntersectionPoint(laneA.getLaneVerticesInner(), laneB.getLaneVerticesInner());
 								// determine the stopLines of the incoming Link
+								if (link.getToNode_r().getPoint().equals(compareToLink.getToNode_r().getPoint()))
+									if (laneA.getDown().get(0).equals(laneB.getDown().get(0)))
+										cType =  conflictType.MERGE;
+									else if ((pInIn != null) || (pInOut != null) || (pOutIn != null) || (pOutOut != null))
+										cType = conflictType.CROSSING;
+								
 								Double cX = null;
 								Double cY = null;
 								if (pInIn != null) {
