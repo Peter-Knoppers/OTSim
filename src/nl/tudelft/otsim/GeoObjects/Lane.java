@@ -550,5 +550,42 @@ public class Lane extends CrossSectionObject {
 		graphicsPanel.setColor(Color.WHITE);
 		graphicsPanel.drawString(String.format("%d", id), textPoint);
 	}
+
+	/**
+	 * Export a this Lane.
+	 * @return String; textual description of this Lane
+	 */
+	public String export() {
+		String result = String.format("LaneData\tlaneID:\t%d", getID());
+
+		for (Integer laneID : getUpLaneIDs())				
+			result += String.format("\tup:\t%d", laneID); 
+		for (Integer laneID : getDownLaneIDs())
+			result += String.format("\tdown:\t%d", laneID); 
+		if (getCrossingYieldToLaneList() != null)  {
+			for (Lane yLane : getCrossingYieldToLaneList())  {
+				result += String.format("\tcrossingYieldTo:\t%d", yLane.getID()); 
+			}
+		}
+		if (getMergingYieldToLaneList() != null)  {
+			for (Lane yLane : getMergingYieldToLaneList())  {
+				result += String.format("\tmergingYieldTo:\t%d", yLane.getID()); 
+			}
+		}
+		if (getLeft() != null)
+			result += String.format("\tleft:\t%d", getLeft().getID()); 
+		if (getRight() != null)
+			result += String.format("\tright:\t%d", getRight().getID()); 
+		if (isGoLeft())
+			result += String.format("\tgoLeft:\t%s", isGoLeft()); 
+		if (isGoRight())
+			result += String.format("\tgoRight:\t%s", isGoRight()); 
+		if (getOrigin() >= 0)
+			result += String.format("\torigin:\t%d", getOrigin()); 
+		if (getDestination() >= 0)
+			result += String.format("\tdestination:\t%d", getDestination()); 
+		result += "\n";
+		return result;
+	}
     
 }

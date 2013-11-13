@@ -1399,37 +1399,8 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 		}
    		result += String.format("Section LaneData\n");
  
-		for(Lane lane : laneList) {
-			result += String.format("LaneData\tlaneID:\t%d", lane.getID());
-
-			for (Integer laneID : lane.getUpLaneIDs())				
-				result += String.format("\tup:\t%d", laneID); 
-			for (Integer laneID : lane.getDownLaneIDs())
-				result += String.format("\tdown:\t%d", laneID); 
-			if (lane.getCrossingYieldToLaneList() != null)  {
-				for (Lane yLane : lane.getCrossingYieldToLaneList())  {
-					result += String.format("\tcrossingYieldTo:\t%d", yLane.getID()); 
-				}
-			}
-			if (lane.getMergingYieldToLaneList() != null)  {
-				for (Lane yLane : lane.getMergingYieldToLaneList())  {
-					result += String.format("\tmergingYieldTo:\t%d", yLane.getID()); 
-				}
-			}
-			if (lane.getLeft() != null)
-				result += String.format("\tleft:\t%d", lane.getLeft().getID()); 
-			if (lane.getRight() != null)
-				result += String.format("\tright:\t%d", lane.getRight().getID()); 
-			if (lane.isGoLeft())
-				result += String.format("\tgoLeft:\t%s", lane.isGoLeft()); 
-			if (lane.isGoRight())
-				result += String.format("\tgoRight:\t%s", lane.isGoRight()); 
-			if (lane.getOrigin() >= 0)
-				result += String.format("\torigin:\t%d", lane.getOrigin()); 
-			if (lane.getDestination() >= 0)
-				result += String.format("\tdestination:\t%d", lane.getDestination()); 
-			result += "\n";
-		}
+		for(Lane lane : laneList)
+			result += lane.export();
    		result += String.format(Main.locale, "Section TrafficDemand\n");
    		int maxMicroZones = getMicroZoneList().size(); 
    		result += String.format(Main.locale, "NumberOfZones:\t%s\n", maxMicroZones);
