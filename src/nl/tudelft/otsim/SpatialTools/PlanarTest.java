@@ -7,21 +7,61 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
+/**
+ * Test the methods in the Planar class
+ * 
+ * @author Peter Knoppers
+ */
 public class PlanarTest {
 
+	@SuppressWarnings("static-method")
 	@Test
 	public void testCoordinatesToPointsStringArray() {
-		fail("Not yet implemented");
+		String[] in = {"123,45", "678.90", "12", "34"};
+		Point2D.Double[] result = Planar.coordinatesToPoints(in);
+		assertEquals("Length of result should be 2", 2, result.length);
+		assertEquals("First point of result", result[0].distance(new Point2D.Double(123.45, 678.90)), 0, 0.00001);
+		assertEquals("Second point of result", result[1].distance(new Point2D.Double(12, 34)), 0, 0.00001);
+		String[] in2 = {"1234a", "4567"};
+		try {
+			Planar.coordinatesToPoints(in2);
+			fail("Should have thrown a NumberFormatException");
+		} catch (NumberFormatException e) {
+			; // ignore
+		}
+		String[] in3 = {};
+		Planar.coordinatesToPoints(in3);
 	}
 
+	@SuppressWarnings("static-method")
 	@Test
 	public void testCoordinatesToPointsStringArrayIntInt() {
-		fail("Not yet implemented");
+		String[] in = {"123,45", "678.90", "12", "34", "56", "78"};
+		Point2D.Double[] result = Planar.coordinatesToPoints(in, 1, 5);
+		assertEquals("Length of result should be 2", 2, result.length);
+		assertEquals("First point of result", result[0].distance(new Point2D.Double(678.90, 12)), 0, 0.00001);
+		assertEquals("Second point of result", result[1].distance(new Point2D.Double(34, 56)), 0, 0.00001);
+		try {
+			Planar.coordinatesToPoints(in, 1, 7);
+			fail("Should have thrown an exception (array index out of bounds)");
+		} catch (Exception e) {
+			; // ignore
+		}
+		try {
+			Planar.coordinatesToPoints(in, -1, 1);
+			fail("Should have thrown an exception (array index out of bounds)");
+		} catch (Exception e) {
+			; // ignore
+		}
 	}
 
+	@SuppressWarnings("static-method")
 	@Test
 	public void testFixRadix() {
-		fail("Not yet implemented");
+		String in = "123.45abc";
+		assertEquals("No comma in input should return unchanged input", Planar.fixRadix(in), in);
+		String in2 = "123,456,78";
+		assertEquals("Only first comma should be replaced", Planar.fixRadix(in2), "123.456,78");
 	}
 
 	@Test

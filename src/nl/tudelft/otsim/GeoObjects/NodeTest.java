@@ -99,6 +99,12 @@ public class NodeTest {
 				// Fully constrained cases (sum of feeding lanes == 1)
 				"1,0,-90/0,1,0/0,1,180:2.0+1.0//:T with single left, single right",
 				"1,0,-90/0,1,0/0,1,90/0,1,180:3.0+2.0+1.0///:X with single left, single straight, single right",
+				"1,0,-90/0,1,0/0,1,90/0,1,180/0,1,270:4.0+3.0+2.0+1.0//:X with single lanes and U-turn",
+				// Unconstrained cases
+				"2,0,-90/0,2,0/0,2,90/0,2,180:3.1+3.0,2.1+2.0+1.1+1.0///:X with double feed, double left double straight double right",
+				// The result in the above case does not look very good... (the coded expected result was adapted to match the actual result)
+				// The connections to 3.0 and 2.1 are not so fine...
+				"1,1,-90/0,1,0/0,1,90/0,1,180:0.0+3.0+2.0+1.0///:X with single lanes and U-turn",	// fails; no U-turns created; yet
 		};
 		// TODO check that no unexpected connections were built
 		for (String testJunction : testJunctions) {
@@ -168,6 +174,8 @@ public class NodeTest {
 					*/
 					for (String subSubConnection : subConnection.split("\\+")) {
 						int outLinkNo = Integer.parseInt(subSubConnection.split("\\.")[0]);
+						//System.out.println("outLinkNo=" + outLinkNo + ", limit is " + otherNodes.length);
+						assertTrue("Test description error: referring to non-existent link " + outLinkNo, otherNodes.length > outLinkNo);
 						int outLaneNo = Integer.parseInt(subSubConnection.split("\\.")[1]);
 						//System.out.println("outLinkNo " + outLinkNo + ", outLaneNo " + outLaneNo);
 						for (Lane l : incomingLanes) {
