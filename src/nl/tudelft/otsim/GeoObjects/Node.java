@@ -765,6 +765,8 @@ public class Node extends Vertex implements XML_IO {
 				else if ( (angleDif > sharpLeft || angleDif < uTurnRight) && linkRank > 0) {
 					index = 6;	
 					UTurn = true;
+					if (angleDif != 0)
+						index = 6;
 				}
 				
 				this.turnIndex= index;
@@ -845,434 +847,6 @@ public class Node extends Vertex implements XML_IO {
 		return getLinks();
 	}
 	
-	
-    /**
-     * Connect the {@link Link Links} at this Node.
-     */
-    public void fixLinkConnections_old() {
-    	
-    	ArrayList<DirectionalLink> dlList = getLinksFromJunction();
-		int inCount = incomingCount();
-		int outCount = leavingCount();
-
-		// Create junction expansion
-		// At junctions every entering link and every exiting link receives a new node
-		// This new node replaces the original one, and gets the coordinates of the driving lane
-		// At the junctions, links are created by generating links between the new node 
-		// These links receive  a new crossSection, and one crossSection element: the road with road markings and
-		// finally driving lanes
-		// FIXME: assumes that all turns are permitted (should be dependent on road markings, signs, etc.
-		// TODO Later on: these turning lanes will only be generated if turning arrows show if a turn exists
-
-		ArrayList<Link> newLinks = new ArrayList<Link>();
-		if ((inCount >= 1) && (outCount >= 1) && (inCount + outCount > 2)) {
-			// Expand nodes and create junction connecting links/lanes (connectors)
-			int incomingArm = -1; // index of the incoming arm: start at zero
-			for (DirectionalLink incoming : dlList) {
-				incomingArm++;
-				if (! incoming.incoming)
-					continue;
-				// for the incoming lanes: detect the turning movements and create turning lanes
-				// if turning arrows are provided: connect by that information
-				// else an automated search
-				// automated search: uses some logic to define turning movements from one lane to another 
-				// select the lanes from the incoming link into the junction
-	    		int size = incoming.link.getCrossSections_r().size();
-	    		// collect all entering lanes from one link
-	    		ArrayList<Lane> inLanesAll = incoming.link.getCrossSections_r().get(size - 1).collectLanesReversed();
-	    		
-	            //step through the leaving links and collect information for all leaving lanes
-	    		// the OutLaneInfo object is created to collect that information and use it later on
-	    		ArrayList<OutLaneInfo> outLanesAndLinkList = new ArrayList<OutLaneInfo>() ;
-	    		// determine the angle between the entering and leaving link
-	    		// the angle is represented in radians. Starting at west (0) and going anti-clockwise.
-	    		// So north is around 1.5, east = pi, south = 4.5
-	    		// GT should be: So north is around 4.5, east = pi, south = 1.5
-	    		int linkRank = 1;  // rank of the leaving links from a certain incoming arm in anti-clockwise order
-				for (int arm = 1; arm < dlList.size(); arm++) {
-	    			int itel = arm + incomingArm;
-	    			if (arm + incomingArm > dlList.size() - 1)
-	    				itel  = arm + incomingArm - dlList.size();
-	    			DirectionalLink leaving = dlList.get(itel);
-	    			// select all leaving lanes from this junction
-	    			if (! leaving.incoming && ! incoming.link.getFromNode_r().equals(leaving.link.getToNode_r())) {
-	    				double angleDif;
-            			if (incoming.angle > leaving.angle)
-            				angleDif = 2 * Math.PI - incoming.angle + leaving.angle ;
-            			else
-            				angleDif = leaving.angle - incoming.angle;
-            			// only if it is not a U-turn!
-            			if (Math.abs(angleDif) >= 0.0)  {
-            				if ( angleDif > 0.75 * Math.PI  && angleDif < 1.25 * Math.PI && linkRank == 1)
-            					linkRank = 2;
-            				if ( angleDif > 1.25 * Math.PI  && linkRank < 3)
-            					linkRank = 3;
-		    	    		CrossSection outCs = leaving.link.getCrossSections_r().get(0);
-	    	    			// collect information on the index of the leaving link, its lanes and 
-	    	    			// the angle with the entering lane
-		    	    		for (Lane lane : outCs.collectLanesReversed())
-		    	            	outLanesAndLinkList.add(new OutLaneInfo(lane, angleDif, linkRank));
-		    	    		// increase the leaving link index
-		    	    		linkRank++;
-            			}
-            			else
-            				System.out.println("U-turn");
-	    			}
-	    		}
-				
-				//There are situations with two incoming links and one outgoing link (U-turn to incoming)
-				//In this case no junction is constructed
-				if (outLanesAndLinkList.size() > 0) {
-            		int outLaneIndex = 0;
-            		double shareOfOutLanes = 0;
-            		double shareOfInLanes = 0;
-            		//shareOfOutLanes =  shareOfOutLanes + outLanesRoad.get(indexOutlane) / outLanesAll.size();
-            		ArrayList<RoadMarkerAlong> rmaList = new ArrayList<RoadMarkerAlong>();
-		    		int turnCount = 0;
-		    		// loop through the lanes of the entering link
-		    		// sometimes a lane needs to be connected more than once (more turning movements per lane)
-		    		// in that case the index is reset minus 1
-            		for (int indexInlane = 0; indexInlane < inLanesAll.size(); indexInlane++) {
-			    		Lane currentInLane = inLanesAll.get(indexInlane);
-			    		Lane currentOutLane = null;
-						// if a lane has got no stopLine (no priority defined) an "empty"  stopLine is added
-			    		if (currentInLane.getStopLine() == null) {
-			    			StopLine stopLine = new StopLine(currentInLane.getCse(), StopLine.NOSTOPLINE,-4.0, 2.0, 0.0); 
-			    			currentInLane.setStopLine(stopLine);
-			    		}
-            			// if turning movements are defined, the new turning lanes are constructed accordingly
-            			if (currentInLane.getTurnArrow().getOutLinkNumbers() != null)  {
-            				// retrieve the index of the outgoing links (one by one)
-            				int outLinkRank = inLanesAll.get(indexInlane).getTurnArrow().getOutLinkNumbers()[turnCount];
-            				// we look for the connecting outLane by looping through all outlanes at this node
-            				OutLaneInfo currentOutlaneInfo = outLanesAndLinkList.get(outLaneIndex);
-            				// connect to the lane of a leaving arm
-            				// find the index of the outgoing link first
-							while (outLinkRank != currentOutlaneInfo.getLinkRank()) {
-								if (outLaneIndex >= 0) {
-									if (outLinkRank < currentOutlaneInfo.getLinkRank())
-										outLaneIndex--;
-									else
-										outLaneIndex++;
-								}
-								// retrieve the index of the current outlane
-								if (outLaneIndex >= outLanesAndLinkList.size())
-									break;
-								if (outLaneIndex < 0)
-									System.out.println("strange: less than zero");
-								currentOutlaneInfo = outLanesAndLinkList.get(outLaneIndex);
-							}
-							// for an inlane, all outlanes of the corresponding outLink are checked:
-							while (outLinkRank == currentOutlaneInfo.getLinkRank() && outLaneIndex < outLanesAndLinkList.size()) {
-								// next line away????
-								currentOutlaneInfo = outLanesAndLinkList.get(outLaneIndex);
-								int inlaneNext = 1;
-								boolean connectOnlyOneLane = false;
-								while (indexInlane + inlaneNext < inLanesAll.size()) {										
-									if (inLanesAll.get(indexInlane + inlaneNext).getTurnArrow().getOutLinkNumbers()[0] == outLinkRank)  {
-										connectOnlyOneLane = true;
-										break;
-									}
-									inlaneNext++;
-								}
-
-								if (currentOutlaneInfo.inLane == null && outLinkRank == currentOutlaneInfo.getLinkRank())  {
-									currentOutlaneInfo.setInLane(currentInLane);
-									if (connectOnlyOneLane)	
-										break;
-								}
-								outLaneIndex++;
-							}
-							if (currentOutlaneInfo.getInLane() == null)
-								System.out.println("strange: no inLane");
-
-							// connect the inlane to the outlane
-							// later on we will loop through the outLanesAndLinkList to generate new junction connectors 
-							// but first continue to inspect the other in lanes and their turns!
-            				// if more than one turning movement from an incoming lane?
-            				// keep this lane at the next loop (until all turns are dealt with)
-            				turnCount++; 
-            				if (turnCount < inLanesAll.get(indexInlane).getTurnArrow().getOutLinkNumbers().length)  {
-            					indexInlane--;
-            					outLaneIndex = 0;
-            				} else // go to the next inLane and reset turncount to zero
-            					turnCount = 0;
-            				outLaneIndex = 0;
-            			}
-            			
-			    		// else if no turning movements are defined, construct the movements with some simple rules
-            			else if (currentInLane.getTurnArrow().getOutLinkNumbers() == null) {
-            				OutLaneInfo currentOutlaneInfo = outLanesAndLinkList.get(outLaneIndex);  
-            				currentOutLane = currentOutlaneInfo.getLane();
-	            			// compute share of outlanes per leaving CrossSectionElement
-		            		// only if no turn movement definition is available
-	            			if (indexInlane == 0)
-	            				// share of the number of outlanes of the first leaving link as part of all outgoing lanes
-	            				shareOfOutLanes = shareOfOutLanes + (double) currentOutLane.getCse().getCrossSectionObjects(Lane.class).size() / outLanesAndLinkList.size();
-	            			else if (indexInlane > 0) {
-	            				// only if shifting to a new leaving link: the current lane is part of the next arm, 
-	            				// than the number of outlanes from that link is added to the shareOfOutLanes
-	            				if (outLaneIndex>0)
-	            					if (! currentOutLane.getCse().getCrossSection().getLink().equals(outLanesAndLinkList.
-	            							get(outLaneIndex - 1).getLane().getCse().getCrossSection().getLink()) )	
-	            						shareOfOutLanes = shareOfOutLanes + (double) currentOutLane.getCse().getCrossSectionObjects(Lane.class).size() / outLanesAndLinkList.size();		            			
-		            		}
-	            			// the share of this and previous inLanes to the total number of inLanes 
-	            			shareOfInLanes = (double) (indexInlane + 1) / inLanesAll.size();
-	            			
-	            			// only in case there are more outgoing lanes than incoming lanes it becomes a puzzle....
-							if (inLanesAll.size() <= outLanesAndLinkList.size()) {
-								boolean gotoNextOutlink = false; // go to the next Lane??
-								
-								// yes, when .. 
-								if (shareOfInLanes >= shareOfOutLanes && currentOutlaneInfo.getAngleDifference() < 0.75 * Math.PI)
-									gotoNextOutlink = true;
-								else if (shareOfInLanes > shareOfOutLanes  && currentOutlaneInfo.getAngleDifference() <= 1.25 * Math.PI)
-									gotoNextOutlink = true;		
-								if (gotoNextOutlink && shareOfOutLanes < 1)
-									indexInlane--;  // in this case more outgoing lanes are being connected to an incoming lane
-								if (gotoNextOutlink) {
-									OutLaneInfo exploreOutlaneInfo = outLanesAndLinkList.get(outLaneIndex); 
-									int outLinkRank = exploreOutlaneInfo.getLinkRank();
-									while (outLinkRank == exploreOutlaneInfo.getLinkRank()) {
-										outLaneIndex++;
-										if (outLaneIndex >= outLanesAndLinkList.size()) {
-											System.err.format("indexOutLane (%d) is not in range of outLanesAndLinkList (0..%d)\r\n", outLaneIndex, outLanesAndLinkList.size() - 1);
-											break;
-										}
-										exploreOutlaneInfo = outLanesAndLinkList.get(outLaneIndex);
-									}
-									outLaneIndex--;
-								}
-								outLaneIndex++;
-								
-							}
-							 // strange junction
-							if (inLanesAll.size() > outLanesAndLinkList.size())
-								if (((double) (indexInlane + 1) / inLanesAll.size() > shareOfOutLanes) && (shareOfOutLanes < 1)) 
-									outLaneIndex++;  // in case there are more outlanes connected to one incoming lane
-            				currentOutlaneInfo.setInLane(currentInLane);
-            				if (outLaneIndex > outLanesAndLinkList.size() - 1) 
-            					break;
-	            		}	
-						// finished after all outlanes have passed!
-            		}
-            			
-            		outLaneIndex = 0;
-					ArrayList<Lane> newLanes = new ArrayList<Lane>();
-					Lane newLane = null;
-					// when all incoming lanes are "inspected", the link and lane connectors are created
-					// for every connection between an incoming and leaving arm, one link is created
-    				for (OutLaneInfo outLaneInfo : outLanesAndLinkList) {
-	    				Lane currentOutLane = outLaneInfo.getLane();
-	    				Lane currentInLane = outLaneInfo.getInLane();
-	    				boolean sameOutLink = false;
-	    				if (!(currentInLane == null) && !(currentOutLane == null) ) {
-	    				//create a new lane that connect this incoming lane and this leaving lane		
-	    					if (currentInLane.getCse().getCrossSection().getLink().getToNode_r().getNodeID() == 6649)	
-	    						System.out.println("test vertices lanes");
-		    				boolean addLink = false;
-		    				// add a new link if...	
-		    				if (outLaneIndex > 0)
-		        				if (outLaneInfo.getLinkRank() > outLanesAndLinkList.get(outLaneIndex-1).getLinkRank()) {
-		    						addLink = true;
-		    						sameOutLink = false;
-		        				}
-		        				else
-		        					sameOutLink = true;
-		    				
-		    				if (addLink) {
-		    			    	if (newLanes.size() == 0) 
-		    			    		System.out.println("strange");
-	            				Link newLink = createJunctionLink(incoming, newLanes, rmaList);
-	            				newLinks.add(newLink);
-			            		rmaList = new ArrayList<RoadMarkerAlong>();
-								newLanes = new ArrayList<Lane>();
-								addLink = false;
-								newLanes.clear();
-	            			}
-		    				boolean createCurve = false;
-		    				Lane oldLane = null;
-		    				if (newLanes.isEmpty())
-		    					createCurve = true;
-		    				if (newLane != null)
-		    					oldLane = new Lane(newLane);
-							newLane = newLaneConnection(currentInLane, currentOutLane, createCurve, oldLane, sameOutLink);	
-							if (newLane.getID() == 17)
-								System.out.println("Created lane " + newLane.getID());
-		    				newLanes.add(0, newLane);
-	    				}
-	    				if (outLaneIndex == outLanesAndLinkList.size() - 1) {
-	    			    	if (newLanes.size() == 0) 
-	    			    		System.out.println("strange");
-            				Link newLink = createJunctionLink(incoming, newLanes, rmaList);
-            				newLinks.add(newLink);
-	    				}
-	    				outLaneIndex++;	
-    				}
-				}
-        	}	
-			// revisit the new Links to investigate conflicting lanes (merge, split, cross)
-			for (Link link : newLinks) {
-				for (Link compareToLink : newLinks) {
-					if (compareToLink == link)
-						continue;
-					if (compareToLink.getName_r().compareTo(link.getName_r()) <= 0)
-						continue;
-					PriorityConflict priorityConflict = null;
-					conflictType cType;
-					if (link.getToNode_r().getPoint().equals(compareToLink.getToNode_r().getPoint()))
-						cType =  conflictType.MERGE;
-					else if (link.getFromNode_r().getPoint().equals(compareToLink.getFromNode_r().getPoint()))
-						cType =  conflictType.SPLIT;
-					else
-						cType =  conflictType.CROSSING;
-					for (CrossSectionObject csoA : link.getCrossSections_r().get(0).getCrossSectionElementList_r().get(0).getCrossSectionObjects(Lane.class)) {
-						for (CrossSectionObject csoB : compareToLink.getCrossSections_r().get(0).getCrossSectionElementList_r().get(0).getCrossSectionObjects(Lane.class)) {									
-							if (null == csoA)
-								System.err.println("fixLinkConnections: skipping null lane");
-							else {
-								if (conflictType.SPLIT == cType)
-									continue;	// take care of the easy cases first
-								Lane laneA = (Lane) csoA;
-								Lane laneB = (Lane) csoB;
-								if (13 == laneA.getID())
-									System.out.println("laneA is " + laneA.getID());
-								//if (17 == laneB.getID())
-								//	System.out.println("laneB is " + laneB.getID());
-								// we only visit pairs of lanes once
-								// Peter believes the above comment might be false!
-								// identify yield and priority lane
-								Lane pLane;// = null;//new Lane();
-								Lane yLane;// = null;//new Lane();										
-
-								Lane upA = laneA.getUp().get(0);
-								Lane upB = laneB.getUp().get(0);
-								Lane downA = laneA.getDown().get(0);
-								Lane downB = laneB.getDown().get(0);
-								Link linkUpA = upA.getCse().getCrossSection().getLink();
-								Link linkUpB = upB.getCse().getCrossSection().getLink();
-								Link linkDownA = downA.getCse().getCrossSection().getLink();
-								Link linkDownB = downB.getCse().getCrossSection().getLink();
-								boolean yieldA = true;
-								boolean yieldB = true;
-								
-								if ((upA.getStopLine() != null) && (upA.getStopLine().getType() == StopLine.PRIORITYSTOPLINE))
-									yieldA = false;								
-								if ((upB.getStopLine() != null) && (upB.getStopLine().getType() == StopLine.PRIORITYSTOPLINE))
-									yieldB = false;
-								if (yieldA && (! yieldB)) {
-									yLane = laneA;
-									pLane = laneB;
-								} else if ((! yieldA) && yieldB) {
-									yLane = laneB;
-									pLane = laneA;
-								} else {	// Stop lines did not resolve this conflict.
-									// Apply traffic law priority rules
-									// could be on a junction with no rules or two opposing roads (both priority or yield)
-									double angleIncomingA = Double.NaN;
-									double angleIncomingB = Double.NaN;
-									double angleLeavingA = Double.NaN;
-									double angleLeavingB = Double.NaN;
-									for (DirectionalLink incoming : dlList) {
-										if (incoming.incoming) {
-											if (incoming.link.equals(linkUpA))
-												angleIncomingA = incoming.angle;
-											else if (incoming.link.equals(linkUpB))
-												angleIncomingB = incoming.angle;	
-										} else {
-											if (incoming.link.equals(linkDownA))
-												angleLeavingA = incoming.angle;
-											else if (incoming.link.equals(linkDownB))
-												angleLeavingB = incoming.angle;
-										}
-									}
-									double angleDif;
-			            			if (angleIncomingA > angleIncomingB)
-			            				angleDif = 2 * Math.PI - angleIncomingA + angleIncomingB;
-			            			else
-			            				angleDif = angleIncomingA - angleIncomingB;
-									if (angleDif < 0.75 * Math.PI) {	// lane B comes from right
-										yLane = laneA;
-										pLane = laneB;
-									} else if (angleDif > 1.25 * Math.PI) {	// lane B comes from left
-										pLane = laneA;
-										yLane = laneB;
-									} else { // Opposing flows: turning movement determines priority rules
-										double turnAngleA;
-										double turnAngleB;
-				            			if (angleIncomingA > angleLeavingA)
-				            				turnAngleA = 2 * Math.PI - angleIncomingA + angleLeavingA;
-				            			else
-				            				turnAngleA = angleIncomingA - angleLeavingA;
-				            			if (angleIncomingB > angleLeavingB)
-				            				turnAngleB = 2 * Math.PI - angleIncomingB + angleLeavingB;
-				            			else
-				            				turnAngleB = angleIncomingB - angleLeavingB;
-				            			// turn with smallest angle has priority
-				            			if (turnAngleA < turnAngleB) {
-											pLane = laneA;
-											yLane = laneB;
-				            			} else {
-											yLane = laneA;
-											pLane = laneB;
-				            			}	
-									}
-								}
-								// Determine location at the lanes at the start of the conflict Area:
-								Point2D.Double pInIn = getConflictIntersectionPoint(yLane.getLaneVerticesInner(), pLane.getLaneVerticesInner());
-								Point2D.Double pInOut = getConflictIntersectionPoint(yLane.getLaneVerticesInner(), pLane.getLaneVerticesOuter());
-								Point2D.Double pOutIn = getConflictIntersectionPoint(yLane.getLaneVerticesOuter(), pLane.getLaneVerticesInner());
-								Point2D.Double pOutOut = getConflictIntersectionPoint(yLane.getLaneVerticesOuter(), pLane.getLaneVerticesOuter());
-								if ((conflictType.MERGE == cType) || (pInIn != null) || (pInOut != null) || (pOutIn != null) || (pOutOut != null)) {
-									Polygon cArea = new Polygon();
-									// determine the stopLines of the incoming Link
-									StopLine stopLine = yLane.getUp().get(0).getStopLine();
-									Double cX = null;
-									Double cY = null;
-									if (pInIn != null) {
-										cX = pInIn.getX();
-										cY = pInIn.getY();
-										cArea.addPoint(cX.intValue(), cY.intValue());
-									}
-									if (pInOut != null) {
-										cX = pInOut.getX();
-										cY = pInOut.getY();
-										cArea.addPoint(cX.intValue(), cY.intValue());
-									}
-									if (pOutIn != null) {
-										cX = pOutIn.getX();
-										cY = pOutIn.getY();
-										cArea.addPoint(cX.intValue(), cY.intValue());
-									}
-									if (pOutOut != null) {	
-										cX = pOutOut.getX();
-										cY = pOutOut.getY();
-										cArea.addPoint(cX.intValue(), cY.intValue());
-									}
-									if (cType.equals(conflictType.MERGE)) {
-										System.out.println("Adding lane " + pLane.toString() + " to mergingYieldToList of " + yLane.toString());
-										yLane.addMergingYieldToLaneList(pLane);
-									} else if (cType.equals(conflictType.CROSSING))
-										yLane.addCrossingYieldToLaneList(pLane);
-									priorityConflict = new PriorityConflict(pLane, yLane, cType, cArea);
-									//  add conflict to the relevant stopLine 
-									if (stopLine == null)		
-										System.err.println("no Stopline created or found");
-									else
-										stopLine.addConflicts(priorityConflict);
-								} else {
-									System.out.println(String.format("Conflict of y%s and p%s at node %d has no intersection...", yLane.toString(), pLane.toString(), nodeID));
-								}
-							}
-						}
-					}
-				}
-			}
-			System.out.format("Adding %d links to network for node %s\n", newLinks.size(), name);
-		}
-    }
-     
     /**
      * Connect the {@link Link Links} at this Node.
      */
@@ -1336,7 +910,8 @@ public class Node extends Vertex implements XML_IO {
 				nextArm = incomingArm;	
 				int numberOfLeavingLanes = 0;
 				int numberOfIncomingArms = 1;
-				
+				int numberOfleavingArms = 0;
+				boolean isUturn = false;
 	    		for (int arm = 1; arm < dlList.size(); arm++) {
 	    			nextArm++;
 					// explore all links excluding the current incoming arm
@@ -1346,9 +921,11 @@ public class Node extends Vertex implements XML_IO {
 					double angleDif;
 					// if this is a leaving link:
 					if (leaving.incoming)
+						// determine if this link is from the opposite direction and if this is a real junction or not
 						numberOfIncomingArms++;
 					else {   					
 						//compute the angle in radians between the incoming and leaving link
+						numberOfleavingArms++;
 		    			if (incoming.angle > leaving.angle)
 	        				angleDif = 2 * Math.PI - incoming.angle + leaving.angle ;
 	        			else
@@ -1359,6 +936,7 @@ public class Node extends Vertex implements XML_IO {
 	    	    		OutLinkInfo outLink = new OutLinkInfo(outCs.collectLanesReversed(), angleDif, linkRank);
         				if (outLink.isUTurn()) {
             				if (! uTurnAllowed)  {
+            					isUturn = true;
         	    	    		continue;	            					
             				}
         				}
@@ -1370,10 +948,38 @@ public class Node extends Vertex implements XML_IO {
 					}	    			
 	    		}
 				
+	    		// determine if there is a real junction:
+	    		// in case of four arms with two incoming and two leaving links
+	    		// if there is a U-Turn it might be just a two link - two directions situation
+	    		nextArm = incomingArm;
+	    		boolean junction = false;
+	    		if (outLanesAndLinkList.size() > 0 && numberOfIncomingArms == 2 && numberOfleavingArms == 2) {
+	    			if (isUturn) {
+	    				for (int arm = 1; arm < dlList.size(); arm++) {
+	    	    			nextArm++;
+	    					// explore all links excluding the current incoming arm
+	    					if (nextArm >= dlList.size())
+	    						nextArm = 0;
+	    	    			DirectionalLink leaving = dlList.get(nextArm);
+	    	    			if (leaving.incoming) {
+	    	    				OutLinkInfo currentOutlinkInfo = outLanesAndLinkList.get(0);
+	    	    				if (currentOutlinkInfo.getOutLanes().get(0).getCse().getCrossSection().getLink().getToNode_r().equals(leaving.link.getFromNode_r()))
+	    	    					junction = false;
+	    	    			}
+	    				}
+	    			}
+	    			else 
+	    				junction = true;
+	    		}
+	    		// a junction requires at least three links and one leaving link
+	    		else if (outLanesAndLinkList.size() > 0 && (numberOfIncomingArms + outLanesAndLinkList.size()) > 2) {
+	    			junction = true;
+	    		}
+
 				int numberOfLeavingLinks = linkRank;
         		ArrayList<RoadMarkerAlong> rmaList = new ArrayList<RoadMarkerAlong>();
 				//  only if we do have a junction we perform step 2 and 3
-				if (outLanesAndLinkList.size() > 0 && (numberOfIncomingArms + outLanesAndLinkList.size()) > 2) {
+				if (junction) {
 					// STEP 2: determine the turning movements
 
 		    		// STEP 2A
@@ -1806,13 +1412,11 @@ public class Node extends Vertex implements XML_IO {
 								if (laneA.getUp().get(0).equals(laneB.getUp().get(0)))
 									cType =  conflictType.SPLIT;
 								//else if (link.getToNode_r().getPoint().equals(compareToLink.getToNode_r().getPoint())) 
-								if (laneA.getDown().get(0).equals(laneB.getDown().get(0)))
+								else if (laneA.getDown().get(0).equals(laneB.getDown().get(0)))
 									cType =  conflictType.MERGE;
 								else if ((pInIn != null) || (pInOut != null) || (pOutIn != null) || (pOutOut != null))
 									cType = conflictType.CROSSING;
-								// if these links leave from the same point it is a merge
-/*								if ((pInIn != null) || (pInOut != null) || (pOutIn != null) || (pOutOut != null))
-										cType = conflictType.CROSSING;*/
+
 								Double cX = null;
 								Double cY = null;
 								if (pInIn != null) {
