@@ -139,10 +139,12 @@ public class Model {
      */
     public void run(int n) {
         // Simulate n steps
+        int i = 0;
     	for (int nn = 0; (nn < n) && (t < period); nn++) {
             // Run on-board units, road-side units and controllers
             runUnits();
-
+    		System.out.println("test Run timesteps "+ t);
+    		i++;
             // Vehicle generation
             generating = true;
             for (Lane l : network)
@@ -256,18 +258,62 @@ public class Model {
      * units needs to aggregate data at t=period, that will not happen in the
      * main model loop.
      */
+    
+    
+    // GUUS has added some tests for computer time taken by "Control"
+    // see also Conflict - control()
+    public long rsuTime1 = 0;
+    public long rsuTime2 = 0;
+    public long rsuTime3 = 0;
+    public long rsuTime4 = 0;
+    public long rsuTime5 = 0;
+    public long rsuTime6 = 0;
+    public long beginTime = System.currentTimeMillis();
+    public long time = System.currentTimeMillis() - beginTime;
+    public long numberOfRSUCalls = 0;
+    public long numberOfRSU = 0;
     protected void runUnits() {
         // Run road-side units
-    	for (Lane l : network)
-    		for (RSU rsu : l.RSUs)
-    			rsu.run();
+    	int i = 0;
+		int j = 0;
+    	for (Lane l : network) {
+    		if (i > 100)  {
+    			time = System.currentTimeMillis() - beginTime;
+    			int aantal = j*100 + i;
+        		
+    			System.out.println("test network number of lanes passed " + aantal);
+    			System.out.println( " number of RSU's " + numberOfRSU);
+    			System.out.println("Total time RSU " + rsuTime1 + " number of RSU's calls " + numberOfRSUCalls);
+    			System.out.println("time RSU 2 " + rsuTime2 );
+    			System.out.println("time RSU 3 " + rsuTime3 );
+    			System.out.println("time RSU 4 " + rsuTime4 );
+
+    			System.out.println("total time " + time);
+    			i = 0;
+    			j++;
+    		}
+    		i++;
+    		for (RSU rsu : l.RSUs) {
+    			numberOfRSU++;
+        		rsu.run();
+    		}
+    	}
         // Run on-board units
-    	for (Vehicle v : vehicles)
-    		if (v.isEquipped())
+    	i = 0;
+    	for (Vehicle v : vehicles)  {
+    		if (v.isEquipped())  {
+        		System.out.println("test OBU" + i);
+        		i++;
     			v.OBU.run();
+    		}
+    	}
         // Run controllers
-    	for (Controller c : controllers)
+    	i = 0;
+    	for (Controller c : controllers)  {
+    		System.out.println("test Controller" + i);
+    		i++;
     		c.run();
+    	}
     }
 
     /** 

@@ -499,6 +499,7 @@ public class Conflict {
          */
         public Movable up() {
             // check whether upstream vehicle has not been deleted
+        	//System.out.println("Movable");
             if (!model.exists(up)) {
                 up = null;
                 control();
@@ -634,7 +635,8 @@ public class Conflict {
                             }
                         }
                         //System.out.println("isEmpty returns " + (rsus.isEmpty() ? "empty" : "not empty"));
-                        if ((! found) && (! rsus.isEmpty())) // next cross section with rsu(s)
+                        //Guus added one more test
+                        if ((! found) && (! rsus.isEmpty()) && (rsus.size() != 0)) // next cross section with rsu(s)
                             xRsu = rsus.get(0).x;
                     }
                 }
@@ -650,10 +652,15 @@ public class Conflict {
          * earliest, assuming a fixed speed equal to the current speed, is 
          * selected.
          */
+        
+
         @Override
         public void control() {
-        	if (marked)
+        	if (marked) {
         		return;
+        	}
+        	model.numberOfRSUCalls++;
+        	long startTime = System.currentTimeMillis();
         	marked = true;
             // remove jLcVehicle as up if the lane change has ended (vehicle==null)
             if ((up != null) && (up instanceof LCVehicle) && (((LCVehicle) up).vehicle == null))
@@ -664,6 +671,10 @@ public class Conflict {
                 while ((up.getNeighbor(Movable.DOWN) != null) && (up.getNeighbor(Movable.DOWN).getDistanceToRSU(this) > 0))
                     up = up.getNeighbor(Movable.DOWN);
             // check existing vehicle
+    		long endTime2 = System.currentTimeMillis() - startTime;
+            model.rsuTime2 = model.rsuTime2 + endTime2;
+
+            long startTime3 = System.currentTimeMillis();
             if (up!=null && mergeConflictOfUp==null) {
                 // upstream vehicle which is not upstream of a merge conflict
                 if ((up.lane == lane) || (up.lane.xAdj(lane) != 0)) {
@@ -679,12 +690,14 @@ public class Conflict {
                 mergeConflictOfUp = null;
                 up = null;
             }
-            
+    		long endTime3 = System.currentTimeMillis() - startTime3;
+            model.rsuTime3 = model.rsuTime3 + endTime3;            
             // find vehicle upstream of RSU
             if (up == null)
                 up = lane.findVehicle(x, Model.longDirection.UP);
             // find vehicle upstream of upstream merge
             if (up == null) {
+            	long startTime4 = System.currentTimeMillis();
                 double tte; // time to enter the merge by upstream vehicle
                 double tteMin = Double.POSITIVE_INFINITY; 
                 for (Conflict.conflictRSU rsu : upstreamMergeConflicts) {
@@ -699,9 +712,14 @@ public class Conflict {
                         }
                     }
                 }
+        		long endTime4 = System.currentTimeMillis() - startTime4;
+                model.rsuTime4 = model.rsuTime4 + endTime4;
             }
             marked = false;
+    		long endTime = System.currentTimeMillis() - startTime;
+            model.rsuTime1 = model.rsuTime1 + endTime;
         }
+        
     }
     
     /**
