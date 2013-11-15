@@ -420,9 +420,15 @@ public class Lane {
             if (!vehicles.isEmpty())
                 veh = vehicles.get(0);
             else {
-                // search for upstream lane with vehicles
+            	//double distance = 0;   //GUUS
+                // search for upstream lane with vehicles            	
                 Lane j = up;
                 while ((j != null) && j.vehicles.isEmpty()) {
+/*                	//GUUS
+                	j.calculateLength();
+                	distance = distance + l;
+                	if (l > 40)
+                		return null;*/
                 	if (j.marked) {
                 		j = null;
                 		System.out.println("Loop detected in \"up\" links");
