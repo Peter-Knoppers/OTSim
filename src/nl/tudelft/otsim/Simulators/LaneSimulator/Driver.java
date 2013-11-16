@@ -271,6 +271,9 @@ public class Driver {
         /* Maximum acceleration [m/s^2] for intersections. */
         aInter = 2*(1-ActLevel) + ActLevel * 2 * (1.46/0.94);
         
+        /* Maximum deceleration [m/s^2] for a yellow traffic light. */
+        bYellow = 3.5*(1-ActLevel) + ActLevel * 3.5 * (0.97/0.87);
+        
         //if ((630 == vehicle.id) && (vehicle.model.t >= 5 * 60 + 37.3))
         //	System.out.println("watch");
         noticeRSUs();
