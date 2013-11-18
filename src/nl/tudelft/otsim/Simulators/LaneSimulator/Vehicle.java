@@ -79,6 +79,8 @@ public class Vehicle extends Movable implements SimulatedObject {
         double aZero = -v / model.dt;
         a = a < aZero ? aZero : a;
         this.a = a;
+        if ((Math.abs(a) < 0.05) && (Math.abs(v) < 0.01) && (4 == this.id))
+        	System.out.println("Vehicle stationary");
     }
     
     /**

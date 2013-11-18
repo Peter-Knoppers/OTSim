@@ -388,6 +388,8 @@ public abstract class Movable  {
                 s = veh.lcVehicle.getHeadway(leader);
         }
         s = s-leader.l; // gross -> net
+        if (4 == this.id)
+        	System.out.println("headway to leader of " + this.id + " is " + s + "m");
         return s;
     }
     

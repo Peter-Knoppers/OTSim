@@ -500,7 +500,7 @@ public class Conflict {
         public Movable up() {
             // check whether upstream vehicle has not been deleted
         	//System.out.println("Movable");
-            if (!model.exists(up)) {
+            if ((null != up) && (!model.exists(up))) {
                 up = null;
                 control();
             }

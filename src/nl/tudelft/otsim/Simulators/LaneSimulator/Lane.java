@@ -431,7 +431,7 @@ public class Lane {
                 		return null;*/
                 	if (j.marked) {
                 		j = null;
-                		System.out.println("Loop detected in \"up\" links");
+                		//System.out.println("Loop detected in \"up\" links");
                 	} else {
                 		j.marked = true;
                 		j = j.up;
@@ -461,7 +461,7 @@ public class Lane {
                 while ((j != null) && j.vehicles.isEmpty()) {
                 	if (j.marked) {
                 		j = null;
-                		System.out.println("Loop detected in \"down\" links");
+                		//System.out.println("Loop detected in \"down\" links");
                 	} else {
                 		j.marked = true;
                 		j = j.down;
@@ -590,107 +590,96 @@ public class Lane {
     }
     
     /**
-     * Performs the actual work of <tt>xAdj(jLane)</tt>. This method may be 
-     * called recursively with a decreasing remaining range.
+     * Performs the actual work of <tt>xAdj(jLane)</tt>.
      * @param otherLane Lane from which the adjustment is required.
-     * @param range Maximum search range [m].
      * @param dir Direction of search, use <tt>null</tt> for both.
      * @return Distance [m] to other lane.
      */
     protected double xAdj(Lane otherLane, Model.longDirection dir) {
-        double dx = 0;
-        if (otherLane!=this) { // && otherLane!=null) {
-            try {
-                dx = xAdjust.get(otherLane.id) ;
-            } catch (NullPointerException npe) {
-                // If no other lane specified, return 0.
-                if (otherLane==null) {
-                    return 0;
-                }
-                // If value is not in the map, retrieve and store it.
-                // Calculate dx and store in xAdjust
-                boolean found = false;
-                Lane j = this;
-                if (dir==null || dir==Model.longDirection.DOWN) {
-                    // search downstream
-                    while (j!=null && !found) {
-                        // increase downstream distance
-                        dx = dx + j.l;
-                        if (j.down == otherLane) {
-                            // lane found
-                            found = true;
-                        } else if (j.isSplit()) {
-                            // at split, forward request to downstream lanes
-                            double dx2;
-                            for (Lane lane : j.downs) {
-                                if (lane==otherLane) {
-                                    found = true;
-                                    break;
-                                }
-                            	if (lane.marked)
-                            		continue;
-                            	lane.marked = true;
-                                dx2 = lane.xAdj(otherLane, Model.longDirection.DOWN);
-                                if (dx2>0) {
-                                    dx = dx + dx2;
-                                    found = true;
-                                    lane.marked = false;
-                                    break;
-                                }
-                                lane.marked = false;
-                            }
-                        }
-                        j = j.down;
+        // Skip if already marked or same lane or no lane
+        if (marked || otherLane==this || otherLane==null) {
+            return 0;
+        }
+        // Check whether it has been found before
+        if (xAdjust.containsKey(otherLane.id)) {
+            return xAdjust.get(otherLane.id);
+        }
+        // Search
+        double dx = 0; // longitudinal difference between two lanes
+        double dx2; // used for recursive search
+        boolean found = false;
+        marked = true;
+        // Search downstream
+        if (null==dir || Model.longDirection.DOWN==dir) {
+            if (null!=down) {
+                if (down==otherLane) {
+                    found = true;
+                    dx = l;
+                } else {
+                    // use further recursion
+                    dx2 = down.xAdj(otherLane, Model.longDirection.DOWN);
+                    if (dx2>0) {
+                        found = true;
+                        dx += dx2+l;
                     }
                 }
-                if (!found && (dir==null || dir==Model.longDirection.UP)) {
-                    // not found, search upstream
-                    dx = 0;
-                    j = this;
-                    while (j!=null && !found) {
-                        // reduce upstream distance
-                        if (j.up != null)
-                            dx = dx - j.up.l;
-                        if (j.up == otherLane)
+            } else if (isSplit()) {
+                if (downs.contains(otherLane)) {
+                    found = true;
+                    dx = l;
+                } else {
+                    for (Lane j : downs) {
+                        // use further recursion
+                        dx2 = j.xAdj(otherLane, Model.longDirection.DOWN);
+                        if (dx2>0) {
                             found = true;
-                        else if (j.isMerge()) {
-                            // at merge, forward request to upstream lanes
-                            double dx2;
-                            for (Lane lane : j.ups) {
-                                dx -= lane.l;
-                                if (lane==otherLane) {
-                                    found = true;
-                                    break;
-                                }
-                            	if (lane.marked)
-                            		continue;
-                            	lane.marked = true;
-                                dx2 = lane.xAdj(otherLane, Model.longDirection.UP);
-                                if (dx2<0) {
-                                    dx = dx + dx2;
-                                    found = true;
-                                    lane.marked = false;
-                                    break;
-                                }
-                                lane.marked = false;
-                                if (!found)
-                                    dx += lane.l;
-                            }
+                            dx += dx2+l;
+                            break;
                         }
-                        j = j.up;
                     }
-                }
-                if (!found) {
-                    dx = 0;
-                }
-                // Store if found (or searched in both directions and not found)
-                if (found || dir==null) {
-                    xAdjust.put(otherLane.id, dx);
-                    // also store the reverse value for the other lane
-                    otherLane.xAdjust.put(id, -dx);
                 }
             }
         }
+        // Search upstream
+        if (!found && (null==dir || Model.longDirection.UP==dir)) {
+            dx = 0;
+            if (null!=up) {
+                if (up==otherLane) {
+                    found = true;
+                    dx -= up.l;
+                } else {
+                    // use further recursion
+                    dx2 = up.xAdj(otherLane, Model.longDirection.UP);
+                    if (dx2<0) {
+                        found = true;
+                        dx += dx2-up.l;
+                    }
+                }
+            } else if (isMerge()) {
+                if (ups.contains(otherLane)) {
+                    found = true;
+                    dx = -otherLane.l;
+                } else {
+                    for (Lane j : ups) {
+                        // use further recursion
+                        dx2 = j.xAdj(otherLane, Model.longDirection.UP);
+                        if (dx2<0) {
+                            found = true;
+                            dx += dx2-j.l;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        if (!found) {
+            dx = 0;
+        }
+        // Store if found, or not found but searched in both directions
+        if (found || dir==null) { 
+            xAdjust.put(otherLane.id, dx);
+        }
+        marked = false;
         return dx;
     }
     
