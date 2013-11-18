@@ -979,7 +979,8 @@ public class Node extends Vertex implements XML_IO {
 				int numberOfLeavingLinks = linkRank;
         		ArrayList<RoadMarkerAlong> rmaList = new ArrayList<RoadMarkerAlong>();
 				//  only if we do have a junction we perform step 2 and 3
-				if (junction) {
+    			////if (junction) {
+        		if ((outLanesAndLinkList.size() > 0) && ((numberOfIncomingArms + outLanesAndLinkList.size()) > 2)) {
 					// STEP 2: determine the turning movements
 
 		    		// STEP 2A
