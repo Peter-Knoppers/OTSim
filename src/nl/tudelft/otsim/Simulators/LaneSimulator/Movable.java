@@ -38,6 +38,7 @@ public abstract class Movable  {
     public java.awt.geom.Point2D.Double heading = new java.awt.geom.Point2D.Double();
     
     private Movable[] neighbors = new Movable[6];
+    private java.util.ArrayList<Movable> reverseNeighbors = new java.util.ArrayList<Movable> ();
     
     /* Allowed values for the neighbor parameter of getNeighbor */
     /* The Java enum cannot be used in subtract and exclusive or which would have been so nice */ 
@@ -105,7 +106,16 @@ public abstract class Movable  {
      * @param newNeighbor Movable; the new neighbor in the specified direction (may be null)
      */
     public void setNeighbor (int direction, Movable newNeighbor) {
+    	Movable oldNeighbor = neighbors[direction];
+    	if (null != oldNeighbor) {
+    		int index = oldNeighbor.reverseNeighbors.indexOf(this);
+    		if (index < 0)
+    			throw new Error("Missing reverseNeighbor link");
+    		oldNeighbor.reverseNeighbors.remove(index);
+    	}
     	neighbors[direction] = newNeighbor;
+    	if (null != newNeighbor)
+    		newNeighbor.reverseNeighbors.add(this);
     }
     
     /**
@@ -496,7 +506,7 @@ public abstract class Movable  {
          */
 
         // reset pointers in own lane
-        
+        /*
     	final int[] directions = { UP, DOWN };
     	for (int direction : directions) {
     		Movable vehicleG = getNeighbor(direction);
@@ -506,11 +516,13 @@ public abstract class Movable  {
     				vehicleG.setNeighbor(flipDirection(direction, FLIP_UD), getNeighbor(flipDirection(direction, FLIP_UD)));
     		}
     	}
+    	*/
         /* 
          * Own lane pointers are one-directional for the last vehicle on a 
          * split, or the first vehicle on a merge. Loop all split or merge 
          * lanes, find the nearest vehicle and update pointers.
          */
+        /*
     	for (int direction : directions) {
     		if (null == getNeighbor(direction)) {
     			java.util.ArrayList<Movable> candidates;
@@ -529,8 +541,9 @@ public abstract class Movable  {
     					candidate.setNeighbor(flipDirection(direction, FLIP_UD), getNeighbor(flipDirection(direction, FLIP_UD)));
     		}
     	}
-
+		*/
         // reset pointers in adjacent lanes
+        /*
     	final int[] fourDirections = { LEFT_DOWN, LEFT_UP, RIGHT_DOWN, RIGHT_UP };
     	for (int direction : fourDirections) {
     		Movable neighbor = getNeighbor(direction);
@@ -553,7 +566,7 @@ public abstract class Movable  {
     			neighbor = neighbor.getNeighbor(alignDirection(direction));
     		}
     	}
-
+		*/
         // one-directional pointers
         /*
          * --------------------------
@@ -566,9 +579,10 @@ public abstract class Movable  {
          * as long as there are no vehicles and then check vehicles on adjacent
          * lanes.
          */
+        /*
         cutAsAdjacentLeader(lane, Model.longDirection.DOWN);
         cutAsAdjacentLeader(lane, Model.longDirection.UP);
-        
+        */
         /*
          * -----------
          *            \    A
@@ -580,6 +594,7 @@ public abstract class Movable  {
          * happen as vehicles move beyond the end of the lane. Therefore only
          * an upstream search is useful.
          */
+        /*
         if (x > lane.l) {
             int[] twoDirections = { LEFT_DOWN, RIGHT_DOWN };
         	for (int direction : twoDirections) {
@@ -592,15 +607,34 @@ public abstract class Movable  {
         			}
         	}
         }
+		*/
 
+        while (reverseNeighbors.size() > 0)
+        	fixLinkFromNeighbor(reverseNeighbors.get(0));
+        
         // check connection consistency (debug)
         if (model.debug)
             model.checkForRemainingPointers(this);
-
+		
         // delete own references
         int[] allDirections = { UP, DOWN, LEFT_UP, LEFT_DOWN, RIGHT_UP, RIGHT_DOWN };
         for (int direction : allDirections)
         	setNeighbor(direction, null);
+    }
+    
+    private void fixLinkFromNeighbor(Movable neighbor) {
+        int[] allDirections = { UP, DOWN, LEFT_UP, LEFT_DOWN, RIGHT_UP, RIGHT_DOWN };
+    	for (int direction: allDirections)
+    		if (this == neighbor.getNeighbor(direction)) {
+    			Movable newNeighbor = getNeighbor(alignDirection(direction));
+    			if (this == neighbor)
+    				newNeighbor = null;	// one movable on a roundabout
+    			else if (this == newNeighbor)
+    				newNeighbor = null;	// two movables on a roundabout
+    			neighbor.setNeighbor(direction, newNeighbor);
+    			return;
+    		}
+    	throw new Error("Could not find neighbor link");
     }
     
     /**
