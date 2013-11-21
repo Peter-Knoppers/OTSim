@@ -242,8 +242,8 @@ public class Driver {
      * desire which is set in <tt>notice()</tt> methods.
      */
     public void drive() { 	
-    	//a. time function @After TransitionTime(600s) fully activated to the target level! #Ugly
-    	ActLevel = TemporalAct(vehicle.model.t(), transitionTime, 30, activationLevel); 
+    	//a. time function @After TransitionTime(600s) + WarmingupTime(1800s) fully activated to the target level! #Ugly
+    	ActLevel = TemporalAct(vehicle.model.t(), transitionTime, 30, activationLevel, 1800); 
     	
     	//b. Set stochastic driver parameters'
     	ActLevel = ActLevel * (1 + RandomAct);
@@ -581,13 +581,16 @@ public class Driver {
      * @param actT Fully activated time period
      * @param dt Time step interval
      * @param actL Targeted activation level
+     * @param warmingUpT Warming up period
      * @return Time-dependent ActLevel
      */
-	private static double TemporalAct(double t, double actT, double dt, double actL) {
+	private static double TemporalAct(double t, double actT, double dt, double actL, double warmingUpT) {
     	double activationLevel;
-    	if (t<actT) {
-    		activationLevel = Math.round(t/dt)/(actT/dt)*(actL-0);
-    	} else {
+    	if (t<warmingUpT) {
+    		activationLevel = 0;
+    	}else if ((t>=warmingUpT) && (t<=actT+warmingUpT)) {
+    		activationLevel = Math.round((t-warmingUpT)/dt)/(actT/dt)*(actL-0);
+    	}else {
     		activationLevel = actL;
     	}
     	return activationLevel;
