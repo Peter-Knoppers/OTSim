@@ -3,6 +3,7 @@ package nl.tudelft.otsim.Simulators.LaneSimulator;
 import java.util.Collections;
 import java.util.Comparator;
 
+import nl.tudelft.otsim.GUI.Log;
 import nl.tudelft.otsim.GUI.Main;
 
 /**
@@ -341,8 +342,13 @@ public class Model {
      * @param vehicle Vehicle to add.
      */
     public void addVehicle(Movable vehicle) {
-        if (vehicle instanceof Vehicle)
+        if (vehicle instanceof Vehicle) {
             vehicles.add((Vehicle) vehicle);
+            vehicle.setXY();
+            String logFileName = Main.mainFrame.getVehicleLifeLogFileName();
+            if (null != logFileName)
+            	Log.logMessage(logFileName, false, "Created at %.3f %s", t, vehicle.toString());
+        }
         else if (vehicle instanceof LCVehicle)
             lcVehicles.add((LCVehicle) vehicle);
     }
@@ -352,8 +358,12 @@ public class Model {
      * @param vehicle Vehicle to remove.
      */
     public void removeVehicle(Movable vehicle) {
-        if (vehicle instanceof Vehicle)
+        if (vehicle instanceof Vehicle) {
+            String logFileName = Main.mainFrame.getVehicleLifeLogFileName();
+            if (null != logFileName)
+            	Log.logMessage(logFileName, false, "Destroyed at %.3f %s", t, vehicle.toString());
             vehicles.remove(vehicle);
+        }
         else if (vehicle instanceof LCVehicle)
             lcVehicles.remove(vehicle);
     }

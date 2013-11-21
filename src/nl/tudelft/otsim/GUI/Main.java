@@ -19,6 +19,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
@@ -901,13 +902,25 @@ public class Main extends JPanel implements ActionListener {
 		}		
 	}
 	
+	/**
+	 * Extract the file type from a file name
+	 * @param fileName String; the name of the file
+	 * @return String; the type (without dot), or empty string if the file does not have a file type
+	 */
+	public static String getFileExtension(String fileName) {
+		String lastElement = "" + Paths.get(fileName).getFileName();
+		int pos = lastElement.lastIndexOf(".");
+		if (pos < 0)
+			return "";
+		return lastElement.substring(pos + 1);
+	}
+	
 	private void loadFile(String fileName) {
-		int pos = fileName.lastIndexOf(".");
-		if (pos < 0) {
+		String extension = getFileExtension(fileName);
+		if ("".equals(extension)) {
 			WED.showProblem(WED.ENVIRONMENTERROR, "Cannot identify type of file \"%s\"", fileName);
 			return;
 		}
-		String extension = fileName.substring(pos + 1);
 		Storable storable = identifyStorableExtension(extension);
 		if (null == storable)
 			WED.showProblem(WED.ENVIRONMENTERROR, "Cannot identify file type (\"%s\") of \"%s\"", extension, fileName);
@@ -1087,6 +1100,8 @@ public class Main extends JPanel implements ActionListener {
         	newStorable(identifyStorable(command.substring(4)));
 		else if ("Exit".equals(command))
         	closeProgramCheck();
+		else if ("logVehicleLifes".equals(command))
+			setVehicleLifeLog();
         else if ("propertiesTabChanged".equals(command))
         	setActiveGraph();
 		else if ("LaneSimulatorRedraw".equals(command))
@@ -1125,6 +1140,25 @@ public class Main extends JPanel implements ActionListener {
 			System.out.println("Unhandled actionevent " + command);
 		showDrivable.setEnabled(showLinks.isSelected());
 		graphicsPanel.repaint();
+	}
+
+	private String vehicleLifeLogFileName = null;
+	/**
+	 * Retrieve the currently set name for logging vehicle creation and destruction.
+	 * @return String; the current name for the logging file, or null if no logging is to be performed
+	 */
+	public String getVehicleLifeLogFileName () {
+		return vehicleLifeLogFileName;
+	}
+	private void setVehicleLifeLog() {
+		final String defaultExt = "txt";
+		String defaultName = initialDirectory;
+		if (null != vehicleLifeLogFileName)
+			defaultName = vehicleLifeLogFileName;
+		System.out.println("defaultName is " + defaultName);
+		vehicleLifeLogFileName = FileDialog.showFileDialog(true, defaultExt, "Vehicle life log", defaultName);
+		if ("".equals(getFileExtension(vehicleLifeLogFileName)))
+			vehicleLifeLogFileName += "." + defaultExt;
 	}
 
 	private void deleteMeasurementPlan() {
