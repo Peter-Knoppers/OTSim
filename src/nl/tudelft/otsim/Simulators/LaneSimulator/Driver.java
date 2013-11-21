@@ -1032,13 +1032,22 @@ public class Driver {
             keepClearConflicts.add(conflict);
         
         // Conflict is only valid with conflict vehicle
+    	if (vehicle.model.t > 11.5)
+    		System.out.println("watch");
         Movable up = conflict.otherUp();
+        if (null == up)
+        	System.out.println("Other up is null");
+        else
+        	System.out.println("Other up is " + up.toString());
         if (up == null)
             return;
         
         // Calculate and preallocate a few often used parameters
         double v0 = desiredVelocity();
         double sOther = up.getDistanceToRSU(conflict.otherRSU());
+        // TODO: Remove next two lines if problem in xAdj is solved
+        if (sOther < - up.l)
+        	return;	// Workaround for a fundamental problem in xAdj
 
         // Split or merge conflict?
         // Follow downstream vehicles on the conflict while being on the
@@ -1257,6 +1266,7 @@ public class Driver {
             // Accept the gap ?
             boolean gapOK = false;
             if (conflict.visibility()<sSelf) {
+            	System.out.println("Invisible gap not OK (1)");
                 // If major road not visible, reject gap
             } else if (!up.getDriver().vehicle.route.canBeFollowedFrom(conflict.otherRSU().lane))                
                 gapOK = true;	// Crossing vehicle's route does not pass the conflict
@@ -1282,6 +1292,8 @@ public class Driver {
                      */
                     if ((ttc_o * estTimeFactor < tte_c) && ((ttc_o+t_dv) * estTimeFactor < tte_c2))
                         gapOK = true;
+                    else
+                    	System.out.println("Merge gap not OK (2)");
                 } else {                    
                     /* Accept gap on crossing if:
                      *  i)   the downstream vehicle is expected to allow 
@@ -1295,6 +1307,10 @@ public class Driver {
                      */
                     if ((ttp_d * estTimeFactor < tte_c) && (ttc_o * estTimeFactor < tte_c) && (ttp_d2 * estTimeFactor < tte_c2))
                         gapOK = true;
+                    else {
+                    	System.out.println(String.format("Crossing gap not OK (3) ttp_d=%f, estTimeFactor=%f, tte_c=%f, ttc_o=%f, ttp_d2=%f, tte_c2=%f, my id=%d, sOther=%f, up=%s", ttp_d, estTimeFactor, tte_c, ttc_o, ttp_d2, tte_c2, vehicle.id, sOther, up.toString()));
+                    	System.out.println("Conflict on lane " + conflict.lane.id); 
+                    }
                 }
             }
             // Gap rejected?
@@ -1374,8 +1390,9 @@ public class Driver {
         // Only stop if upstream of conflict
         if (s > 0) {
             double s0tmp = this.s0; // remember regular stopping distance value
-            this.s0 = s0conflict; // set small value for numerical overshoot
-            // Decelerate using car-following model
+            this.s0 = s0conflict; // set small value for numerical overshoot          // Decelerate using car-following model
+            if (vehicle.v < 1)
+            	System.out.println(String.format("v=%.3f, s=%.3f", vehicle.v, s));
             double acc = longitudinal(vehicle.v, vehicle.v, desiredVelocity(), s);
             if (safe) {
                 if (acc > -b) {

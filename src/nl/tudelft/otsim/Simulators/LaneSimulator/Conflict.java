@@ -1,5 +1,10 @@
 package nl.tudelft.otsim.Simulators.LaneSimulator;
 
+import java.awt.Color;
+import java.awt.geom.Point2D;
+
+import nl.tudelft.otsim.GUI.GraphicsPanel;
+
 /**
  * Represents a conflict between two lanes. Conflicts can be split, merge or
  * crossing conflicts and are included in the driver behavior by using two RSUs. 
@@ -718,8 +723,23 @@ public class Conflict {
             marked = false;
     		long endTime = System.currentTimeMillis() - startTime;
             model.rsuTime1 = model.rsuTime1 + endTime;
+            if (496 == lane.id)
+            	System.out.println("Time is " + model.t + ", up of conflictRSU at lane " + lane.up + " is " + (null == up ? "null" : up.toString()));
         }
         
+        public void drawLineToUpStreamVehicle(GraphicsPanel gp) {
+        	/* This is for debugging only...
+        	if (up != null) {
+        		if ((478 != lane.id) && (496 != lane.id))
+        			return;
+        		gp.setColor(Color.cyan);
+        		if (496 == lane.id)
+        			gp.setColor(Color.orange);
+        		gp.drawLine(lane.XY(x), up.global);
+        	}
+        	*/
+        }
+
     }
     
     /**
@@ -764,4 +784,5 @@ public class Conflict {
         /** Crossing conflict. */
         CROSSING,
     }
+    
 }

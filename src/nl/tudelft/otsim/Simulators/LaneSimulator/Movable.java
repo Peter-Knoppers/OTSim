@@ -116,6 +116,8 @@ public abstract class Movable  {
     	neighbors[direction] = newNeighbor;
     	if (null != newNeighbor)
     		newNeighbor.reverseNeighbors.add(this);
+    	if ((neighbors[UP] == neighbors[DOWN]) && (neighbors[UP] != null))
+    		System.out.println("whoops");
     }
     
     /**

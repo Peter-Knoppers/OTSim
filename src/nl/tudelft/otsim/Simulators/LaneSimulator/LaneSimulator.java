@@ -1104,7 +1104,10 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 		if (Main.mainFrame.checkBoxShowLCVehicles.isSelected())
 			for (LCVehicle lcv : model.getLcVehicles())
 				new VehicleGraphic(lcv).paint(graphicsPanel, showLeader, showFollower);
-		
+		for (Lane l : model.network)
+			for (RSU rsu : l.getRSUs_r())
+				if (rsu instanceof Conflict.conflictRSU)
+					((Conflict.conflictRSU)rsu).drawLineToUpStreamVehicle(graphicsPanel);
 	}
 
 	@Override

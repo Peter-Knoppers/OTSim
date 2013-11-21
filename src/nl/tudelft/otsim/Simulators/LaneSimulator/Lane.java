@@ -16,6 +16,7 @@ import nl.tudelft.otsim.GUI.Main;
 public class Lane {
 	
 	boolean marked;
+	boolean markedForXadj;
 	
 	/** Special value for no source or no destination */
 	public final static int none = -999;
@@ -597,7 +598,7 @@ public class Lane {
      */
     protected double xAdj(Lane otherLane, Model.longDirection dir) {
         // Skip if already marked or same lane or no lane
-        if (marked || otherLane==this || otherLane==null) {
+        if (markedForXadj || otherLane==this || otherLane==null) {
             return 0;
         }
         // Check whether it has been found before
@@ -608,7 +609,7 @@ public class Lane {
         double dx = 0; // longitudinal difference between two lanes
         double dx2; // used for recursive search
         boolean found = false;
-        marked = true;
+        markedForXadj = true;
         // Search downstream
         if (null==dir || Model.longDirection.DOWN==dir) {
             if (null!=down) {
@@ -679,7 +680,7 @@ public class Lane {
         if (found || dir==null) { 
             xAdjust.put(otherLane.id, dx);
         }
-        marked = false;
+        markedForXadj = false;
         return dx;
     }
     

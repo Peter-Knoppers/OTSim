@@ -139,12 +139,12 @@ public class Model {
      */
     public void run(int n) {
         // Simulate n steps
-        int i = 0;
+        //int i = 0;
     	for (int nn = 0; (nn < n) && (t < period); nn++) {
             // Run on-board units, road-side units and controllers
             runUnits();
-    		System.out.println("test Run timesteps "+ t);
-    		i++;
+    		//System.out.println("test Run timesteps "+ t);
+    		//i++;
             // Vehicle generation
             generating = true;
             for (Lane l : network)
@@ -194,9 +194,9 @@ public class Model {
                     	if (null != other) {
                     		Movable back = other.getNeighbor(Movable.flipDirection(direction, Movable.FLIP_UD));
                     		if ((null != back) && (back != veh)) {
-                    			String problem = String.format ("Movable %s has non reciprocal %s link to %s (reverse link goes to %s)", veh.toString(), Movable.directionToString(direction), other.toString(), back.toString());
+                    			String problem = String.format ("Warning: Movable %s has non reciprocal %s link to %s (reverse link goes to %s)", veh.toString(), Movable.directionToString(direction), other.toString(), back.toString());
                                 System.err.println(problem);
-                                throw new RuntimeException(problem);
+                                //throw new RuntimeException(problem);
                     		}
                     	}                   		
                     }
@@ -310,8 +310,8 @@ public class Model {
         // Run controllers
     	i = 0;
     	for (Controller c : controllers)  {
-    		System.out.println("test Controller" + i);
-    		i++;
+    		//System.out.println("test Controller" + i);
+    		//i++;
     		c.run();
     	}
     }
