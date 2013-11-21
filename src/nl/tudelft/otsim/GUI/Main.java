@@ -209,6 +209,7 @@ public class Main extends JPanel implements ActionListener {
         menuFile.add(makeMenu("New", "new", "New.png", true));
         menuFile.add(makeMenu("Open", "load", "Briefcase.png", haveDiskAccess()));
         menuFile.add(makeMenu("Save", "save", "Save.png", haveDiskAccess()));
+        menuFile.add(makeMenuItem("Log vehicle creation and destruction", "logVehicleLifes", "Notes.png", haveDiskAccess()));
         menuFile.add(makeMenuItem("Import model ...", "openDialogImportModel", "Back.png", haveDiskAccess()));
         menuFile.add(makeMenuItem("Import OpenStreetMap Network ...", "openDialogImportOSM", "Back.png", haveDiskAccess()));
         menuFile.add(makeMenuItem("Exit", "Exit", "Exit.png", haveDiskAccess()));
