@@ -654,57 +654,6 @@ public class Planar {
 	}
 	
 	/**
-	 * Check that the circleCovereringPoints method behaves well. There has
-	 * been a case where it failed (due to a bug) on this particular set of 
-	 * points.
-	 */
-	public static void testCircleCoveringPoints() {
-	    // This set of points caused circleCoveringPoints to fail (never finish) when margin was 0.000001
-	    ArrayList<Point2D.Double> points = new ArrayList<Point2D.Double>();
-	    points.add(new Point2D.Double(86444.20734684722, 442696.03123710706));
-	    points.add(new Point2D.Double(86444.18221227782, 442699.5311468564));
-	    points.add(new Point2D.Double(86444.28509257668, 442699.530562569));
-	    points.add(new Point2D.Double(86444.22020688458, 442696.0311640711));
-	    points.add(new Point2D.Double(86444.20166811542, 442695.0313359289));
-	    points.add(new Point2D.Double(86444.13678242332, 442691.531937431));
-	    points.add(new Point2D.Double(86444.11598296637, 442691.5323772043));
-	    points.add(new Point2D.Double(86444.1990681833, 442695.03139090055));
-	    circleCoveringPoints(points);
-	}
-
-	/**
-	 * Check tat the circleCoveringsPoints method behaves well. There has been
-	 * a case where it failed (due to another bug) on this particular set of
-	 * points.
-	 */
-	public static void testCircleCoveringPoints2() {
-	    // This set of points caused circleCoveringPoints to fail (never finish) when margin was 0.000001
-	    ArrayList<Point2D.Double> points = new ArrayList<Point2D.Double>();
-	    points.add(new Point2D.Double(50.896195, -200.443661));
-	    points.add(new Point2D.Double(46.415221, -198.225357));
-	    //points.add(new Point2D.Double(46.415221, -198.225357));
-	    points.add(new Point2D.Double(51.164450, -186.377939));
-	    //points.add(new Point2D.Double(51.164450, -186.377939));
-	    points.add(new Point2D.Double(45.631733, -184.030182));
-	    //points.add(new Point2D.Double(45.631733, -184.030182));
-	    points.add(new Point2D.Double(36.660364, -190.882476));
-	    points.add(new Point2D.Double(44.697691, -184.743599));
-	    points.add(new Point2D.Double(39.150151, -185.853107));
-	    points.add(new Point2D.Double(35.653602, -191.651437));
-	    //points.add(new Point2D.Double(35.653602, -191.651437));
-	    points.add(new Point2D.Double(36.559156, -197.589149));
-	    //points.add(new Point2D.Double(36.559156, -197.589149));
-	    points.add(new Point2D.Double(49.215535, -196.077677));
-	    points.add(new Point2D.Double(47.287538, -196.463277));
-	    //points.add(new Point2D.Double(47.287538, -196.463277));
-	    points.add(new Point2D.Double(49.215535, -196.077677));
-	    points.add(new Point2D.Double(47.287538, -196.463277));
-	    //points.add(new Point2D.Double(47.287538, -196.463277));
-	    points.add(new Point2D.Double(50.196116, -200.980581));
-	    circleCoveringPoints(points);
-	}
-
-	/**
 	 * Compute all intersection points of a ray and a circle. There are zero,
 	 * one, or two intersection. NB. A ray is a line with one real end point. 
 	 * The other end lies at infinity.

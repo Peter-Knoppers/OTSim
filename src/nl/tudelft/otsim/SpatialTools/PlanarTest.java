@@ -175,8 +175,94 @@ public class PlanarTest {
 		fail("Not yet implemented");
 	}
 
+	/**
+	 * Test the circleCoveringPoints method.
+	 */
 	@Test
 	public void testCircleCoveringPoints() {
+		ArrayList<Point2D.Double> points = new ArrayList<Point2D.Double>();
+		assertNull("Empty input list should return null", Planar.circleCoveringPoints(points));
+		points.add(new Point2D.Double(123.4, 567.9));
+		Circle c = Planar.circleCoveringPoints(points);
+		assertEquals("radius of circle covering 1 point should be 0", 0, c.radius(), 0.00000001);
+		assertEquals("center of circle covering 1 point should be the point", 0, c.center().distance(points.get(0)), 0.000001);
+		points.clear();
+		points.add(new Point2D.Double(1, 0));
+		points.add(new Point2D.Double(-2, 0));
+		c = Planar.circleCoveringPoints(points);
+		assertEquals("radius of circle covering 2 point should be half the distance between those points", points.get(0).distance(points.get(1)) / 2, c.radius(), 0.002);
+		assertEquals("center of circle coverint 2 points should be the half-way point", 0, c.center().distance(new Point2D.Double((points.get(0).x + points.get(1).x) / 2, (points.get(0).y + points.get(1).y) / 2)), 0.002);
+		points.add(new Point2D.Double (-0.5, 0.5));
+		c = Planar.circleCoveringPoints(points);
+		assertEquals("adding a point clearly inside the circle should not alter the radius", points.get(0).distance(points.get(1)) / 2, c.radius(), 0.002);
+		assertEquals("adding a point clearly inside the circle should not alter the center", 0, c.center().distance(new Point2D.Double((points.get(0).x + points.get(1).x) / 2, (points.get(0).y + points.get(1).y) / 2)), 0.000001);
+		points.clear();
+		// 4 points forming the corners of a square
+		points.add(new Point2D.Double(0, 0));
+		points.add(new Point2D.Double(2, 0));
+		points.add(new Point2D.Double(2, 2));
+		points.add(new Point2D.Double(0, 2));
+		c = Planar.circleCoveringPoints(points);
+		assertEquals("circle should be centered on the square it covers", 0, c.center().distance(new Point2D.Double(1, 1)), 0.002);
+		assertEquals("radius should be half the diagonal of the square", Math.sqrt(8) / 2, c.radius(), 0.002);
+		// Now run the test for previously found problems that were (supposedly) fixed
+		testCircleCoveringPoints1();
+		testCircleCoveringPoints2();
+		testCircleCoveringPoints3();
+	}
+	
+	/**
+	 * Check that the circleCovereringPoints method behaves well. There has
+	 * been a case where it failed (due to a bug) on this particular set of 
+	 * points.
+	 */
+	public static void testCircleCoveringPoints1() {
+	    // This set of points caused circleCoveringPoints to fail (never finish) when margin was 0.000001
+	    ArrayList<Point2D.Double> points = new ArrayList<Point2D.Double>();
+	    points.add(new Point2D.Double(86444.20734684722, 442696.03123710706));
+	    points.add(new Point2D.Double(86444.18221227782, 442699.5311468564));
+	    points.add(new Point2D.Double(86444.28509257668, 442699.530562569));
+	    points.add(new Point2D.Double(86444.22020688458, 442696.0311640711));
+	    points.add(new Point2D.Double(86444.20166811542, 442695.0313359289));
+	    points.add(new Point2D.Double(86444.13678242332, 442691.531937431));
+	    points.add(new Point2D.Double(86444.11598296637, 442691.5323772043));
+	    points.add(new Point2D.Double(86444.1990681833, 442695.03139090055));
+	    Planar.circleCoveringPoints(points);
+	}
+
+	/**
+	 * Check that the circleCoveringsPoints method behaves well. There has been
+	 * a case where it failed (due to another bug) on this particular set of
+	 * points.
+	 */
+	public static void testCircleCoveringPoints2() {
+	    // This set of points caused circleCoveringPoints to fail (never finish) when margin was 0.000001
+	    ArrayList<Point2D.Double> points = new ArrayList<Point2D.Double>();
+	    points.add(new Point2D.Double(50.896195, -200.443661));
+	    points.add(new Point2D.Double(46.415221, -198.225357));
+	    //points.add(new Point2D.Double(46.415221, -198.225357));
+	    points.add(new Point2D.Double(51.164450, -186.377939));
+	    //points.add(new Point2D.Double(51.164450, -186.377939));
+	    points.add(new Point2D.Double(45.631733, -184.030182));
+	    //points.add(new Point2D.Double(45.631733, -184.030182));
+	    points.add(new Point2D.Double(36.660364, -190.882476));
+	    points.add(new Point2D.Double(44.697691, -184.743599));
+	    points.add(new Point2D.Double(39.150151, -185.853107));
+	    points.add(new Point2D.Double(35.653602, -191.651437));
+	    //points.add(new Point2D.Double(35.653602, -191.651437));
+	    points.add(new Point2D.Double(36.559156, -197.589149));
+	    //points.add(new Point2D.Double(36.559156, -197.589149));
+	    points.add(new Point2D.Double(49.215535, -196.077677));
+	    points.add(new Point2D.Double(47.287538, -196.463277));
+	    //points.add(new Point2D.Double(47.287538, -196.463277));
+	    points.add(new Point2D.Double(49.215535, -196.077677));
+	    points.add(new Point2D.Double(47.287538, -196.463277));
+	    //points.add(new Point2D.Double(47.287538, -196.463277));
+	    points.add(new Point2D.Double(50.196116, -200.980581));
+	    Planar.circleCoveringPoints(points);
+	}
+
+	private void testCircleCoveringPoints3() {
 		// This really big case failed miserable due in stage 4 when dli and dlj got exactly the same value
 		ArrayList<Point2D.Double> points = new ArrayList<Point2D.Double>();
 		points.add(new Point2D.Double(0.000000, -5.400000));
@@ -255,19 +341,9 @@ public class PlanarTest {
 		points.add(new Point2D.Double(5.400000, -1.000000));
 		points.add(new Point2D.Double(5.400000, -1.000000));
 		points.add(new Point2D.Double(5.400000, -0.000000));
-		Circle result = Planar.circleCoveringPoints(points);
-		fail("Not yet implemented");
+		Planar.circleCoveringPoints(points);
 	}
 
-	@Test
-	public void testTestCircleCoveringPoints() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testTestCircleCoveringPoints2() {
-		fail("Not yet implemented");
-	}
 
 	@Test
 	public void testIntersectRayAndCircle() {
