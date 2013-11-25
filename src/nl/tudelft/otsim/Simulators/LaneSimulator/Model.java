@@ -347,7 +347,7 @@ public class Model {
             vehicle.setXY();
             String logFileName = Main.mainFrame.getVehicleLifeLogFileName();
             if (null != logFileName)
-            	Log.logMessage(logFileName, false, "Created at %.3f %s", t, vehicle.toString());
+            	Log.logMessage(logFileName, false, "Created at\t%.3f\t%s\t%s\t\n", t, vehicle.toString(), vehicle.marker); //export TrafficClass + Destination & Origin??? + vehicle.getDriver().activationLevel
         }
         else if (vehicle instanceof LCVehicle)
             lcVehicles.add((LCVehicle) vehicle);
@@ -361,7 +361,7 @@ public class Model {
         if (vehicle instanceof Vehicle) {
             String logFileName = Main.mainFrame.getVehicleLifeLogFileName();
             if (null != logFileName)
-            	Log.logMessage(logFileName, false, "Destroyed at %.3f %s", t, vehicle.toString());
+            	Log.logMessage(logFileName, false, "Destroyed at\t%.3f\t%s\t%s\t\n", t, vehicle.toString(), vehicle.marker); //Destroy veh. only contains [last node]
             vehicles.remove(vehicle);
         }
         else if (vehicle instanceof LCVehicle)
