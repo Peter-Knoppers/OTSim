@@ -274,8 +274,6 @@ public class Driver {
         /* Maximum deceleration [m/s^2] for a yellow traffic light. */
         bYellow = 3.5*(1-ActLevel) + ActLevel * 3.5 * (0.97/0.87);
         
-        //if ((630 == vehicle.id) && (vehicle.model.t >= 5 * 60 + 37.3))
-        //	System.out.println("watch");
         noticeRSUs();
         
         // Initialize interaction booleans to false
@@ -476,7 +474,8 @@ public class Driver {
                     } else {	// Do not change lanes right after a merge because some followers may not be visible (BUG)
                     	Lane otherLane = Movable.LEFT_DOWN == direction ? vehicle.lane.left : vehicle.lane.right;
                     	Model.latDirection latDirection = Movable.LEFT_DOWN == direction ? Model.latDirection.LEFT : Model.latDirection.RIGHT;
-                    	if ((null != otherLane) && (null != otherLane.upMerge) && (otherLane.upMerge.xAdj(otherLane) + vehicle.getAdjacentX(latDirection) < otherLane.getVLim() * Tmax))
+                    	if ((null != otherLane) && (null != otherLane.upMerge) 
+                    			&& (otherLane.upMerge.xAdj(otherLane) + vehicle.getAdjacentX(latDirection) < otherLane.getVLim() * Tmax))
                     		aFollow = Double.NEGATIVE_INFINITY;
                     }
                     boolean laneChangePermitted = Movable.LEFT_DOWN == direction ? vehicle.lane.goLeft : vehicle.lane.goRight;
@@ -750,9 +749,9 @@ public class Driver {
                  * a slow queue adjacent to an empty lane, where the anticipated
                  * speeds are then consequently low.
                  */
-                if (down.leftIndicator && !lane.isSameLane(vehicle.lane))
+                if (down.leftIndicator && (lane != vehicle.lane))
                     vLeft = Math.min(vLeft, v);
-                else if (down.rightIndicator && !lane.isSameLane(vehicle.lane))
+                else if (down.rightIndicator && (lane != vehicle.lane))
                     vRight = Math.min(vRight, v);
             }
             // go to next vehicle
@@ -764,74 +763,6 @@ public class Driver {
         antInLane.put(lane, vCur);
         if (lane.left != null)
             antFromRight.put(lane.left, vLeft); // this lane is the right lane of lane.left
-    }
-
-    /**
-     * Determine acceleration based on specific vehicle. If this has been
-     * calculated this time step, take previously calculated value. Stored
-     * accelerations are automatically cleared each time step. This is useful if
-     * acceleration between a set of vehicles is needed multiple times within
-     * each time step. Otherwise one should circumvent the look-up and store
-     * procedure by directly using <code>calculateAcceleration()</code>. Note
-     * that by supplying a follower, the <code>getAcceleration()</code> will be
-     * called on the correct driver, which may be different from the original
-     * driver on which it is called.
-     * @param follower Vehicle whos acceleration is required.
-     * @param leader Acceleration is based on this vehicle.
-     * @return Acceleration [m/s^2].
-     */
-    public double getAcceleration(Movable follower, Movable leader) {
-        // default: without type label
-        return getAcceleration(follower, leader, "");
-    }
-    
-    /**
-     * Determine acceleration based on specific vehicle and label. If this has
-     * been calculated this time step, take previously calculated value. Stored
-     * accelerations are automatically cleared each time step. The label can be
-     * used to distinct between different acceleration types when storing or
-     * retreiving them from memory. Note that to calculate actual different
-     * values, parameters need to be set before <code>getAcceleration()</code>
-     * is called. Note that by supplying a follower, the <code>getAcceleration()
-     * </code> will be called on the correct driver, which may be different from
-     * the original driver on which it is called.
-     * @param follower Vehicle of considered driver.
-     * @param leader Acceleration is based on this vehicle.
-     * @param label Label for type of acceleration (e.g. following, lane change)
-     * used for storage.
-     * @return Acceleration [m/s^2].
-     */
-    public double getAcceleration(Movable follower, Movable leader, java.lang.String label) {
-        double acc = 0;
-        if ((follower.getDriver() == this) || ((vehicle.lcProgress != 0) && (follower == vehicle.lcVehicle))) {
-            // reset stored accelerations each time step
-            if (isNewTimeStepForAction("calculate_acceleration"))
-                accelerations.clear();
-            if (!vehicle.model.isGenerating() && accelerations.containsKey(leader) && accelerations.get(leader).containsKey(label))
-                acc = accelerations.get(leader).get(label);	// get acceleration that has already been calculated
-            else if (vehicle.model.isGenerating()) {
-                // calculate and do not store acceleration as vehicle generation
-                // may just be testing the current location
-                acc = calculateAcceleration(leader);
-            } else {
-                // calculate and store acceleration
-                acc = calculateAcceleration(leader);
-                if (accelerations.containsKey(leader))
-                    accelerations.get(leader).put(label, acc); // may include 'null' as leader
-                else {
-                    java.util.HashMap<java.lang.String, Double> submap = new java.util.HashMap<java.lang.String, Double>();
-                    submap.put(label, acc);
-                    accelerations.put(leader, submap);
-                }
-             }
-        } else {
-            // acceleration from other vehicle, find correct driver
-            if (follower.getDriver()==null)
-                throw new java.lang.RuntimeException("No driver found: "+follower.x+"@"+
-                        follower.lane.id+" - "+leader.x+"@"+leader.lane.id+", vehicle was deleted.");
-            acc = follower.getDriver().getAcceleration(follower, leader);
-        }
-        return acc;
     }
 
     /**
@@ -1020,7 +951,11 @@ public class Driver {
             conflictBlocked = false;
             keepClearConflicts.clear();
             ignoreFurtherConflicts = false;
+            vehicle.ignoreLeader = false;
         }
+        
+        if ((conflict.isMerge() && (null != conflict.otherUp()) && (conflict.otherUp() == vehicle.getNeighbor(Movable.DOWN))) && (conflict.otherUp().getDistanceToRSU(conflict.otherRSU()) < 0))
+        	vehicle.ignoreLeader = true;
         
         // Ignore further conflicts
         if (ignoreFurtherConflicts)
@@ -1035,13 +970,7 @@ public class Driver {
             keepClearConflicts.add(conflict);
         
         // Conflict is only valid with conflict vehicle
-    	if (vehicle.model.t > 11.5)
-    		System.out.println("watch");
         Movable up = conflict.otherUp();
-        if (null == up)
-        	System.out.println("Other up is null");
-        else
-        	System.out.println("Other up is " + up.toString());
         if (up == null)
             return;
         
@@ -1056,8 +985,9 @@ public class Driver {
         // Follow downstream vehicles on the conflict while being on the
         // conflict or while being the most downstream vehicle upstream of the 
         // conflict.
-        if (!conflict.isCrossing() && (sSelf<conflict.length() || (null == vehicle.getNeighbor(Movable.DOWN)) 
-        		|| vehicle.getNeighbor(Movable.DOWN).getDistanceToRSU(conflict)<conflict.length())) {
+        Movable downLeader;
+        if ((! conflict.isCrossing()) && (sSelf < conflict.length() || (null == (downLeader = vehicle.getNeighbor(Movable.DOWN))) 
+        		|| (vehicle.getHeadway(downLeader) + downLeader.l > vehicle.getDistanceToRSU(conflict) - conflict.length()))) {
             double s = 0;
             Movable upFollow = null;
             double sFollow = 0;
@@ -1152,8 +1082,10 @@ public class Driver {
             // that the vehicle is being blocked and might yield out of courtesy.
             double ttp_d = 0; // passable now if no downstream vehicle
             Movable leader = vehicle.getNeighbor(Movable.DOWN);
+        	double distanceToConflict = vehicle.getDistanceToRSU(conflict);
+        	double distanceToLeader = (null == leader) ? Double.NaN : vehicle.getHeadway(leader) + leader.l;
             if (null != leader) {
-                s = leader.getDistanceToRSU(conflict) + vehicle.l + s0 + leader.l + dMerge;
+            	s = distanceToConflict - distanceToLeader + vehicle.l + s0 + leader.l + dMerge;
                 ttp_d = anticipateConflictMovement(s, leader.v, 0);
             }
             s = sSelf-conflict.length();
@@ -1161,7 +1093,7 @@ public class Driver {
             
             // Most downstream vehicle fully upstream of conflict?
             boolean isFirstUp = (sSelf > conflict.length()) &&
-                    ((null == leader) || (leader.getDistanceToRSU(conflict) < conflict.length()));
+                    ((null == leader) || (distanceToConflict - distanceToLeader < conflict.length()));
             
             /* Courtesy yielding
              * A number of conditions is required for a driver to yield out of 
@@ -1245,7 +1177,9 @@ public class Driver {
             double ttp_d2 = 0; // passable now if no downstream vehicle
             Movable leader = vehicle.getNeighbor(Movable.DOWN);
             if (leader != null) {
-                s = leader.getDistanceToRSU(conflict) + vehicle.l + s0 + leader.l + dMerge;
+            	double distanceToLeader = vehicle.getHeadway(leader) + leader.l;
+            	double distanceToConflict = vehicle.getDistanceToRSU(conflict);
+                s = distanceToConflict - distanceToLeader + vehicle.l + s0 + leader.l + dMerge;
                 // ttp_d is only of interest on conflicts that need to be kept clear
                 if (conflict.keepClear())
                     ttp_d = anticipateConflictMovement(s, leader.v, 0);
@@ -1376,7 +1310,10 @@ public class Driver {
         if (stopUpstream) {
             for (Conflict.conflictRSU rsu : keepClearConflicts) {
                 // Distance adjustment between lanes
-                double dxLanes = conflict.lane.xAdj(rsu.lane);
+                ///////double dxLanes = conflict.lane.xAdj(rsu.lane);
+            	double dxLanes = rsu.lane.xAdj(conflict.lane);
+            	if (dxLanes < 0)
+            		throw new Error("oops; we've got it wrong");
                 // Distance between end of conflicts
                 double dxRSUs = conflict.x-rsu.x+dxLanes;
                 if ((dxRSUs - conflict.length() < vehicle.l + s0conflict) && (dxRSUs > 0)) {

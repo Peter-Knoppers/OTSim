@@ -13,6 +13,7 @@ import nl.tudelft.otsim.Events.Step;
 import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.GUI.ObjectInspector;
+import nl.tudelft.otsim.GUI.Storable;
 import nl.tudelft.otsim.GUI.WED;
 import nl.tudelft.otsim.Simulators.Measurement;
 import nl.tudelft.otsim.Simulators.LaneSimulator.Conflict;
@@ -21,6 +22,7 @@ import nl.tudelft.otsim.Simulators.SimulatedObject;
 import nl.tudelft.otsim.Simulators.SimulatedTrafficLightController;
 import nl.tudelft.otsim.Simulators.Simulator;
 import nl.tudelft.otsim.SpatialTools.Planar;
+import nl.tudelft.otsim.Utilities.TimeScaleFunction;
 
 /**
  * This class holds all data of a laneSimulator.
@@ -109,7 +111,8 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         		microNetwork.add(newLane);
         	}
         }
-    	double numberOfTripsPath = 0;
+    	//double numberOfTripsPath = 0;
+        TimeScaleFunction flowGraph = null;
     	ExportTripPattern exportTripPattern = null;
     	// pass 2; extract everything else
         for(String line : definition.split("\n")) {
@@ -205,13 +208,15 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         			throw new Error("Sum of Fractions does not add up to 1");
         		continue;
         	} else if (fields[0].equals("TripPatternPath"))
-        		numberOfTripsPath = Double.parseDouble(fields[2]);	// Only numberOfTrips is actually used
+        		flowGraph = new TimeScaleFunction(fields[2]);
+        		//numberOfTripsPath = Double.parseDouble(fields[2]);	// Only numberOfTrips is actually used
         	else if (fields[0].equals("Path:")) {
-        		if (numberOfTripsPath > 0) {
+        		//if (! flowGraph.isTrivial()) {
+        		//if (numberOfTripsPath > 0) {
         			if (null != exportTripPattern)
         				tripList.add(exportTripPattern);
-        			exportTripPattern = new ExportTripPattern(numberOfTripsPath, classProbabilities);
-        		}		
+        			exportTripPattern = new ExportTripPattern(flowGraph, classProbabilities);
+        		//}		
         		ArrayList<Integer> route = new ArrayList<Integer>(); 
         		for (int i = 3; i < fields.length; i++) {
         			String field = fields[i];
@@ -327,27 +332,34 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         int currentNode = Integer.MAX_VALUE;
         ArrayList<Double> routeFlows = new ArrayList<Double>();
         ArrayList<ArrayList<Integer>> routeList = new ArrayList<ArrayList<Integer>>();
-        double flow = 0;
+        //double flow = 0;
+        flowGraph = new TimeScaleFunction((Storable) null);
         double[] fractions = null;
         for (ExportTripPattern trip : tripList) {
 			int nextNode = trip.getRoutes().get(0).get(0);
 			// When next node changes: create a generator for the current Node
 			if (nextNode > currentNode) {
-				makeGenerator(routeFlows, currentNode, microNetwork, routeList, flow, fractions);
+				makeGenerator(routeFlows, currentNode, microNetwork, routeList, flowGraph, fractions);
 				routeFlows.clear();
 				routeList.clear();
-				flow = 0;
+				flowGraph = trip.flowGraph;
+				//flow = 0;
 			}
 			currentNode = nextNode;
 			for (int i = 0; i < trip.routeProbabilities.size(); i++) {
-				flow += trip.getFlow(i);
+				//flow += trip.getFlow(i);
+				//double currentFlow = flowGraph.getFactor(0d);
+				//currentFlow += trip.getFlow(i).getFactor(0d);
+				//if (flowGraph.size() > 0)
+				//	flowGraph.deletePair(0);
+				//flowGraph.insertPair(0d, currentFlow);
 				routeList.add(trip.getRoutes().get(i));
-				routeFlows.add(trip.getFlow(i));
+				routeFlows.add(trip.getFlow(i).getFactor(0d));
 			}
 			fractions = trip.getFractions();
 		}
         if (Integer.MAX_VALUE != currentNode) // Make the last generator
-        	makeGenerator(routeFlows, currentNode, microNetwork, routeList, flow, fractions);
+        	makeGenerator(routeFlows, currentNode, microNetwork, routeList, flowGraph, fractions);
 
         model.network = microNetwork.toArray(new Lane[0]);
         // Add the tapers to the list of lane objects
@@ -366,7 +378,8 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         scheduler.enqueueEvent(0d, new Stepper(this));
 	}
 	
-	private void makeGenerator(ArrayList<Double> routeFlows, int node, ArrayList<Lane> lanes, ArrayList<ArrayList<Integer>> routes, double numberOfTrips, double classProbabilities[]) throws Exception {
+	private void makeGenerator(ArrayList<Double> routeFlows, int node, ArrayList<Lane> lanes, ArrayList<ArrayList<Integer>> routes, TimeScaleFunction flowGraph, double classProbabilities[]) throws Exception {
+		double numberOfTrips = flowGraph.getFactor(0d);
 		System.out.print("Creating generator at node " + node + " flow " + numberOfTrips + " with class probabilities [");
 		for (int i = 0; i < classProbabilities.length; i++)
 			System.out.print(String.format("%s%.6f", i > 0 ? ", " : "", classProbabilities[i]));
@@ -452,6 +465,8 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 		generator.routeProb = probabilities;
 		generator.setClassProbabilities(classProbabilities);
 		// TODO numberOfTrips must be converted to flow [veh/h]
+		// STUB 
+		numberOfTrips = 1000;
 		generator.setDemand(numberOfTrips);
 	}
 	
@@ -1176,28 +1191,44 @@ class Stepper implements Step {
 }
 
 class ExportTripPattern {
-	final Double flow;
+	//final Double flow;
+	final TimeScaleFunction flowGraph;
 	final ArrayList<ArrayList<Integer>> routes = new ArrayList<ArrayList<Integer>>();
 	final ArrayList<Double> routeProbabilities = new ArrayList<Double>();
 	final double[] fractions;
 	final Random randomGenerator = new Random(54321);
-	/**
-	 * @param startNode Integer; ID of the start node of the new ExportTripPattern
-	 * @param flow Double; flow on the new ExportTripPattern
-	 * @param routes ArrayList&lt;ArrayList&lt<Integer&gt;&gt;; the list of routes
-	 * @param routeProbabilities ArrayList&lt;Double&gt;; the probabilities of the routes
-	 * @param route ArrayList&lt;Integer&gt;; IDs that define the route of the new ExportTripPattern
-	 * @param vehiclyTypeFractions double[]; list of fractions corresponding to the defined {@link TrafficClass TrafficClasses}
-	 * @throws Exception if the routeProbabilities do not add up to (approximately) 1.0
-	 */
-	public ExportTripPattern(Double flow, double[] vehiclyTypeFractions) throws Exception {
-		this.flow = flow;
-		this.fractions = vehiclyTypeFractions;
+	
+	private void checkFractions () throws Exception {
 		double sum = 0;
 		for (int i = 0; i < fractions.length; i++)
 			sum += fractions[i];
 		if (Math.abs(sum - 1.0) > 0.001)
-			throw new Exception("vehicleTypeFractions add up to " + sum + " which is not (nearly) equal to one");
+			throw new Exception("vehicleTypeFractions add up to " + sum + " which is not (nearly) equal to one");		
+	}
+	
+	/**
+	 * Create an exportTripPattern.
+	 * @param flow Double; flow on the new ExportTripPattern
+	 * @param vehicleTypeFractions double[]; list of fractions corresponding to the defined {@link TrafficClass TrafficClasses}
+	 * @throws Exception if the routeProbabilities do not add up to (approximately) 1.0
+	 */
+	public ExportTripPattern(Double flow, double[] vehicleTypeFractions) throws Exception {
+		//this.flow = flow;
+		flowGraph = new TimeScaleFunction((Storable) null);
+		flowGraph.insertPair(0, flow);
+		this.fractions = vehicleTypeFractions;
+	}
+	
+	/**
+	 * Create an ExportTripPattern.
+	 * @param flowGraph TimeScaleFunction; the flow values at a set of times
+	 * @param vehicleTypeFractions double[]; list of fractions corresponding to the defined {@link TrafficClass TrafficClasses}
+	 * @throws Exception if the routeProbabilities do not add up to (approximately) 1.0
+	 */
+	public ExportTripPattern(TimeScaleFunction flowGraph, double[] vehicleTypeFractions) throws Exception {
+		this.flowGraph = new TimeScaleFunction((Storable) null, flowGraph);
+		this.fractions = vehicleTypeFractions;
+		checkFractions();
 	}
 	
 	public void addRoute(ArrayList<Integer> route, double probability) {
@@ -1208,10 +1239,10 @@ class ExportTripPattern {
 		routeProbabilities.add(probability);
 	}
 
-	public Double getFlow(int routeIndex) {
+	public TimeScaleFunction getFlow(int routeIndex) {
 		if ((routeIndex < 0) || (routeIndex >= routeProbabilities.size()))
 			throw new Error("no routes defined");
-		return flow * routeProbabilities.get(routeIndex);
+		return new TimeScaleFunction((Storable) null, flowGraph, routeProbabilities.get(routeIndex));
 	}
 
 	public double[] getFractions() {

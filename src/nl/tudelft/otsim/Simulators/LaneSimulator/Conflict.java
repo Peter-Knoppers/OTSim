@@ -618,8 +618,6 @@ public class Conflict {
             while ((j != null) && (! j.isMerge()))
                 j = j.up;
             // stopped as merge was found?
-            if ((null != j) && (210 == j.id))
-            	System.out.println("watch...");
             if ((j != null) && j.isMerge()) {
                 for (Lane k : j.ups) {
                     // find appropriate rsu on lane
@@ -672,9 +670,13 @@ public class Conflict {
                 up = null;
             // move downstream for as long as the leader is still upstream, this
             // leader may have changed lane
-            if (up != null)
-                while ((up.getNeighbor(Movable.DOWN) != null) && (up.getNeighbor(Movable.DOWN).getDistanceToRSU(this) > 0))
-                    up = up.getNeighbor(Movable.DOWN);
+            // TODO: getDistanceToRSU might be called with upstream argument
+            if (up != null) {
+            	Movable downNeighbor;
+                while (((downNeighbor = up.getNeighbor(Movable.DOWN)) != null) 
+                		&& (up.getDistanceToRSU(this) > up.getHeadway(downNeighbor) + downNeighbor.l))
+                    up = downNeighbor;
+            }
             // check existing vehicle
     		long endTime2 = System.currentTimeMillis() - startTime;
             model.rsuTime2 = model.rsuTime2 + endTime2;

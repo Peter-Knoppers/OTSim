@@ -204,19 +204,16 @@ public class Model {
                 }
                 // Check that all vehicles on all lanes are correctly linked to each other
                 for (Lane l : network) {
-                	java.util.ArrayList<Movable> vehiclesOnLane = new java.util.ArrayList<Movable> (l.vehicles);
-                	// Sort by x (traveled distance on the lane)
-                	Collections.sort(vehiclesOnLane, new Comparator<Movable>() {
-						@Override
-						public int compare(Movable arg0, Movable arg1) {
-							double dx = arg0.x - arg1.x;
-							return dx > 0 ? 1 : dx < 0 ? -1 : 0;
-						}
-                	});
+                	java.util.ArrayList<Movable> vehiclesOnLane = l.getVehicles();
                 	Movable prevM = null;
                 	for (Movable m : vehiclesOnLane) {
                 		if (null != prevM) {
                 			Movable neighbor = prevM.getNeighbor(Movable.DOWN);
+                			if ((null != neighbor) && (prevM.x > neighbor.x)) {
+                				String problem = String.format("Movable %s is not correctly sorted with respect to movable %s", prevM.toString(), neighbor.toString());
+                				System.err.println(problem);
+                				throw new RuntimeException (problem);                				
+                			}
                 			if (prevM == m) {
                 				String problem = String.format("Movable %s is linked multiple times to a lane", m.toString());
                 				System.err.println(problem);

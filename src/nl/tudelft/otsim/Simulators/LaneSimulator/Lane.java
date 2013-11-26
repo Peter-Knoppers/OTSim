@@ -33,14 +33,6 @@ public class Lane {
     /** Main model. */
     public Model model;
 
-    //public jModel getModel() {
-	//	return model;
-	//}
-
-	//public void setModel(jModel model) {
-	//	this.model = model;
-	//}
-
 	/** ID of lane for user recognition. */
     protected int id;
 
@@ -75,7 +67,7 @@ public class Lane {
     protected java.util.ArrayList<RSU> RSUs = new java.util.ArrayList<RSU>();
 
     /** All movables on this lane, in no particular order. */
-    public java.util.ArrayList<Movable> vehicles = new java.util.ArrayList<Movable>(0);
+    private java.util.ArrayList<Movable> vehicles = new java.util.ArrayList<Movable>(0);
 
     /** Destination number, NODESTINATION if no destination. */
     public int destination;
@@ -85,6 +77,72 @@ public class Lane {
 
     /** Legal speed limit [km/h]. */
     public double vLim = 120;
+    
+    private void checkOrdering () {
+    	Movable prevM = null;
+    	for (Movable thisM : vehicles) {
+    		if (null != prevM)
+    			if (prevM.x > thisM.x)
+    				throw new Error("cannot happen");
+    		prevM = thisM;
+    	}
+    }
+    
+    /**
+     * Insert a Movable in the list of vehicles on this Lane.
+     * @param m Movable to insert
+     * @param pos Double; longitudinal position on this lane
+     */
+    public void paste (Movable m, double pos) {
+    	if (9 == id)
+    		System.out.println("pasting " + m.toString() + " on lane " + toString());
+    	vehicles.add(findVehicleIndex(pos), m);
+    	checkOrdering();
+    }
+    
+    /**
+     * Remove a Movable from this Lane.
+     * @param m Movable to remove
+     */
+    public void cut (Movable m) {
+    	vehicles.remove(m);
+    	checkOrdering();
+    }
+    
+    /** 
+     * Report presence of Movables on this Lane
+     * @return Boolean; true if no Movables are on this Lane; false otherwise
+     */
+    public boolean isEmpty() {
+    	return vehicles.isEmpty();
+    }
+    
+    /**
+     * Return the index where a Movable at position pos should be inserted in the vehicles list.
+     * @param pos Double; the position of the vehicle to be inserted
+     * @return index where a Movable at position pos should be inserted in the vehicles list
+     */
+    public int findVehicleIndex(double pos) {
+    	if (vehicles.size() == 0)
+    		return 0;
+    	int result = (int) (pos / l * vehicles.size());
+    	// Move backward while we're too far
+    	while ((result > 0) && (vehicles.get(result - 1).x > pos))
+    		result--;
+    	if (result < 0)
+    		return 0;
+    	while ((result < vehicles.size()) && (vehicles.get(result).x < pos))
+    		result++;
+    	return result;
+    }
+    
+    /**
+     * Return a copy of the vehicles list.
+     * @return ArrayList&lt;Movable&gt;; the copy of the vehicles list
+     */
+    public java.util.ArrayList<Movable> getVehicles() {
+    	return new java.util.ArrayList<Movable> (vehicles);
+    }
 
     /**
      * Number of lane changes to be performed from this lane towards a certain
@@ -415,6 +473,54 @@ public class Lane {
      * @return Found movable, <tt>null</tt> if none found.
      */
     public Movable findVehicle(double startX, Model.longDirection updown) {
+    	if (startX > l + 0.002)		// UGLY! This margin must be bigger than margin used in Driver.anticipatedSpeed
+    		throw new Error("StartX is out of range");
+    	int index = findVehicleIndex(startX);
+        if (updown == Model.longDirection.UP) {
+        	if (index > 0)
+        		return vehicles.get(--index);
+        	if (null != up) {
+        		markedForXadj = true;
+        		Movable result = up.lastVehicle();
+        		markedForXadj = false;
+        		return result;
+        	}
+        } else {
+        	if (index < vehicles.size())
+        		return vehicles.get(index);
+        	if (null != down) {
+        		markedForXadj = true;
+        		Movable result = down.firstVehicle();
+        		markedForXadj = false;
+        		return result;
+        	}
+        }
+    	return null;
+    }
+    
+    private Movable lastVehicle () {
+    	if (! isEmpty())
+    		return vehicles.get(vehicles.size() - 1);
+    	if ((null == up) || up.markedForXadj)
+    		return null;
+    	markedForXadj = true;
+    	Movable result = up.lastVehicle();
+    	markedForXadj = false;
+    	return result;
+    }
+    
+    private Movable firstVehicle () {
+    	if (! isEmpty())
+    		return vehicles.get(0);
+    	if ((null == down) || down.markedForXadj)
+    		return null;
+    	markedForXadj = true;
+    	Movable result = down.firstVehicle();
+    	markedForXadj = false;
+    	return result;
+    }
+    
+    public Movable oldfindVehicle(double startX, Model.longDirection updown) {
         Movable veh = null;
         if (updown == Model.longDirection.UP) {
             // if there are vehicles on the lane, pick any vehicle
@@ -425,11 +531,6 @@ public class Lane {
                 // search for upstream lane with vehicles            	
                 Lane j = up;
                 while ((j != null) && j.vehicles.isEmpty()) {
-/*                	//GUUS
-                	j.calculateLength();
-                	distance = distance + l;
-                	if (l > 40)
-                		return null;*/
                 	if (j.marked) {
                 		j = null;
                 		//System.out.println("Loop detected in \"up\" links");
@@ -582,7 +683,7 @@ public class Lane {
      * other.<br>
      * <br>
      * Note that this method can be called often, as adjustment values between
-     * any set of lanes are calculated once, and then stored for sucessive use.
+     * any set of lanes are calculated once, and then stored for successive use.
      * @param otherLane Lane from which the adjustment is required.
      * @return Distance [m] to other lane.
      */
@@ -672,6 +773,8 @@ public class Lane {
                     }
                 }
             }
+            //if (found)
+            //	throw new Error ("should not find xAdj in upstream direction");
         }
         if (!found) {
             dx = 0;
@@ -693,12 +796,12 @@ public class Lane {
      * @return <tt>true</tt> if the lanes are in the same physical lane.
      */
     public boolean isSameLane(Lane otherLane) {
-        if (otherLane==this)
+        if (otherLane == this)
             return true;
-        else if (otherLane==null)
+        else if (otherLane == null)
             return false;
         else
-            return xAdj(otherLane)!=0 && downSplit==otherLane.downSplit && upMerge==otherLane.upMerge;
+            return xAdj(otherLane) != 0 && downSplit==otherLane.downSplit && upMerge==otherLane.upMerge;
     }
 
     /**
@@ -721,6 +824,8 @@ public class Lane {
      * @return Adjacent location [m].
      */
     public double getAdjacentX(double myX, Model.latDirection dir) {
+    	//if ((356 == id) && (Model.latDirection.LEFT == dir))
+    	//	System.out.println("hier komt ie");
         if ((dir == Model.latDirection.LEFT) && !goLeft && !left.goRight)
             return myX * left.l/l; // maybe not physically adjacent, use total length only
         else if (dir==Model.latDirection.RIGHT && !goRight && !right.goLeft)

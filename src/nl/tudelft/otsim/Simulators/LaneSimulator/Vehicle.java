@@ -225,8 +225,8 @@ public class Vehicle extends Movable implements SimulatedObject {
                 }
                 // put on downstream lane
                 x -= lane.l;
-                lane.vehicles.remove(this);
-                lane.down.vehicles.add(this);
+                lane.cut(this);
+                lane.down.paste(this, x);
                 if (lane.down.isMerge()) {
                     // register the current lane as the origin of the last  
                     // entering vehicle on the next lane

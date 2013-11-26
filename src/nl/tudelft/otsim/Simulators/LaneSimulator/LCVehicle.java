@@ -53,8 +53,8 @@ public class LCVehicle extends Movable {
             }
             // put on downstream lane
             x -= lane.l;
-            lane.vehicles.remove(this);
-            lane.down.vehicles.add(this);
+            lane.cut(this);
+            lane.down.paste(this, x);
             lane = lane.down;
             if (lane.isMerge() || lane.isSplit()) {
                 Lane lTmp = lane;

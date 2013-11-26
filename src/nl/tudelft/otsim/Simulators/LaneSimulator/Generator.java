@@ -206,6 +206,10 @@ public class Generator extends Controller {
             }
             // paste at lane
             double x = nextVehicle.v * (lane.model.t - tNext);
+            if (x > downX) {
+            	success = false;
+            	break;
+            }
             vehLane = genLane;
             while (x > vehLane.l) {
                 // vehicle is generated beyond lane length

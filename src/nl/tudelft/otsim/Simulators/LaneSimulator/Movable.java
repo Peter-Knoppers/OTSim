@@ -37,6 +37,8 @@ public abstract class Movable  {
     /** Normalized heading of the vehicle. */
     public java.awt.geom.Point2D.Double heading = new java.awt.geom.Point2D.Double();
     
+    public boolean ignoreLeader = false;
+    
     private Movable[] neighbors = new Movable[6];
     private java.util.ArrayList<Movable> reverseNeighbors = new java.util.ArrayList<Movable> ();
     
@@ -350,15 +352,16 @@ public abstract class Movable  {
         // Ignore leader which is on the other side of a merge but which came
         // from another lane. It should also be only partially past the conflict.
         // The conflict should deal with the situation.
-        if ((leader == getNeighbor(DOWN)) && (leader.lane.upMerge != null) && (leader.lane.upMerge != lane.upMerge) &&
-                ((null == leader.lane.upMerge.mergeOrigin) || !leader.lane.upMerge.mergeOrigin.isSameLane(lane)) && 
-                leader.lane.upMerge.xAdj(leader.lane)+leader.x<leader.l) {
+        if ((leader == getNeighbor(DOWN)) && ignoreLeader) {
             return Double.POSITIVE_INFINITY;
         }
         double s = 0;
         double xAdjTmp;
-        if (lane==leader.lane)
+        if (lane == leader.lane) {
             s = leader.x - x; // same lane
+            if (s < 0)
+            	s += lane.l;
+        }
         else if (lane==leader.lane.left)
             s = leader.getAdjacentX(Model.latDirection.LEFT) - x; // leader is right
         else if (lane==leader.lane.right)
@@ -411,7 +414,10 @@ public abstract class Movable  {
      * @return Distance [m] between vehicle and RSU.
      */
     public double getDistanceToRSU(RSU rsu) {
-        return rsu.x + lane.xAdj(rsu.lane) - x;
+    	double reverseDistance = rsu.lane.xAdj(lane) + x - rsu.x;
+    	if ((0 == reverseDistance) || (reverseDistance > l)) 
+            return rsu.x + lane.xAdj(rsu.lane) - x; // Not found; or too far away on loop
+    	return - reverseDistance;	// vehicle nose downstream of rsu and rear upstream of rsu
     }
 
     /**
@@ -473,7 +479,7 @@ public abstract class Movable  {
      */
     public void cut() {
         // remove from lane vector
-        lane.vehicles.remove(this);
+    	lane.cut(this);
 
         /*
          * All pointers from neighbors need to be updated or removed. Finding
@@ -655,7 +661,7 @@ public abstract class Movable  {
             Movable d = j.findVehicle(j.l, Model.longDirection.UP);
             if (d != null)
                 out.add(d);
-            else if (j.upMerge!=null)
+            else if (j.upMerge != null)
                 out.addAll(findVehiclesUpstreamOfMerge(j));
             j.marked = false;
         }
@@ -730,7 +736,7 @@ public abstract class Movable  {
         			}
         		}
         	}
-            if (k.vehicles.isEmpty()) {
+            if (k.isEmpty()) {
                 // no vehicles encountered, move on
             	if (k.marked)
             		return;
@@ -746,7 +752,7 @@ public abstract class Movable  {
         			for (Movable m = otherLane.findVehicle(otherLane.l, lon); (null != m) && (this == m.getNeighbor(direction)); m = m.getNeighbor(UP))
         				m.setNeighbor(direction, getNeighbor(DOWN));
         	}
-            if (k.vehicles.isEmpty()) {
+            if (k.isEmpty()) {
                 // no vehicles encountered, move on
             	if (k.marked)
             		return;
@@ -755,6 +761,7 @@ public abstract class Movable  {
                 k.marked = false;
             } else {
                 // check if there is any vehicle that has not just exceeded its lane
+            	/* TODO: will be removed
                 int i = 0;
                 while (i < k.vehicles.size()) {
                     if (!k.vehicles.get(i).justExceededLane) {
@@ -762,12 +769,12 @@ public abstract class Movable  {
                          * A vehicle was found that has been there for at least
                          * one time step. This vehicle is the neighbor of any
                          * further upstream vehicles. The search can be stopped.
-                         */ 
+                         */ /*
                         k = null;
                         break;
                     }
                     i++;
-                }
+                }*/
                 if (null != k) {
                     /*
                      * Vehicle(s) were found, but they all just exceeded their 
@@ -817,7 +824,7 @@ public abstract class Movable  {
         					m = m.getNeighbor(DOWN))
         				m.setNeighbor(direction, this);        					
         	}
-        	if (k.vehicles.isEmpty()) {
+        	if (k.isEmpty()) {
             	if (k.marked)
             		return;
             	k.marked = true;
@@ -835,7 +842,7 @@ public abstract class Movable  {
         					m = m.getNeighbor(UP))
         				m.setNeighbor(direction, this);
         	}
-            if (k.vehicles.isEmpty()) {
+            if (k.isEmpty()) {
             	if (k.marked)
             		return;
             	k.marked = true;
@@ -880,18 +887,18 @@ public abstract class Movable  {
             java.util.ArrayList<Movable> ups = findVehiclesUpstreamOfMerge(lane);
             for (Movable d : ups)
             	if (((null == d.getNeighbor(DOWN)) || (d.getNeighbor(DOWN) == getNeighbor(DOWN))) 
-            			&& ((null == d.lane.downSplit) || (d.lane.downSplit == lane.downSplit)))
+            			&& ((null == d.lane.downSplit) || ((d.lane.downSplit == lane.downSplit) && (d.lane.xAdj(lane.downSplit) > lane.xAdj(lane.downSplit)))))
             		d.setNeighbor(DOWN, this);
         }
         if ((lane.downSplit != null) && (null == getNeighbor(DOWN))) {
             java.util.ArrayList<Movable> downs = findVehiclesDownstreamOfSplit(lane);
             for (Movable d : downs)
             	if (((null == d.getNeighbor(UP)) || (d.getNeighbor(UP) == getNeighbor(UP)))
-            			&& ((null == d.lane.upMerge) || (d.lane.upMerge == lane.upMerge)))
+            			&& ((null == d.lane.upMerge) || ((d.lane.upMerge == lane.upMerge) && (lane.upMerge.xAdj(d.lane) > lane.upMerge.xAdj(lane)))))
             		d.setNeighbor(UP, this);
         }
         // add to lane vector
-        atLane.vehicles.add(this);
+        atLane.paste(this, x);
         // set adjacent neighbors
         updateNeighbours();
         // set adjacent neighbors' new neighbors (this vehicle)
