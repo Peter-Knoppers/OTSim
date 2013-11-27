@@ -8,8 +8,10 @@ import java.util.Locale;
 import nl.tudelft.otsim.FileIO.ParsedNode;
 import nl.tudelft.otsim.FileIO.StaXWriter;
 import nl.tudelft.otsim.FileIO.XML_IO;
+import nl.tudelft.otsim.GUI.Storable;
 import nl.tudelft.otsim.Population.MovingPerson;
 import nl.tudelft.otsim.Utilities.Sorter;
+import nl.tudelft.otsim.Utilities.TimeScaleFunction;
 
 /**
  * The Trip Pattern is the final list of characteristics of the population and its activities 
@@ -27,6 +29,7 @@ public class TripPattern implements XML_IO {
 	private static final String XML_ACTIVITYID = "activityID";
 	/** Name for a TripPattern trips element when stored in XML format */
 	private static final String XML_NUMBEROFTRIPS = "trips";
+	private static final String XML_FLOWGRAPH = "flowGraph";
 	/** Name for a TripPattern location element when stored in XML format */
 	private static final String XML_LOCATION = "location";
 	
@@ -34,20 +37,22 @@ public class TripPattern implements XML_IO {
 	private HashMap<TrafficClass, Double> classDemand = new HashMap<TrafficClass, Double>();
 	private MovingPerson movingPerson ;
 	private ArrayList<Object> locationList;
-	private LinkedList<Long> departureTimeList;	
-	private double numberOfTrips;
+	private LinkedList<Long> departureTimeList;
+	protected TimeScaleFunction flowGraph = null;
 	private ArrayList<TripPatternPath> tripPatternPathList;	
 	
 	public TripPattern(TrafficDemand trafficDemand, double numberOfTrips, ArrayList<Object> locationList) {
 		this.trafficDemand = trafficDemand;
-		this.numberOfTrips = numberOfTrips;
+		flowGraph = new TimeScaleFunction((Storable) null);
+		flowGraph.insertPair(0, numberOfTrips);
 		this.locationList = locationList;
 	}
 	
 	public TripPattern(TrafficDemand trafficDemand, int numberOfTrips, ArrayList<Object> locationList,
 			LinkedList<Long> departureTimeList) {
 		this.trafficDemand = trafficDemand;
-		this.numberOfTrips = numberOfTrips;
+		flowGraph = new TimeScaleFunction((Storable) null);
+		flowGraph.insertPair(0, numberOfTrips);
 		this.locationList = locationList;
 		this.departureTimeList = departureTimeList;
 
@@ -64,18 +69,17 @@ public class TripPattern implements XML_IO {
 	public TripPattern(TrafficDemand trafficDemand, ParsedNode pn) throws Exception {
 		this.trafficDemand = trafficDemand;
 		movingPerson = null;
-		numberOfTrips = Double.NaN;
 		locationList = new ArrayList<Object>();
 		departureTimeList = new LinkedList<Long>();
 		tripPatternPathList = new ArrayList<TripPatternPath>();
+		double sumClassDemand = 0d;
 		
 		for (String fieldName : pn.getKeys()) {
 			String value = pn.getSubNode(fieldName, 0).getValue();
 			if (fieldName.equals(XML_NUMBEROFTRIPS)) {
-				if (Double.isNaN(numberOfTrips))
-					numberOfTrips = 0;
 				for (int i = pn.size(XML_NUMBEROFTRIPS); --i >= 0; ) {
 					value = pn.getSubNode(fieldName,  i).getValue();
+					sumClassDemand += Double.parseDouble(value);
 					String trafficClassName = pn.getSubNode(XML_NUMBEROFTRIPS, i).getAttributeValue(TrafficClass.XMLTAG);
 					if (null != trafficClassName) {
 						TrafficClass tc = trafficDemand.lookupTrafficClass(trafficClassName);
@@ -83,8 +87,9 @@ public class TripPattern implements XML_IO {
 							throw new Exception("TrafficDemand refers to undefined traffic class \"" + trafficClassName + "\" near " + pn.description());
 						classDemand.put(tc, Double.parseDouble(value));
 					}
-					numberOfTrips += Double.parseDouble(value);
 				}
+			} else if (fieldName.equals(XML_FLOWGRAPH)) {
+				flowGraph = new TimeScaleFunction((Storable) null, pn.getSubNode(XML_FLOWGRAPH, 0));
 			} else if (fieldName.equals(XML_LOCATION)) {
 				// FIXME: XML format for the location list is bad
 				for(String location : value.split(" "))
@@ -92,8 +97,10 @@ public class TripPattern implements XML_IO {
 			} else
 				throw new Exception("Unknown field in TrafficDemand: \"" + fieldName + "\" near " + pn.description());
 		}
-		if (Double.isNaN(numberOfTrips))
-			throw new Exception("TripPattern does not define NumberOfTrips " + pn.description());
+		if (null == flowGraph) {
+			flowGraph = new TimeScaleFunction((Storable) null);
+			flowGraph.insertPair(0, sumClassDemand);
+		}
 	}
 
 	public TrafficDemand getTrafficDemand() {
@@ -112,27 +119,23 @@ public class TripPattern implements XML_IO {
 	 * Retrieve the total flow for this TripPattern.
 	 * @return Double; the total flow for this TripPattern
 	 */
-	public double getNumberOfTrips() {
-		return numberOfTrips;
-	}
+	//public double getNumberOfTrips() {
+	//	return numberOfTrips;
+	//}
 	
 	/**
 	 * Return the flow for a specified TrafficClass.
 	 * @param tc {@link TrafficClass}; the TrafficClass to return the flow for
 	 * @return Double; the flow for the specified {@link TrafficClass}
 	 */
-	public double getNumberOfTrips(TrafficClass tc) {
+	
+	/*public double getNumberOfTrips(TrafficClass tc) {
 		if (classDemand.size() == 0)
 			return tc.getDefaultFraction() * getNumberOfTrips();
 		if (null == classDemand.get(tc))
 			return 0;
 		return classDemand.get(tc) * getNumberOfTrips();
-	}
-
-	// TODO never used
-	public void setNumberOfTrips(int numberOfTrips) {
-		this.numberOfTrips = numberOfTrips;
-	}
+	}*/
 
 	public ArrayList<Object> getLocationList() {
 		return locationList;
@@ -191,8 +194,11 @@ public class TripPattern implements XML_IO {
 	}
 
 	private boolean writeTrips(StaXWriter staXWriter) {
-		if (classDemand.size() == 0)
-			return staXWriter.writeNode(XML_NUMBEROFTRIPS, String.format(Locale.US, "%f", numberOfTrips));
+		if (classDemand.size() == 0) {
+			if (flowGraph.isTrivial())
+				return staXWriter.writeNode(XML_NUMBEROFTRIPS, String.format(Locale.US, "%f", flowGraph.getFactor(0)));
+			return flowGraph.writeXML(staXWriter);
+		}
 		for (String className : Sorter.asSortedList(trafficDemand.trafficClassNames())) {
 			TrafficClass tc = trafficDemand.lookupTrafficClass(className);
 			Double flow = classDemand.get(tc);
@@ -227,8 +233,11 @@ public class TripPattern implements XML_IO {
 		}
 		// FIXME: This code is very inefficient...
 		ArrayList<String> names = new ArrayList<String>();
-		for (TrafficClass tc : classDemand.keySet())
+		double totalDemand = 0;
+		for (TrafficClass tc : classDemand.keySet()) {
 			names.add(tc.getName());
+			totalDemand += classDemand.get(tc);
+		}
 		for (String name : Sorter.asSortedList(names)) {
 			TrafficClass trafficClass = null;
 			for (TrafficClass tc : classDemand.keySet())
@@ -236,7 +245,7 @@ public class TripPattern implements XML_IO {
 					trafficClass = tc;
 			if (null == trafficClass)
 				throw new Error("Cannot happen");
-			result += String.format(Locale.US, "\t%s:%.6f", trafficClass.getName(), classDemand.get(trafficClass) / numberOfTrips);
+			result += String.format(Locale.US, "\t%s:%.6f", trafficClass.getName(), classDemand.get(trafficClass) / totalDemand);
 		}
 		return result;
 	}

@@ -342,10 +342,11 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 				makeGenerator(routeFlows, currentNode, microNetwork, routeList, flowGraph, fractions);
 				routeFlows.clear();
 				routeList.clear();
-				flowGraph = trip.flowGraph;
 				//flow = 0;
 			}
 			currentNode = nextNode;
+			flowGraph = trip.flowGraph;
+			// TODO: figure out if we need to add up the flowGraphs...
 			for (int i = 0; i < trip.routeProbabilities.size(); i++) {
 				//flow += trip.getFlow(i);
 				//double currentFlow = flowGraph.getFactor(0d);
@@ -383,13 +384,13 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 		System.out.print("Creating generator at node " + node + " flow " + numberOfTrips + " with class probabilities [");
 		for (int i = 0; i < classProbabilities.length; i++)
 			System.out.print(String.format("%s%.6f", i > 0 ? ", " : "", classProbabilities[i]));
-		System.out.print("], path flows [");
+		System.out.print("], path flows {");
 		for (int i = 0; i < routeFlows.size(); i++)
 			System.out.print(String.format("%.2f ", routeFlows.get(i)));
 		System.out.println("] and routes [");
 		for (int i = 0; i < routes.size(); i++)
 			System.out.println("r" + i + " " + routes.get(i));
-		System.out.println("]\n");
+		System.out.println("{ and flow graph " + flowGraph.export() + "\n");
 		int routeCount = routeFlows.size();
 		double probabilities[] = new double[routeCount];
 		Route[] routePaths = new Route[routeCount];

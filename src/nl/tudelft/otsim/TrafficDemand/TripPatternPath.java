@@ -1,10 +1,10 @@
 package nl.tudelft.otsim.TrafficDemand;
 
 import java.util.ArrayList;
-import java.util.Collection;
 
 import nl.tudelft.otsim.GeoObjects.Node;
-import nl.tudelft.otsim.ShortesPathAlgorithms.Path;
+import nl.tudelft.otsim.GUI.Storable;
+import nl.tudelft.otsim.Utilities.TimeScaleFunction;
 
 /**
  * This class provides details of a (part of a) trip
@@ -17,7 +17,8 @@ import nl.tudelft.otsim.ShortesPathAlgorithms.Path;
 public class TripPatternPath {
 	
 	private TripPattern tripPattern;
-	private double numberOfTrips;
+	//private double numberOfTrips;
+	private TimeScaleFunction flowPattern = null;
 	//private ArrayList<Node> nodeList;	
 	private Node fromNode;
 	private Node toNode;
@@ -27,16 +28,34 @@ public class TripPatternPath {
 	private ArrayList<Double> costs = new ArrayList<Double> ();
 	private ArrayList<Double> probabilities = null;
 
+	public TripPatternPath(TripPattern tripPattern, TimeScaleFunction flowPattern, Node fromNode, Node toNode) {
+		this.tripPattern = tripPattern;
+		this.flowPattern = flowPattern;
+		this.fromNode = fromNode;
+		this.toNode = toNode;
+	}
 	public TripPatternPath(TripPattern tripPattern, double numberOfTrips, Node fromNode, Node toNode) {
 		this.tripPattern = tripPattern;
-		this.numberOfTrips = numberOfTrips;
+		flowPattern = new TimeScaleFunction((Storable) null);
+		flowPattern.insertPair(0, numberOfTrips);
+		//this.numberOfTrips = numberOfTrips;
 		this.fromNode = fromNode;
 		this.toNode = toNode;
 	}
 	
+	public TripPatternPath(TripPattern tripPattern, TimeScaleFunction flowPattern, ArrayList<Node> nodeList) {
+		this.tripPattern = tripPattern;
+		this.flowPattern = flowPattern;
+		this.setNodeList(nodeList);
+		if (nodeList.size() != 2)
+			System.err.println("Hmm node list size is " + nodeList.size());
+	}
+
 	public TripPatternPath(TripPattern tripPattern, double numberOfTrips, ArrayList<Node> nodeList) {
 		this.tripPattern = tripPattern;
-		this.numberOfTrips = numberOfTrips;
+		flowPattern = new TimeScaleFunction((Storable) null);
+		flowPattern.insertPair(0, numberOfTrips);
+		//this.numberOfTrips = numberOfTrips;
 		this.setNodeList(nodeList);
 		if (nodeList.size() != 2)
 			System.err.println("Hmm node list size is " + nodeList.size());
@@ -50,9 +69,9 @@ public class TripPatternPath {
 	//	this.tripPattern = tripPattern;
 	//}
 
-	public double getNumberOfTrips() {
-		return numberOfTrips;
-	}
+	//public double getNumberOfTrips() {
+	//	return numberOfTrips;
+	//}
 
 	//public void setNumberOfTrips(double numberOfTrips) {
 	//	this.numberOfTrips = numberOfTrips;

@@ -92,6 +92,10 @@ public class TrafficDemand implements Storable {
 			timeScaleFunction.insertPair(120.1, 2);
 		}
 		*/
+		if (null == timeScaleFunction) {
+			timeScaleFunction = new TimeScaleFunction((Storable) null);
+			timeScaleFunction.insertPair(0, 1);
+		}	
 	}
 	
 	/**
@@ -125,7 +129,7 @@ public class TrafficDemand implements Storable {
 		 */	
 		for (TripPattern tripPattern : tripPatternList) {
 			int numberOfLocations = tripPattern.getLocationList().size();
-			double numberOfTrips = tripPattern.getNumberOfTrips();
+			//double numberOfTrips = tripPattern.getNumberOfTrips();
 			ArrayList<ArrayList<Node>> listNodeList = new ArrayList<ArrayList<Node>>();
 			
 			/* The total amount of possible paths:
@@ -204,7 +208,7 @@ public class TrafficDemand implements Storable {
 					ArrayList<Node> path = new ArrayList<Node> (numberOfLocations);
 					for (int i = 0; i < numberOfLocations; i++)
 						path.add(listNodeList.get(i).get(indices[i]));
-					TripPatternPath tripPatternPath = new TripPatternPath(tripPattern,  weight * numberOfTrips, path);
+					TripPatternPath tripPatternPath = new TripPatternPath(tripPattern,  new TimeScaleFunction((Storable) null, timeScaleFunction, weight), path);
 					tripPattern.addTripPatternPath(tripPatternPath);
 					depth--;
 					indices[depth]++;
@@ -261,13 +265,14 @@ public class TrafficDemand implements Storable {
     	}
     	createRoutes();
         for (TripPattern tripPattern : getTripPatternList()) {
-        	Double totalTrips = tripPattern.getNumberOfTrips();
-        	result += String.format(Locale.US, "TripPattern\tnumberOfTrips:\t%.2f\tLocationPattern:\t%s\tFractions%s\n", totalTrips, tripPattern.getLocationList().toString(), tripPattern.getClasslFlows());
+        	TimeScaleFunction totalFlow = new TimeScaleFunction(null, timeScaleFunction, tripPattern.flowGraph);
+        	//Double totalTrips = tripPattern.getNumberOfTrips();
+        	result += String.format(Locale.US, "TripPattern\tnumberOfTrips:\t%s\tLocationPattern:\t%s\tFractions%s\n", totalFlow.export(), tripPattern.getLocationList().toString(), tripPattern.getClasslFlows());
             for (TripPatternPath tripPatternPath : tripPattern.getTripPatternPathList()) {
-            	double numberOfTrips = 0;
-            	if (totalTrips > 0)
-            		numberOfTrips = tripPatternPath.getNumberOfTrips();
-            	result += String.format(Locale.US, "TripPatternPath\tnumberOfTrips:\t%.3f\tNodePattern:\t%s\n", numberOfTrips, tripPatternPath.getNodeList().toString());
+            	//double numberOfTrips = 0;
+            	//if (totalTrips > 0)
+            	//	numberOfTrips = tripPatternPath.getNumberOfTrips();
+            	result += String.format(Locale.US, "TripPatternPath\tnumberOfTrips:\t%s\tNodePattern:\t%s\n", tripPattern.flowGraph.export(), tripPatternPath.getNodeList().toString());
 				int index = 0;
             	for (ArrayList<Node> path : tripPatternPath.getDetailedPathList()) {
 		     		result += String.format(Locale.US, "Path:\t%f\tnodes:", tripPatternPath.getProbability(index));

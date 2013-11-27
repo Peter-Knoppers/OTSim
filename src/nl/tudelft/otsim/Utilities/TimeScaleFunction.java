@@ -118,6 +118,19 @@ public class TimeScaleFunction implements XML_IO {
 	}
 	
 	/**
+	 * Return a new TimeScaleFunction that is a copy of an existing 
+	 * TimeScaleFunction with all values multiplied by a factor.
+	 * @param storable (@link Storable}; the Storable that will be notified on changes to the new TimeScaleFunction (may be null)
+	 * @param pattern TimeScaleFunction that is used as reference.
+	 * @param factor Double; the factor that is applied to all values in the reference to obtain the factors in the new TimeScaleFunction
+	 */
+	public TimeScaleFunction (Storable storable, TimeScaleFunction pattern, double factor) {
+		this (storable, pattern);
+		for (int index = 0; index < factors.size(); index++)
+			factors.set(index, factors.get(index) * factor);
+	}
+	
+	/**
 	 * Insert a time/factor pair.
 	 * <br /> If several values are inserted with the exact same time, the 
 	 * order of the stored time/factor pairs is undefined.
@@ -208,6 +221,8 @@ public class TimeScaleFunction implements XML_IO {
 		for (Double factor : factors)
 			if (1.0d != factor)
 				return false;
+		if (null != multiplyWith)
+			return multiplyWith.isTrivial();
 		return true;
 	}
 
@@ -248,6 +263,11 @@ public class TimeScaleFunction implements XML_IO {
 		if (null != multiplyWith)
 			result += multiplyWith.export();
 		return result;
+	}
+	
+	@Override
+	public String toString () {
+		return "TimeScaleFunction " + export();
 	}
 	
 }
