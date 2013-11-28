@@ -293,14 +293,13 @@ public abstract class Movable  {
         if ((leader == getNeighbor(DOWN)) && ignoreLeader) {
             return Double.POSITIVE_INFINITY;
         }
-        double s = 0;
+        double s;
         double xAdjTmp;
         if (lane == leader.lane) {
             s = leader.x - x; // same lane
             if (s < 0)
             	s += lane.l;
-        }
-        else if (lane==leader.lane.left)
+        } else if (lane==leader.lane.left)
             s = leader.getAdjacentX(Model.latDirection.LEFT) - x; // leader is right
         else if (lane==leader.lane.right)
             s = leader.getAdjacentX(Model.latDirection.RIGHT) - x; // leader is left
@@ -339,10 +338,9 @@ public abstract class Movable  {
                 s = Double.POSITIVE_INFINITY;
             } else
                 s = veh.lcVehicle.getHeadway(leader);
-        }
-        s = s-leader.l; // gross -> net
-        if (4 == this.id)
-        	System.out.println("headway to leader of " + this.id + " is " + s + "m");
+        } else
+        	throw new Error ("Cannot compute headway of non-related lanes");
+        s = s - leader.l; // gross -> net
         return s;
     }
     
