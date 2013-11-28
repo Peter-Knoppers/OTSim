@@ -954,8 +954,15 @@ public class Driver {
             vehicle.ignoreLeader = false;
         }
         
-        if ((conflict.isMerge() && (null != conflict.otherUp()) && (conflict.otherUp() == vehicle.getNeighbor(Movable.DOWN))) && (conflict.otherUp().getDistanceToRSU(conflict.otherRSU()) < 0))
+        if ((conflict.isMerge() 
+        		&& (null != conflict.otherUp()) 
+        		&& (conflict.otherUp() == vehicle.getNeighbor(Movable.DOWN))) 
+        		&& (conflict.otherUp().getDistanceToRSU(conflict.otherRSU()) < 0)
+        		&& (conflict.lane.down.mergeOrigin != conflict.lane)) {
         	vehicle.ignoreLeader = true;
+        	System.out.println("otherUp is " + conflict.otherUp());
+        	System.out.println("up is " + conflict.up());
+        }
         
         // Ignore further conflicts
         if (ignoreFurtherConflicts)

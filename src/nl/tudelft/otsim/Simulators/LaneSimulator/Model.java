@@ -167,12 +167,6 @@ public class Model {
             for (Vehicle v : tmp)
             	v.move();	// performs a and dy
 
-            // Update all neighbor references (overtaking)
-            for (Vehicle v : vehicles)
-            	v.updateNeighbours();
-            for (LCVehicle lcv : lcVehicles)
-                lcv.updateNeighbours();
-
             // End lane changes
             for (Vehicle v : vehicles)
             	if (v.lcProgress >= 1)
@@ -396,7 +390,7 @@ public class Model {
     }
     
     private static void checkCut(Movable cutMovable, Movable other) {
-        final int[] directions = { Movable.UP, Movable.DOWN, Movable.LEFT_UP, Movable.LEFT_DOWN, Movable.RIGHT_UP, Movable.RIGHT_DOWN };
+        final int[] directions = { Movable.UP, Movable.DOWN};
         for (int direction : directions) {
         	if (other.getNeighbor(direction) == cutMovable) {
             	String whatIsIt;

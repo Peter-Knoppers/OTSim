@@ -182,9 +182,9 @@ public class Vehicle extends Movable implements SimulatedObject {
 
         // Move movable downstream
         x += dx;
-        justExceededLane = false;
+        //justExceededLane = false;
         while (x > lane.l) {
-            justExceededLane = true;
+            //justExceededLane = true;
             if ((null == lane.down) && (Lane.none == lane.destination)) {
                 model.deleted++;
                 System.out.println("Vehicle deleted as lane " + lane.id + " is exceeded (" + model.deleted + "), dead end");

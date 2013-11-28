@@ -45,6 +45,8 @@ public class Conflict {
     /** Location on vLane where major road is visible from minor road [m]. */
     protected double vX;
     
+    static double defaultMaxDistance = 1000;	// [m]
+    
     /**
      * Constructor. Not public as conflicts should be created by using 
      * <tt>createSplit</tt>, <tt>createMerge</tt> or <tt>createCrossing</tt>.
@@ -645,6 +647,8 @@ public class Conflict {
                 }
             }
         }
+        
+        int lastControlTimeStep = -1;
 
         /**
          * Maintain bookkeeping regarding which vehicle is upstream. The 
@@ -655,16 +659,18 @@ public class Conflict {
          * earliest, assuming a fixed speed equal to the current speed, is 
          * selected.
          */
-        
-
         @Override
         public void control() {
-        	if (marked) {
+        	if (lastControlTimeStep == model.k)
         		return;
-        	}
+            lastControlTimeStep = model.k;
         	model.numberOfRSUCalls++;
         	long startTime = System.currentTimeMillis();
-        	marked = true;
+        	// Check if the current up is covering the end of this Conflict
+        	double distanceToVehicle;
+        	if ((null != up) && (((distanceToVehicle = lane.xAdj(up.lane) + up.x - x) == 0) || (distanceToVehicle > up.l)))
+        		up = null;	// It is not; we'll have to search for a new up.
+        	/*
             // remove jLcVehicle as up if the lane change has ended (vehicle==null)
             if ((up != null) && (up instanceof LCVehicle) && (((LCVehicle) up).vehicle == null))
                 up = null;
@@ -698,7 +704,8 @@ public class Conflict {
                 up = null;
             }
     		long endTime3 = System.currentTimeMillis() - startTime3;
-            model.rsuTime3 = model.rsuTime3 + endTime3;            
+            model.rsuTime3 = model.rsuTime3 + endTime3;    
+            
             // find vehicle upstream of RSU
             if (up == null)
                 up = lane.findVehicle(x, Model.longDirection.UP);
@@ -722,21 +729,55 @@ public class Conflict {
         		long endTime4 = System.currentTimeMillis() - startTime4;
                 model.rsuTime4 = model.rsuTime4 + endTime4;
             }
-            marked = false;
+            */
+        	up = findVehicleUpOfConflict (defaultMaxDistance);
     		long endTime = System.currentTimeMillis() - startTime;
             model.rsuTime1 = model.rsuTime1 + endTime;
             if (496 == lane.id)
             	System.out.println("Time is " + model.t + ", up of conflictRSU at lane " + lane.up + " is " + (null == up ? "null" : up.toString()));
         }
         
+        private Movable findVehicleUpOfConflict (double maxDistance) {
+        	Movable result = lane.findVehicle(x, Model.longDirection.UP);
+        	if ((null != result) && (result.getDistanceToRSU(this) <= maxDistance))
+        		return result;	// this Movable is in range and the first on this branch
+        	else if (null != result)
+        		return null;	// too far (and any up stream conflicts are even further away; give up
+        	if (null == lane.upMerge)
+        		return null;
+        	maxDistance -= lane.upMerge.xAdj(lane) + lane.l;
+        	if (maxDistance < 0)
+        		return null;
+        	marked = true;
+        	double bestTime = Double.MAX_VALUE;
+        	for (Conflict.conflictRSU rsu : upstreamMergeConflicts) {
+        		if (rsu.marked)
+        			continue;
+        		rsu.control();
+        		Movable m = rsu.up();
+        		if (null != m) {
+        			double timeToHere = m.getDistanceToRSU(this) / m.v;
+        			if (timeToHere < bestTime) {
+        				result = m;
+        				bestTime = timeToHere;
+        			}
+        		}
+        	}
+        	marked = false;
+        	return result;
+        }
+        
         public void drawLineToUpStreamVehicle(GraphicsPanel gp) {
         	/* This is for debugging only...
         	if (up != null) {
-        		if ((478 != lane.id) && (496 != lane.id))
+        		if ((468 != lane.id) && (471 != lane.id))
         			return;
         		gp.setColor(Color.cyan);
-        		if (496 == lane.id)
+        		gp.setStroke(1f);
+        		if (471 == lane.id) {
         			gp.setColor(Color.orange);
+        			gp.setStroke(0f);
+        		}
         		gp.drawLine(lane.XY(x), up.global);
         	}
         	*/

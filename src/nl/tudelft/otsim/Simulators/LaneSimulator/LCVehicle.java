@@ -37,9 +37,9 @@ public class LCVehicle extends Movable {
 	public void translate(double dx) {
         // Move movable downstream
         x += dx;
-        justExceededLane = false;
+        //justExceededLane = false;
         if (x > lane.l) {
-            justExceededLane = true;
+            //justExceededLane = true;
             // check whether adjacent neighbors need to be reset
             // these will be found automatically by updateNeighbour() in
             // the main model loop
