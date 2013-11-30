@@ -403,6 +403,7 @@ public class Node extends Vertex implements XML_IO {
 		ArrayList<Vertex> result = new ArrayList<Vertex>();
 		result.add(vertices.get(0));
 		Point2D.Double prevPoint = null;
+		int numberOfReplacedVertices = 0;
 		for (Vertex v : vertices) {
 			Point2D.Double p = v.getPoint();
 			if (null != prevPoint) {
@@ -432,11 +433,13 @@ public class Node extends Vertex implements XML_IO {
 							
 					}
 				}
-				if (null != replacementPoint) {
+				if (null != replacementPoint && numberOfReplacedVertices == 0) {
+					numberOfReplacedVertices++;						
 					result.clear();
 					result.add(new Vertex(replacementPoint, z));
 				}
-				result.add(v);
+				else
+					result.add(v);
 			}
 			prevPoint = p;
 		}		
@@ -454,24 +457,29 @@ public class Node extends Vertex implements XML_IO {
 		if (vertices.size() < 2)
 			throw new Error("Malformed vertices");
 		if (! hasConflictArea())
-			return vertices;	// First take care of the easy cases		
+			return vertices;	// First take care of the easy cases	
+		
 		double distanceStart = vertices.get(0).getPoint().distance(circle.center());
 		double distanceEnd = vertices.get(vertices.size() - 1).getPoint().distance(circle.center());
 		if ((distanceStart < circle.radius()) && (distanceEnd < circle.radius())) {
 			System.err.println("Vertices begin AND end within circle of node " + name);
 			return vertices;
 		} 
-		if (distanceStart < circle.radius())
-			return truncateHeadAtConflictArea(vertices);
+		if (distanceStart < circle.radius()) {
+			vertices = truncateHeadAtConflictArea(vertices);
+			return vertices;
+		}
 		if (distanceEnd < circle.radius()) {
 			// This severely clobbers the provided list of vertices
 			// We'd better make sure that the caller does not mind...
 			Collections.reverse(vertices);
 			vertices = truncateHeadAtConflictArea(vertices);
+
 			Collections.reverse(vertices);
 			return vertices;
 		}
 		// Neither end of vertices is near the conflict area
+
 		return vertices;
 	}
 	

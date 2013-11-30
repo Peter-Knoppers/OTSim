@@ -385,6 +385,7 @@ public class CrossSectionElement implements XML_IO {
 	}
 	
 	private ArrayList<Vertex> generateLinkPointList(int lateralReference, boolean adjust, boolean adjustLink) {
+	
 		if (null == crossSection)
 			throw new Error("parent is null");
         ArrayList<Vertex> referenceVertices = crossSection.getVertices_r();
@@ -395,14 +396,14 @@ public class CrossSectionElement implements XML_IO {
         		prevReferenceVertices = this.connectedFrom.getVerticesInner();
         	else if (lateralReference == LateralReferenceRight)
         		prevReferenceVertices = this.connectedFrom.getVerticesOuter();  
-        }
-        
+        }	
         if (null == referenceVertices)
         	throw new Error("referenceVertices is null");
         if (referenceVertices.size() < 2) {
         	System.err.println("List of referenceVertices for link " + crossSection.getLink().getName_r() + " from node " + crossSection.getLink().getFromNode_r().getName_r() + " to node " + crossSection.getLink().getToNode_r().getName_r() + " is too short");
         	return new ArrayList<Vertex>();
-        }
+        }	
+        
         double myLateralPosition = getLateralPosition(lateralReference);
         double previousLateralPosition = myLateralPosition;
         int myRank = crossSection.getLink().getCrossSections_r().indexOf(crossSection);
@@ -432,6 +433,8 @@ public class CrossSectionElement implements XML_IO {
     		//if (otherIndex >= cseList.size())
         	//	System.out.println("No connected CrossSectionElement found");
         }
+
+	
         ArrayList<Vertex> result = Planar.createParallelVertices(referenceVertices, prevReferenceVertices, previousLateralPosition, myLateralPosition);
         ArrayList<CrossSection> csList = crossSection.getLink().getCrossSections_r();
         if (crossSection == csList.get(0) && this.connectedFrom == null)
@@ -442,7 +445,7 @@ public class CrossSectionElement implements XML_IO {
         	//if (crossSection.getLongitudinalPosition_r()== 0)
         		//System.out.println("Node at start");       		
         }
-
+        
         if (result.size() < 2)
         	System.err.println("too short");
         return result;
@@ -903,7 +906,8 @@ public class CrossSectionElement implements XML_IO {
     	int sizeThisLane = thisLanes.size();
     	int iLanePrev = 0;
     	int jLaneThis = 0;
-    	
+
+
     	//if (sizePrevLanes != sizeThisLane)  {
     		while (iLanePrev < prevLanes.size() && jLaneThis < thisLanes.size())  {
 	    		Lane prevLane = ((Lane) prevLanes.get(iLanePrev));
@@ -1227,6 +1231,8 @@ public class CrossSectionElement implements XML_IO {
 	 * <br /> This method must be called if the shape of this CrossSectionElement may have changed.
 	 */
 	public void regenerateVertices() {
+		int innerDeleted = 0;
+		int outerDeleted = 0;
 		setVertices(createAndCleanLinkPointListInner(false, true, false), createAndCleanLinkPointListOuter(false, true, false));         		
 	}
 
@@ -1240,6 +1246,8 @@ public class CrossSectionElement implements XML_IO {
 	public void setVertices(ArrayList<Vertex> inner, ArrayList<Vertex> outer) {
 		verticesInner = inner;
 		verticesOuter = outer;
+		if (verticesInner.size() != verticesOuter.size())
+			System.out.println("link 1 " );
 		if ((inner.size() < 2) || (outer.size() < 2))
 			System.err.println("Oops verticesInner.size() is " + inner.size() + " ...outer.size() is " + outer.size());
 	}
