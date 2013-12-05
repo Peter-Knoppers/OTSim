@@ -91,6 +91,7 @@ public class Vehicle extends Movable implements SimulatedObject {
     	// skip if moved
     	if (moved >= lane.model.k)
     		return;
+    	/*
     	// move leaders first
     	Movable leader = getNeighbor(Movable.DOWN);
     	if (null != leader)
@@ -100,8 +101,9 @@ public class Vehicle extends Movable implements SimulatedObject {
     		if (null != LCLeader)
     			LCLeader.getDriver().vehicle.move();
     	}
+    	*/
     	//tag as moved
-    	moved  = lane.model.k;
+    	moved = lane.model.k;
         // lateral
         lcProgress += dy;
         // longitudinal
@@ -234,6 +236,15 @@ public class Vehicle extends Movable implements SimulatedObject {
                 }
                 lane = lane.down;
                 if (lane.isMerge() || lane.isSplit()) {
+                	Movable downNeighbor = getNeighbor(Movable.DOWN);
+                	if (null != downNeighbor) {
+                		if (downNeighbor instanceof Vehicle)
+                			((Vehicle) downNeighbor).move();
+                		else if (downNeighbor instanceof LCVehicle)
+                			((LCVehicle) downNeighbor).vehicle.move();
+                		else
+                			throw new Error ("Do not know how to move an object of type " + downNeighbor.getClass());
+                	}
                     Lane lTmp = lane;
                     cut();
                     paste(lTmp, x);

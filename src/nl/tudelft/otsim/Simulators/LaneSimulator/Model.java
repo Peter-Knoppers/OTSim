@@ -176,10 +176,13 @@ public class Model {
                 for (Vehicle veh : vehicles) {
                     // Check for collisions
                     Movable leader = veh.getNeighbor(Movable.DOWN);
+                    if (veh == leader)
+                    	continue;
                     if ((null != leader) && (veh.getHeadway(leader) < 0) &&
                             ((veh.lane == leader.lane) || !leader.lane.isMerge())) {
                     	String problem = String.format("Collision: %s %.2f@%d collided with %s %.2f@%d", veh.toString(), veh.x, veh.lane.id, leader.toString(), leader.x, leader.lane.id);
                         System.err.println(problem);
+                        veh.getHeadway(leader);
                         throw new RuntimeException(problem);
                     }
                     // Check reciprocity of UP and DOWN neighbor links

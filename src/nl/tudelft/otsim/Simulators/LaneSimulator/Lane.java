@@ -66,7 +66,7 @@ public class Lane {
     /** Set of RSUs, ordered by position. */
     protected java.util.ArrayList<RSU> RSUs = new java.util.ArrayList<RSU>();
 
-    /** All movables on this lane, in no particular order. */
+    /** All Movables on this lane, in order of increasing x. */
     private java.util.ArrayList<Movable> vehicles = new java.util.ArrayList<Movable>(0);
 
     /** Destination number, NODESTINATION if no destination. */
@@ -94,8 +94,6 @@ public class Lane {
      * @param pos Double; longitudinal position on this lane
      */
     public void paste (Movable m, double pos) {
-    	if (9 == id)
-    		System.out.println("pasting " + m.toString() + " on lane " + toString());
     	vehicles.add(findVehicleIndex(pos), m);
     	checkOrdering();
     }
@@ -742,6 +740,7 @@ public class Lane {
                 }
             }
         }
+        /*
         // Search upstream
         if (!found && (null==dir || Model.longDirection.UP==dir)) {
             dx = 0;
@@ -775,7 +774,7 @@ public class Lane {
             }
             //if (found)
             //	throw new Error ("should not find xAdj in upstream direction");
-        }
+        }*/
         if (!found) {
             dx = 0;
         }
@@ -824,8 +823,6 @@ public class Lane {
      * @return Adjacent location [m].
      */
     public double getAdjacentX(double myX, Model.latDirection dir) {
-    	//if ((356 == id) && (Model.latDirection.LEFT == dir))
-    	//	System.out.println("hier komt ie");
         if ((dir == Model.latDirection.LEFT) && !goLeft && !left.goRight)
             return myX * left.l/l; // maybe not physically adjacent, use total length only
         else if (dir==Model.latDirection.RIGHT && !goRight && !right.goLeft)

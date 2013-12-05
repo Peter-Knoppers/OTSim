@@ -448,6 +448,8 @@ public class Driver {
                  * acceleration of the driver itself and the potential follower.
                  */
                 // Determine own acceleration
+                if ((19 == vehicle.id) && (vehicle.model.t >= 132.1))
+                	System.out.println("watch");
                 int[] directions = { Movable.LEFT_DOWN, Movable.RIGHT_DOWN };
                 boolean acceptLeft = false;
                 boolean acceptRight = false;
@@ -455,7 +457,8 @@ public class Driver {
                 	Movable leader = vehicle.getNeighbor(direction);
                     double aSelf = 0; // assume current speed is fine
                     double desire = Movable.LEFT_DOWN == direction ? dLeft : dRight;
-                    if ((null != leader) && (vehicle.getHeadway(leader) > 0)) {
+                    double hw = 0;
+                    if ((null != leader) && ((hw=vehicle.getHeadway(leader)) > 0)) {
                     	setT(desire);
                     	aSelf = calculateAcceleration(vehicle, leader);
                     	resetT();
@@ -507,6 +510,8 @@ public class Driver {
                     if ((null != follower) && (follower.getNeighbor(Movable.RIGHT_DOWN) == vehicle))
                     	follower.getDriver().setT(dLeft);
                 } else if ((dRight >= dLeft) && (dRight >= dFree) && acceptRight) {
+                	if (19 == vehicle.id)
+                		System.out.println("Vehicle " + vehicle.id + " changes right " + vehicle.model.t);
                     // Set dy to the right
                     double dur = Math.min((vehicle.route.xLaneChanges(vehicle.lane) - vehicle.x) / (180 / 3.6), duration);
                     vehicle.changeRight(vehicle.model.dt / dur);
@@ -728,6 +733,7 @@ public class Driver {
         double vRight = desiredVelocity();
         // Find first leader
         Movable down = lane.findVehicle(x, Model.longDirection.DOWN);
+        Movable firstDown = down;
         double s = 0;
         double v = 0;
         double v0 = desiredVelocity();
@@ -756,6 +762,8 @@ public class Driver {
             }
             // go to next vehicle
             down = down.getNeighbor(Movable.DOWN);
+            if (down == firstDown)
+            	break;
         }
         // store anticipated speeds
         if (lane.right != null)
@@ -1002,6 +1010,7 @@ public class Driver {
             // Loop vehicles while upstream vehicle which is on the conflict to 
             // select a vehicle to follow
             boolean loop = true;
+            boolean firstUp = true;
             while ((up != null) && loop) {
                 // Get headway from conflict vehicle to conflict
                 sOther = up.getDistanceToRSU(conflict.otherRSU());
@@ -1012,7 +1021,7 @@ public class Driver {
                     upFollow = up; // this vehicle will be followed (or the next)
                     sFollow = s; // headway to follow that vehicle
                     // Get next upstream vehicle
-                    if ((sOther < 0) && (null == up.getNeighbor(Movable.UP)) && conflict.isMerge()) {
+                    if (firstUp && (sOther < 0) && (null == up.getNeighbor(Movable.UP)) && conflict.isMerge()) {
                         // At a merge, the first vehicle may be partially past the 
                         // conflict and not have an upstream vehicle connected.
                         Movable up2 = conflict.otherRSU().lane.findVehicle(
@@ -1021,6 +1030,7 @@ public class Driver {
                         up = up2 != up ? up2 : null;
                     } else
                         up = up.getNeighbor(Movable.UP); // next upstream vehicle
+                    firstUp = false;
                 } else
                     loop = false;	// Vehicle upstream of self or not on the conflict, stop loop
             }
