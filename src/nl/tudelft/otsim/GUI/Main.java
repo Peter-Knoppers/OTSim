@@ -57,6 +57,7 @@ import nl.tudelft.otsim.ModelIO.LoadModel;
 import nl.tudelft.otsim.ModelIO.SaveModel;
 import nl.tudelft.otsim.Simulators.Simulator;
 import nl.tudelft.otsim.Simulators.LaneSimulator.LaneSimulator;
+import nl.tudelft.otsim.Simulators.LaneSimulator.Movable;
 import nl.tudelft.otsim.Simulators.RoadwaySimulator.RoadwaySimulator;
 import nl.tudelft.otsim.SpatialTools.Planar;
 import nl.tudelft.otsim.TrafficDemand.TrafficDemand;
@@ -229,6 +230,7 @@ public class Main extends JPanel implements ActionListener {
         menuView.add(makeMenuItem("Zoom to link ...", "zoomToLink", null, true));
         menuView.add(makeMenuItem("Zoom to node ...", "zoomToNode", null, true));
         menuView.add(makeMenuItem("Zoom to lane ...", "zoomToLane", null, true));
+        menuView.add(makeMenuItem("Zoom to vehicle ...", "zoomToVehicle", null, true));
 
         // Show the menu
         if (null != parent) {
@@ -1034,6 +1036,15 @@ public class Main extends JPanel implements ActionListener {
 		else if ("lane".equals(what))
 			for (Lane lane : model.network.getLanes())
 				mapping.put ("lane_" + lane.getID(), lane);
+		else if ("vehicle".equals(what)) {
+			GraphicsPanelClient gpc = graphicsPanel.getClient();
+			if (gpc instanceof LaneSimulator) {
+				for (Movable m : ((LaneSimulator) gpc).getModel().getVehicles())
+					mapping.put("vehicle_" + m.id, m);
+			} else
+				throw new Error("Collecting vehicle list not supported in simulator " + gpc.toString());
+		} else
+			throw new Error("Don't know how to build a list of " + what);
 		String selected = (String) JOptionPane.showInputDialog(new JFrame(), "", "Please select", JOptionPane.PLAIN_MESSAGE, null, mapping.keySet().toArray(), "");
 		if (null == selected)
 			return;
@@ -1056,6 +1067,9 @@ public class Main extends JPanel implements ActionListener {
 				bbox = Planar.expandBoundingBox(bbox, v.getX(), v.getY());
 			for (Vertex v : lane.getLaneVerticesOuter())
 				bbox = Planar.expandBoundingBox(bbox, v.getX(), v.getY());
+		} else if ("vehicle".equals(what)) {
+			Movable m = (Movable) mapping.get(selected);
+			bbox = Planar.expandBoundingBox(bbox, m.global.x, m.global.y);
 		}
 		setZoomRect(bbox, margin);			
 	}
@@ -1118,6 +1132,8 @@ public class Main extends JPanel implements ActionListener {
 			showZoomDialog("link");
 		else if ("zoomToNode".equals(command))
 			showZoomDialog("node");
+		else if ("zoomToVehicle".equals(command))
+			showZoomDialog("vehicle");
 		else if ("MeasurementPlanChanged".equals(command))
 			switchMeasurementPlan();
 		else if ("EditMeasurementPlanName".equals(command))
