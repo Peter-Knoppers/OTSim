@@ -179,8 +179,8 @@ public class Model {
                     if (veh == leader)
                     	continue;
                     if ((null != leader) && (veh.getHeadway(leader) < 0) &&
-                            ((veh.lane == leader.lane) || !leader.lane.isMerge())) {
-                    	String problem = String.format("Collision: %s %.2f@%d collided with %s %.2f@%d", veh.toString(), veh.x, veh.lane.id, leader.toString(), leader.x, leader.lane.id);
+                            ((veh.getLane() == leader.getLane()) || !leader.getLane().isMerge())) {
+                    	String problem = String.format("Collision: %s %.2f@%d collided with %s %.2f@%d", veh.toString(), veh.x, veh.getLane().id, leader.toString(), leader.x, leader.getLane().id);
                         System.err.println(problem);
                         veh.getHeadway(leader);
                         throw new RuntimeException(problem);
@@ -404,7 +404,7 @@ public class Model {
             	else
             		whatIsIt = "Movable";	// That should never happen ...
         		String description = String.format(Main.locale, "Cut %s %s %.3f@%d is still connected from movable %s %.2f@%d in direction %s", 
-        				whatIsIt, cutMovable.toString(), cutMovable.x, cutMovable.lane.id, other.toString(), other.x, other.lane.id, 
+        				whatIsIt, cutMovable.toString(), cutMovable.x, cutMovable.getLane().id, other.toString(), other.x, other.getLane().id, 
                         Movable.directionToString(direction));
             	System.err.println(description);
                 throw new RuntimeException(description);    	        		

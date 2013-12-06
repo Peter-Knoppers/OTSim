@@ -1,5 +1,7 @@
 package nl.tudelft.otsim.Simulators.LaneSimulator;
 
+import nl.tudelft.otsim.Utilities.TimeScaleFunction;
+
 /**
  * Standard vehicle generator with various types of vehicle generation.
  */
@@ -10,6 +12,8 @@ public class Generator extends Controller {
 
     /** Dynamic demand as two columns with [t, demand]. May be <tt>null</tt>. */
     protected double[][] dynamicDemand;
+    
+    protected TimeScaleFunction tsfDemand = null;
 
     /** Interpolate or stepwise dynamic demand. */
     public boolean interpDemand = true;
@@ -199,7 +203,7 @@ public class Generator extends Controller {
             double downX;
             if (down != null) {
                 nextVehicle.v = Math.min(down.v, nextVehicle.getDriver().desiredVelocity(genLane));
-                downX = down.x + genLane.xAdj(down.lane);
+                downX = down.x + genLane.xAdj(down.getLane());
             } else {
                 nextVehicle.v = nextVehicle.driver.desiredVelocity(genLane);
                 downX = Double.POSITIVE_INFINITY;
@@ -265,7 +269,7 @@ public class Generator extends Controller {
             double downX=0;
             double downL=0;
             if (down!=null) {
-                downX = down.x+genLane.xAdj(down.lane);
+                downX = down.x+genLane.xAdj(down.getLane());
                 nextVehicle.v = Math.min(down.v, nextVehicle.driver.desiredVelocity());
                 downL = down.l;
             } else
@@ -379,6 +383,14 @@ public class Generator extends Controller {
         } else
             dynamicDemand = dem;
     }
+    
+    /**
+     * Set a {@link TimeScaleFunction} as demand pattern.
+     * @param tsf {@link TimeScaleFunction}; the demand pattern
+     */
+    public void setDemand (TimeScaleFunction tsf) {
+    	tsfDemand = tsf;
+    }
 
     /**
      * Determines a headway value based on generator settings.
@@ -386,7 +398,13 @@ public class Generator extends Controller {
      */
     public double headway() {
         double headway = 0;
-        if (dist == distribution.PREDEFINED) {
+        if (null != tsfDemand) {
+        	double currentDemand = tsfDemand.getFactor(model.t);
+        	if (0d == currentDemand)
+        		headway = Double.POSITIVE_INFINITY;
+        	else
+        		headway = 1d / currentDemand;
+        } else if (dist == distribution.PREDEFINED) {
             if (generated >= preTime.length) {
                 // all vehicles were generated
                 headway = Double.POSITIVE_INFINITY;
@@ -430,7 +448,7 @@ public class Generator extends Controller {
      */
     protected static void passRSUs(Vehicle veh) {
         // upstream lanes (if any)
-        Lane l = veh.lane.up;
+        Lane l = veh.getLane().up;
         while (l != null) {
         	if (l.marked)
         		break;
@@ -441,10 +459,10 @@ public class Generator extends Controller {
             l = l.up;
         }
         // lane itself
-        for (int i = 0; i < veh.lane.RSUcount(); i++)
-            if ((veh.lane.getRSU(i).x <= veh.x) && veh.lane.getRSU(i).passable)
-                veh.lane.getRSU(i).pass(veh);
-        for (l = veh.lane.up; (l != null) && l.marked; l = l.up)
+        for (int i = 0; i < veh.getLane().RSUcount(); i++)
+            if ((veh.getLane().getRSU(i).x <= veh.x) && veh.getLane().getRSU(i).passable)
+                veh.getLane().getRSU(i).pass(veh);
+        for (l = veh.getLane().up; (l != null) && l.marked; l = l.up)
         	l.marked = false;
     }
     

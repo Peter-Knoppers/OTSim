@@ -73,7 +73,7 @@ public class OccupancyDetector extends RSU implements SimulatedDetector {
              * of the detector. If this distance is larger than the detector
              * length and vehicle length the vehicle rear has left the detector.
              */
-            if ((this.lane.xAdj(veh.lane) + veh.x > x + length + veh.l) || ((! model.vehicles.contains(veh)) && (! model.lcVehicles.contains(veh)))) {
+            if ((this.lane.xAdj(veh.getLane()) + veh.x > x + length + veh.l) || ((! model.vehicles.contains(veh)) && (! model.lcVehicles.contains(veh)))) {
                 iter.remove(); // safely remove using the iterator
                 //System.out.println("Removed vehicle " + veh + " from VehicleDetector " + this);
             }

@@ -390,7 +390,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 		System.out.println("] and routes [");
 		for (int i = 0; i < routes.size(); i++)
 			System.out.println("r" + i + " " + routes.get(i));
-		System.out.println("{ and flow graph " + flowGraph.export() + "\n");
+		System.out.println("and flow graph {" + flowGraph.export() + "}\n");
 		int routeCount = routeFlows.size();
 		double probabilities[] = new double[routeCount];
 		Route[] routePaths = new Route[routeCount];
@@ -465,10 +465,11 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 		generator.routes = routePaths;
 		generator.routeProb = probabilities;
 		generator.setClassProbabilities(classProbabilities);
+		generator.setDemand(flowGraph);
 		// TODO numberOfTrips must be converted to flow [veh/h]
 		// STUB 
-		numberOfTrips = 1000;
-		generator.setDemand(numberOfTrips);
+		//numberOfTrips = 1000;
+		//generator.setDemand(numberOfTrips);
 	}
 	
 	static Lane lookupLane(int id, ArrayList<Lane> lanes) {

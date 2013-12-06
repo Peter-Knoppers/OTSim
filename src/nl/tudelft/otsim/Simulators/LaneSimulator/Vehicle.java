@@ -89,8 +89,10 @@ public class Vehicle extends Movable implements SimulatedObject {
      */
     public void move() {
     	// skip if moved
-    	if (moved >= lane.model.k)
+    	if (moved >= getLane().model.k)
     		return;
+    	if ((6 == id) && (model.t > 646.7))
+    		System.out.println("moving " + id + " lane is " + getLane().toString());
     	/*
     	// move leaders first
     	Movable leader = getNeighbor(Movable.DOWN);
@@ -103,7 +105,7 @@ public class Vehicle extends Movable implements SimulatedObject {
     	}
     	*/
     	//tag as moved
-    	moved = lane.model.k;
+    	moved = getLane().model.k;
         // lateral
         lcProgress += dy;
         // longitudinal
@@ -133,7 +135,7 @@ public class Vehicle extends Movable implements SimulatedObject {
         double lastX;
         if (RSUsInRange.isEmpty()) {
             // search downstream of vehicle
-            lastLane = lane;
+            lastLane = getLane();
             lastX = x;
             s = 0;
         } else {
@@ -185,57 +187,57 @@ public class Vehicle extends Movable implements SimulatedObject {
         // Move movable downstream
         x += dx;
         //justExceededLane = false;
-        while (x > lane.l) {
+        while (x > getLane().l) {
             //justExceededLane = true;
-            if ((null == lane.down) && (Lane.none == lane.destination)) {
+            if ((null == getLane().down) && (Lane.none == getLane().destination)) {
                 model.deleted++;
-                System.out.println("Vehicle deleted as lane " + lane.id + " is exceeded (" + model.deleted + "), dead end");
+                System.out.println("Vehicle deleted as lane " + getLane().id + " is exceeded (" + model.deleted + "), dead end");
                 delete();
                 return;
-            } else if (route.destinations().length == 1 && lane.destination==route.destinations()[0]) {
+            } else if (route.destinations().length == 1 && getLane().destination==route.destinations()[0]) {
                 // vehicle has reached (a) destination
                 if (model.settings.getBoolean("storeTrajectoryData") && trajectory != null)
                     model.saveTrajectoryData(trajectory);
                 delete();
                 return;
             } else {	// update route
-                if (lane.destination > 0)
-                    route = route.subRouteAfter(lane.destination);
+                if (getLane().destination > 0)
+                    route = route.subRouteAfter(getLane().destination);
                 // check whether route is still reachable
-                if (!route.canBeFollowedFrom(lane.down)) {
+                if (!route.canBeFollowedFrom(getLane().down)) {
 	                model.deleted++;
-	                System.out.println("Vehicle deleted as lane " + lane.id + " is exceeded (" + model.deleted + "), route unreachable");
+	                System.out.println("Vehicle deleted as lane " + getLane().id + " is exceeded (" + model.deleted + "), route unreachable");
 	                System.out.println(toString());
 	                delete();
 	                return;
                 } 
             	// abort impossible lane change
                 if (null != lcVehicle )
-                    if ((lcDirection==Model.latDirection.RIGHT && (lane.down.right==null || lane.down.right!=lcVehicle.lane.down)) ||
-                            (lcDirection==Model.latDirection.LEFT && (lane.down.left==null || lane.down.left!=lcVehicle.lane.down)))
+                    if ((lcDirection==Model.latDirection.RIGHT && (getLane().down.right==null || getLane().down.right!=lcVehicle.getLane().down)) ||
+                            (lcDirection==Model.latDirection.LEFT && (getLane().down.left==null || getLane().down.left!=lcVehicle.getLane().down)))
                         abortLaneChange();
                 // check whether adjacent neighbors need to be reset
                 // these will be found automatically by updateNeighbour() in
                 // the main model loop
-                if ((null != lane.left) && (lane.left.down != lane.down.left)) {
+                if ((null != getLane().left) && (getLane().left.down != getLane().down.left)) {
                 	setNeighbor(Movable.LEFT_UP, null);
                 	setNeighbor(Movable.LEFT_DOWN, null);
                 }
-                if ((null != lane.right) && (lane.right.down != lane.down.right)) {
+                if ((null != getLane().right) && (getLane().right.down != getLane().down.right)) {
                 	setNeighbor(Movable.RIGHT_UP, null);
                 	setNeighbor(Movable.RIGHT_DOWN, null);
                 }
                 // put on downstream lane
-                x -= lane.l;
-                lane.cut(this);
-                lane.down.paste(this, x);
-                if (lane.down.isMerge()) {
+                x -= getLane().l;
+                getLane().cut(this);
+                getLane().down.paste(this, x);
+                if (getLane().down.isMerge()) {
                     // register the current lane as the origin of the last  
                     // entering vehicle on the next lane
-                    lane.down.mergeOrigin = lane;
+                    getLane().down.mergeOrigin = getLane();
                 }
-                lane = lane.down;
-                if (lane.isMerge() || lane.isSplit()) {
+                setLane(getLane().down);
+                if (getLane().isMerge() || getLane().isSplit()) {
                 	Movable downNeighbor = getNeighbor(Movable.DOWN);
                 	if (null != downNeighbor) {
                 		if (downNeighbor instanceof Vehicle)
@@ -245,7 +247,7 @@ public class Vehicle extends Movable implements SimulatedObject {
                 		else
                 			throw new Error ("Do not know how to move an object of type " + downNeighbor.getClass());
                 	}
-                    Lane lTmp = lane;
+                    Lane lTmp = getLane();
                     cut();
                     paste(lTmp, x);
                 }
@@ -258,10 +260,10 @@ public class Vehicle extends Movable implements SimulatedObject {
             double xAdj = 0;
             if (lcDirection == Model.latDirection.LEFT) {
                 xNew = getAdjacentX(Model.latDirection.LEFT);
-                xAdj = lcVehicle.lane.xAdj(lane.left);
+                xAdj = lcVehicle.getLane().xAdj(getLane().left);
             } else {
                 xNew = getAdjacentX(Model.latDirection.RIGHT);
-                xAdj = lcVehicle.lane.xAdj(lane.right);
+                xAdj = lcVehicle.getLane().xAdj(getLane().right);
             }
             lcVehicle.translate(xNew+xAdj - lcVehicle.x);
             lcVehicle.a = a;
@@ -290,9 +292,9 @@ public class Vehicle extends Movable implements SimulatedObject {
         model.addVehicle(lcVehicle);//
         Lane atLane;
         if (lcDirection==Model.latDirection.LEFT)
-            atLane = lane.left;
+            atLane = getLane().left;
         else
-            atLane = lane.right;
+            atLane = getLane().right;
         double atX = getAdjacentX(lcDirection);
         lcVehicle.paste(atLane, atX);
     }
@@ -306,9 +308,9 @@ public class Vehicle extends Movable implements SimulatedObject {
         Lane targetLane;
         double targetX = getAdjacentX(lcDirection);
         if (lcDirection==Model.latDirection.LEFT)
-            targetLane = lane.left;
+            targetLane = getLane().left;
         else
-            targetLane = lane.right;
+            targetLane = getLane().right;
         cut();
         paste(targetLane, targetX);
         lcProgress = 0;
@@ -368,14 +370,14 @@ public class Vehicle extends Movable implements SimulatedObject {
      * Sets the heading of this vehicle based on lane curvature.
      */
     public void setHeading() {
-        java.awt.geom.Point2D.Double p1 = lane.XY(x);
+        java.awt.geom.Point2D.Double p1 = getLane().XY(x);
         java.awt.geom.Point2D.Double p2;
         if ((x > l) || (null == rearLane)) {
-            rearLane = lane;
-            p2 = lane.XY (x - l);
+            rearLane = getLane();
+            p2 = getLane().XY (x - l);
         } else {
             // update rearLane
-            double xRear = rearLane.xAdj(lane) + x - l;
+            double xRear = rearLane.xAdj(getLane()) + x - l;
             while (xRear > rearLane.l) {
                 if (null != rearLane.down)
                     rearLane = rearLane.down;
@@ -391,7 +393,7 @@ public class Vehicle extends Movable implements SimulatedObject {
                         }
                     }
                 }
-                xRear = rearLane.xAdj (lane) + x - l;
+                xRear = rearLane.xAdj (getLane()) + x - l;
             }
             p2 = rearLane.XY (xRear);
         }
@@ -508,7 +510,7 @@ public class Vehicle extends Movable implements SimulatedObject {
 
 	@Override
 	public void paint(double when, GraphicsPanel graphicsPanel) {
-		if ((! lane.isVisible()) || ((null != rearLane) && (! rearLane.isVisible())))
+		if ((! getLane().isVisible()) || ((null != rearLane) && (! rearLane.isVisible())))
 			return;
         graphicsPanel.setColor(Color.BLACK);
         graphicsPanel.setStroke(0.1f);

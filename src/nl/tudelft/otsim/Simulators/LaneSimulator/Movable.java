@@ -17,7 +17,25 @@ public abstract class Movable  {
     public Model model;
 
     /** Lane where the movable is at. */
-    public Lane lane;
+    private Lane lane;
+    
+    /**
+     * Retrieve the {@link Lane} on which this Movable is located.
+     * @return {@link Lane}; the Lane on which this Movable is located
+     */
+    public Lane getLane() {
+    	return lane;
+    }
+    
+    /**
+     * Set the {@link Lane} on which this Movable is located.
+     * @param newLane {@link Lane}; the new lane of this Movable
+     */
+    public void setLane(Lane newLane) {
+    	if ((6 == id) && (model.t > 646.1))
+    		System.out.println("movable " + id + " changing from " + lane.toString() + " to " + newLane.toString());
+    	lane = newLane;
+    }
 
     /** Position on the lane. */
     public double x;
@@ -541,7 +559,7 @@ public abstract class Movable  {
         if (null != getNeighbor(UP))
         	getNeighbor(UP).neighborUpdated[UP] = -1;
         // set properties
-        lane = atLane;
+        setLane(atLane);
         x = atX;
         // Set pointers to this of vehicles at other side of split or merge.
         if ((null != lane.upMerge) && (null == getNeighbor(UP))) {

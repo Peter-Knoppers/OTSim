@@ -546,9 +546,9 @@ public class Lane {
             }
             if (veh != null) {
                 // search downstream; then upstream to find first vehicle with x > startX
-            	while ((null != veh.getNeighbor(Movable.DOWN)) && (veh.getNeighbor(Movable.DOWN).x + xAdj(veh.getNeighbor(Movable.DOWN).lane) <= startX))
+            	while ((null != veh.getNeighbor(Movable.DOWN)) && (veh.getNeighbor(Movable.DOWN).x + xAdj(veh.getNeighbor(Movable.DOWN).getLane()) <= startX))
             		veh = veh.getNeighbor(Movable.DOWN);
-            	while ((null != veh) && (veh.x + xAdj(veh.lane) > startX))
+            	while ((null != veh) && (veh.x + xAdj(veh.getLane()) > startX))
             		veh = veh.getNeighbor(Movable.UP);
             }
         } else if (updown==Model.longDirection.DOWN) {
@@ -576,9 +576,9 @@ public class Lane {
             }
             if (veh != null) {
                 // search upstream; then downstream to find first vehicle with x < startX
-            	while ((null != veh.getNeighbor(Movable.UP)) && (veh.getNeighbor(Movable.UP).x + xAdj(veh.getNeighbor(Movable.UP).lane) >= startX))
+            	while ((null != veh.getNeighbor(Movable.UP)) && (veh.getNeighbor(Movable.UP).x + xAdj(veh.getNeighbor(Movable.UP).getLane()) >= startX))
             		veh = veh.getNeighbor(Movable.UP);
-            	while ((null != veh) && (veh.x + xAdj(veh.lane) < startX))
+            	while ((null != veh) && (veh.x + xAdj(veh.getLane()) < startX))
             		veh = veh.getNeighbor(Movable.DOWN);
             }
         }
@@ -1070,10 +1070,12 @@ public class Lane {
         @Override
         public void pass(Vehicle vehicle) {
             Lane lan = getLaneForRoute(vehicle.route);
+            if ((6 == vehicle.id) && (model.t > 646.9))
+            	System.out.println("vehicle " + vehicle.id + " passes a splitRSU");
             if (lan != null) {
                 if (vehicle.lcVehicle != null) {
-                    if ((vehicle.lcDirection == Model.latDirection.RIGHT && (lan.right == null || lan.right != vehicle.lcVehicle.lane.down)) ||
-                            (vehicle.lcDirection == Model.latDirection.LEFT && (lan.left == null || lan.left != vehicle.lcVehicle.lane.down))) {
+                    if ((vehicle.lcDirection == Model.latDirection.RIGHT && (lan.right == null || lan.right != vehicle.lcVehicle.getLane().down)) ||
+                            (vehicle.lcDirection == Model.latDirection.LEFT && (lan.left == null || lan.left != vehicle.lcVehicle.getLane().down))) {
                     	vehicle.abortLaneChange();
                     }
                 }
@@ -1098,6 +1100,8 @@ public class Lane {
                     } else
                         break;
                 }
+                if ((6 == vehicle.id) && (model.t > 646.9))
+                	System.out.println("vehicle " + vehicle.id + " will be cut");
                 vehicle.cut();
                 vehicle.paste(lan, atX);
                 //vehicle.setNeighbor(Movable.LEFT_DOWN, null);
