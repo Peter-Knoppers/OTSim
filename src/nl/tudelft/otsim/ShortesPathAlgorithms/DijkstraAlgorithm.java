@@ -107,7 +107,8 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 		double totalCost = 0;
 		ArrayList<Link> links = getPathLinks();
 		for (Link link : links)
-			totalCost += computeCost(link, true);
+			if (9999!=link.getToNodeExpand().getNodeID()) //NGI Simulation: super-node ID = 9999 (0-cost hyper-links)
+				totalCost += computeCost(link, true);
 		return totalCost;
 	}
 
@@ -123,6 +124,8 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 	}
 	
 	private double getCost(Node node, Node target) {
+		if (9999==target.getNodeID()) //NGI Simulation: super-node ID = 9999 (0-cost hyper-links)
+			return 0;
 		for (Link link : edges)
 			if (link.getFromNodeExpand().equals(node) && link.getToNodeExpand().equals(target))
 				return computeCost(link, false);
