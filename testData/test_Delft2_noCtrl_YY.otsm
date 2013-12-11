@@ -1465,56 +1465,6 @@
           </roadMarkerAlong>
         </element>
       </crossSection>
-      <crossSection>
-        <ID>1</ID>
-        <crossSectionPositionLongitudinal>23.864596064306223</crossSectionPositionLongitudinal>
-        <elementOffsetLateral>0.0</elementOffsetLateral>
-        <element>
-          <name>road</name>
-          <width>10.5</width>
-          <roadMarkerAlong>
-            <type>|</type>
-            <lateralPosition>0.0</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>3.5</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>7.0</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>|</type>
-            <lateralPosition>10.5</lateralPosition>
-          </roadMarkerAlong>
-        </element>
-      </crossSection>
-      <crossSection>
-        <ID>2</ID>
-        <crossSectionPositionLongitudinal>24.660082599783095</crossSectionPositionLongitudinal>
-        <elementOffsetLateral>0.0</elementOffsetLateral>
-        <element>
-          <name>road</name>
-          <width>10.5</width>
-          <roadMarkerAlong>
-            <type>|</type>
-            <lateralPosition>0.0</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>3.5</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>7.0</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>|</type>
-            <lateralPosition>10.5</lateralPosition>
-          </roadMarkerAlong>
-        </element>
-      </crossSection>
     </link>
     <link>
       <name>114</name>
@@ -1535,48 +1485,6 @@
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>3.5</lateralPosition>
-          </roadMarkerAlong>
-        </element>
-      </crossSection>
-      <crossSection>
-        <ID>1</ID>
-        <crossSectionPositionLongitudinal>23.864596064306223</crossSectionPositionLongitudinal>
-        <elementOffsetLateral>0.0</elementOffsetLateral>
-        <element>
-          <name>road</name>
-          <width>7.0</width>
-          <roadMarkerAlong>
-            <type>|</type>
-            <lateralPosition>0.0</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>3.5</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>|</type>
-            <lateralPosition>7.0</lateralPosition>
-          </roadMarkerAlong>
-        </element>
-      </crossSection>
-      <crossSection>
-        <ID>2</ID>
-        <crossSectionPositionLongitudinal>24.660082599783095</crossSectionPositionLongitudinal>
-        <elementOffsetLateral>0.0</elementOffsetLateral>
-        <element>
-          <name>road</name>
-          <width>7.0</width>
-          <roadMarkerAlong>
-            <type>|</type>
-            <lateralPosition>0.0</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>3.5</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>|</type>
-            <lateralPosition>7.0</lateralPosition>
           </roadMarkerAlong>
         </element>
       </crossSection>
@@ -1646,11 +1554,6 @@
       <fromNode>6988</fromNode>
       <toNode>7055</toNode>
       <distance>284.7293587482226</distance>
-      <intermediatePoint>
-        <X>85308.9921875</X>
-        <Y>447112.34375</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -1724,11 +1627,6 @@
       <fromNode>7055</fromNode>
       <toNode>6988</toNode>
       <distance>284.7293587482226</distance>
-      <intermediatePoint>
-        <X>85308.9921875</X>
-        <Y>447112.34375</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -1770,94 +1668,6 @@
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>7.0</lateralPosition>
-          </roadMarkerAlong>
-        </element>
-      </crossSection>
-      <crossSection>
-        <ID>1</ID>
-        <crossSectionPositionLongitudinal>13.024409550556411</crossSectionPositionLongitudinal>
-        <elementOffsetLateral>0.0</elementOffsetLateral>
-        <element>
-          <name>road</name>
-          <width>7.0</width>
-          <roadMarkerAlong>
-            <type>|</type>
-            <lateralPosition>0.0</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>3.5</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>|</type>
-            <lateralPosition>7.0</lateralPosition>
-          </roadMarkerAlong>
-        </element>
-      </crossSection>
-      <crossSection>
-        <ID>2</ID>
-        <crossSectionPositionLongitudinal>13.675630028084232</crossSectionPositionLongitudinal>
-        <elementOffsetLateral>0.0</elementOffsetLateral>
-        <element>
-          <name>road</name>
-          <width>3.5</width>
-          <roadMarkerAlong>
-            <type>|</type>
-            <lateralPosition>0.0</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>|</type>
-            <lateralPosition>3.5</lateralPosition>
-          </roadMarkerAlong>
-        </element>
-      </crossSection>
-      <crossSection>
-        <ID>3</ID>
-        <crossSectionPositionLongitudinal>19.536614325834616</crossSectionPositionLongitudinal>
-        <elementOffsetLateral>0.0</elementOffsetLateral>
-        <element>
-          <name>road</name>
-          <width>10.5</width>
-          <roadMarkerAlong>
-            <type>|</type>
-            <lateralPosition>0.0</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>3.5</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>7.0</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>|</type>
-            <lateralPosition>10.5</lateralPosition>
-          </roadMarkerAlong>
-        </element>
-      </crossSection>
-      <crossSection>
-        <ID>4</ID>
-        <crossSectionPositionLongitudinal>20.187834803362435</crossSectionPositionLongitudinal>
-        <elementOffsetLateral>0.0</elementOffsetLateral>
-        <element>
-          <name>road</name>
-          <width>10.5</width>
-          <roadMarkerAlong>
-            <type>|</type>
-            <lateralPosition>0.0</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>3.5</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>7.0</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>|</type>
-            <lateralPosition>10.5</lateralPosition>
           </roadMarkerAlong>
         </element>
       </crossSection>
@@ -3298,11 +3108,6 @@
         <Y>447310.1875</Y>
         <Z>NaN</Z>
       </intermediatePoint>
-      <intermediatePoint>
-        <X>85313.2734375</X>
-        <Y>447152.3125</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -3369,11 +3174,6 @@
       <toNode>6612</toNode>
       <distance>365.85459143615424</distance>
       <intermediatePoint>
-        <X>85313.2734375</X>
-        <Y>447152.3125</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
-      <intermediatePoint>
         <X>85540.234375</X>
         <Y>447310.1875</Y>
         <Z>NaN</Z>
@@ -3401,16 +3201,6 @@
       <fromNode>6586</fromNode>
       <toNode>6614</toNode>
       <distance>348.7671518777588</distance>
-      <intermediatePoint>
-        <X>85270.1484375</X>
-        <Y>447355.46875</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
-      <intermediatePoint>
-        <X>85281.6015625</X>
-        <Y>447244.8125</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -3428,64 +3218,12 @@
           </roadMarkerAlong>
         </element>
       </crossSection>
-      <crossSection>
-        <ID>1</ID>
-        <crossSectionPositionLongitudinal>298.7671518777588</crossSectionPositionLongitudinal>
-        <elementOffsetLateral>0.0</elementOffsetLateral>
-        <element>
-          <name>road</name>
-          <width>7.0</width>
-          <roadMarkerAlong>
-            <type>|</type>
-            <lateralPosition>0.0</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>3.5</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>|</type>
-            <lateralPosition>7.0</lateralPosition>
-          </roadMarkerAlong>
-        </element>
-      </crossSection>
-      <crossSection>
-        <ID>2</ID>
-        <crossSectionPositionLongitudinal>313.7671518777588</crossSectionPositionLongitudinal>
-        <elementOffsetLateral>0.0</elementOffsetLateral>
-        <element>
-          <name>road</name>
-          <width>7.0</width>
-          <roadMarkerAlong>
-            <type>|</type>
-            <lateralPosition>0.0</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>3.5</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>|</type>
-            <lateralPosition>7.0</lateralPosition>
-          </roadMarkerAlong>
-        </element>
-      </crossSection>
     </link>
     <link>
       <name>23</name>
       <fromNode>6614</fromNode>
       <toNode>6586</toNode>
       <distance>348.76715187775875</distance>
-      <intermediatePoint>
-        <X>85281.6015625</X>
-        <Y>447244.8125</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
-      <intermediatePoint>
-        <X>85270.1484375</X>
-        <Y>447355.46875</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -5107,14 +4845,18 @@
         <elementOffsetLateral>0.0</elementOffsetLateral>
         <element>
           <name>road</name>
-          <width>3.5</width>
+          <width>7.0</width>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
           </roadMarkerAlong>
           <roadMarkerAlong>
-            <type>|</type>
+            <type>:</type>
             <lateralPosition>3.5</lateralPosition>
+          </roadMarkerAlong>
+          <roadMarkerAlong>
+            <type>|</type>
+            <lateralPosition>7.0</lateralPosition>
           </roadMarkerAlong>
         </element>
       </crossSection>
@@ -5322,14 +5064,18 @@
         <elementOffsetLateral>0.0</elementOffsetLateral>
         <element>
           <name>road</name>
-          <width>3.5</width>
+          <width>7.0</width>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
           </roadMarkerAlong>
           <roadMarkerAlong>
-            <type>|</type>
+            <type>:</type>
             <lateralPosition>3.5</lateralPosition>
+          </roadMarkerAlong>
+          <roadMarkerAlong>
+            <type>|</type>
+            <lateralPosition>7.0</lateralPosition>
           </roadMarkerAlong>
         </element>
       </crossSection>
