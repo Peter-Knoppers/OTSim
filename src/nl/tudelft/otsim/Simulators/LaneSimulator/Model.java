@@ -276,6 +276,7 @@ public class Model {
     			time = System.currentTimeMillis() - beginTime;
     			int aantal = j*100 + i;
         		
+    			/*
     			System.out.println("test network number of lanes passed " + aantal);
     			System.out.println( " number of RSU's " + numberOfRSU);
     			System.out.println("Total time RSU " + rsuTime1 + " number of RSU's calls " + numberOfRSUCalls);
@@ -284,6 +285,7 @@ public class Model {
     			System.out.println("time RSU 4 " + rsuTime4 );
 
     			System.out.println("total time " + time);
+    			*/
     			i = 0;
     			j++;
     		}
