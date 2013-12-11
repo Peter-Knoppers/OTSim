@@ -157,7 +157,6 @@ public class ConsistencyCheck {
 					System.out.println("Checking route " + describeRoute(route));
 					if (! lane.leadsTo(route.destinations[0]))
 						throw new Exception("lane " + describeLane(lane) + " does not lead to destination " + route.destinations[0] + " (entire route is " + describeRoute(route) + ")");
-					/*
 					for (int index = 1; index < route.destinations.length - 1; index++) {
 						for (Lane otherLane : model.network) {
 							if (otherLane.destination == route.destinations[index]) {
@@ -177,8 +176,7 @@ public class ConsistencyCheck {
 								}
 							}	
 						}
-					}
-					*/					
+					}		
 				}
 			}
 		}
