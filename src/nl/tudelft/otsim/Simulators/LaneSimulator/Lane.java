@@ -304,6 +304,8 @@ public class Lane {
      * destination of this lane.
      */
     public void initLaneChangeInfo() {
+    	if (destination > 0 && leadsTo(destination))
+    		endpoints.put(destination, l);
         if (destination>0 && !leadsTo(destination)) {
             // find all lanes in cross section with same destination and set initial info
             java.util.ArrayList<Lane> curlanes = new java.util.ArrayList<Lane>();
@@ -367,18 +369,23 @@ public class Lane {
                         // can be used with less lane changes or 
                         // can be used with more remaining space 
                         //  (equal number of lane changes, but now coming from downstream)
-                        uplanes.add(curlane.up); // add to uplanes
-                        // copy number of lane changes
-                        curlane.up.lanechanges.put(destination, curlane.lanechanges.get(destination));
-                        // increase with own length
-                        curlane.up.endpoints.put(destination, curlane.endpoints.get(destination)+curlane.up.l);
-                    } //else if (curlane.isMerge()) {
-                        for (Lane j : curlane.ups) {
-                            uplanes.add(j);
-                            j.lanechanges.put(destination, curlane.lanechanges.get(destination));
-                            j.endpoints.put(destination, curlane.endpoints.get(destination)+j.l);
-                        }
-                    //}
+                    	//FIXME STUB if (0 == curlane.up.destination) {
+	                        uplanes.add(curlane.up); // add to uplanes
+	                        // copy number of lane changes
+	                        curlane.up.lanechanges.put(destination, curlane.lanechanges.get(destination));
+	                        // increase with own length
+	                        curlane.up.endpoints.put(destination, curlane.endpoints.get(destination)+curlane.up.l);
+                    	//}
+                    }
+                    for (Lane j : curlane.ups) {
+                    	//FIXME STUB if (0 == j.destination) {
+	                        uplanes.add(j);
+	                        j.lanechanges.put(destination, curlane.lanechanges.get(destination));
+	                        if (null != j.endpoints.get(destination))
+	                        	System.out.println("updating cost; current cost is " + j.endpoints.get(destination));
+	                        j.endpoints.put(destination, curlane.endpoints.get(destination)+j.l);
+                    	//}
+                    }
                 }
                 // set curlanes for next loop
                 curlanes = uplanes;
@@ -980,6 +987,10 @@ public class Lane {
      * @return Whether this lane leads to the given destination.
      */
     public boolean leadsTo(int whichDestination) {
+    	if (lanechanges.isEmpty())
+    		for (Lane downLane : downs)
+    			if (downLane.leadsTo(whichDestination))
+    				return true;
         return lanechanges.containsKey(whichDestination);
     }
     
@@ -989,6 +1000,10 @@ public class Lane {
      * @return The number of lane changes for the destination.
      */
     public int nLaneChanges(int whichDestination) {
+    	if (null == lanechanges)
+    		return 0;	// STUB FIXME
+    	if (null == lanechanges.get(whichDestination))
+    		return 0;	// STUB FIXME
         return lanechanges.get(whichDestination);
     }
     
@@ -1123,10 +1138,18 @@ public class Lane {
          * @return Downstream lane for the given route, <tt>null</tt> if none applies.
          */
         public Lane getLaneForRoute(Route route) {
+        	double cost = Double.POSITIVE_INFINITY;
+        	Lane bestLane = null;
             for (Lane lan : downs)
-                if (route.canBeFollowedFrom(lan))
-                    return lan;
-            return null;
+                if (route.canBeFollowedFrom(lan)) {
+                    double thisCost = lan.endpoints.get(route.destinations[0]);
+                    System.out.println(String.format("destination %d: lane %d cost %.2f", route.destinations[0], lan.id, thisCost));
+                    if (thisCost < cost) {
+                    	cost = thisCost;
+                    	bestLane = lan;
+                    }
+                }
+            return bestLane;
         }
 
         /** Empty, needs to be implemented. */

@@ -62,6 +62,8 @@ public class LCVehicle extends Movable {
                 paste(lTmp, x);
             }
         }
+        getLane().cut(this);
+        getLane().paste(this, this.x);
     }
 
     /**

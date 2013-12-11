@@ -378,13 +378,21 @@ public abstract class Movable  {
     /**
      * Returns the distance between a vehicle and a RSU.
      * @param rsu RSU.
-     * @return Distance [m] between vehicle and RSU.
+     * @return Distance [m] from vehicle to RSU.
      */
     public double getDistanceToRSU(RSU rsu) {
-    	double reverseDistance = rsu.lane.xAdj(lane) + x - rsu.x;
-    	if ((0 == reverseDistance) || (reverseDistance > l)) 
-            return rsu.x + lane.xAdj(rsu.lane) - x; // Not found; or too far away on loop
-    	return - reverseDistance;	// vehicle nose downstream of rsu and rear upstream of rsu
+    	if (lane == rsu.lane){
+    		if (x > rsu.x + l)	// we drove beyond the RSU
+    			return rsu.x + lane.xAdj(rsu.lane) - x; // Not found; or too far away on loop
+    		// not beyond RSU
+    		return rsu.x - x;
+    	}
+    	// different lanes
+    	double reverseXAdj = rsu.lane.xAdj(lane);
+    	double reverseDistance = reverseXAdj + x - rsu.x;
+    	if ((0 == reverseXAdj) || (reverseDistance > l))
+            return rsu.x + lane.xAdj(rsu.lane) - x; // Not found; or too far away on loop    		
+    	return - reverseDistance;	// vehicle nose downstream of RSU and rear upstream of RSU
     }
 
     /**

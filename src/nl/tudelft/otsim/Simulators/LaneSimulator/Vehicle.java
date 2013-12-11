@@ -176,6 +176,8 @@ public class Vehicle extends Movable implements SimulatedObject {
         // Pass RSUs
         for (java.util.Iterator<RSU> it = RSUsInRange.iterator(); it.hasNext(); ) {
             RSU rsu = it.next();
+        	if ((3 == id) && (v < 5))
+        		System.out.println("translate " + id);
             s = getDistanceToRSU(rsu) - dx;
             if (s < 0) {
                 if (rsu.passable || rsu.noticeable)
@@ -253,7 +255,8 @@ public class Vehicle extends Movable implements SimulatedObject {
                 }
             }
         }
-        
+        getLane().cut(this);
+        getLane().paste(this, this.x);
         // Move lane change vehicle
         if (lcVehicle != null) {
             double xNew = 0;

@@ -461,6 +461,34 @@ public class Driver {
                     	resetT();
                     } else if (null != leader)
                     	aSelf = Double.NEGATIVE_INFINITY;	// Negative headway; reject gap
+                    else {
+                    	Lane otherLane = Movable.LEFT_DOWN == direction ? vehicle.getLane().left : vehicle.getLane().right;
+                    	if ((null != otherLane) && (null != otherLane.downSplit)) {
+                    		java.util.ArrayList<Movable> leaders = vehicle.findVehiclesDownstreamOfSplit(otherLane);
+                    		double ttc = Double.POSITIVE_INFINITY;
+                    		for (Movable l : leaders) {
+                    			if (vehicle == l)
+                    				continue;
+                    			double headway = vehicle.getHeadway(l);
+                    			if (headway < 0) {	// driving parallel with the tail of this leader
+                    				aSelf = Double.NEGATIVE_INFINITY;
+                    				break;
+                    			}
+                    			double thisTTC = headway / (vehicle.v - l.v);
+                    			if (vehicle.v < l.v)
+                    				thisTTC = Double.POSITIVE_INFINITY;
+                    			if (thisTTC < ttc) {
+                    				leader = l;
+                    				ttc = thisTTC;
+                    			}
+                    		}
+                    		if (null != leader) {
+                            	setT(desire);
+                            	aSelf = calculateAcceleration(vehicle, leader);
+                            	resetT();
+                            } 
+                    	}
+                    }
                     // Determine follower acceleration
                     double aFollow = 0; // assume current speed is fine
                     Movable follower = vehicle.getNeighbor(Movable.flipDirection(direction, Movable.FLIP_UD));
