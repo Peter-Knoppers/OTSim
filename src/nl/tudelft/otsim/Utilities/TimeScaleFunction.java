@@ -75,7 +75,7 @@ public class TimeScaleFunction implements XML_IO {
 			throw new Error ("Bad TimeScaleFunction description (no terminating \"]\" found)");
 		String remainder = description.substring(pos + 1).trim();
 		description = description.substring(1, pos);
-		String pairs[] = description.split("\t");
+		String pairs[] = description.split(":");
 		for(String pair : pairs) {
 			String fields[] = pair.split("/");
 			double time = Double.parseDouble(fields[0]);
@@ -257,7 +257,7 @@ public class TimeScaleFunction implements XML_IO {
 		for (int i = 0; i < size(); i++) {
 			double time = times.get(i);
 			double factor = factors.get(i);
-			result += String.format(Locale.US, "%s" + formatPair, result.length() > 1 ? "\t" : "", time, factor);
+			result += String.format(Locale.US, "%s" + formatPair, result.length() > 1 ? ":" : "", time, factor);
 		}
 		result += "]";
 		if (null != multiplyWith)

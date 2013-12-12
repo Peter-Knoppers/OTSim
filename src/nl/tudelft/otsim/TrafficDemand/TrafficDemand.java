@@ -272,7 +272,7 @@ public class TrafficDemand implements Storable {
             	//double numberOfTrips = 0;
             	//if (totalTrips > 0)
             	//	numberOfTrips = tripPatternPath.getNumberOfTrips();
-            	result += String.format(Locale.US, "TripPatternPath\tnumberOfTrips:\t%s\tNodePattern:\t%s\n", tripPattern.flowGraph.export(), tripPatternPath.getNodeList().toString());
+            	result += String.format(Locale.US, "TripPatternPath\tnumberOfTrips:\t%s\tNodePattern:\t%s\n", totalFlow.export(), tripPatternPath.getNodeList().toString());
 				int index = 0;
             	for (ArrayList<Node> path : tripPatternPath.getDetailedPathList()) {
 		     		result += String.format(Locale.US, "Path:\t%f\tnodes:", tripPatternPath.getProbability(index));
