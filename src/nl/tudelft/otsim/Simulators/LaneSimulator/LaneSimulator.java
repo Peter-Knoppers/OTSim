@@ -105,8 +105,8 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         		//System.out.println(String.format("microNetwork.add(new jLane(model, %s, %s, %d", x.toString(), y.toString(), id));
         		Lane newLane = new Lane(model, x, y, id);
         		// set origin and destination as default to none
-        		newLane.destination = Lane.none;
-        		newLane.origin = Lane.none;   
+        		newLane.destination = 0;
+        		newLane.origin = 0;   
         		newLane.vLim = speedLimit;
         		microNetwork.add(newLane);
         	}

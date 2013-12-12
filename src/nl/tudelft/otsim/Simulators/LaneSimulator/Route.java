@@ -35,12 +35,16 @@ public class Route {
      * @return Sub-route after the passed destination.
      */
     public Route subRouteAfter(int destination) {
-        int i = 0;
+        int i = -1;
         for (int j = 0; j < destinations.length; j++)
             if (destinations[j] == destination)
                 i = j + 1; // +1 for 'after'
         int[] newRoute = new int[destinations.length - i];
-        for (int j = i; j<destinations.length; j++)
+        if (i < 0) {	// did not find destination in the list
+        	System.err.println("Destination " + destination + " not found in route " + toString());
+        	return new Route(destinations);
+        }
+        for (int j = i; j < destinations.length; j++)
             newRoute[j - i] = destinations[j];
         return new Route(newRoute);
     }

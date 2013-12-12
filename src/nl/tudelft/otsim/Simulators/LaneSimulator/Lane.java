@@ -18,9 +18,6 @@ public class Lane {
 	boolean marked;
 	boolean markedForXadj;
 	
-	/** Special value for no source or no destination */
-	public final static int none = -999;
-
     /** Array of x-coordinates defining the lane curvature. */
     public double[] x;
 
@@ -304,8 +301,8 @@ public class Lane {
      * destination of this lane.
      */
     public void initLaneChangeInfo() {
-    	if (destination > 0 && leadsTo(destination))
-    		endpoints.put(destination, l);
+    	//if (destination > 0 && leadsTo(destination))
+    	//	endpoints.put(destination, l);
         if (destination>0 && !leadsTo(destination)) {
             // find all lanes in cross section with same destination and set initial info
             java.util.ArrayList<Lane> curlanes = new java.util.ArrayList<Lane>();
@@ -335,7 +332,8 @@ public class Lane {
                     int lcs = 0;
                     while (curlane.left!=null && curlane.left.goRight && 
                             !curlanes.contains(curlane.left) &&
-                            !curlane.left.lanechanges.containsKey(destination)) {
+                            !curlane.left.lanechanges.containsKey(destination)
+                            && (curlane.left.destination == 0)) {
                         // left lane is not in current set and has not been covered yet
                         lcs = lcs+1; // additional lane change required
                         curlanes.add(curlane.left); // add to current set
@@ -350,7 +348,8 @@ public class Lane {
                     int lcs = 0;
                     while (curlane.right!=null && curlane.right.goLeft && 
                             !curlanes.contains(curlane.right) &&
-                            !curlane.right.lanechanges.containsKey(destination)) {
+                            !curlane.right.lanechanges.containsKey(destination)
+                            && (curlane.right.destination == 0)) {
                         // right lane is not in current set and has not been covered yet
                         lcs = lcs+1; // additional lane change required
                         curlanes.add(curlane.right); // add to current set
@@ -369,22 +368,22 @@ public class Lane {
                         // can be used with less lane changes or 
                         // can be used with more remaining space 
                         //  (equal number of lane changes, but now coming from downstream)
-                    	//FIXME STUB if (0 == curlane.up.destination) {
+                    	if (0 == curlane.up.destination) {
 	                        uplanes.add(curlane.up); // add to uplanes
 	                        // copy number of lane changes
 	                        curlane.up.lanechanges.put(destination, curlane.lanechanges.get(destination));
 	                        // increase with own length
 	                        curlane.up.endpoints.put(destination, curlane.endpoints.get(destination)+curlane.up.l);
-                    	//}
+                    	}
                     }
                     for (Lane j : curlane.ups) {
-                    	//FIXME STUB if (0 == j.destination) {
+                    	if (0 == j.destination) {
 	                        uplanes.add(j);
 	                        j.lanechanges.put(destination, curlane.lanechanges.get(destination));
 	                        if (null != j.endpoints.get(destination))
 	                        	System.out.println("updating cost; current cost is " + j.endpoints.get(destination));
 	                        j.endpoints.put(destination, curlane.endpoints.get(destination)+j.l);
-                    	//}
+                    	}
                     }
                 }
                 // set curlanes for next loop
@@ -1159,6 +1158,14 @@ public class Lane {
         /** Empty, needs to be implemented. */
         @Override
         public void noControl() {}
+        
+        /**
+         * Return a human readable description of this splitRSU.
+         */
+        @Override
+		public String toString() {
+        	return String.format("splitRSU " + super.toString() + " on lane " + lane.id);
+        }
     }
     
     @Override

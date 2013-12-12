@@ -143,6 +143,8 @@ public class Vehicle extends Movable implements SimulatedObject {
             RSU rsu = RSUsInRange.get(RSUsInRange.size() - 1);
             if (rsu instanceof Lane.splitRSU) {
                 // at a split, search from x=0 at the next lane
+            	if (3 == id)
+            		System.out.println("Vehicle " + id + " finds splitRSU " + ((Lane.splitRSU) rsu).toString());
                 lastLane = ((Lane.splitRSU) rsu).getLaneForRoute(route);
                 lastX = 0;
             } else {
@@ -176,12 +178,15 @@ public class Vehicle extends Movable implements SimulatedObject {
         // Pass RSUs
         for (java.util.Iterator<RSU> it = RSUsInRange.iterator(); it.hasNext(); ) {
             RSU rsu = it.next();
-        	if ((3 == id) && (v < 5))
-        		System.out.println("translate " + id);
             s = getDistanceToRSU(rsu) - dx;
             if (s < 0) {
-                if (rsu.passable || rsu.noticeable)
+            	if ((3 == id) && (rsu instanceof Lane.splitRSU))
+            		System.out.println("Vehicle " + id + " passes splitRSU " + ((Lane.splitRSU) rsu).toString());
+                if (rsu.passable || rsu.noticeable) {
                     rsu.pass(this);
+                    if (! model.vehicles.contains(this))
+                    	return;	// this vehicle was deleted by rsu.pass
+                }
                 it.remove();
             }
         }
@@ -191,7 +196,7 @@ public class Vehicle extends Movable implements SimulatedObject {
         //justExceededLane = false;
         while (x > getLane().l) {
             //justExceededLane = true;
-            if ((null == getLane().down) && (Lane.none == getLane().destination)) {
+            if ((null == getLane().down) && (0 == getLane().destination)) {
                 model.deleted++;
                 System.out.println("Vehicle deleted as lane " + getLane().id + " is exceeded (" + model.deleted + "), dead end");
                 delete();
@@ -393,6 +398,7 @@ public class Vehicle extends Movable implements SimulatedObject {
                                 rearLane = tmp;
                                 break;
                             }
+                            rearLane = getLane(); // route has been updated before the rear passed a split
                         }
                     }
                 }
