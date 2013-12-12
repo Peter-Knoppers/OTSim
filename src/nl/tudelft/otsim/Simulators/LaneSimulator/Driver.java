@@ -756,11 +756,12 @@ public class Driver {
         double vRight = desiredVelocity();
         // Find first leader
         Movable down = lane.findVehicle(x, Model.longDirection.DOWN);
-        Movable firstDown = down;
+        //Movable firstDown = down;
         double s = 0;
         double v = 0;
         double v0 = desiredVelocity();
         // Loop leaders while within anticipation region
+        java.util.ArrayList<Movable> downs = new java.util.ArrayList<Movable>();
         while ((down != null) && (s <= x0)) {
             // interpolate from "v(s=x0) = vDes" to "v(s=0) = down.v" e.g.
             // with headway = 0 take vehicle fully into account, and with
@@ -785,8 +786,11 @@ public class Driver {
             }
             // go to next vehicle
             down = down.getNeighbor(Movable.DOWN);
-            if (down == firstDown)
+            if (downs.contains(down))
             	break;
+            downs.add(down);
+            //if (down == firstDown)
+            //	break;
         }
         // store anticipated speeds
         if (lane.right != null)
@@ -956,6 +960,8 @@ public class Driver {
      * @param split RSU located at the split.
      */
     public void notice(Lane.splitRSU split) {
+    	if ((585 == vehicle.id) && (vehicle.model.t > 230))
+    		System.out.println("komt ie");
         if (null == vehicle.getNeighbor(Movable.DOWN)) {
             // get appropriate lane
             Lane lane = split.getLaneForRoute(vehicle.route);
@@ -1243,7 +1249,7 @@ public class Driver {
             // Accept the gap ?
             boolean gapOK = false;
             if (conflict.visibility()<sSelf) {
-            	System.out.println("Invisible gap not OK (1)");
+            	//System.out.println("Invisible gap not OK (1)");
                 // If major road not visible, reject gap
             } else if (!up.getDriver().vehicle.route.canBeFollowedFrom(conflict.otherRSU().lane))                
                 gapOK = true;	// Crossing vehicle's route does not pass the conflict
@@ -1270,7 +1276,7 @@ public class Driver {
                     if ((ttc_o * estTimeFactor < tte_c) && ((ttc_o+t_dv) * estTimeFactor < tte_c2))
                         gapOK = true;
                     else
-                    	System.out.println("Merge gap not OK (2)");
+                    	;//System.out.println("Merge gap not OK (2)");
                 } else {                    
                     /* Accept gap on crossing if:
                      *  i)   the downstream vehicle is expected to allow 
@@ -1285,8 +1291,8 @@ public class Driver {
                     if ((ttp_d * estTimeFactor < tte_c) && (ttc_o * estTimeFactor < tte_c) && (ttp_d2 * estTimeFactor < tte_c2))
                         gapOK = true;
                     else {
-                    	System.out.println(String.format("Crossing gap not OK (3) ttp_d=%f, estTimeFactor=%f, tte_c=%f, ttc_o=%f, ttp_d2=%f, tte_c2=%f, my id=%d, sOther=%f, up=%s", ttp_d, estTimeFactor, tte_c, ttc_o, ttp_d2, tte_c2, vehicle.id, sOther, up.toString()));
-                    	System.out.println("Conflict on lane " + conflict.lane.id); 
+                    	//System.out.println(String.format("Crossing gap not OK (3) ttp_d=%f, estTimeFactor=%f, tte_c=%f, ttc_o=%f, ttp_d2=%f, tte_c2=%f, my id=%d, sOther=%f, up=%s", ttp_d, estTimeFactor, tte_c, ttc_o, ttp_d2, tte_c2, vehicle.id, sOther, up.toString()));
+                    	//System.out.println("Conflict on lane " + conflict.lane.id); 
                     }
                 }
             }
@@ -1371,8 +1377,8 @@ public class Driver {
         if (s > 0) {
             double s0tmp = this.s0; // remember regular stopping distance value
             this.s0 = s0conflict; // set small value for numerical overshoot          // Decelerate using car-following model
-            if (vehicle.v < 1)
-            	System.out.println(String.format("v=%.3f, s=%.3f", vehicle.v, s));
+            //if (vehicle.v < 1)
+            //	System.out.println(String.format("v=%.3f, s=%.3f", vehicle.v, s));
             double acc = longitudinal(vehicle.v, vehicle.v, desiredVelocity(), s);
             if (safe) {
                 if (acc > -b) {
@@ -1508,7 +1514,7 @@ public class Driver {
     
     @Override
 	public String toString() {
-    	return String.format("s0=%.2fm", s0);
+    	return String.format("Driver s0=%.2fm in vehicle %d", s0, vehicle.id);
     }
     
     /**

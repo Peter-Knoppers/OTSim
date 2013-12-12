@@ -152,7 +152,7 @@ public abstract class Movable  {
     		newNeighbor.reverseNeighbors.add(this);
     	neighbors[direction] = newNeighbor;
     	if ((neighbors[UP] == neighbors[DOWN]) && (neighbors[UP] != null))
-    		System.out.println("whoops");
+    		System.out.println("whoops up neighbor is equal to down neighbor (and not null)");
     }
     
     /**

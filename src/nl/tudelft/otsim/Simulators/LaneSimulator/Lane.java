@@ -1142,7 +1142,7 @@ public class Lane {
             for (Lane lan : downs)
                 if (route.canBeFollowedFrom(lan)) {
                     double thisCost = lan.endpoints.get(route.destinations[0]);
-                    System.out.println(String.format("destination %d: lane %d cost %.2f", route.destinations[0], lan.id, thisCost));
+                    //System.out.println(String.format("destination %d: lane %d cost %.2f", route.destinations[0], lan.id, thisCost));
                     if (thisCost < cost) {
                     	cost = thisCost;
                     	bestLane = lan;
