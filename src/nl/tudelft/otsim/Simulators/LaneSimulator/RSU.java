@@ -99,6 +99,6 @@ public abstract class RSU extends Controller {
      */
     @Override
 	public String toString() {
-    	return String.format(Main.locale, " at %.2fm (of %.2fm)", x, lane.l);
+    	return String.format(Main.locale, " on lane %d at %.2fm (of %.2fm)", lane.id, x, lane.l);
     }
 }

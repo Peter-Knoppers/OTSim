@@ -385,8 +385,12 @@ public class Vehicle extends Movable implements SimulatedObject {
             p2 = getLane().XY (x - l);
         } else {
             // update rearLane
+        	int attempt = 0;
             double xRear = rearLane.xAdj(getLane()) + x - l;
             while (xRear > rearLane.l) {
+            	// FIXME
+            	if (++attempt > 100)
+            		return;
                 if (null != rearLane.down)
                     rearLane = rearLane.down;
                 else if (rearLane.isSplit()) {

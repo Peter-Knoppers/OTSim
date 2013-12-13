@@ -692,16 +692,66 @@ public class Lane {
      * @return Distance [m] to other lane.
      */
     public double xAdj(Lane otherLane) {
-        return xAdj(otherLane, null);
+        // 0 for self or no other lane
+        if ((this == otherLane) || (null == otherLane))
+            return 0;
+        // return earlier found value
+        if (xAdjust.containsKey(otherLane.id))
+            return xAdjust.get(otherLane.id);
+        // find, store (in helper method) and return value
+        return xAdj(otherLane, 0, new Object());
     }
     
+    // distance marker for xAdj recursion to stop in case of (longer) loop
+    private double xAdjDistance = Double.POSITIVE_INFINITY;
+    // last lane on which xAdj(otherLane) was called, the search of which reached this lane
+    //private Lane xAdjLane = null;
+    // last key when xAdj(otherLane) was called, the search of which reached this lane
+    protected Object xAdjKey = null;
+
     /**
      * Performs the actual work of <tt>xAdj(jLane)</tt>.
      * @param otherLane Lane from which the adjustment is required.
      * @param dir Direction of search, use <tt>null</tt> for both.
      * @return Distance [m] to other lane.
      */
-    protected double xAdj(Lane otherLane, Model.longDirection dir) {
+    protected double xAdj(Lane otherLane, double distance, final Object key) {
+        // return ‘not found’ value if better value has already been found (to stop recursion in a loop)
+        // this will overwrite information in case distance<xAdjDistance as this is a shorter connection
+        if ((key == xAdjKey) && (distance >= xAdjDistance))
+            return 0;
+        xAdjDistance = distance; // remember distance traveled up to this lane
+        xAdjKey = key; // remember to which original lane this pertains    
+        double dx = 0; // longitudinal difference between two lanes
+        double dx2; // used for recursive search
+        if (null != down) {
+            if (down == otherLane)
+                dx = l;
+            else { // use further recursion
+                dx2 = down.xAdj(otherLane, distance + l, key);
+                if (dx2 > 0)
+                    dx = dx2 + l;
+            }
+        } else if (isSplit()) {
+            if (downs.contains(otherLane))
+                dx = l;
+            else { // find the minimum distance from any of the splits
+                double minDx2 = Double.POSITIVE_INFINITY;
+                for (Lane j : downs) { // use further recursion
+                    dx2 = j.xAdj(otherLane, distance + l, key);
+                    if ((dx2 > 0) && (dx2 < minDx2))
+                    	minDx2 = dx2;
+                }
+                if (!Double.isInfinite(minDx2))
+                    dx = minDx2 + l;
+            }
+        }
+        xAdjust.put(otherLane.id, dx);
+        return dx;
+    }
+
+    /*
+    protected double oldxAdj(Lane otherLane, Model.longDirection dir) {
         // Skip if already marked or same lane or no lane
         if (markedForXadj || otherLane==this || otherLane==null) {
             return 0;
@@ -746,41 +796,6 @@ public class Lane {
                 }
             }
         }
-        /*
-        // Search upstream
-        if (!found && (null==dir || Model.longDirection.UP==dir)) {
-            dx = 0;
-            if (null!=up) {
-                if (up==otherLane) {
-                    found = true;
-                    dx -= up.l;
-                } else {
-                    // use further recursion
-                    dx2 = up.xAdj(otherLane, Model.longDirection.UP);
-                    if (dx2<0) {
-                        found = true;
-                        dx += dx2-up.l;
-                    }
-                }
-            } else if (isMerge()) {
-                if (ups.contains(otherLane)) {
-                    found = true;
-                    dx = -otherLane.l;
-                } else {
-                    for (Lane j : ups) {
-                        // use further recursion
-                        dx2 = j.xAdj(otherLane, Model.longDirection.UP);
-                        if (dx2<0) {
-                            found = true;
-                            dx += dx2-j.l;
-                            break;
-                        }
-                    }
-                }
-            }
-            //if (found)
-            //	throw new Error ("should not find xAdj in upstream direction");
-        }*/
         if (!found) {
             dx = 0;
         }
@@ -791,6 +806,7 @@ public class Lane {
         markedForXadj = false;
         return dx;
     }
+    */
     
     /**
      * Checks whether two <tt>jLane</tt>s are in the same physical lane, e.g.
@@ -1083,9 +1099,9 @@ public class Lane {
          */
         @Override
         public void pass(Vehicle vehicle) {
-            Lane lan = getLaneForRoute(vehicle.route);
-            if ((6 == vehicle.id) && (model.t > 646.9))
+            if (3 == vehicle.id)
             	System.out.println("vehicle " + vehicle.id + " passes a splitRSU");
+            Lane lan = getLaneForRoute(vehicle.route);
             if (lan != null) {
                 if (vehicle.lcVehicle != null) {
                     if ((vehicle.lcDirection == Model.latDirection.RIGHT && (lan.right == null || lan.right != vehicle.lcVehicle.getLane().down)) ||
