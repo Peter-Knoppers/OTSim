@@ -2,7 +2,6 @@ package nl.tudelft.otsim.GeoObjects;
 
 import static org.junit.Assert.*;
 
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
 import nl.tudelft.otsim.FileIO.StaXWriter;
@@ -49,95 +48,105 @@ public class NodeTest {
 		//System.out.println(String.format(Locale.US, "rounding %s to %d digits yields %s", in, fractionalDigits, result));
 		return result;
 	}
+
+	/**
+	 * Format of the description of the testJunctions:
+	 * Each String describes a test junction.
+	 * Each String consists of three fields separated by a colon (:):
+	 * 1: network description
+	 * 2: expected connections
+	 * 3: textual description of the test
+	 * 
+	 * The network description consists of N fields separated by a slash (/).
+	 * Each of these fields describes one leg of the junction.
+	 * Each leg consists of three comma-separated fields
+	 * 1: number of incoming lanes
+	 * 2: number of outgoing lanes
+	 * 3: angle of the link containing the incoming and outgoing lanes
+	 * The angle is expressed in degrees; 0 is towards the right of the
+	 * screen (increasing X), 90 is towards the top of the screen (decreasing
+	 * Y).
+	 * 
+	 * The expected connections are listed per incoming leg. The descriptions
+	 * of the connections per incoming leg are separated by a slash (/).
+	 * Each incoming leg has a (possibly empty) list of expected connections.
+	 * Expected connections must be described for each lane of the leg, separated by a comma (,).
+	 * If multiple connections are expected for a lane; these must be separated by a plus (+).
+	 * Each expected connections is described with two numbers separated by a dot (.):
+	 * 1: Number of the outgoing leg that the connection connects to
+	 * 2: Rank of the lane in the outgoing leg that the connection connects to
+	 */
+	String[] testJunctions = {
+			// Fully constrained cases (sum of exiting lanes == sum of feeding lanes)
+			"2,0,-90/0,1,0/0,1,180:2.0,1.0//:T junction single left single right",
+			"3,0,-90/0,1,0/0,2,180:2.1,2.0,1.0//:T with double left, single right",
+			"3,0,-90/0,2,0/0,1,180:2.0,1.1,1.0//:T with single left, double right",
+			"4,0,-90/0,2,0/0,2,180:2.1,2.0,1.1,1.0//:T with double left, double right",
+			"3,0,-90/0,1,0/0,1,90/0,1,180:3.0,2.0,1.0///:X with single left, single straight, single right",
+			"4,0,-90/0,1,0/0,1,90/0,2,180:3.1,3.0,2.0,1.0///:X with double left, single straight, single right",
+			"4,0,-90/0,1,0/0,2,90/0,1,180:3.0,2.1,2.0,1.0///:X with single left, double straight, single right",
+			"4,0,-90/0,2,0/0,1,90/0,1,180:3.0,2.0,1.1,1.0///:X with single left, single straight, double right",
+			"5,0,-90/0,1,0/0,2,90/0,2,180:3.1,3.0,2.1,2.0,1.0///:X with double left, double straight, single right",
+			"5,0,-90/0,2,0/0,1,90/0,2,180:3.1,3.0,2.0,1.1,1.0///:X with double left, single straight, double right",
+			"5,0,-90/0,2,0/0,2,90/0,1,180:3.0,2.1,2.0,1.1,1.0///:X with single left, double straight, double right",
+			"6,0,-90/0,2,0/0,2,90/0,2,180:3.1,3.0,2.1,2.0,1.1,1.0///:X with double left, double straight, double right",
+			// Fully constrained cases (sum of feeding lanes == 1)
+			"1,0,-90/0,1,0/0,1,180:2.0+1.0//:T with single left, single right",
+			"1,0,-90/0,1,0/0,1,90/0,1,180:3.0+2.0+1.0///:X with single left, single straight, single right",
+			// U_turn dow not work yet "1,0,-90/0,1,0/0,1,90/0,1,180/0,1,270:4.0+3.0+2.0+1.0//:X with single lanes and U-turn",
+			// Unconstrained cases
+			"2,0,-90/0,2,0/0,2,90/0,2,180:3.1+3.0,2.1+2.0+1.1+1.0///:X with double feed, double left double straight double right",
+			// The result in the above case does not look very good... (the coded expected result was adapted to match the actual result)
+			// The connections to 3.0 and 2.1 are not so fine...
+	};
+
+	private Network network;
+	private Junction junction;
+	private Node[] otherNodes;
+	private Link[] incomingLinks;
+	private Link[] outgoingLinks;
+	
+	private void buildTestJunction(String description) {
+		junction = new Junction(description);
+		// Create a Network that matches this junction
+		network = new Network();
+		// Location of the junction Node
+		final double cx = 0;
+		final double cy = 0; 
+		final double cz = 0;
+		final double distance = 100;	// distance of neighboring Nodes (from the junction) in m
+		Node junctionNode = network.addNode ("junction", network.nextNodeID(), cx, cy, cz);
+		final int legCount = junction.legCount();
+		otherNodes = new Node[legCount];
+		incomingLinks = new Link[legCount];
+		outgoingLinks = new Link[legCount];
+		
+		for (int legNo = 0; legNo < legCount; legNo++) {
+			Junction.Leg leg = junction.getLeg(legNo);
+			otherNodes[legNo] = network.addNode ("neighborNode" + legNo, network.nextNodeID(), round(cx + distance * Math.cos(Math.toRadians(leg.angle)), 3), round(cy + distance * Math.sin(Math.toRadians(leg.angle)), 3), cz);
+			incomingLinks[legNo] = createLink(network, "feedLink" + legNo, otherNodes[legNo], junctionNode, leg.inLaneCount);
+			outgoingLinks[legNo] = createLink(network, "exitLink" + legNo, junctionNode, otherNodes[legNo], leg.outLaneCount);
+		}
+		assertEquals("Network rebuild should succeed", Network.RebuildResult.SUCCESS, network.rebuild());
+	}
 	
 	/**
 	 * Test junction expansion
 	 */
 	@Test
 	public void testFixLinkConnections() {
-		/**
-		 * Format of the description of the testJunctions:
-		 * Each String describes a test junction.
-		 * Each String consists of three fields separated by a colon (:):
-		 * 1: network description
-		 * 2: expected connections
-		 * 3: textual description of the test
-		 * 
-		 * The network description consists of N fields separated by a slash (/).
-		 * Each of these fields describes one leg of the junction.
-		 * Each leg consists of three comma-separated fields
-		 * 1: number of incoming lanes
-		 * 2: number of outgoing lanes
-		 * 3: angle of the link containing the incoming and outgoing lanes
-		 * The angle is expressed in degrees; 0 is towards the right of the
-		 * screen (increasing X), 90 is towards the top of the screen (decreasing
-		 * Y).
-		 * 
-		 * The expected connections are listed per incoming leg. The descriptions
-		 * of the connections per incoming leg are separated by a slash (/).
-		 * Each incoming leg has a (possibly empty) list of expected connections.
-		 * Expected connections must be described for each lane of the leg, separated by a comma (,).
-		 * If multiple connections are expected for a lane; these must be separated by a plus (+).
-		 * Each expected connections is described with two numbers separated by a dot (.):
-		 * 1: Number of the outgoing leg that the connection connects to
-		 * 2: Rank of the lane in the outgoing leg that the connection connects to
-		 */
-		String[] testJunctions = {
-				// Fully constrained cases (sum of exiting lanes == sum of feeding lanes)
-				"2,0,-90/0,1,0/0,1,180:2.0,1.0//:T junction single left single right",
-				"3,0,-90/0,1,0/0,2,180:2.1,2.0,1.0//:T with double left, single right",
-				"3,0,-90/0,2,0/0,1,180:2.0,1.1,1.0//:T with single left, double right",
-				"4,0,-90/0,2,0/0,2,180:2.1,2.0,1.1,1.0//:T with double left, double right",
-				"3,0,-90/0,1,0/0,1,90/0,1,180:3.0,2.0,1.0///:X with single left, single straight, single right",
-				"4,0,-90/0,1,0/0,1,90/0,2,180:3.1,3.0,2.0,1.0///:X with double left, single straight, single right",
-				"4,0,-90/0,1,0/0,2,90/0,1,180:3.0,2.1,2.0,1.0///:X with single left, double straight, single right",
-				"4,0,-90/0,2,0/0,1,90/0,1,180:3.0,2.0,1.1,1.0///:X with single left, single straight, double right",
-				"5,0,-90/0,1,0/0,2,90/0,2,180:3.1,3.0,2.1,2.0,1.0///:X with double left, double straight, single right",
-				"5,0,-90/0,2,0/0,1,90/0,2,180:3.1,3.0,2.0,1.1,1.0///:X with double left, single straight, double right",
-				"5,0,-90/0,2,0/0,2,90/0,1,180:3.0,2.1,2.0,1.1,1.0///:X with single left, double straight, double right",
-				"6,0,-90/0,2,0/0,2,90/0,2,180:3.1,3.0,2.1,2.0,1.1,1.0///:X with double left, double straight, double right",
-				// Fully constrained cases (sum of feeding lanes == 1)
-				"1,0,-90/0,1,0/0,1,180:2.0+1.0//:T with single left, single right",
-				"1,0,-90/0,1,0/0,1,90/0,1,180:3.0+2.0+1.0///:X with single left, single straight, single right",
-				"1,0,-90/0,1,0/0,1,90/0,1,180/0,1,270:4.0+3.0+2.0+1.0//:X with single lanes and U-turn",
-				// Unconstrained cases
-				"2,0,-90/0,2,0/0,2,90/0,2,180:3.1+3.0,2.1+2.0+1.1+1.0///:X with double feed, double left double straight double right",
-				// The result in the above case does not look very good... (the coded expected result was adapted to match the actual result)
-				// The connections to 3.0 and 2.1 are not so fine...
-				"1,1,-90/0,1,0/0,1,90/0,1,180:0.0+3.0+2.0+1.0///:X with single lanes and U-turn",	// fails; no U-turns created; yet
-		};
 		// TODO check that no unexpected connections were built
 		for (String testJunction : testJunctions) {
 			System.out.println("Running test " + testJunction.split(":")[2]);
-			Junction junction = new Junction(testJunction.split(":")[0]);
-			// Create a Network that matches this junction
-			Network network = new Network();
-			// Location of the junction Node
-			final double cx = 0;
-			final double cy = 0; 
-			final double cz = 0;
-			final double distance = 100;	// distance of neighboring Nodes (from the junction) in m
-			Node junctionNode = network.addNode ("junction", network.nextNodeID(), cx, cy, cz);
-			final int legCount = junction.legCount();
-			Node[] otherNodes = new Node[legCount];
-			Link[] incomingLinks = new Link[legCount];
-			Link[] outgoingLinks = new Link[legCount];
-			
-			for (int legNo = 0; legNo < legCount; legNo++) {
-				Junction.Leg leg = junction.getLeg(legNo);
-				otherNodes[legNo] = network.addNode ("neighborNode" + legNo, network.nextNodeID(), round(cx + distance * Math.cos(Math.toRadians(leg.angle)), 3), round(cy + distance * Math.sin(Math.toRadians(leg.angle)), 3), cz);
-				incomingLinks[legNo] = createLink(network, "feedLink" + legNo, otherNodes[legNo], junctionNode, leg.inLaneCount);
-				outgoingLinks[legNo] = createLink(network, "exitLink" + legNo, junctionNode, otherNodes[legNo], leg.outLaneCount);
-			}
-			assertEquals("Network rebuild should succeed", Network.RebuildResult.SUCCESS, network.rebuild());
-			
+			buildTestJunction(testJunction.split(":")[0]);
 			try {
 				String xmlText = StaXWriter.XMLString(network);
 				System.out.println(xmlText);
 			} catch (Exception e) {
 				fail("Caught unexpected exception in creation of the StaXWriter");
 			}
-			
+
+			final int legCount = junction.legCount();
 			System.out.println("Test: " + testJunction);
 			String expected = testJunction.split(":")[1];
 			assertEquals("Test description error; number of exits mismatches", legCount, expected.split("/", -1).length);
@@ -211,6 +220,7 @@ public class NodeTest {
 					
 			}
 			System.out.println("Test succeeded (generated connections match expected connections)\n");
+			System.out.println("Lane export:\n" + network.exportLanes());
 		}
 	}
 
