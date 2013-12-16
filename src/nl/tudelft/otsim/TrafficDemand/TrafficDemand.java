@@ -265,7 +265,9 @@ public class TrafficDemand implements Storable {
     	}
     	createRoutes();
         for (TripPattern tripPattern : getTripPatternList()) {
-        	TimeScaleFunction totalFlow = new TimeScaleFunction(null, timeScaleFunction, tripPattern.flowGraph);
+        	TimeScaleFunction totalFlow = new TimeScaleFunction(null, tripPattern.flowGraph, timeScaleFunction);
+        	double factor = 1d / tripPattern.getTripPatternPathList().size();
+        	totalFlow = new TimeScaleFunction(null, totalFlow, factor);
         	//Double totalTrips = tripPattern.getNumberOfTrips();
         	result += String.format(Locale.US, "TripPattern\tnumberOfTrips:\t%s\tLocationPattern:\t%s\tFractions%s\n", totalFlow.export(), tripPattern.getLocationList().toString(), tripPattern.getClasslFlows());
             for (TripPatternPath tripPatternPath : tripPattern.getTripPatternPathList()) {

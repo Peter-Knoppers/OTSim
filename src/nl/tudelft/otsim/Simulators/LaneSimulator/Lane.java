@@ -1099,8 +1099,8 @@ public class Lane {
          */
         @Override
         public void pass(Vehicle vehicle) {
-            if (3 == vehicle.id)
-            	System.out.println("vehicle " + vehicle.id + " passes a splitRSU");
+            //if (3 == vehicle.id)
+            //	System.out.println("vehicle " + vehicle.id + " passes a splitRSU");
             Lane lan = getLaneForRoute(vehicle.route);
             if (lan != null) {
                 if (vehicle.lcVehicle != null) {
@@ -1140,7 +1140,7 @@ public class Lane {
                 //vehicle.setNeighbor(Movable.RIGHT_UP, null);
             } else {
                 vehicle.model.deleted++;
-                System.out.println("Vehicle deleted while split was entered ("+model.deleted+"), no applicable downstream lane.");
+                System.err.println("Vehicle deleted while split was entered ("+model.deleted+"), no applicable downstream lane.");
                 vehicle.delete();
             }
         }

@@ -733,8 +733,6 @@ public class Conflict {
         	up = findVehicleUpOfConflict (defaultMaxDistance);
     		long endTime = System.currentTimeMillis() - startTime;
             model.rsuTime1 = model.rsuTime1 + endTime;
-            if (496 == lane.id)
-            	System.out.println("Time is " + model.t + ", up of conflictRSU at lane " + lane.up + " is " + (null == up ? "null" : up.toString()));
         }
         
         private Movable findVehicleUpOfConflict (double maxDistance) {

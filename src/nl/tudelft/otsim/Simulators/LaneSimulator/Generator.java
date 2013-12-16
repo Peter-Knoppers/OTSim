@@ -1,5 +1,7 @@
 package nl.tudelft.otsim.Simulators.LaneSimulator;
 
+import java.util.Locale;
+
 import nl.tudelft.otsim.Utilities.TimeScaleFunction;
 
 /**
@@ -28,7 +30,7 @@ public class Generator extends Controller {
      * Static route probabilities. These may be changed dynamically by an 
      * external controller.
      */
-    public double[] routeProb;
+    private double[] routeProb;
 
     /** Available routes from this generator. */
     public Route[] routes;
@@ -177,6 +179,13 @@ public class Generator extends Controller {
         else if (probabilities != null)
             for (int i = 0; i < probabilities.length; i++)
                 classProbs.put(lane.model.classes.get(i).id(), probabilities[i]);
+        double sumProb = 0;
+        for (int i = 0; i < routeProb.length; i++) {
+        	System.out.println(String.format(Locale.US, "probability %.6f, route %s", routeProb[i], routes[i]));
+        	sumProb += routeProb[i];
+        }
+        if (Math.abs(sumProb - 1.0) > 0.0001)
+        	throw new Error("Probabilities do not add up to approximately 1.0 (sum is " + sumProb + ")");
     }
     
     /**
@@ -283,7 +292,7 @@ public class Generator extends Controller {
                     x = x - vehLane.l;
                     vehLane = vehLane.down;
                 }
-                // make sure the vehicle is at the right location (was initialliy located at x=0)
+                // make sure the vehicle is at the right location (was initially located at x=0)
                 nextVehicle.cut();
                 nextVehicle.paste(vehLane, x);
                 success = true;
@@ -316,6 +325,7 @@ public class Generator extends Controller {
             routeInd++;
         }
         nextVehicle.route = routes[routeInd];
+        //System.out.println("randomVehicle: id= " + nextVehicle.id + ", r = " + r + ", route: " + nextVehicle.route.toString());
     }
 
     /**
@@ -403,7 +413,7 @@ public class Generator extends Controller {
         	if (0d == currentDemand)
         		headway = Double.POSITIVE_INFINITY;
         	else
-        		headway = 3600d / currentDemand;
+        		headway = 1d / currentDemand;
         } else if (dist == distribution.PREDEFINED) {
             if (generated >= preTime.length) {
                 // all vehicles were generated
@@ -490,4 +500,17 @@ public class Generator extends Controller {
         /** Vehicles are uniformly spread over time (fixed headway). */
         UNIFORM;
     }
+
+    /**
+     * Set the probabilities for the routes (must add up to approximately 1.0).
+     * @param newProbabilities Double[] the probabilities for the routes
+     */
+	public void setRouteProbabilities(double[] newProbabilities) {
+		routeProb = newProbabilities;
+        double sumProb = 0;
+        for (int i = 0; i < routeProb.length; i++)
+        	sumProb += routeProb[i];
+        if (Math.abs(sumProb - 1.0) > 0.0001)
+        	throw new Error("Probabilities do not add up to approximately 1.0 (sum is " + sumProb + ")");
+	}
 }

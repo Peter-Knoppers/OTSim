@@ -143,8 +143,8 @@ public class Vehicle extends Movable implements SimulatedObject {
             RSU rsu = RSUsInRange.get(RSUsInRange.size() - 1);
             if (rsu instanceof Lane.splitRSU) {
                 // at a split, search from x=0 at the next lane
-            	if (3 == id)
-            		System.out.println("Vehicle " + id + " finds splitRSU " + ((Lane.splitRSU) rsu).toString());
+            	//if (3 == id)
+            	//	System.out.println("Vehicle " + id + " finds splitRSU " + ((Lane.splitRSU) rsu).toString());
                 lastLane = ((Lane.splitRSU) rsu).getLaneForRoute(route);
                 lastX = 0;
             } else {
@@ -180,8 +180,8 @@ public class Vehicle extends Movable implements SimulatedObject {
             RSU rsu = it.next();
             s = getDistanceToRSU(rsu) - dx;
             if (s < 0) {
-            	if ((3 == id) && (rsu instanceof Lane.splitRSU))
-            		System.out.println("Vehicle " + id + " passes splitRSU " + ((Lane.splitRSU) rsu).toString());
+            	//if ((3 == id) && (rsu instanceof Lane.splitRSU))
+            	//	System.out.println("Vehicle " + id + " passes splitRSU " + ((Lane.splitRSU) rsu).toString());
                 if (rsu.passable || rsu.noticeable) {
                     rsu.pass(this);
                     if (! model.vehicles.contains(this))

@@ -231,7 +231,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 		}
 	}
 	
-	private final int maxIteration = 20;
+	private final int maxIteration = 50;
 	
 	@Override
 	public boolean hasNext() {

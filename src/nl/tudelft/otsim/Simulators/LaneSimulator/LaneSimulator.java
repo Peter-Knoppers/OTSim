@@ -6,6 +6,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Locale;
 import java.util.Random;
 
 import nl.tudelft.otsim.Events.Scheduler;
@@ -380,16 +381,15 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 	}
 	
 	private void makeGenerator(ArrayList<Double> routeFlows, int node, ArrayList<Lane> lanes, ArrayList<ArrayList<Integer>> routes, TimeScaleFunction flowGraph, double classProbabilities[]) throws Exception {
-		double numberOfTrips = flowGraph.getFactor(0d);
-		System.out.print("Creating generator at node " + node + " flow " + numberOfTrips + " with class probabilities [");
+		double numberOfTrips = 0;
+		for (int i = 0; i < routeFlows.size(); i++)
+			numberOfTrips += routeFlows.get(i);
+		System.out.print(String.format(Locale.US, "Creating generator at node %d, numberOfTrips %.4f, class probabilities [", node, numberOfTrips));
 		for (int i = 0; i < classProbabilities.length; i++)
 			System.out.print(String.format("%s%.6f", i > 0 ? ", " : "", classProbabilities[i]));
-		System.out.print("], path flows {");
-		for (int i = 0; i < routeFlows.size(); i++)
-			System.out.print(String.format("%.2f ", routeFlows.get(i)));
-		System.out.println("] and routes [");
+		System.out.println("] flows and routes [");
 		for (int i = 0; i < routes.size(); i++)
-			System.out.println("r" + i + " " + routes.get(i));
+			System.out.println(String.format(Locale.US, "r%2d: %10.4f veh/h %s", i,  routeFlows.get(i), routes.get(i)));
 		System.out.println("and flow graph {" + flowGraph.export() + "}\n");
 		int routeCount = routeFlows.size();
 		double probabilities[] = new double[routeCount];
@@ -463,7 +463,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
     	}
 		Generator generator = new Generator(laneOrigin, Generator.distribution.EXPONENTIAL);
 		generator.routes = routePaths;
-		generator.routeProb = probabilities;
+		generator.setRouteProbabilities(probabilities);
 		generator.setClassProbabilities(classProbabilities);
 		generator.setDemand(flowGraph);
 		// TODO numberOfTrips must be converted to flow [veh/h]
