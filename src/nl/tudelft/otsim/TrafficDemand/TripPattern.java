@@ -43,7 +43,7 @@ public class TripPattern implements XML_IO {
 	
 	public TripPattern(TrafficDemand trafficDemand, double numberOfTrips, ArrayList<Object> locationList) {
 		this.trafficDemand = trafficDemand;
-		flowGraph = new TimeScaleFunction((Storable) null);
+		flowGraph = new TimeScaleFunction();
 		flowGraph.insertPair(0, numberOfTrips);
 		this.locationList = locationList;
 	}
@@ -51,7 +51,7 @@ public class TripPattern implements XML_IO {
 	public TripPattern(TrafficDemand trafficDemand, int numberOfTrips, ArrayList<Object> locationList,
 			LinkedList<Long> departureTimeList) {
 		this.trafficDemand = trafficDemand;
-		flowGraph = new TimeScaleFunction((Storable) null);
+		flowGraph = new TimeScaleFunction();
 		flowGraph.insertPair(0, numberOfTrips);
 		this.locationList = locationList;
 		this.departureTimeList = departureTimeList;
@@ -89,7 +89,7 @@ public class TripPattern implements XML_IO {
 					}
 				}
 			} else if (fieldName.equals(XML_FLOWGRAPH)) {
-				flowGraph = new TimeScaleFunction((Storable) null, pn.getSubNode(XML_FLOWGRAPH, 0));
+				flowGraph = new TimeScaleFunction(pn.getSubNode(XML_FLOWGRAPH, 0));
 			} else if (fieldName.equals(XML_LOCATION)) {
 				// FIXME: XML format for the location list is bad
 				for(String location : value.split(" "))
@@ -98,7 +98,7 @@ public class TripPattern implements XML_IO {
 				throw new Exception("Unknown field in TrafficDemand: \"" + fieldName + "\" near " + pn.description());
 		}
 		if (null == flowGraph) {
-			flowGraph = new TimeScaleFunction((Storable) null);
+			flowGraph = new TimeScaleFunction();
 			flowGraph.insertPair(0, sumClassDemand);
 		}
 	}

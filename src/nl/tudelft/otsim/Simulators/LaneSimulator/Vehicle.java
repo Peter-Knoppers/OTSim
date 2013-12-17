@@ -155,10 +155,16 @@ public class Vehicle extends Movable implements SimulatedObject {
         }
         // Add new RSUs in range
         java.util.ArrayList<RSU> next = new java.util.ArrayList<RSU>();
+        int attempt = 0;
         while ((s < RSURange) && (null != lastLane)) {
             // lastLane may become null at a split where the route has no
             // appropriate downstream lane, as the vehicle has to change lane
             // before the split
+        	// FIXME this is just an ugly hack to break infinite loops
+        	if (++attempt > 100) {
+        		s = RSURange;
+        		break;
+        	}
             next = lastLane.findRSU(lastX, RSURange - s);
             if (!next.isEmpty()) {
                 s = getDistanceToRSU(next.get(0)) - dx;

@@ -269,12 +269,7 @@
     </TimeScaleFunction>
     <tripPattern>
       <location>z1 z2</location>
-      <TimeScaleFunction>
-        <Pair>
-          <Time>0.000</Time>
-          <Factor>1000.000000</Factor>
-        </Pair>
-      </TimeScaleFunction>
+      <trips>1000.000000</trips>
     </tripPattern>
   </Demand>
   <MeasurementPlan>

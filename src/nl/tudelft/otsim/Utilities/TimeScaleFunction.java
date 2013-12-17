@@ -22,18 +22,20 @@ public class TimeScaleFunction implements XML_IO {
 	private static final String XML_FACTOR = "Factor";
 	private ArrayList<Double> times = new ArrayList<Double>();
 	private ArrayList<Double> factors = new ArrayList<Double>();
-	private final Storable storable;
+	private Storable storable;
 	private final static String timeFormat = "%.3f"; 
 	private final static String factorFormat = "%.6f";
 	private TimeScaleFunction multiplyWith;
+	private TimeScaleFunction addTo;
 	
 	/**
 	 * Create an empty instance of a TimeScaleFunction.
 	 * @param storable {@link Storable}; the Storable that will be notified on changes to this TimeScaleFunction (may be null)
 	 */
-	public TimeScaleFunction(Storable storable) {
-		this.storable = storable;
+	public TimeScaleFunction() {
+		this.storable = null;
 		multiplyWith = null;
+		addTo = null;
 	}
 	
 	/**
@@ -42,8 +44,8 @@ public class TimeScaleFunction implements XML_IO {
 	 * @param pn {@link ParsedNode} XML node of the TimeScaleFunction object 
 	 * @throws Exception
 	 */
-	public TimeScaleFunction(Storable storable, ParsedNode pn) throws Exception {
-		this(storable);
+	public TimeScaleFunction(ParsedNode pn) throws Exception {
+		this();
 		for (int index = 0; index < pn.size(XML_TIMEFACTORPAIR); index++) {
 			ParsedNode subNode = pn.getSubNode(XML_TIMEFACTORPAIR, index);
 			double time = Double.NaN;
@@ -82,39 +84,71 @@ public class TimeScaleFunction implements XML_IO {
 			double factor = Double.parseDouble(fields[1]);
 			insertPair(time, factor);
 		}
-		if (remainder.length() > 0)
+		if ((remainder.length() > 0) && (remainder.startsWith("["))) {
 			multiplyWith = new TimeScaleFunction(remainder);
+			int nestingDepth = 0;
+			for (pos = 0; pos < remainder.length(); pos++) {
+				String letter = remainder.substring(pos, pos + 1);
+				if (letter.equals("["))
+					nestingDepth++;
+				else if (letter.equals("]"))
+					nestingDepth--;
+				if (0 == nestingDepth)
+					break;
+			}
+			remainder = remainder.substring(pos + 1);
+		}
 		else
 			multiplyWith = null;
+		if (remainder.length() > 0) {
+			if (remainder.startsWith("+"))
+				addTo = new TimeScaleFunction(remainder.substring(pos + 1));
+			else
+				throw new Error ("Bad description");
+		}
+			
 	}
 	
 	/**
-	 * Create a TimeScaleFunction that is a copy of another one; except for the
-	 * Storable.
-	 * @param owner {@link Storable} the Storable that will be notified of changes
+	 * Create a TimeScaleFunction that is a copy of another one.
 	 * @param original TimeScaleFunction whose time/factor values will be copied into the new TimeScaleFunction
 	 */
-	public TimeScaleFunction (Storable owner, TimeScaleFunction original) {
-		this (owner);
+	public TimeScaleFunction (TimeScaleFunction original) {
+		this ();
 		times.addAll (original.times);
 		factors.addAll (original.factors);
 		if (null != original.multiplyWith)
-			multiplyWith = new TimeScaleFunction(owner, original.multiplyWith);
+			multiplyWith = new TimeScaleFunction(original.multiplyWith);
+		if (null != original.addTo)
+			addTo = new TimeScaleFunction(original.addTo);
 	}
 	
 	/**
 	 * Return a new TimeScaleFunction that implements the multiplication of
 	 * one TimeScaleFunction with another TimeScaleFunction.
-	 * @param storable {@link Storable}; the Storable that will be notified on changes to the new TimeScaleFunction (may be null)
-	 * @param first TimeScaleFunction; 
-	 * @param second TimeScaleFunction
+	 * @param first TimeScaleFunction; the first TimeScaleFunction in the multiplication
+	 * @param second TimeScaleFunction; the second TimeScaleFunction in the multiplication
 	 */
-	public TimeScaleFunction (Storable storable, TimeScaleFunction first, TimeScaleFunction second) {
-		this (storable, first);
+	public TimeScaleFunction (TimeScaleFunction first, TimeScaleFunction second) {
+		this (first);
 		TimeScaleFunction tsf;
 		for (tsf = this; null != tsf.multiplyWith; tsf = tsf.multiplyWith)
 			;
-		tsf.multiplyWith = new TimeScaleFunction (null, second);
+		tsf.multiplyWith = new TimeScaleFunction (second);
+	}
+	
+	/**
+	 * Create a new TimeScaleFunction that returns the sum of this TimeScaleFunction and another TimeScaleFunction to this TimeScaleFunction
+	 * @param other TimeScaleFunction; the TimeScaleFunction that will be added to this TimeScaleFunction
+	 * @return new TimeScaleFunction that returns the sum of the values of this and the other TimeScaleFunction for all times
+	 */
+	public TimeScaleFunction add(TimeScaleFunction other) {
+		TimeScaleFunction result = new TimeScaleFunction(this);
+		TimeScaleFunction nested;
+		for (nested = result; null != nested.addTo; nested = nested.addTo)
+			;
+		nested.addTo = new TimeScaleFunction(other);;
+		return result;
 	}
 	
 	/**
@@ -124,10 +158,18 @@ public class TimeScaleFunction implements XML_IO {
 	 * @param pattern TimeScaleFunction that is used as reference.
 	 * @param factor Double; the factor that is applied to all values in the reference to obtain the factors in the new TimeScaleFunction
 	 */
-	public TimeScaleFunction (Storable storable, TimeScaleFunction pattern, double factor) {
-		this (storable, pattern);
+	public TimeScaleFunction (TimeScaleFunction pattern, double factor) {
+		this (pattern);
 		for (int index = 0; index < factors.size(); index++)
 			factors.set(index, factors.get(index) * factor);
+	}
+	
+	/**
+	 * Set the Storable that will be notified on changes to this TimeScaleFunction.
+	 * @param newStorable Storable (may be null)
+	 */
+	public void setStorable (Storable newStorable) {
+		storable = newStorable;
 	}
 	
 	/**
@@ -193,10 +235,13 @@ public class TimeScaleFunction implements XML_IO {
 	 */
 	public double getFactor(double time) {
 		double result = 1.0;
+		double add = 0;
+		if (null != addTo)
+			add = addTo.getFactor(time);
 		if (null != multiplyWith)
 			result *= multiplyWith.getFactor(time);
 		if (factors.size() == 0)
-			return result;		// Trivial case
+			return add + result;		// Trivial case
 		double prevTime = 0;
 		double prevFactor = factors.get(0);
 		for (int i = 0; i < times.size(); i++) {
@@ -206,11 +251,11 @@ public class TimeScaleFunction implements XML_IO {
 				prevTime = thisTime;
 				prevFactor = thisFactor;
 			} else if (thisTime > prevTime )
-				return result * (prevFactor + (thisFactor - prevFactor) * (time - prevTime) / (thisTime - prevTime));
+				return add + result * (prevFactor + (thisFactor - prevFactor) * (time - prevTime) / (thisTime - prevTime));
 			else
-				return result * thisFactor;
+				return add + result * thisFactor;
 		}
-		return result * prevFactor;
+		return add + result * prevFactor;
 	}
 	
 	/**
@@ -221,9 +266,9 @@ public class TimeScaleFunction implements XML_IO {
 		for (Double factor : factors)
 			if (1.0d != factor)
 				return false;
-		if (null != multiplyWith)
-			return multiplyWith.isTrivial();
-		return true;
+		boolean multiplyWithTrivial = null == multiplyWith ? true : multiplyWith.isTrivial();
+		boolean addToTrivial = null == addTo ? true : addTo.isTrivial();
+		return multiplyWithTrivial && addToTrivial;
 	}
 
 	private boolean writePairs(StaXWriter staXWriter) {
@@ -262,6 +307,8 @@ public class TimeScaleFunction implements XML_IO {
 		result += "]";
 		if (null != multiplyWith)
 			result += multiplyWith.export();
+		if (null != addTo)
+			result += "+" + addTo.export();
 		return result;
 	}
 	

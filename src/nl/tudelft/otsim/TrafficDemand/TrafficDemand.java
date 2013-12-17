@@ -70,8 +70,10 @@ public class TrafficDemand implements Storable {
 	public TrafficDemand(Model model, ParsedNode demandRoot) throws Exception {
 		this.model = model;
 		//System.out.print(demandRoot.toString(""));
-		if (demandRoot.size(TimeScaleFunction.XMLTAG) > 0)
-			timeScaleFunction = new TimeScaleFunction(this, demandRoot.getSubNode(TimeScaleFunction.XMLTAG, 0));
+		if (demandRoot.size(TimeScaleFunction.XMLTAG) > 0) {
+			timeScaleFunction = new TimeScaleFunction(demandRoot.getSubNode(TimeScaleFunction.XMLTAG, 0));
+			timeScaleFunction.setStorable (this);
+		}
 		double sumFractions = 0;
 		for (int index = 0; index < demandRoot.size(TrafficClass.XMLTAG); index++) {
 			TrafficClass tc = new TrafficClass(demandRoot.getSubNode(TrafficClass.XMLTAG, index));
@@ -93,7 +95,7 @@ public class TrafficDemand implements Storable {
 		}
 		*/
 		if (null == timeScaleFunction) {
-			timeScaleFunction = new TimeScaleFunction((Storable) null);
+			timeScaleFunction = new TimeScaleFunction();
 			timeScaleFunction.insertPair(0, 1);
 		}	
 	}
@@ -208,7 +210,7 @@ public class TrafficDemand implements Storable {
 					ArrayList<Node> path = new ArrayList<Node> (numberOfLocations);
 					for (int i = 0; i < numberOfLocations; i++)
 						path.add(listNodeList.get(i).get(indices[i]));
-					TripPatternPath tripPatternPath = new TripPatternPath(tripPattern,  new TimeScaleFunction((Storable) null, timeScaleFunction, weight), path);
+					TripPatternPath tripPatternPath = new TripPatternPath(tripPattern,  new TimeScaleFunction(timeScaleFunction, weight), path);
 					tripPattern.addTripPatternPath(tripPatternPath);
 					depth--;
 					indices[depth]++;
@@ -265,11 +267,11 @@ public class TrafficDemand implements Storable {
     	}
     	createRoutes();
         for (TripPattern tripPattern : getTripPatternList()) {
-        	TimeScaleFunction totalFlow = new TimeScaleFunction(null, tripPattern.flowGraph, timeScaleFunction);
-        	double factor = 1d / tripPattern.getTripPatternPathList().size();
-        	totalFlow = new TimeScaleFunction(null, totalFlow, factor);
+        	TimeScaleFunction totalFlow = new TimeScaleFunction(tripPattern.flowGraph, timeScaleFunction);
         	//Double totalTrips = tripPattern.getNumberOfTrips();
         	result += String.format(Locale.US, "TripPattern\tnumberOfTrips:\t%s\tLocationPattern:\t%s\tFractions%s\n", totalFlow.export(), tripPattern.getLocationList().toString(), tripPattern.getClasslFlows());
+        	double factor = 1d / tripPattern.getTripPatternPathList().size();
+        	totalFlow = new TimeScaleFunction(totalFlow, factor);
             for (TripPatternPath tripPatternPath : tripPattern.getTripPatternPathList()) {
             	//double numberOfTrips = 0;
             	//if (totalTrips > 0)

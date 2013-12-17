@@ -103,8 +103,16 @@ public class Main extends JPanel implements ActionListener {
 					} catch (Exception e) {
 						WED.showProblem(WED.ENVIRONMENTERROR, "Could not import file \"%s\"\n%s", right, WED.exeptionStackTraceToString(e));
 					}
+        		else if (left.equalsIgnoreCase("Seed"))
+        			Main.seed = Integer.parseInt(right);
+        		else if (left.equalsIgnoreCase("EndTime"))
+        			Main.endTime = Double.parseDouble(right);
+        		else if (left.equalsIgnoreCase("vehicleLifeLog"))
+        			Main.mainFrame.vehicleLifeLogFileName = right;
         		else if (left.equalsIgnoreCase("GenerateEvent"))
     				Main.mainFrame.actionPerformed(new ActionEvent(Main.mainFrame, 0, right));
+        		else if (left.equalsIgnoreCase("RunSimulation"))
+        			Main.mainFrame.runSimulation();
         		else if (left.equalsIgnoreCase("SetStatus"))
         			Main.mainFrame.setStatus(-1, "%s", right);
         		else
@@ -116,6 +124,27 @@ public class Main extends JPanel implements ActionListener {
         Log.logMessage(null, false, "Ready");	// test that LogMessage can log to the Event log
     }
 
+	private void runSimulation() {
+		int index = tabbedPaneProperties.getSelectedIndex();
+		System.out.println("runSimulation: index is " + index);
+		if (index < 0)
+			return;
+    	if (roadWaySimulatorIndex == index) {
+    		if (0 == roadwaySimulatorControlPanel.getComponentCount()) {
+    			WED.showProblem(WED.INFORMATION, "Could not load roadway simulator");
+    			return;
+    		}
+    		((Scheduler) roadwaySimulatorControlPanel.getComponent(0)).runSimulation();
+    	} else if (laneSimulatorIndex == index) {
+    		if (0 == laneSimulatorControlPanel.getComponentCount()) {
+    			WED.showProblem(WED.INFORMATION, "Could not load lane simulator");
+    			return;
+    		}
+    		((Scheduler) laneSimulatorControlPanel.getComponent(0)).runSimulation();
+    	} else 
+    		throw new Error("no Simulator selected");
+	}
+
 	/** GraphicsPanel used in the main window */
 	public GraphicsPanel graphicsPanel;
 	private String workingDir;
@@ -125,6 +154,8 @@ public class Main extends JPanel implements ActionListener {
     private String fileSelectedNetwork;
     /** Currently loaded traffic model */
     public Model model;
+    private static int seed = 1;	// seed for the random generator of the Simulator
+    private static double endTime = 1800d;	// end time of the Simulator
     /** JMenuItem of the Export Model ... menu */
     private JPopupMenu measurementPlanPopup;
     
@@ -686,10 +717,11 @@ public class Main extends JPanel implements ActionListener {
 	 */
 	public static String configuration(String type) {
 		Model model = mainFrame.model;
+		String config = String.format("EndTime:\t%.2f\nSeed:\t%d\n", endTime, seed);
 		if (type.equals(LaneSimulator.simulatorType))
-			return model.exportToMicroSimulation();
+			return config + model.exportToMicroSimulation();
 		if (type.equals(RoadwaySimulator.simulatorType))
-			return model.exportToSubMicroSimulation();
+			return config + model.exportToSubMicroSimulation();
 		throw new Error("Do not know how to create configuration of type " + type);
 	}
 	
@@ -1166,6 +1198,7 @@ public class Main extends JPanel implements ActionListener {
 	public String getVehicleLifeLogFileName () {
 		return vehicleLifeLogFileName;
 	}
+	
 	private void setVehicleLifeLog() {
 		final String defaultExt = "txt";
 		String defaultName = initialDirectory;

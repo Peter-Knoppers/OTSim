@@ -585,5 +585,13 @@ public class Scheduler extends JPanel implements ActionListener, PropertyChangeL
 			throw new ParseException("Pattern did not match", 0);
 		}
 	}
+
+	/**
+	 * Run a complete simulation and terminate.
+	 */
+	public void runSimulation() {
+		stepUpTo(Double.MAX_VALUE);
+		Main.mainFrame.actionPerformed(new ActionEvent(Main.mainFrame, 0, "Exit"));
+	}
 		
 }

@@ -61,4 +61,5 @@ public abstract class Simulator implements GraphicsPanelClient {
 	 * A String that identifies the type of Simulator.
 	 */
 	String simulatorType;
+
 }

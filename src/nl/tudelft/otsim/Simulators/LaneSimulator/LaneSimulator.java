@@ -14,7 +14,6 @@ import nl.tudelft.otsim.Events.Step;
 import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.GUI.ObjectInspector;
-import nl.tudelft.otsim.GUI.Storable;
 import nl.tudelft.otsim.GUI.WED;
 import nl.tudelft.otsim.Simulators.Measurement;
 import nl.tudelft.otsim.Simulators.LaneSimulator.Conflict;
@@ -68,7 +67,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 		*/
 		
 		// STUB set reasonable defaults
-		model.period = 1860;
+		model.period = 1800;
         model.dt = .2;
         model.debug = true;
         model.setSeed(1);
@@ -123,6 +122,10 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         	
         	if (null == fields[0])
         		continue;
+        	else if (fields[0].equals("EndTime:"))
+        		model.period = Double.parseDouble(fields[1]);
+        	else if (fields[0].equals("Seed:"))
+        		model.setSeed(Integer.parseInt(fields[1]));
         	else if (fields[0].equals("Lane"))
         		continue;
         	else if (fields[0].equals("LaneData")) {	
@@ -334,8 +337,10 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         ArrayList<Double> routeFlows = new ArrayList<Double>();
         ArrayList<ArrayList<Integer>> routeList = new ArrayList<ArrayList<Integer>>();
         //double flow = 0;
-        flowGraph = new TimeScaleFunction((Storable) null);
+        flowGraph = new TimeScaleFunction();
+        flowGraph.insertPair(0, 0);
         double[] fractions = null;
+        int endNode = -1;
         for (ExportTripPattern trip : tripList) {
 			int nextNode = trip.getRoutes().get(0).get(0);
 			// When next node changes: create a generator for the current Node
@@ -343,18 +348,18 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 				makeGenerator(routeFlows, currentNode, microNetwork, routeList, flowGraph, fractions);
 				routeFlows.clear();
 				routeList.clear();
-				//flow = 0;
+		        flowGraph = new TimeScaleFunction();
+		        flowGraph.insertPair(0, 0);
+		        endNode = -1;
 			}
 			currentNode = nextNode;
-			flowGraph = trip.flowGraph;
-			// TODO: figure out if we need to add up the flowGraphs...
+			int currentEndNode = trip.getRoutes().get(0).get(trip.getRoutes().get(0).size() - 1); 
+			if (endNode != currentEndNode) {
+				flowGraph = flowGraph.add(trip.flowGraph);
+				System.out.println("flowgraph is now " + flowGraph.export());
+				endNode = currentEndNode;
+			}
 			for (int i = 0; i < trip.routeProbabilities.size(); i++) {
-				//flow += trip.getFlow(i);
-				//double currentFlow = flowGraph.getFactor(0d);
-				//currentFlow += trip.getFlow(i).getFactor(0d);
-				//if (flowGraph.size() > 0)
-				//	flowGraph.deletePair(0);
-				//flowGraph.insertPair(0d, currentFlow);
 				routeList.add(trip.getRoutes().get(i));
 				routeFlows.add(trip.getFlow(i).getFactor(0d));
 			}
@@ -1216,7 +1221,7 @@ class ExportTripPattern {
 	 */
 	public ExportTripPattern(Double flow, double[] vehicleTypeFractions) throws Exception {
 		//this.flow = flow;
-		flowGraph = new TimeScaleFunction((Storable) null);
+		flowGraph = new TimeScaleFunction();
 		flowGraph.insertPair(0, flow);
 		this.fractions = vehicleTypeFractions;
 	}
@@ -1228,7 +1233,7 @@ class ExportTripPattern {
 	 * @throws Exception if the routeProbabilities do not add up to (approximately) 1.0
 	 */
 	public ExportTripPattern(TimeScaleFunction flowGraph, double[] vehicleTypeFractions) throws Exception {
-		this.flowGraph = new TimeScaleFunction((Storable) null, flowGraph);
+		this.flowGraph = new TimeScaleFunction(flowGraph);
 		this.fractions = vehicleTypeFractions;
 		checkFractions();
 	}
@@ -1244,7 +1249,7 @@ class ExportTripPattern {
 	public TimeScaleFunction getFlow(int routeIndex) {
 		if ((routeIndex < 0) || (routeIndex >= routeProbabilities.size()))
 			throw new Error("no routes defined");
-		return new TimeScaleFunction((Storable) null, flowGraph, routeProbabilities.get(routeIndex));
+		return new TimeScaleFunction(flowGraph, routeProbabilities.get(routeIndex));
 	}
 
 	public double[] getFractions() {

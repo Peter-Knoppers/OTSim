@@ -7267,5 +7267,23 @@
       <location>z18 z21</location>
       <trips>254.000000</trips>
     </tripPattern>
+    <TimeScaleFunction>
+      <Pair>
+        <Time>0.000</Time>
+        <Factor>0.100000</Factor>
+      </Pair>
+      <Pair>
+        <Time>600.000</Time>
+        <Factor>0.100000</Factor>
+      </Pair>
+      <Pair>
+        <Time>600.100</Time>
+        <Factor>1.000000</Factor>
+      </Pair>
+    </TimeScaleFunction>
+    <tripPattern>
+      <location>z1 z2</location>
+      <trips>1000.000000</trips>
+    </tripPattern>
   </Demand>
 </model>

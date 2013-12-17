@@ -413,7 +413,7 @@ public class Generator extends Controller {
         	if (0d == currentDemand)
         		headway = Double.POSITIVE_INFINITY;
         	else
-        		headway = 1d / currentDemand;
+        		headway = 3600d / currentDemand;
         } else if (dist == distribution.PREDEFINED) {
             if (generated >= preTime.length) {
                 // all vehicles were generated
