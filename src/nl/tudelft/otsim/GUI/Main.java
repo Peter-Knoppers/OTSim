@@ -155,7 +155,7 @@ public class Main extends JPanel implements ActionListener {
     /** Currently loaded traffic model */
     public Model model;
     private static int seed = 1;	// seed for the random generator of the Simulator
-    private static double endTime = 1800d;	// end time of the Simulator
+    private static double endTime = 3600d;	// end time of the Simulator
     /** JMenuItem of the Export Model ... menu */
     private JPopupMenu measurementPlanPopup;
     
