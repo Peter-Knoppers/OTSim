@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import nl.tudelft.otsim.GeoObjects.CrossSectionElement;
 import nl.tudelft.otsim.GeoObjects.Link;
 import nl.tudelft.otsim.GeoObjects.Network;
 import nl.tudelft.otsim.GeoObjects.Node;
@@ -115,7 +116,16 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 
 	private double computeCost(Link link, boolean ignorePenalties) {
 		// Currently the cost is the driving time (in seconds) of a link
-		double result = link.getLength() / (link.getMaxSpeed_r() / 3.6);
+		//double result = link.getLength() / (link.getMaxSpeed_r() / 3.6);
+		double linkLength = link.getLength();
+		double linkSpeed = link.getMaxSpeed_r() / 3.6;
+		// Look for a speed limit in the first CrossSection
+		for (CrossSectionElement cse : link.getCrossSections_r().get(0).getCrossSectionElementList_r()) {
+			String speedLimit = cse.getSpeedLimit_r();
+			if (null != speedLimit)
+				linkSpeed = Double.parseDouble(speedLimit) / 3.6;
+		}
+		double result = linkLength / linkSpeed;
 		if (ignorePenalties)
 			return result;
 		Double penalty = penalties.get(link);
