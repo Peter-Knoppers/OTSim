@@ -663,11 +663,15 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
                     if ((! showOnlyDrivable) || cse.getCrossSectionElementTypology().getDrivable())
                     	cse.paint(graphicsPanel, showFormPoints, showFormLines);
         if (showLaneIDs) // These must be drawn last; else some might be invisible
+        	for (CrossSectionObject cso : getCrossSectionObjects(Lane.class))
+        		((Lane) cso).paintID(graphicsPanel);
+        /*
             for (Link link :  getLinkList())
             	for (CrossSection cs : link.getCrossSections_r())
                     for (CrossSectionElement cse : cs.getCrossSectionElementList_r())
                 		for (CrossSectionObject cso : cse.getCrossSectionObjects(Lane.class))
                 			((Lane) cso).paintID(graphicsPanel);
+        */
     }    
     
     private void paintActivityLocations(GraphicsPanel graphicsPanel)
@@ -1451,6 +1455,25 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 	 */
 	public String exportDetectors() {
 		String result = "";
+		for (CrossSectionObject cso : getCrossSectionObjects(VehicleDetector.class)) {
+			VehicleDetector vd = (VehicleDetector) cso;
+			result += "Detector\t" + vd.getID_r() + "\t";
+			String separator = "";
+			for (CrossSectionObject lcso : vd.crossSectionElement.getCrossSectionObjects(Lane.class)) {
+				Lane lane = (Lane) lcso;
+				// Add only those lanes whose center line intersects the detector
+				if (Planar.polyLineIntersectsPolyLine(Planar.getAlignment(lane.getLaneVerticesCenter()), Planar.closePolyline(Planar.getAlignment(vd.getPolygon_r())))) {
+					result += String.format(Locale.US, "%s%d %.3f %.3f", separator, lane.getID(), vd.longitudinalPosition, vd.longitudinalLength);
+					separator = ",";
+				}
+			}
+			ArrayList<Vertex> vertices = vd.getPolygon_r();
+			if (vertices.size() > 0)
+				for (Vertex v : vertices)
+					result += String.format(Locale.US, "\t%.2f\t%.2f", v.x, v.y);
+			result += "\n";			
+		}
+		/*				
 		for (Link link : getLinkList())
 			for (CrossSection cs : link.getCrossSections_r())
 				for (CrossSectionElement cse : cs.getCrossSectionElementList_r())
@@ -1472,6 +1495,7 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 								result += String.format(Locale.US, "\t%.2f\t%.2f", v.x, v.y);
 						result += "\n";
 					}
+		*/
 		return result;
 	}
 	
@@ -1481,11 +1505,15 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 	 */
 	public ArrayList<TrafficLight> getTrafficLights() {
 		ArrayList<TrafficLight> result = new ArrayList<TrafficLight> ();
+		for (CrossSectionObject cso : getCrossSectionObjects(TrafficLight.class))
+			result.add((TrafficLight) cso);
+		/*
 		for (Link link : getLinkList())
 			for (CrossSection cs : link.getCrossSections_r())
 				for (CrossSectionElement cse : cs.getCrossSectionElementList_r())
 					for (CrossSectionObject cso : cse.getCrossSectionObjects(TrafficLight.class))
 						result.add((TrafficLight) cso);
+		*/
 		return result;
 	}
 
@@ -1590,6 +1618,25 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 	 */
 	public String exportTrafficLights() {
 		String result = "";
+		for (CrossSectionObject cso : getCrossSectionObjects(TrafficLight.class)) {
+			TrafficLight tl = (TrafficLight) cso;
+			result += "TrafficLight\t" + tl.getID_r() + "\t";
+			String separator = "";
+			for (CrossSectionObject lcso : tl.crossSectionElement.getCrossSectionObjects(Lane.class)) {
+				Lane lane = (Lane) lcso;
+				double position = tl.longitudinalPosition;
+				if (position < 0)
+					position += Planar.length(tl.crossSectionElement.getLinkPointList(CrossSectionElement.LateralReferenceCenter, true, false));
+				result += String.format(Locale.US, "%s%d %.3f", separator, lane.getID(), position);
+				separator = ",";
+			}
+			ArrayList<Vertex> vertices = tl.getPolygon_r();
+			if (vertices.size() > 0)
+				for (Vertex v : vertices)
+					result += String.format(Locale.US, "\t%.2f\t%.2f", v.x, v.y);
+			result += "\n";
+		}
+		/*
 		for (Link link : getLinkList())
 			for (CrossSection cs : link.getCrossSections_r())
 				for (CrossSectionElement cse : cs.getCrossSectionElementList_r())
@@ -1611,6 +1658,7 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 								result += String.format(Locale.US, "\t%.2f\t%.2f", v.x, v.y);
 						result += "\n";
 					}
+		*/
 		return result;
 	}
 
@@ -1629,6 +1677,20 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 		for (TrafficLightController tlc : trafficLightControllerList())
 			result += String.format(Locale.US, "TrafficLightController\t%s\t%s\t%s\t%s\n",
 					tlc.getName_r(), tlc.getLights(), tlc.getDetectors(), null == tlc.getControlProgramURL_r() ? "" : tlc.getControlProgramURL_r());
+		return result;
+	}
+	
+	/**
+	 * Return a collection of all {@link CrossSectionObject CrossSectionObjects} of a particular sub-class in this Network.
+	 * @param klass Class; the sub-class of CrossSectionObject to collect.
+	 * @return ArrayList&lt;{@link CrossSectionObject}&gt;; the list of all CrossSectionObjects of the specified class
+	 */
+	public ArrayList<CrossSectionObject> getCrossSectionObjects(Class<?> klass) {
+		ArrayList<CrossSectionObject> result = new ArrayList<CrossSectionObject>();
+		for (Link link : getLinkList())
+			for (CrossSection cs : link.getCrossSections_r())
+				for (CrossSectionElement cse : cs.getCrossSectionElementList_r())
+					result.addAll(cse.getCrossSectionObjects(klass));
 		return result;
 	}
 
@@ -1697,6 +1759,20 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 			for (CrossSection cs : link.getCrossSections_r())
 				result.addAll(cs.collectLanes());
 		return result;
+	}
+
+	/**
+	 * Lookup a VMS in this Network.
+	 * @param name String; name of the VMS
+	 * @return VMS or null if no VMS with the specified name exists in this Network
+	 */
+	public VMS lookupVMS(String name) {
+		for (CrossSectionObject cso : getCrossSectionObjects(VMS.class)) {
+			VMS vms = (VMS) cso;
+			if (vms.getID_r().equals(name))
+				return (vms);
+		}
+		return null;
 	}
 
 }

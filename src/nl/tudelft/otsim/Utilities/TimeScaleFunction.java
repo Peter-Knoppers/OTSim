@@ -263,8 +263,9 @@ public class TimeScaleFunction implements XML_IO {
 	 * @return Boolean; true if this TimeScaleFunction always return 1.0
 	 */
 	public boolean isTrivial() {
+		double firstFactor = factors.get(0);
 		for (Double factor : factors)
-			if (1.0d != factor)
+			if (firstFactor != factor)
 				return false;
 		boolean multiplyWithTrivial = null == multiplyWith ? true : multiplyWith.isTrivial();
 		boolean addToTrivial = null == addTo ? true : addTo.isTrivial();

@@ -197,6 +197,9 @@ public class CrossSectionElement implements XML_IO {
 			else if (fieldName.equals(VehicleDetector.XMLTAG))
 				for (int index = 0; index < pn.size(fieldName); index++)
 					objects.add(new VehicleDetector(this, pn.getSubNode(fieldName, index)));			
+			else if (fieldName.equals(VMS.XMLTAG))
+				for (int index = 0; index < pn.size(fieldName); index++)
+					objects.add(new VMS(this, pn.getSubNode(fieldName, index)));			
 			else
 				throw new Exception("Unknown field in CrossSectionElement: " + fieldName);
 		}
@@ -550,6 +553,7 @@ public class CrossSectionElement implements XML_IO {
 		result.add("Traffic light");
 		if (crossSectionElementTypology.getDrivable())
 			result.add("Vehicle detector");
+		result.add("Variable Message Sign (VMS)");
 		return result;
 	}
 	
@@ -576,6 +580,8 @@ public class CrossSectionElement implements XML_IO {
 			addCrossSectionObject(new VehicleDetector(this));
 		else if (description.contains("Traffic light"))
 			addCrossSectionObject(new TrafficLight(this));
+		else if (description.contains("Variable Message Sign"))
+			addCrossSectionObject(new VMS(this));
 		else
 			throw new Error("Do not know how to add a " + description);
 		crossSection.getLink().network.setModified();
