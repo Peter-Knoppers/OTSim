@@ -2,6 +2,8 @@ package nl.tudelft.otsim.GeoObjects;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Locale;
+import java.util.TreeSet;
 
 import nl.tudelft.otsim.FileIO.ParsedNode;
 import nl.tudelft.otsim.FileIO.StaXWriter;
@@ -10,6 +12,11 @@ import nl.tudelft.otsim.GUI.InputValidator;
 import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.SpatialTools.Planar;
 import nl.tudelft.otsim.Utilities.Reversed;
+
+
+//TODO set message text
+//TODO add TimedMessage
+//TODO delete TimedMessage
 
 /**
  * A Variable Message Sign (VMS) shows a time-varying message to passing traffic.
@@ -29,6 +36,14 @@ public class VMS extends CrossSectionObject {
 	private static final String XML_LATERALPOSITION = "lateralCenter";
 	/** Label of width in XML representation of a VMS */
 	private static final String XML_WIDTH = "width";
+	/** Label of time/text set in XML representation of a VMS */
+	private static final String XML_TIMETEXT = "timeText";
+	/** Label of a time in XML representation of a VMS time/text pair */
+	private static final String XML_TIME = "time";
+	/** Label of a text in XML representation of a VMS time/text pair */
+	private static final String XML_TEXT = "text";
+	
+	private TreeSet<TimedMessage> messages = new TreeSet<TimedMessage> ();
 
 	/**
 	 * Create a VMS from a parsed XML file.
@@ -57,6 +72,23 @@ public class VMS extends CrossSectionObject {
 		}
 		if ((null == ID) || Double.isNaN(longitudinalPosition) || Double.isNaN(lateralPosition) || Double.isNaN(lateralWidth))
 			throw new Exception("VMS is not completely defined" + pn.lineNumber + ", " + pn.columnNumber);
+		
+		// Put some junk it it for debugging
+		messages.add(new TimedMessage(10d, "Hello World!"));
+		messages.add(new TimedMessage(100d, "Goodbye World!"));
+		messages.add(new TimedMessage(30d, "How are you doing?"));
+	}
+	
+	/**
+	 * Create a VMS from a textual description of times and messages.
+	 * @param messageList String; textual description of times and messages
+	 */
+	public VMS(String messageList) {
+		String[] fields = messageList.split(",");
+		for (String field : fields) {
+			String[] subFields = field.split(":");
+			messages.add(new TimedMessage(Double.parseDouble(subFields[0]), subFields[1]));
+		}
 	}
 
 	/**
@@ -232,6 +264,20 @@ public class VMS extends CrossSectionObject {
 		return String.format(Main.locale, "VMS %s at longitudinalPosition %.3fm, width %.3fm", ID, longitudinalPosition, lateralWidth);
 	}
 	
+	/**
+	 * Create a string representation of the messages this VMS suitable for import
+	 * @return String; the string representation of the messages of this VMS
+	 */
+	public String export () {
+		String result = "VMS";
+		String separator = "\t";
+		for (TimedMessage tm : messages) {
+			result += String.format(Locale.US, "%s%.3f:%s", separator, tm.getTime(), tm.getMessage_r());
+			separator = ",";
+		}
+		return result + "\n";
+	}
+	
 	@Override
 	public void paint(GraphicsPanel graphicsPanel) {
 		graphicsPanel.setStroke(0F);
@@ -241,6 +287,16 @@ public class VMS extends CrossSectionObject {
 		if (polygon.size() > 0)
 			graphicsPanel.drawPolygon(polygon.toArray());
 	}
+	
+	private boolean writeMessages(StaXWriter staXWriter) {
+		for (TimedMessage tm : messages)
+			if (! (staXWriter.writeNodeStart(XML_TIMETEXT)
+					&& staXWriter.writeNode(XML_TIME, String.format(Locale.US, "%.3f",  tm.getTime()))
+					&& staXWriter.writeNode(XML_TEXT, tm.getMessage_r())
+					&& staXWriter.writeNodeEnd(XML_TIMETEXT)))
+				return false;
+		return true;
+	}
 
 	@Override
 	public boolean writeXML(StaXWriter staXWriter) {
@@ -249,8 +305,138 @@ public class VMS extends CrossSectionObject {
 				&& staXWriter.writeNode(XML_LATERALPOSITION, Double.toString(lateralPosition))
 				&& staXWriter.writeNode(XML_WIDTH, Double.toString(lateralWidth))
 				&& staXWriter.writeNode(XML_LONGITUDINALPOSITION, Double.toString(longitudinalPosition))
+				&& writeMessages(staXWriter)
 				&& staXWriter.writeNodeEnd(XMLTAG);
 	}
 
+	private final static VMS.TimedMessage addTimedMessage = new VMS.TimedMessage(-1d, "Add a timed message");
+	
+	/**
+	 * Retrieve a list of all messages
+	 * @return ArrayList&lt;{@link TimedMessage}&gt;; the list of all messages
+	 */
+	public ArrayList<TimedMessage> getTimedMessages_r() {
+		ArrayList<TimedMessage> result = new ArrayList<TimedMessage>(messages);
+		result.add(addTimedMessage);		
+		return result;
+	}
 
+	/**
+	 * Simple fixed message that is displayed at a specified time
+	 * 
+	 * @author Peter Knoppers
+	 */
+	public static class TimedMessage implements Comparable<TimedMessage> {
+		private double time;
+		private String message;
+		
+		@Override
+		public int compareTo(TimedMessage other) {
+			if (other.time > time)
+				return -1;
+			else if (other.time < time)
+				return 1;
+			return 0;
+		}
+		
+		/**
+		 * Create a TimedMessage.
+		 * @param time Double; time [s] when the message is displayed
+		 * @param message String; the message to display
+		 */
+		public TimedMessage(Double time, String message) {
+			this.time = time;
+			this.message = message;
+		}
+		
+		/**
+		 * Modify the time at which this TimedMessage is displayed
+		 * @param newTime Double; the time [s] when the message is displayed
+		 */
+		public void setTime (Double newTime) { this.time = newTime; };
+		
+		/**
+		 * Modify the text that is displayed.
+		 * @param newMessage String; the text that is displayed
+		 */
+		public void setMessage_w (String newMessage) { this.message = newMessage; };
+		
+		/**
+		 * Retrieve the time at which this TimedMessage is displayed.
+		 * @return Double; the time [s] at which this TimedMessage is displayed
+		 */
+		public Double getTime () { return time; };
+		
+		/**
+		 * Retrieve the text that is displayed
+		 * @return String; the text that is displayed
+		 */
+		public String getMessage_r () { return message; };
+		
+		@Override
+		public String toString() {
+			if (time < 0)
+				return message;
+			return String.format (Main.locale, "%.3f: %s", time, message);
+		}
+		
+		/**
+		 * Retrieve a string representation of the time at which this 
+		 * TimedMessage is displayed.
+		 * @return String; a string representation of the time at which this
+		 * TimedMessage is displayed
+		 */
+		public String getTime_r () {
+			return String.format (Main.locale, "%.3f", time);
+		}
+		
+		/**
+		 * Change the time at which this TimedMessage is displayed.
+		 * @param newTime Double; the new value for the time at which this
+		 * TimedMessage is displayed
+		 */
+		public void setTime_w (String newTime) {
+			time = Double.parseDouble(Planar.fixRadix(newTime));
+		}
+		
+		/**
+		 * Return an {@link InputValidator} for the time.
+		 * @return {@link InputValidator}; InputValidator for the time
+		 */
+		@SuppressWarnings("static-method")
+		public InputValidator validateTime_v () {
+			return new InputValidator(new InputValidator.CustomValidator () {
+				@Override
+				public boolean validate(String originalValue, String proposedValue) {
+					try {
+						return Double.parseDouble(Planar.fixRadix(proposedValue)) >= 0;
+					} catch (Exception e) {
+						return false;
+					}
+				}
+				
+			});
+		}
+			
+		/**
+		 * Return an {@link InputValidator} for the text.
+		 * @return {@link InputValidator} for the text
+		 */
+		@SuppressWarnings("static-method")
+		public InputValidator validateMessage_v () {
+			return new InputValidator(".*");
+		}
+		
+		/**
+		 * A TimedMessage can always be deleted.
+		 * <br /> This method is only used by the {@link nl.tudelft.otsim.GUI.ObjectInspector}.
+		 * @return Boolean; always true
+		 */
+		@SuppressWarnings("static-method")
+		public boolean mayDeleteMessage_d() {
+			return true;
+		}
+		
+	}
 }
+
