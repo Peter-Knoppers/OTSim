@@ -7,6 +7,7 @@ import java.util.TreeSet;
 
 import nl.tudelft.otsim.FileIO.ParsedNode;
 import nl.tudelft.otsim.FileIO.StaXWriter;
+import nl.tudelft.otsim.FileIO.XML_IO;
 import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GUI.InputValidator;
 import nl.tudelft.otsim.GUI.Main;
@@ -23,7 +24,7 @@ import nl.tudelft.otsim.Utilities.Reversed;
  * 
  * @author Peter Knoppers
  */
-public class VMS extends CrossSectionObject {
+public class VMS extends CrossSectionObject implements XML_IO {
 	private String ID;
 	/** Label in XML representation of a VMS */
 	public static final String XMLTAG = "VMS";
@@ -38,10 +39,6 @@ public class VMS extends CrossSectionObject {
 	private static final String XML_WIDTH = "width";
 	/** Label of time/text set in XML representation of a VMS */
 	private static final String XML_TIMETEXT = "timeText";
-	/** Label of a time in XML representation of a VMS time/text pair */
-	private static final String XML_TIME = "time";
-	/** Label of a text in XML representation of a VMS time/text pair */
-	private static final String XML_TEXT = "text";
 	
 	private TreeSet<TimedMessage> messages = new TreeSet<TimedMessage> ();
 
@@ -67,6 +64,9 @@ public class VMS extends CrossSectionObject {
 				lateralPosition = Double.parseDouble(value);
 			else if (fieldName.equals(XML_WIDTH))
 				lateralWidth = Double.parseDouble(value);
+			else if (fieldName.equals(XML_TIMETEXT))
+				for (int index = 0; index < pn.size(XML_TIMETEXT); index++)
+					messages.add(new TimedMessage(pn.getSubNode(XML_TIMETEXT, index)));
 			else
 				throw new Exception("VMS does not have a field " + fieldName);
 		}
@@ -290,10 +290,7 @@ public class VMS extends CrossSectionObject {
 	
 	private boolean writeMessages(StaXWriter staXWriter) {
 		for (TimedMessage tm : messages)
-			if (! (staXWriter.writeNodeStart(XML_TIMETEXT)
-					&& staXWriter.writeNode(XML_TIME, String.format(Locale.US, "%.3f",  tm.getTime()))
-					&& staXWriter.writeNode(XML_TEXT, tm.getMessage_r())
-					&& staXWriter.writeNodeEnd(XML_TIMETEXT)))
+			if (! tm.writeXML(staXWriter))
 				return false;
 		return true;
 	}
@@ -309,24 +306,53 @@ public class VMS extends CrossSectionObject {
 				&& staXWriter.writeNodeEnd(XMLTAG);
 	}
 
-	private final static VMS.TimedMessage addTimedMessage = new VMS.TimedMessage(-1d, "Add a timed message");
-	
 	/**
 	 * Retrieve a list of all messages
 	 * @return ArrayList&lt;{@link TimedMessage}&gt;; the list of all messages
 	 */
 	public ArrayList<TimedMessage> getTimedMessages_r() {
 		ArrayList<TimedMessage> result = new ArrayList<TimedMessage>(messages);
-		result.add(addTimedMessage);		
 		return result;
 	}
+	
+	/**
+	 * Return a fixed string to be used to label the tree node in the
+	 * {@link nl.tudelft.otsim.GUI.ObjectInspector} that must be clicked to add a
+	 * {@link TimedMessage} to this VMS.
+	 * @return String; <code>"new timed message"</code>
+	 */
+	@SuppressWarnings("static-method")
+	public String getAdd_r () {
+		return "new timed message";
+	}
+	
+	/**
+	 * Add a new TimedMessage with a given text and a reasonable start time.
+	 * @param text String; ignored
+	 */
+	public void setAdd_w (String text) {
+		double startTime = 0d;
+		for (TimedMessage tm : messages)
+			if (tm.getTime() >= startTime)
+				startTime = tm.getTime() + 1;
+		messages.add(new TimedMessage(startTime, text));
+		crossSectionElement.getCrossSection().getLink().network.setModified();
+		
+		//rebuild(objectPath(inspectorTreeNode.getPath()));
+	}
+
+//	public void setTimedMessages
 
 	/**
 	 * Simple fixed message that is displayed at a specified time
 	 * 
 	 * @author Peter Knoppers
 	 */
-	public static class TimedMessage implements Comparable<TimedMessage> {
+	public static class TimedMessage implements Comparable<TimedMessage>, XML_IO {
+		/** Label of a time in XML representation of a VMS time/text pair */
+		private static final String XML_TIME = "time";
+		/** Label of a text in XML representation of a VMS time/text pair */
+		private static final String XML_TEXT = "text";
 		private double time;
 		private String message;
 		
@@ -347,6 +373,29 @@ public class VMS extends CrossSectionObject {
 		public TimedMessage(Double time, String message) {
 			this.time = time;
 			this.message = message;
+		}
+		
+		/**
+		 * Create a TimedMessage from a {@link ParsedNode}.
+		 * @param pn {@link ParsedNode}; the XML node with the data to use
+		 * @throws Exception 
+		 */
+		public TimedMessage(ParsedNode pn) throws Exception {
+			this.time = Double.NaN;
+			this.message = null;
+			for (String fieldName : pn.getKeys()) {
+				String value = pn.getSubNode(fieldName, 0).getValue();
+				if (fieldName.equals(XML_TIME))
+					this.time = Double.parseDouble(value);
+				else if (fieldName.equals(XML_TEXT))
+					this.message = value;
+				else
+					throw new Exception("TimedMessage does not have a field " + fieldName + " (near " + pn.description() + ")");
+			}
+			if (Double.isNaN(this.time))
+				throw new Exception("Time not specified near " + pn.description());
+			if (null == message)
+				throw new Exception("Message not specified near " + pn.description());
 		}
 		
 		/**
@@ -432,9 +481,16 @@ public class VMS extends CrossSectionObject {
 		 * <br /> This method is only used by the {@link nl.tudelft.otsim.GUI.ObjectInspector}.
 		 * @return Boolean; always true
 		 */
-		@SuppressWarnings("static-method")
-		public boolean mayDeleteMessage_d() {
+		public boolean mayDeleteMessage_d() { 
 			return true;
+		}
+
+		@Override
+		public boolean writeXML(StaXWriter staXWriter) {
+			return staXWriter.writeNodeStart(XML_TIMETEXT)
+					&& staXWriter.writeNode(XML_TIME, String.format(Locale.US, "%.3f",  time))
+					&& staXWriter.writeNode(XML_TEXT, message)
+					&& staXWriter.writeNodeEnd(XML_TIMETEXT);
 		}
 		
 	}

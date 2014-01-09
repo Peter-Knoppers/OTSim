@@ -698,6 +698,7 @@ public class ObjectInspector extends JFrame implements TreeSelectionListener, Fo
 							System.out.println("Succeeded to set new value");
 							if (null != graphicsPanelClient)
 								graphicsPanelClient.setModified();
+							rebuild(objectPath(inspectorTreeNode.getPath()));
 						} catch (Exception e) {
 							System.out.println("Failed to set new value: " + e.toString());
 						}
