@@ -32,6 +32,7 @@ public class ImportOSM {
 	public static Network loadOSM(String fileName) throws Exception {
 		WGS84Converter converter = new DutchRD();
 		/* Test the converter
+		// TODO: move this code into a unit test for the WGS84Converter
 		Point2D.Double in = new Point2D.Double(4.37, 52);
 		Point2D.Double out = converter.meters(in);
 		System.out.println(String.format(Main.locale, "%f,%f -> %f,%f", in.x, in.y, out.x, out.y));

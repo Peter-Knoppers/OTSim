@@ -14,10 +14,8 @@ import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.SpatialTools.Planar;
 import nl.tudelft.otsim.Utilities.Reversed;
 
-
-//TODO set message text
-//TODO add TimedMessage
 //TODO delete TimedMessage
+//TODO export to simulator
 
 /**
  * A Variable Message Sign (VMS) shows a time-varying message to passing traffic.
@@ -82,6 +80,7 @@ public class VMS extends CrossSectionObject implements XML_IO {
 	/**
 	 * Create a VMS from a textual description of times and messages.
 	 * @param messageList String; textual description of times and messages
+	 * TODO: implement quoting (escape the field separators, HTML tags, etc., or use base64 encoding).
 	 */
 	public VMS(String messageList) {
 		String[] fields = messageList.split(",");
@@ -337,11 +336,7 @@ public class VMS extends CrossSectionObject implements XML_IO {
 				startTime = tm.getTime() + 1;
 		messages.add(new TimedMessage(startTime, text));
 		crossSectionElement.getCrossSection().getLink().network.setModified();
-		
-		//rebuild(objectPath(inspectorTreeNode.getPath()));
 	}
-
-//	public void setTimedMessages
 
 	/**
 	 * Simple fixed message that is displayed at a specified time
