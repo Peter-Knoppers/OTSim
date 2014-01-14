@@ -66,17 +66,12 @@ public class VMS extends CrossSectionObject implements XML_IO {
 				lateralWidth = Double.parseDouble(value);
 			else if (fieldName.equals(XML_TIMETEXT))
 				for (int index = 0; index < pn.size(XML_TIMETEXT); index++)
-					messages.add(new TimedMessage(pn.getSubNode(XML_TIMETEXT, index)));
+					messages.add(new TimedMessage(pn.getSubNode(XML_TIMETEXT, index), this));
 			else
 				throw new Exception("VMS does not have a field " + fieldName);
 		}
 		if ((null == ID) || Double.isNaN(longitudinalPosition) || Double.isNaN(lateralPosition) || Double.isNaN(lateralWidth))
 			throw new Exception("VMS is not completely defined" + pn.lineNumber + ", " + pn.columnNumber);
-		
-		// Put some junk it it for debugging
-		messages.add(new TimedMessage(10d, "Hello World!"));
-		messages.add(new TimedMessage(100d, "Goodbye World!"));
-		messages.add(new TimedMessage(30d, "How are you doing?"));
 	}
 	
 	/**
@@ -89,7 +84,7 @@ public class VMS extends CrossSectionObject implements XML_IO {
 			return;
 		String[] fields = messageList.split(",");
 		for (String field : fields) {
-			messages.add(new TimedMessage(field));
+			messages.add(new TimedMessage(field, this));
 		}
 	}
 
@@ -345,13 +340,14 @@ public class VMS extends CrossSectionObject implements XML_IO {
 	/**
 	 * Add a new TimedMessage with a given text and a reasonable start time.
 	 * @param text String; ignored
+	 * @throws Exception 
 	 */
-	public void setAdd_w (String text) {
+	public void setAdd_w (String text) throws Exception {
 		double startTime = 0d;
 		for (TimedMessage tm : messages)
 			if (tm.getTime() >= startTime)
 				startTime = tm.getTime() + 1;
-		messages.add(new TimedMessage(startTime, text));
+		messages.add(new TimedMessage(startTime, text, this));
 		crossSectionElement.getCrossSection().getLink().network.setModified();
 	}
 	
@@ -359,9 +355,24 @@ public class VMS extends CrossSectionObject implements XML_IO {
 	 * Add a TimedMessage to this VMS.
 	 * @param time Double; the time when the new message must be shown
 	 * @param message String; the text of the message
+	 * @throws Exception 
 	 */
-	public void addMessage(Double time, String message) {
-		messages.add(new TimedMessage(time, message));
+	public void addMessage(Double time, String message) throws Exception {
+		messages.add(new TimedMessage(time, message, this));
+	}
+	
+	/**
+	 * Retrieve the message that is shown at the specified time.
+	 * @param time Double; the time [s] for which the message must be retrieved
+	 * @return String; the message that is shown at the specified time
+	 */
+	public String message(Double time) {
+    	String result = "";
+    	for (TimedMessage tm : messages)
+    		if (tm.getTime() <= time)
+    			result = tm.getMessage_r();
+    	return result;
+
 	}
 
 	/**
@@ -376,6 +387,7 @@ public class VMS extends CrossSectionObject implements XML_IO {
 		private static final String XML_TEXT = "base64Text";
 		private double time;
 		private String message;
+		private final VMS parent;
 		
 		@Override
 		public int compareTo(TimedMessage other) {
@@ -399,18 +411,23 @@ public class VMS extends CrossSectionObject implements XML_IO {
 		 * Create a TimedMessage.
 		 * @param time Double; time [s] when the message is displayed
 		 * @param message String; the message to display
+		 * @param parent VMS; the VMS that owns this TimedMessage
+		 * @throws Exception 
 		 */
-		public TimedMessage(Double time, String message) {
-			this.time = time;
+		public TimedMessage(Double time, String message, VMS parent) throws Exception {
+			this.parent = parent;	// must be done before calling setTime
+			setTime(time);
 			this.message = message;
 		}
 		
 		/**
 		 * Create a TimedMessage from its String representation.
 		 * @param text String; the String representation
+		 * @param parent VMS; the VMS that owns this TimedMessage
 		 * @throws UnsupportedEncodingException
 		 */
-		public TimedMessage(String text) throws UnsupportedEncodingException {
+		public TimedMessage(String text, VMS parent) throws UnsupportedEncodingException {
+			this.parent = parent;	// must be done before calling setTime
 			String[] subFields = text.split(":");
 			time = Double.parseDouble(subFields[0]);
 			message = decode(subFields[1]);
@@ -419,15 +436,17 @@ public class VMS extends CrossSectionObject implements XML_IO {
 		/**
 		 * Create a TimedMessage from a {@link ParsedNode}.
 		 * @param pn {@link ParsedNode}; the XML node with the data to use
+		 * @param parent VMS; the VMS that owns this TimedMessage
 		 * @throws Exception 
 		 */
-		public TimedMessage(ParsedNode pn) throws Exception {
+		public TimedMessage(ParsedNode pn, VMS parent) throws Exception {
+			this.parent = parent;	// must be done before calling setTime
 			this.time = Double.NaN;
 			this.message = null;
 			for (String fieldName : pn.getKeys()) {
 				String value = pn.getSubNode(fieldName, 0).getValue();
 				if (fieldName.equals(XML_TIME))
-					this.time = Double.parseDouble(value);
+					setTime (Double.parseDouble(value));
 				else if (fieldName.equals(XML_TEXT))
 					this.message = decode(value);
 				else
@@ -442,8 +461,16 @@ public class VMS extends CrossSectionObject implements XML_IO {
 		/**
 		 * Modify the time at which this TimedMessage is displayed
 		 * @param newTime Double; the time [s] when the message is displayed
+		 * @throws Exception 
 		 */
-		public void setTime (Double newTime) { this.time = newTime; };
+		public void setTime (Double newTime) throws Exception { 
+			if (newTime < 0d)
+				throw new Exception("Bad time (must be >= 0; got " + newTime + ")");
+			this.time = newTime;
+			// Ensure this gets correctly sorted with the new time
+			parent.messages.remove(this);
+			parent.messages.add(this);
+		};
 		
 		/**
 		 * Modify the text that is displayed.
@@ -488,9 +515,10 @@ public class VMS extends CrossSectionObject implements XML_IO {
 		 * Change the time at which this TimedMessage is displayed.
 		 * @param newTime Double; the new value for the time at which this
 		 * TimedMessage is displayed
+		 * @throws Exception 
 		 */
-		public void setTime_w (String newTime) {
-			time = Double.parseDouble(Planar.fixRadix(newTime));
+		public void setTime_w (String newTime) throws Exception {
+			setTime (Double.parseDouble(Planar.fixRadix(newTime)));
 		}
 		
 		/**
