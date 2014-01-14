@@ -1483,6 +1483,16 @@ public class Driver {
             T = tTmp;
         }
     }
+    
+    /**
+     * Read the message displayed on a VMS and act on it.
+     * @param vms {@link VMS}; the VMS that is noticed
+     */
+    public void notice(VMS vms) {
+    	String message = vms.getMessage();
+    	System.out.println("Driver of vehicle " + vehicle.toString() + " reads VMS displaying \"" + message + "\"");
+    	// That's it; for now
+    }
 
     /**
      * Is called once at vehicle generation <i>after</i> the stochastic

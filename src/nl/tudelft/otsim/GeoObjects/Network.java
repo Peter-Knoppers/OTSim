@@ -1775,4 +1775,32 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 		return null;
 	}
 
+	/**
+	 * Create a textual description of the Variable Message Signs 
+	 * ({@link VMS VMSs}) in this Network.
+	 * @return String; the textual description of the Variable Message Signs 
+	 * ({@link VMS VMSs}) in this Network
+	 */
+	public String exportVMSs() {
+		String result = "";
+		for (CrossSectionObject cso : getCrossSectionObjects(VMS.class)) {
+			result += "VMS\t" + ((VMS) cso).export() + "\t";
+			String separator = "";
+			for (CrossSectionObject lcso : cso.crossSectionElement.getCrossSectionObjects(Lane.class)) {
+				Lane lane = (Lane) lcso;
+				double position = cso.longitudinalPosition;
+				if (position < 0)
+					position += Planar.length(cso.crossSectionElement.getLinkPointList(CrossSectionElement.LateralReferenceCenter, true, false));
+				result += String.format(Locale.US, "%s%d %.3f", separator, lane.getID(), position);
+				separator = ",";
+			}
+			ArrayList<Vertex> vertices = ((VMS) cso).getPolygon_r();
+			if (vertices.size() > 0)
+				for (Vertex v : vertices)
+					result += String.format(Locale.US, "\t%.2f\t%.2f", v.x, v.y);
+			result += "\n";
+		}
+		return result;
+	}
+
 }

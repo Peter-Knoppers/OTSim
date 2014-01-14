@@ -7,7 +7,6 @@ import java.io.ByteArrayOutputStream;
 
 import nl.tudelft.otsim.FileIO.ParsedNode;
 import nl.tudelft.otsim.FileIO.StaXWriter;
-import nl.tudelft.otsim.GUI.Storable;
 import nl.tudelft.otsim.GeoObjects.Network;
 
 import org.junit.Test;

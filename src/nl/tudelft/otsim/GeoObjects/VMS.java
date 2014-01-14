@@ -1,6 +1,7 @@
 package nl.tudelft.otsim.GeoObjects;
 
 import java.awt.Color;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.TreeSet;
@@ -11,6 +12,7 @@ import nl.tudelft.otsim.FileIO.XML_IO;
 import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GUI.InputValidator;
 import nl.tudelft.otsim.GUI.Main;
+import nl.tudelft.otsim.GUI.WED;
 import nl.tudelft.otsim.SpatialTools.Planar;
 import nl.tudelft.otsim.Utilities.Reversed;
 
@@ -80,13 +82,14 @@ public class VMS extends CrossSectionObject implements XML_IO {
 	/**
 	 * Create a VMS from a textual description of times and messages.
 	 * @param messageList String; textual description of times and messages
-	 * TODO: implement quoting (escape the field separators, HTML tags, etc., or use base64 encoding).
+	 * @throws Exception 
 	 */
-	public VMS(String messageList) {
+	public VMS(String messageList) throws Exception {
+		if (messageList.length() == 0)
+			return;
 		String[] fields = messageList.split(",");
 		for (String field : fields) {
-			String[] subFields = field.split(":");
-			messages.add(new TimedMessage(Double.parseDouble(subFields[0]), subFields[1]));
+			messages.add(new TimedMessage(field));
 		}
 	}
 
@@ -136,7 +139,7 @@ public class VMS extends CrossSectionObject implements XML_IO {
 		return new InputValidator(new InputValidator.CustomValidator() {
 			@Override
 			public boolean validate(String originalValue, String proposedValue) {
-				if (! proposedValue.matches("[a-zA-Z_][-a-zA-Z0-9_.]*"))
+				if (! proposedValue.matches("[a-zA-Z_][a-zA-Z0-9_.]*"))
 					return false;	// not a decent name
 				if (proposedValue.equals(originalValue))
 					return true;	// current name is OK
@@ -229,6 +232,7 @@ public class VMS extends CrossSectionObject implements XML_IO {
 	 */
 	public void setLongitudinalPosition_w(double longitudinalPosition) {
 		this.longitudinalPosition = longitudinalPosition;
+		crossSectionElement.getCrossSection().getLink().network.setModified();
 	}
 	
 	/**
@@ -260,7 +264,15 @@ public class VMS extends CrossSectionObject implements XML_IO {
 	
 	@Override
 	public String toString() {
-		return String.format(Main.locale, "VMS %s at longitudinalPosition %.3fm, width %.3fm", ID, longitudinalPosition, lateralWidth);
+		String messageString = "";
+		String separator = "";
+		for (TimedMessage tm : messages) {
+			messageString += separator + tm.toString();
+			separator = ", ";
+		}
+		if (null != crossSectionElement)
+			return String.format(Main.locale, "VMS %s at longitudinalPosition %.3fm, width %.3fm: %s", ID, longitudinalPosition, lateralWidth, messageString);
+		return String.format(Main.locale, "VMS: " + messageString);
 	}
 	
 	/**
@@ -268,13 +280,18 @@ public class VMS extends CrossSectionObject implements XML_IO {
 	 * @return String; the string representation of the messages of this VMS
 	 */
 	public String export () {
-		String result = "VMS";
-		String separator = "\t";
+		String result = "";
+		String separator = "";
 		for (TimedMessage tm : messages) {
-			result += String.format(Locale.US, "%s%.3f:%s", separator, tm.getTime(), tm.getMessage_r());
+			try {
+				result += separator + tm.export();
+			} catch (UnsupportedEncodingException e) {
+				WED.showProblem(WED.PROGRAMERROR, "Cannot encode message \"%s\" for export", tm.getMessage_r());
+				e.printStackTrace();
+			}
 			separator = ",";
 		}
-		return result + "\n";
+		return result;
 	}
 	
 	@Override
@@ -337,6 +354,15 @@ public class VMS extends CrossSectionObject implements XML_IO {
 		messages.add(new TimedMessage(startTime, text));
 		crossSectionElement.getCrossSection().getLink().network.setModified();
 	}
+	
+	/**
+	 * Add a TimedMessage to this VMS.
+	 * @param time Double; the time when the new message must be shown
+	 * @param message String; the text of the message
+	 */
+	public void addMessage(Double time, String message) {
+		messages.add(new TimedMessage(time, message));
+	}
 
 	/**
 	 * Simple fixed message that is displayed at a specified time
@@ -347,7 +373,7 @@ public class VMS extends CrossSectionObject implements XML_IO {
 		/** Label of a time in XML representation of a VMS time/text pair */
 		private static final String XML_TIME = "time";
 		/** Label of a text in XML representation of a VMS time/text pair */
-		private static final String XML_TEXT = "text";
+		private static final String XML_TEXT = "base64Text";
 		private double time;
 		private String message;
 		
@@ -361,6 +387,15 @@ public class VMS extends CrossSectionObject implements XML_IO {
 		}
 		
 		/**
+		 * Convert this TimedMessage to a String representation suitable for import
+		 * @return String; the encoded form of this TimedMessage
+		 * @throws UnsupportedEncodingException
+		 */
+		public String export() throws UnsupportedEncodingException {
+			return String.format(Locale.US, "%.3f:%s", getTime(), encode(message));
+		}
+
+		/**
 		 * Create a TimedMessage.
 		 * @param time Double; time [s] when the message is displayed
 		 * @param message String; the message to display
@@ -368,6 +403,17 @@ public class VMS extends CrossSectionObject implements XML_IO {
 		public TimedMessage(Double time, String message) {
 			this.time = time;
 			this.message = message;
+		}
+		
+		/**
+		 * Create a TimedMessage from its String representation.
+		 * @param text String; the String representation
+		 * @throws UnsupportedEncodingException
+		 */
+		public TimedMessage(String text) throws UnsupportedEncodingException {
+			String[] subFields = text.split(":");
+			time = Double.parseDouble(subFields[0]);
+			message = decode(subFields[1]);
 		}
 		
 		/**
@@ -383,7 +429,7 @@ public class VMS extends CrossSectionObject implements XML_IO {
 				if (fieldName.equals(XML_TIME))
 					this.time = Double.parseDouble(value);
 				else if (fieldName.equals(XML_TEXT))
-					this.message = value;
+					this.message = decode(value);
 				else
 					throw new Exception("TimedMessage does not have a field " + fieldName + " (near " + pn.description() + ")");
 			}
@@ -402,8 +448,12 @@ public class VMS extends CrossSectionObject implements XML_IO {
 		/**
 		 * Modify the text that is displayed.
 		 * @param newMessage String; the text that is displayed
+		 * @throws Exception 
 		 */
-		public void setMessage_w (String newMessage) { this.message = newMessage; };
+		public void setMessage_w (String newMessage) throws Exception {
+			encode (newMessage);	// verify that newMessage can be encoded
+			this.message = newMessage;
+		};
 		
 		/**
 		 * Retrieve the time at which this TimedMessage is displayed.
@@ -421,7 +471,7 @@ public class VMS extends CrossSectionObject implements XML_IO {
 		public String toString() {
 			if (time < 0)
 				return message;
-			return String.format (Main.locale, "%.3f: %s", time, message);
+			return String.format (Main.locale, "%.3f: \"%s\"", time, message);
 		}
 		
 		/**
@@ -476,16 +526,34 @@ public class VMS extends CrossSectionObject implements XML_IO {
 		 * <br /> This method is only used by the {@link nl.tudelft.otsim.GUI.ObjectInspector}.
 		 * @return Boolean; always true
 		 */
+		@SuppressWarnings("static-method")
 		public boolean mayDeleteMessage_d() { 
 			return true;
 		}
 
 		@Override
 		public boolean writeXML(StaXWriter staXWriter) {
-			return staXWriter.writeNodeStart(XML_TIMETEXT)
-					&& staXWriter.writeNode(XML_TIME, String.format(Locale.US, "%.3f",  time))
-					&& staXWriter.writeNode(XML_TEXT, message)
-					&& staXWriter.writeNodeEnd(XML_TIMETEXT);
+			try {
+				return staXWriter.writeNodeStart(XML_TIMETEXT)
+						&& staXWriter.writeNode(XML_TIME, String.format(Locale.US, "%.3f",  time))
+						&& staXWriter.writeNode(XML_TEXT, encode(message))
+						&& staXWriter.writeNodeEnd(XML_TIMETEXT);
+			} catch (UnsupportedEncodingException e) {
+				WED.showProblem(WED.PROGRAMERROR, "Cannot encode message \"%s\" for write", message);
+				e.printStackTrace();
+				return false;
+			}
+		}
+		
+		/*
+		 * Base 64 encoding and decoding will be standard in Java 8; for now we'll have to use this
+		 */
+		private static String encode (String string) throws UnsupportedEncodingException {
+			return javax.xml.bind.DatatypeConverter.printBase64Binary(string.getBytes("UTF-8"));
+		}
+		
+		private static String decode (String string) throws UnsupportedEncodingException {
+			return new String(javax.xml.bind.DatatypeConverter.parseBase64Binary(string), "UTF-8");
 		}
 		
 	}

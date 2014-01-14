@@ -319,11 +319,24 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
                 }else if ((driver.activationLevel <= 1) && (driver.activationLevel > 0)) {
                 	clazz.addStochasticDriverParameter("RandomAct", VehicleDriver.distribution.GAUSSIAN, 0, 0.1);
                 }else {
-                	throw new Error("The targeted ActivationLevel input is not a valid value!");
+                	throw new Exception("The targeted ActivationLevel input is not a valid value!");
                 	//System.out.println("The ActivationLevel input is not a valid value!");
                 }
+        	} else if (fields[0].equals("VMS")) {
+        		for (String location : fields[2].split(",")) {
+        			String[] subFields = location.split(" ");
+        			if ((null == subFields[0]) || (subFields[0].equals("")))
+        				System.err.println("VMS " + fields[1] + " lies on no lane");
+        			else {
+        			Lane lane = lookupLane(Integer.parseInt(subFields[0]), microNetwork);
+        			if (null == lane)
+        				throw new Exception("VMS " + fields[1] + " lies on undefined lane " + subFields[0]);
+        			model.addController(new VMS(lane, Double.parseDouble(subFields[1]), fields[1]));
+        			}
+        		}
+
         	} else
-        		throw new Error("Unknown object in LaneSimulator: \"" + fields[0] + "\"");        	
+        		throw new Exception("Unknown object in LaneSimulator: \"" + fields[0] + "\"");        	
     	}
 		if (null != exportTripPattern)
 			tripList.add(exportTripPattern);
