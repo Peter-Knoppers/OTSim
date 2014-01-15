@@ -450,9 +450,12 @@ public class VMS extends CrossSectionObject implements XML_IO {
 				String value = pn.getSubNode(fieldName, 0).getValue();
 				if (fieldName.equals(XML_TIME))
 					setTime (Double.parseDouble(value));
-				else if (fieldName.equals(XML_TEXT))
-					this.message = decode(value);
-				else
+				else if (fieldName.equals(XML_TEXT)) {
+					if (null == value)
+						this.message = "";
+					else
+						this.message = decode(value);
+				} else
 					throw new Exception("TimedMessage does not have a field " + fieldName + " (near " + pn.description() + ")");
 			}
 			if (Double.isNaN(this.time))
