@@ -960,9 +960,7 @@ public class Driver {
      * @param split RSU located at the split.
      */
     public void notice(Lane.splitRSU split) {
-    	if ((585 == vehicle.id) && (vehicle.model.t > 230))
-    		System.out.println("komt ie");
-        if (null == vehicle.getNeighbor(Movable.DOWN)) {
+         if (null == vehicle.getNeighbor(Movable.DOWN)) {
             // get appropriate lane
             Lane lane = split.getLaneForRoute(vehicle.route);
             // lane may be null if not appropriate for the route (will change lane before)
@@ -1484,16 +1482,6 @@ public class Driver {
         }
     }
     
-    /**
-     * Read the message displayed on a VMS and act on it.
-     * @param vms {@link VMS}; the VMS that is noticed
-     */
-    public void notice(VMS vms) {
-    	String message = vms.getMessage();
-    	System.out.println("Driver of vehicle " + vehicle.toString() + " reads VMS displaying \"" + message + "\"");
-    	// That's it; for now
-    }
-
     /**
      * Is called once at vehicle generation <i>after</i> the stochastic
      * vehicle and driver parameters have been set. It can be used to define

@@ -18,8 +18,7 @@ public class VMS extends RSU {
      * @throws Exception 
      */
     public VMS(Lane lane, double position, String description) throws Exception {
-        super(lane, position, false, true);
-        noticeable = true;
+        super(lane, position, true, false);
         schedule = new nl.tudelft.otsim.GeoObjects.VMS(description);
     }
     
@@ -38,7 +37,7 @@ public class VMS extends RSU {
 
 	@Override
 	public void pass(Vehicle vehicle) {
-		// Required; does nothing
+    	vehicle.passVMS(getMessage());
 	}
 
 	@Override
