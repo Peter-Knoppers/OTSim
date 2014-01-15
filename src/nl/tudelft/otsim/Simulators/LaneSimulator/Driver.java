@@ -21,6 +21,9 @@ public class Driver {
 	/** Actual Activation level of this driver (smoothing variable: [0, 1]) */
 	public double ActLevel;
 	
+	/** ActLevel increment after a VMS. */
+	public double ActLInc = 0;
+	
 	/** Random value of ActLevel for individual vehicles */
 	public double RandomAct;
 	
@@ -244,6 +247,7 @@ public class Driver {
     public void drive() { 	
     	//a. time function @After TransitionTime(600s) + WarmingupTime(1800s) fully activated to the target level! #Ugly
     	ActLevel = TemporalAct(vehicle.model.t(), transitionTime, 30, activationLevel, 1800); 
+    	ActLevel = ActLevel + ActLInc;
     	
     	//b. Set stochastic driver parameters'
     	ActLevel = ActLevel * (1 + RandomAct);
@@ -1480,6 +1484,34 @@ public class Driver {
             b = bTmp;
             T = tTmp;
         }
+    }
+    
+    /**
+     * Read the message displayed on a VMS and act on it.
+     * @param vms {@link VMS}; the VMS that is noticed
+     */
+    public void notice(VMS vms) {
+    	double s = vehicle.getDistanceToRSU(vms); // s = vehicle.x - vms.x();
+    	if ((vehicle.model.t() >= 1800) && (Math.abs(s)<4)){
+    		ActLInc  =  ActLInc + 0.1;
+    		ActLevel = ActLevel + ActLInc;
+        	ActLevel = ActLevel * (1 + RandomAct);
+        	//value constraint:  //(activationLevel<=1 && activationLevel>=0 )
+        	ActLevel = ActLevel < 0? 0 : ActLevel;
+        	ActLevel = ActLevel > 1? 1 : ActLevel;
+        	// set parameters
+            a = 1.25*(1-ActLevel) + ActLevel * 1.25 * (1.46/0.94);
+            aMin = a;
+            b = 2.09*(1-ActLevel) + ActLevel * 2.09 * (0.97/0.87);
+            bSafe = b;
+            Tmin = .56*(1-ActLevel) + ActLevel * .56 * (.25/.78);
+            aInter = 2*(1-ActLevel) + ActLevel * 2 * (1.46/0.94);
+            bYellow = 3.5*(1-ActLevel) + ActLevel * 3.5 * (0.97/0.87);	
+            
+        	String message = vms.getMessage();
+        	System.out.println("Driver of vehicle " + vehicle.toString() + " reads VMS displaying \"" + message + "\"");
+        	// That's it; for now
+    	}
     }
     
     /**
