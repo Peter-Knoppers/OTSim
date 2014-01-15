@@ -37,7 +37,7 @@ public class VMS extends RSU {
 
 	@Override
 	public void pass(Vehicle vehicle) {
-    	vehicle.passVMS(getMessage());
+    	vehicle.passVMS(getMessage(), this);
 	}
 
 	@Override
