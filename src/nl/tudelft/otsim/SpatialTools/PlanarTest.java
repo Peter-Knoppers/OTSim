@@ -96,9 +96,28 @@ public class PlanarTest {
 		assertEquals("Length of three-vertex list", 2 * Math.sqrt(100 * 100 + 200 * 200 + 300 * 300), Planar.length(in), 0.0001);
 	}
 
+	/**
+	 * Test rotateTranslatePolyLine
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testRotateTranslatePolyLine() {
-		fail("Not yet implemented");
+		Point2D.Double[] emptyArray = new Point2D.Double[0];
+		assertEquals("Empty array in should result in empty array out", 0, Planar.rotateTranslatePolyLine(emptyArray, 10, 20, 30).length);
+		Point2D.Double[] onePointArray = new Point2D.Double[1];
+		onePointArray[0] = new Point2D.Double(1, 2);
+		Point2D.Double[] result = Planar.rotateTranslatePolyLine(onePointArray, Math.PI / 2, 10, 20);
+		assertEquals("One point array in should result in one point array out", 1, result.length);
+		assertEquals("Expected result point", 0, new Point2D.Double(8, 21).distance(result[0]), 0.000001);
+		Point2D.Double[] threePointArray = new Point2D.Double[3];
+		threePointArray[0] = new Point2D.Double(1, 2);
+		threePointArray[1] = new Point2D.Double(3, 4);
+		threePointArray[2] = new Point2D.Double(-5, -6);
+		result = Planar.rotateTranslatePolyLine(threePointArray, -Math.PI / 2, 10, 20);
+		assertEquals("Three point array in should result in three point array out", 3, result.length);
+		assertEquals("Expected result point", 0, new Point2D.Double(12, 19).distance(result[0]), 0.000001);
+		assertEquals("Expected result point", 0, new Point2D.Double(14, 17).distance(result[1]), 0.000001);
+		assertEquals("Expected result point", 0, new Point2D.Double(4, 25).distance(result[2]), 0.000001);
 	}
 
 	/**
@@ -342,6 +361,7 @@ public class PlanarTest {
 	    Planar.circleCoveringPoints(points);
 	}
 
+	@SuppressWarnings("static-method")
 	private void testCircleCoveringPoints3() {
 		// This really big case failed miserable due in stage 4 when dli and dlj got exactly the same value
 		ArrayList<Point2D.Double> points = new ArrayList<Point2D.Double>();
