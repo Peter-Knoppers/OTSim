@@ -2,6 +2,7 @@ package nl.tudelft.otsim.SpatialTools;
 
 import static org.junit.Assert.*;
 
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
@@ -100,24 +101,103 @@ public class PlanarTest {
 		fail("Not yet implemented");
 	}
 
+	/**
+	 * Test the rotate around origin method
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testRotatePoint() {
-		fail("Not yet implemented");
+		Point2D.Double p = new Point2D.Double (10, 0);
+		Point2D.Double q = Planar.rotatePoint(p, Math.PI / 2);
+		assertEquals("rotated point should be at expected location", 0, q.distance(new Point2D.Double(0, 10)), 0.000001);
+		p = new Point2D.Double (10, 10);
+		q = Planar.rotatePoint(p, Math.PI / 2);
+		assertEquals("rotated point should be at expected location", 0, q.distance(new Point2D.Double(-10, 10)), 0.000001);
+		q = Planar.rotatePoint(q, Math.PI / 4);
+		assertEquals("rotated point should be at expected location", 0, q.distance(new Point2D.Double(-Math.sqrt(2) * 10, 0)), 0.000001);
 	}
 
+	/**
+	 * Test translatePoint
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testTranslatePoint() {
-		fail("Not yet implemented");
+		Point2D.Double p = new Point2D.Double(10, 0);
+		Point2D.Double q = Planar.translatePoint(p, 5, 6);
+		assertEquals("q should be translated p", 0, q.distance(new Point2D.Double(15, 6)), 0.000001);
+		q = Planar.translatePoint(q, -12, -100);
+		assertEquals("q should be translated p", 0, q.distance(new Point2D.Double(3, -94)), 0.000001);
 	}
 
+	/**
+	 * Test nearestPointOnLine
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testNearestPointOnLine() {
-		fail("Not yet implemented");
+		// Doing the math to figure out the correct solutions was not as easy as I expected
+		Line2D.Double l = new Line2D.Double(6, 0, 0, 8);
+		Point2D.Double p = new Point2D.Double(0, 0);
+		Point2D.Double q = Planar.nearestPointOnLine(l, p);
+		Point2D.Double expected = new Point2D.Double (8 / (6d / 8 + 8d / 6), 6 / (6d / 8 + 8d / 6));
+		//System.out.println("e " + expected.x + ", " + expected.y);
+		//System.out.println("q " + q.x + ", " + q.y);
+		assertEquals("Distance from expected location should be 0", 0, expected.distance(q), 0.00001);
+		p = new Point2D.Double(3, 0);
+		q = Planar.nearestPointOnLine(l, p);
+		expected = new Point2D.Double (3 + 4 / (6d / 8 + 8d / 6), 3 / (6d / 8 + 8d / 6));
+		//System.out.println("e " + expected.x + ", " + expected.y);
+		//System.out.println("q " + q.x + ", " + q.y);
+		assertEquals("Distance from expected location should be 0", 0, expected.distance(q), 0.00001);
+		p = new Point2D.Double (6, 0);
+		q = Planar.nearestPointOnLine(l, p);		
+		assertEquals("Distance to endpoint is 0", 0, new Point2D.Double(6, 0).distance(q), 0.000001);
+		p = new Point2D.Double (12, 0);
+		q = Planar.nearestPointOnLine(l, p);		
+		expected = new Point2D.Double (12 - 8 / (6d / 8 + 8d / 6), -6 / (6d / 8 + 8d / 6));
+		//System.out.println("e " + expected.x + ", " + expected.y);
+		//System.out.println("q " + q.x + ", " + q.y);
+		assertEquals("Distance from expected location should be 0", 0, expected.distance(q), 0.00001);
+		p = new Point2D.Double(0, 4);
+		q = Planar.nearestPointOnLine(l, p);		
+		expected = new Point2D.Double (4 / (6d / 8 + 8d / 6), 4 + 3 / (6d / 8 + 8d / 6));
+		//System.out.println("e " + expected.x + ", " + expected.y);
+		//System.out.println("q " + q.x + ", " + q.y);
+		assertEquals("Distance from expected location should be 0", 0, expected.distance(q), 0.00001);
+		p = new Point2D.Double(3, 4);
+		q = Planar.nearestPointOnLine(l, p);		
+		expected = new Point2D.Double (3,4);
+		//System.out.println("e " + expected.x + ", " + expected.y);
+		//System.out.println("q " + q.x + ", " + q.y);
+		assertEquals("Distance from expected location should be 0", 0, expected.distance(q), 0.00001);
+		p = new Point2D.Double(6, 8);
+		q = Planar.nearestPointOnLine(l, p);		
+		expected = new Point2D.Double (6 - 8 / (6d / 8 + 8d / 6), 8 - 6 / (6d / 8 + 8d / 6));
+		//System.out.println("e " + expected.x + ", " + expected.y);
+		//System.out.println("q " + q.x + ", " + q.y);
+		assertEquals("Distance from expected location should be 0", 0, expected.distance(q), 0.00001);
 	}
 
+	/**
+	 * Test distanceLineSegmentToPoint
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testDistanceLineSegmentToPoint() {
-		fail("Not yet implemented");
+		Line2D.Double l = new Line2D.Double(6, 0, 0, 8);
+		Point2D.Double p = new Point2D.Double(0, 0);
+		double d = Planar.distanceLineSegmentToPoint(l, p);
+		double expected = new Point2D.Double (8 / (6d / 8 + 8d / 6), 6 / (6d / 8 + 8d / 6)).distance(p);
+		//System.out.println("e " + expected.x + ", " + expected.y);
+		//System.out.println("q " + q.x + ", " + q.y);
+		assertEquals("Expected distance", expected, d, 0.00001);
+		p = new Point2D.Double(20, 0);
+		assertEquals("Expected distance to end point", 14, Planar.distanceLineSegmentToPoint(l, p), 0.00001);
+		p = new Point2D.Double(26, -20);
+		assertEquals("Expected distance to end point", Math.sqrt(2) * 20, Planar.distanceLineSegmentToPoint(l, p), 0.00001);
+		p = new Point2D.Double(-10, 18);
+		assertEquals("Expected distance to end point", Math.sqrt(2) * 10, Planar.distanceLineSegmentToPoint(l, p), 0.00001);
 	}
 
 	@Test
