@@ -430,7 +430,10 @@ public class VMS extends CrossSectionObject implements XML_IO {
 			this.parent = parent;	// must be done before calling setTime
 			String[] subFields = text.split(":");
 			time = Double.parseDouble(subFields[0]);
-			message = decode(subFields[1]);
+			if (1 == subFields.length)
+				message = "";
+			else
+				message = decode(subFields[1]);
 		}
 		
 		/**

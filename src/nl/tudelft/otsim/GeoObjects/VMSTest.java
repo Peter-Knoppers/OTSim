@@ -10,7 +10,7 @@ import java.util.Locale;
 import nl.tudelft.otsim.FileIO.ParsedNode;
 import nl.tudelft.otsim.FileIO.StaXWriter;
 import nl.tudelft.otsim.GUI.InputValidator;
-import nl.tudelft.otsim.Utilities.TimeScaleFunction;
+import nl.tudelft.otsim.SpatialTools.Planar;
 
 import org.junit.Test;
 
@@ -62,9 +62,13 @@ public class VMSTest {
 		return result;
 	}
 
+	/**
+	 * Test the paint method
+	 */
 	@Test
 	public void testPaint() {
-		fail("Not yet implemented");
+		// TODO: This is not so easy to test...
+		//fail("Not yet implemented");
 	}
 
 	/**
@@ -247,6 +251,17 @@ public class VMSTest {
 			assertEquals("times should match", vms.getTimedMessages_r().get(i).getTime(), vms2.getTimedMessages_r().get(i).getTime(), 0.00001);
 			assertEquals("messages should match", vms.getTimedMessages_r().get(i).getMessage_r(), vms2.getTimedMessages_r().get(i).getMessage_r());
 		}
+		try {
+			vms.addMessage(1234d, "");
+		} catch (Exception e) {
+			fail("Unexpected exception");
+		}
+		out = vms.export();
+		try {
+			vms2 = new VMS(out);
+		} catch (Exception e) {
+			fail("Unexpected exception");
+		}
 	}
 
 	/**
@@ -300,7 +315,7 @@ public class VMSTest {
 	}
 
 	/**
-	 * Test the InputValidator for ID.
+	 * Test the {@link InputValidator} for ID.
 	 */
 	@SuppressWarnings("static-method")
 	@Test
@@ -344,6 +359,10 @@ public class VMSTest {
 		}
 	}
 
+	/**
+	 * Test the {@link InputValidator} for lateral position.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testValidateLateralPosition_v() {
 		VMS vms = createVMSOnLink();
@@ -385,24 +404,95 @@ public class VMSTest {
 		
 	}
 
+	/**
+	 * Check that the getWidth_r method works.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testGetWidth_r() {
-		fail("Not yet implemented");
+		VMS vms = createVMSOnLink();
+		assertEquals("Default width of VMS should be width of CrossSectionElement", vms.crossSectionElement.getWidth_r(), vms.getWidth_r(), 0.0001);;
 	}
 
+	/**
+	 * Check that reasonable values of lateral width can be set and read back.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testSetWidth_w() {
-		fail("Not yet implemented");
+		VMS vms = createVMSOnLink();
+		for (int i = -100; i <= 100; i++) {
+			double w = 0.1 * i;
+			vms.setWidth_w(w);
+			assertEquals("Returned width should equals last set width", w, vms.getWidth_r(), 0.000001);
+		}
 	}
 
+	/**
+	 * Test the {@link InputValidator} for width.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testValidateWidth_v() {
-		fail("Not yet implemented");
+		VMS vms = createVMSOnLink();
+		double crossSectionWidth = vms.crossSectionElement.getWidth_r();
+		int limit = (int) Math.floor(10 * crossSectionWidth / 2);
+		for (int latStep = -limit; latStep <= limit; latStep++) {
+			double latPos = 0.1 * latStep;
+			vms.setLateralPosition_w(latPos);
+			InputValidator iv = vms.validateWidth_v();
+			for (int widthStep = -10; widthStep < 50; widthStep++) {
+				double width = 0.1 * widthStep;
+				// Test with a locale that uses a comma as radix symbol
+				String proposedValue = String.format(Locale.GERMAN, "%.3f", width);
+				//System.out.println(String.format("latpos=%.3f, width=%s", latPos, proposedValue));
+				if ((width < 0.1) || (width > crossSectionWidth - Math.abs(latPos)))
+					assertFalse("Illegal value for lateral pos should be rejected", iv.validate("", Planar.fixRadix(proposedValue)));
+				else
+					assertTrue("Legal value for lateral position should be accepted", iv.validate("", Planar.fixRadix(proposedValue)));
+			}
+		}
 	}
 
+	/**
+	 * Test that getPolygon returns a rectangular area of the expected size
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testGetPolygon_r() {
-		fail("Not yet implemented");
+		VMS vms = createVMSOnLink();
+		ArrayList<Vertex> polygon = vms.getPolygon_r(); 
+		assertEquals("Polygon of VMS should have 4 vertices", 4, polygon.size());
+		double w = vms.crossSectionElement.getWidth_r();
+		double l = vms.getLongitudinalLength();
+		//System.out.println(String.format("w=%f, dist=%f", w, polygon.get(0).distance(polygon.get(1))));
+		assertEquals("Long edge of polygon should equal length", l, polygon.get(0).distance(polygon.get(1)), 0.0001);
+		assertEquals("Long edge of polygon should equal width", w, polygon.get(1).distance(polygon.get(2)), 0.0001);
+		assertEquals("Long edge of polygon should equal length", l, polygon.get(2).distance(polygon.get(3)), 0.0001);
+		assertEquals("Long edge of polygon should equal width", w, polygon.get(3).distance(polygon.get(0)), 0.0001);
+		double diagonal = Math.sqrt(l * l + w * w);
+		assertEquals("Angles of polygon should be 90 degrees", diagonal, polygon.get(0).distance(polygon.get(2)), 0.0001);
+		assertEquals("Angles of polygon should be 90 degrees", diagonal, polygon.get(1).distance(polygon.get(3)), 0.0001);
+		vms.longitudinalLength = l = 3;
+		polygon = vms.getPolygon_r();
+		//System.out.println(String.format("w=%f, dist=%f", w, polygon.get(0).distance(polygon.get(1))));
+		assertEquals("Long edge of polygon should equal length", l, polygon.get(0).distance(polygon.get(1)), 0.0001);
+		assertEquals("Long edge of polygon should equal width", w, polygon.get(1).distance(polygon.get(2)), 0.0001);
+		assertEquals("Long edge of polygon should equal length", l, polygon.get(2).distance(polygon.get(3)), 0.0001);
+		assertEquals("Long edge of polygon should equal width", w, polygon.get(3).distance(polygon.get(0)), 0.0001);
+		diagonal = Math.sqrt(l * l + w * w);
+		assertEquals("Angles of polygon should be 90 degrees", diagonal, polygon.get(0).distance(polygon.get(2)), 0.0001);
+		assertEquals("Angles of polygon should be 90 degrees", diagonal, polygon.get(1).distance(polygon.get(3)), 0.0001);
+		vms.setWidth_w(w = 2);
+		polygon = vms.getPolygon_r();
+		//System.out.println(String.format("w=%f, dist=%f", w, polygon.get(0).distance(polygon.get(1))));
+		assertEquals("Long edge of polygon should equal length", l, polygon.get(0).distance(polygon.get(1)), 0.0001);
+		assertEquals("Long edge of polygon should equal width", w, polygon.get(1).distance(polygon.get(2)), 0.0001);
+		assertEquals("Long edge of polygon should equal length", l, polygon.get(2).distance(polygon.get(3)), 0.0001);
+		assertEquals("Long edge of polygon should equal width", w, polygon.get(3).distance(polygon.get(0)), 0.0001);
+		diagonal = Math.sqrt(l * l + w * w);
+		assertEquals("Angles of polygon should be 90 degrees", diagonal, polygon.get(0).distance(polygon.get(2)), 0.0001);
+		assertEquals("Angles of polygon should be 90 degrees", diagonal, polygon.get(1).distance(polygon.get(3)), 0.0001);
 	}
 
 	/**
@@ -449,7 +539,7 @@ public class VMSTest {
 	}
 
 	/**
-	 * Check the InputValidator returned for the longitudinal position
+	 * Check the {@link InputValidator} returned for the longitudinal position
 	 */
 	@SuppressWarnings("static-method")
 	@Test
@@ -613,7 +703,7 @@ public class VMSTest {
 		} catch (Exception e) {
 			fail("Caught unexpected exception");
 		}
-		System.out.println(vms.export());
+		//System.out.println(vms.export());
 		assertEquals("check TimedMessage time", 1, vms.getTimedMessages_r().get(0).getTime(), 0.00001);
 		assertTrue("check TimedMessage text", "two".equals(vms.getTimedMessages_r().get(0).getMessage_r()));
 		assertEquals("check TimedMessage time", 1234.5, vms.getTimedMessages_r().get(1).getTime(), 0.00001);
