@@ -567,8 +567,9 @@ public class Vehicle extends Movable implements SimulatedObject {
 	/**
 	 * Change behavior when passing a VMS
 	 * @param message String; the message read
+	 * @param vms VMS; the Variable Message Sign
 	 */
-	public void passVMS(String message) {
+	public void passVMS(String message, VMS vms) {
     	System.out.println("Vehicle " + toString() + " reads VMS displaying \"" + message + "\"");
 		// TODO Let something happen depending on the actual message
 	}
