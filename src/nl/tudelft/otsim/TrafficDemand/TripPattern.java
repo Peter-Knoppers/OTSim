@@ -123,7 +123,7 @@ public class TripPattern implements XML_IO {
 	//	return numberOfTrips;
 	//}
 	
-	/**
+	/*   DEMOTED JAVADOC (removed the double asterisk)
 	 * Return the flow for a specified TrafficClass.
 	 * @param tc {@link TrafficClass}; the TrafficClass to return the flow for
 	 * @return Double; the flow for the specified {@link TrafficClass}
