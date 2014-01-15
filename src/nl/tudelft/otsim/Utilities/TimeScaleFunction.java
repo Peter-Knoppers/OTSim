@@ -30,7 +30,6 @@ public class TimeScaleFunction implements XML_IO {
 	
 	/**
 	 * Create an empty instance of a TimeScaleFunction.
-	 * @param storable {@link Storable}; the Storable that will be notified on changes to this TimeScaleFunction (may be null)
 	 */
 	public TimeScaleFunction() {
 		this.storable = null;
@@ -40,7 +39,6 @@ public class TimeScaleFunction implements XML_IO {
 	
 	/**
 	 * Create a TimeScaleFunction from an XML description
-	 * @param storable {@link Storable}; the Storable that will be notified of changes in this TimeScaleFunction (may be null)
 	 * @param pn {@link ParsedNode} XML node of the TimeScaleFunction object 
 	 * @throws Exception
 	 */
@@ -63,7 +61,7 @@ public class TimeScaleFunction implements XML_IO {
 	}
 	
 	/**
-	 * Create a TimeScaleFunction from a textual description with no Storable.
+	 * Create a TimeScaleFunction from a textual description
 	 * <br /> This can be useful in traffic generators in the traffic simulators.
 	 * @param description
 	 */
@@ -154,7 +152,6 @@ public class TimeScaleFunction implements XML_IO {
 	/**
 	 * Return a new TimeScaleFunction that is a copy of an existing 
 	 * TimeScaleFunction with all values multiplied by a factor.
-	 * @param storable (@link Storable}; the Storable that will be notified on changes to the new TimeScaleFunction (may be null)
 	 * @param pattern TimeScaleFunction that is used as reference.
 	 * @param factor Double; the factor that is applied to all values in the reference to obtain the factors in the new TimeScaleFunction
 	 */
@@ -263,10 +260,12 @@ public class TimeScaleFunction implements XML_IO {
 	 * @return Boolean; true if this TimeScaleFunction always return 1.0
 	 */
 	public boolean isTrivial() {
-		double firstFactor = factors.get(0);
-		for (Double factor : factors)
-			if (firstFactor != factor)
-				return false;
+		if (factors.size() > 0) {
+			double firstFactor = factors.get(0);
+			for (Double factor : factors)
+				if (firstFactor != factor)
+					return false;
+		}
 		boolean multiplyWithTrivial = null == multiplyWith ? true : multiplyWith.isTrivial();
 		boolean addToTrivial = null == addTo ? true : addTo.isTrivial();
 		return multiplyWithTrivial && addToTrivial;

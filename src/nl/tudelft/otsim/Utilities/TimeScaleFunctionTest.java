@@ -231,11 +231,11 @@ public class TimeScaleFunctionTest {
 		TimeScaleFunction f = new TimeScaleFunction();
 		assertTrue("empty TimeScaleFunction is always trivial", f.isTrivial());
 		f.insertPair(10, 20);
-		assertFalse("TimeScaleFunction that is constant non-1.0 is not trivial", f.isTrivial());
+		assertTrue("TimeScaleFunction that is constant non-1.0 is trivial", f.isTrivial());
 		f.insertPair(20, 1);
-		assertFalse("TimeScaleFunction that is constant non-1.0 is not trivial", f.isTrivial());
+		assertFalse("TimeScaleFunction that is not constant is not trivial", f.isTrivial());
 		f.deletePair(0);
-		assertTrue("TimeScaleFunction with one value that equals 1.0 is trivial", f.isTrivial());
+		assertTrue("TimeScaleFunction with one value is trivial", f.isTrivial());
 		for (int i = 1; i < 10; i++)
 			f.insertPair(100 * i, 1);
 		assertTrue("TimeScaleFunction with only values that equal 1.0 is trivial", f.isTrivial());
@@ -285,7 +285,7 @@ public class TimeScaleFunctionTest {
 		f.insertPair(20, 10d / 30);
 		assertEquals("check value and number of decimal digits", f.export(), "[20.000/0.333333]");
 		f.insertPair(30,  40);
-		assertEquals("check single tab char between entries", f.export(), "[20.000/0.333333\t30.000/40.000000]");
+		assertEquals("check single tab char between entries", f.export(), "[20.000/0.333333:30.000/40.000000]");
 	}
 
 	/**
