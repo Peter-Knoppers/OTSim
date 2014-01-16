@@ -230,6 +230,7 @@ public class Planar {
 			double distance = distanceLineSegmentToPoint(new Line2D.Double(prevPoint, p), point);
 			if (distance < closest)
 				closest = distance;
+			prevPoint = p;
 		}
 		return closest;
 	}

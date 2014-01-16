@@ -219,19 +219,98 @@ public class PlanarTest {
 		assertEquals("Expected distance to end point", Math.sqrt(2) * 10, Planar.distanceLineSegmentToPoint(l, p), 0.00001);
 	}
 
+	/**
+	 * Test polytonContainsPoint
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testPolygonContainsPoint() {
-		fail("Not yet implemented");
+		// Simple triangle; a bit off the "grid" so we don't run into boundary cases
+		Point2D.Double[] polygon = new Point2D.Double[3];
+		polygon[0] = new Point2D.Double(10.2, 10.1);
+		polygon[1] = new Point2D.Double(20.2, 10.1);
+		polygon[2] = new Point2D.Double(20.2, 20.1);
+		for (int x = -20; x <= 30; x++) {
+			for (int y = -20; y <= 30; y++) {
+				final Point2D.Double p = new Point2D.Double(x, y);
+				// figure out the truth
+				final boolean expected = (y > 10) && (x > 10) && (x <= 20) && (y < x);
+				//System.out.println("p (" + x + "," + y + ") expects " + (expected ? "true" : "false"));
+				if (expected)
+					assertTrue("Is inside", Planar.polygonContainsPoint(polygon, p));
+				else
+					assertFalse("Is outside", Planar.polygonContainsPoint(polygon, p));
+			}
+		}
+		// TODO write tests using a more "interesting" polygon
 	}
 
 	@Test
 	public void testDistancePolygonToPoint() {
-		fail("Not yet implemented");
+		Point2D.Double[] polygon = new Point2D.Double[3];
+		polygon[0] = new Point2D.Double(10, 10);
+		polygon[1] = new Point2D.Double(20, 10);
+		polygon[2] = new Point2D.Double(20, 20);
+		
+		for (int x = -20; x <= 30; x++) {
+			for (int y = -20; y <= 30; y++) {
+				final Point2D.Double p = new Point2D.Double(x, y);
+				// figure out the truth
+				double expected;
+				if ((y >= 10) && (x >= 10) && (x <= 20) && (y <= x))
+					expected = 0;
+				else if (y < 10) {
+					if (x < 10)
+						expected = p.distance(polygon[0]);
+					else if (x > 20)
+						expected = p.distance(polygon[1]);
+					else
+						expected = 10 - y;
+				} else if (x > 20) {
+					if (y < 10)
+						expected = p.distance(polygon[1]);
+					else if (y > 20)
+						expected = p.distance(polygon[2]);
+					else
+						expected = x - 20;
+				} else {
+					if (y + x < 20)
+						expected = p.distance(polygon[0]);
+					else if (y + x > 40)
+						expected = p.distance(polygon[2]);
+					else
+						expected = (y - x) / Math.sqrt(2);
+				}
+				System.out.println("p (" + x + "," + y + ") expects " + expected);
+				assertEquals("Expected distance", expected, Planar.distancePolygonToPoint(polygon, p), 0.00001);
+			}
+		}
 	}
 
 	@Test
 	public void testPolygonIntersectsPolygon() {
-		fail("Not yet implemented");
+		// Simple triangle; a bit off the "grid" so we don't run into boundary cases
+		Point2D.Double[] polygon1 = new Point2D.Double[3];
+		polygon1[0] = new Point2D.Double(10.2, 10.1);
+		polygon1[1] = new Point2D.Double(20.2, 10.1);
+		polygon1[2] = new Point2D.Double(20.2, 20.1);
+		for (int x = -20; x <= 30; x++) {
+			for (int y = -20; y <= 30; y++) {
+				// Simple square; on the grid
+				Point2D.Double[] polygon2 = new Point2D.Double[4];
+				polygon2[0] = new Point2D.Double(x, y);
+				polygon2[1] = new Point2D.Double(x + 2, y);
+				polygon2[2] = new Point2D.Double(x + 2, y + 2);
+				polygon2[3] = new Point2D.Double(x, y + 2);
+				// figure out the truth
+				final boolean expected = (y > 8) && (y <= 20) && (x > 8) && (x <= 20) && (y < x + 2);
+				System.out.println("p (" + x + "," + y + ") expects " + (expected ? "true" : "false"));
+				if (expected)
+					assertTrue("Is intersecting", Planar.polygonIntersectsPolygon(polygon1, polygon2));
+				else
+					assertFalse("Is disjunct", Planar.polygonIntersectsPolygon(polygon1, polygon2));
+			}
+		}
 	}
 
 	@Test
