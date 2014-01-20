@@ -241,12 +241,16 @@ public class ObjectInspector extends JFrame implements TreeSelectionListener, Fo
 			case ITEMIZER: 
 				this.itemizer = method;
 				try {
+					//System.out.println("about to invoke itemizer");
+					//System.out.println("itemizer is " + itemizer.toString());
+					//System.out.println("methodObject is " + methodObject.toString());
 					if (null == itemizer.invoke(methodObject, new Object[0])) {
 						WED.showProblem(WED.WARNING, "Itemizer of %s returned null", name);
 						itemizer = null;
 					}
 				} catch (Exception e) {
-					WED.showProblem(WED.WARNING, "Itemizer of %s throws exception: %s", name, e.toString());
+					//System.err.println("Oops: " + WED.exeptionStackTraceToString(e));
+					WED.showProblem(WED.WARNING, "Itemizer of %s throws exception: %s\r\n%s", name, e.toString(), WED.exeptionStackTraceToString(e));
 				}
 				return;
 			

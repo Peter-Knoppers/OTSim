@@ -438,10 +438,16 @@ public class CrossSectionElement implements XML_IO {
         }
 
 	
+		if (referenceVertices.size() < 2)
+			throw new Error("Malformed vertices");
         ArrayList<Vertex> result = Planar.createParallelVertices(referenceVertices, prevReferenceVertices, previousLateralPosition, myLateralPosition);
+		if (result.size() < 2)
+			throw new Error("Malformed vertices");
         ArrayList<CrossSection> csList = crossSection.getLink().getCrossSections_r();
         if (crossSection == csList.get(0) && this.connectedFrom == null)
         	result = crossSection.getLink().getFromNode_r().truncateAtConflictArea(result);
+		if (result.size() < 2)
+			throw new Error("Malformed vertices");
         //&& ! csList.get(csList.size() - 1).getLink().getToNodeExpand().equals(csList.get(csList.size() - 1).getLink().getToNode_r())
         if (crossSection == csList.get(csList.size() - 1)  && ! adjustLink)  {
         	result = crossSection.getLink().getToNode_r().truncateAtConflictArea(result);
@@ -719,9 +725,12 @@ public class CrossSectionElement implements XML_IO {
 	 * @return ArrayList&lt;String&gt;; the list of possible values
 	 */
 	public ArrayList<String> itemizeType_i() {
-		ArrayList<String> result = new ArrayList<String> (); 
+		System.out.println("entering itemizeType_i");
+		ArrayList<String> result = new ArrayList<String> ();
+		System.out.println("crossSection is " + toString());
 		for (CrossSectionElementTypology cset : crossSection.getLink().network.getCrossSectionElementTypologyList())
 			result.add(cset.getName_r());
+		System.out.println("returning from itemizeType_i");
 		return result;
 	}
 	

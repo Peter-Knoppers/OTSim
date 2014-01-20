@@ -438,11 +438,18 @@ public class Node extends Vertex implements XML_IO {
 					result.clear();
 					result.add(new Vertex(replacementPoint, z));
 				}
-				else
-					result.add(v);
+				// 20140120/PK: WRONG: else	(must ALWAYS add vertex v)
+				result.add(v);
 			}
 			prevPoint = p;
 		}		
+		if (result.size() < 2) {
+			System.err.println("Malformed vertices");
+			System.out.println("vertices are:" + Planar.verticesToString(vertices));
+			System.out.println("polygon is:  " + Planar.pointsToString(polygon));
+			// Uncomment to try again for debugging
+			//truncateHeadAtConflictArea(vertices);
+		}
 		return result;
 	}
 	
@@ -467,6 +474,8 @@ public class Node extends Vertex implements XML_IO {
 		} 
 		if (distanceStart < circle.radius()) {
 			vertices = truncateHeadAtConflictArea(vertices);
+			if (vertices.size() < 2)
+				throw new Error("Malformed vertices");
 			return vertices;
 		}
 		if (distanceEnd < circle.radius()) {
@@ -474,12 +483,12 @@ public class Node extends Vertex implements XML_IO {
 			// We'd better make sure that the caller does not mind...
 			Collections.reverse(vertices);
 			vertices = truncateHeadAtConflictArea(vertices);
-
+			if (vertices.size() < 2)
+				throw new Error("Malformed vertices");
 			Collections.reverse(vertices);
 			return vertices;
 		}
 		// Neither end of vertices is near the conflict area
-
 		return vertices;
 	}
 	
