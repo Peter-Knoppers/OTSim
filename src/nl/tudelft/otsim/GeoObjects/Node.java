@@ -338,7 +338,7 @@ public class Node extends Vertex implements XML_IO {
 								Line2D.Double otherDLLine = otherCS.vectorAtNode(otherDL.incoming, true, otherIndex, false);
 								if (null == otherDLLine)
 									continue;
-								if (Planar.lineIntersectsLine(dlLine, otherDLLine))
+								if (Planar.lineSegmentIntersectsLineSegment(dlLine, otherDLLine))
 									pointCloud.add(Planar.intersection(dlLine, otherDLLine));
 							}
 						}
@@ -1491,7 +1491,7 @@ public class Node extends Vertex implements XML_IO {
 				for (Vertex vB : verticesB) {
 					if (! (prevB == null))   {
 						Line2D.Double lineB = new Line2D.Double(prevB.getX(),prevB.getY(),vB.getX(),vB.getY());
-						if (Planar.lineIntersectsLine(lineA, lineB))
+						if (Planar.lineSegmentIntersectsLineSegment(lineA, lineB))
 							return Planar.intersection(lineA,  lineB);
 					}
 					prevB = vB;

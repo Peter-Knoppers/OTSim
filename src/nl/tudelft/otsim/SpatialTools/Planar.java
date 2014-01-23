@@ -335,7 +335,7 @@ public class Planar {
 	 * @param l2 Line2D.Double; second line segment
 	 * @return Boolean; true if the line segments intersect; false otherwise
 	 */
-	public static boolean lineIntersectsLine(Line2D.Double l1, Line2D.Double l2) {
+	public static boolean lineSegmentIntersectsLineSegment(Line2D.Double l1, Line2D.Double l2) {
 		return (lineSegmentIntersectsLineSegment(new Point2D.Double(l1.x1, l1.y1), new Point2D.Double(l1.x2, l1.y2),
 				new Point2D.Double(l2.x1, l2.y1), new Point2D.Double(l2.x2, l2.y2)));
 	}
@@ -944,7 +944,7 @@ public class Planar {
 		Point2D.Double prevPoint = polygon[polygon.length - 1];
 		for (Point2D.Double p : polygon) {
 			Line2D.Double polygonLine = new Line2D.Double(prevPoint, p);
-			if (lineIntersectsLine (line, polygonLine))
+			if (lineSegmentIntersectsLineSegment (line, polygonLine))
 				result.add(intersection(line, polygonLine));
 			prevPoint = p;
 		}

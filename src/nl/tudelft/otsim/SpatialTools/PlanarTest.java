@@ -245,6 +245,12 @@ public class PlanarTest {
 		// TODO write tests using a more "interesting" polygon
 	}
 
+	/**
+	 * Test distancePolygonToPoint
+	 * <br /> A major flaw in distancePolygonToPoint was discovered during
+	 * development of this test.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testDistancePolygonToPoint() {
 		Point2D.Double[] polygon = new Point2D.Double[3];
@@ -287,6 +293,10 @@ public class PlanarTest {
 		}
 	}
 
+	/**
+	 * Test polygonIntersectsPolygon
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testPolygonIntersectsPolygon() {
 		// Simple triangle; a bit off the "grid" so we don't run into boundary cases
@@ -313,14 +323,36 @@ public class PlanarTest {
 		}
 	}
 
+	/**
+	 * Test the polyLineIntersectsLine method that takes two points as the last arguments.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testPolyLineIntersectsLineDoubleArrayDoubleDouble() {
-		fail("Not yet implemented");
+		Point2D.Double[] polyLine = new Point2D.Double[3];
+		polyLine[0] = new Point2D.Double(10, 10);
+		polyLine[1] = new Point2D.Double(20, 10);
+		polyLine[2] = new Point2D.Double(30, 30);
+		assertTrue("should intersect", Planar.polyLineIntersectsLine(polyLine, new Point2D.Double(15, 10), new Point2D.Double(20, 20)));
+		assertTrue("should intersect", Planar.polyLineIntersectsLine(polyLine, new Point2D.Double(20, 20), new Point2D.Double(40, 5)));
+		assertFalse("should not intersect", Planar.polyLineIntersectsLine(polyLine, new Point2D.Double(0, 0), new Point2D.Double(40, 5)));
+		assertFalse("should not intersect", Planar.polyLineIntersectsLine(polyLine, new Point2D.Double(9, 0), new Point2D.Double(9, 995)));
 	}
 
+	/**
+	 * Test the polyLineIntersectsLine method that takes a Line2D as the second argument.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testPolyLineIntersectsLineDoubleArrayDouble() {
-		fail("Not yet implemented");
+		Point2D.Double[] polyLine = new Point2D.Double[3];
+		polyLine[0] = new Point2D.Double(10, 10);
+		polyLine[1] = new Point2D.Double(20, 10);
+		polyLine[2] = new Point2D.Double(30, 30);
+		assertTrue("should intersect", Planar.polyLineIntersectsLine(polyLine, new Line2D.Double(15, 10, 20, 20)));
+		assertTrue("should intersect", Planar.polyLineIntersectsLine(polyLine, new Line2D.Double(20, 20, 40, 5)));
+		assertFalse("should not intersect", Planar.polyLineIntersectsLine(polyLine, new Line2D.Double(0, 0, 40, 5)));
+		assertFalse("should not intersect", Planar.polyLineIntersectsLine(polyLine, new Line2D.Double(9, 0, 9, 995)));
 	}
 
 	@Test
@@ -328,14 +360,32 @@ public class PlanarTest {
 		fail("Not yet implemented");
 	}
 
+	/**
+	 * Test the lineSegmentIntersectsLineSegment method taking 4 points.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testLineSegmentIntersectsLineSegment() {
-		fail("Not yet implemented");
+		assertTrue("should intersect", Planar.lineSegmentIntersectsLineSegment(new Point2D.Double(10, 10), new Point2D.Double(20, 11), new Point2D.Double(15, 2), new Point2D.Double(13, 90)));
+		assertTrue("should intersect", Planar.lineSegmentIntersectsLineSegment(new Point2D.Double(10, 10), new Point2D.Double(20, 11), new Point2D.Double(10, 9), new Point2D.Double(20, 12)));
+		assertTrue("should intersect", Planar.lineSegmentIntersectsLineSegment(new Point2D.Double(10, 10), new Point2D.Double(20, 11), new Point2D.Double(20, 12), new Point2D.Double(10, 9)));
+		assertFalse("should not intersect", Planar.lineSegmentIntersectsLineSegment(new Point2D.Double(10, 10), new Point2D.Double(20, 20), new Point2D.Double(11, 10), new Point2D.Double(21, 20)));
+		assertFalse("should not intersect", Planar.lineSegmentIntersectsLineSegment(new Point2D.Double(10, 10), new Point2D.Double (20, 10), new Point2D.Double(21, 10), new Point2D.Double(30, 10)));
+		assertFalse("should not intersect", Planar.lineSegmentIntersectsLineSegment(new Point2D.Double(10, 10), new Point2D.Double (20, 10), new Point2D.Double(1, 9), new Point2D.Double(15, 11)));
 	}
 
+	/**
+	 * Test the lineSegmentIntersectsLineSegment method taking two lines.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testLineIntersectsLine() {
-		fail("Not yet implemented");
+		assertTrue("should intersect", Planar.lineSegmentIntersectsLineSegment(new Line2D.Double(10, 10, 20, 11), new Line2D.Double(15, 2, 13, 90)));
+		assertTrue("should intersect", Planar.lineSegmentIntersectsLineSegment(new Line2D.Double(10, 10, 20, 11), new Line2D.Double(10, 9, 20, 12)));
+		assertTrue("should intersect", Planar.lineSegmentIntersectsLineSegment(new Line2D.Double(10, 10, 20, 11), new Line2D.Double(20, 12, 10, 9)));
+		assertFalse("should not intersect", Planar.lineSegmentIntersectsLineSegment(new Line2D.Double(10, 10, 20, 20), new Line2D.Double(11, 10, 21, 20)));
+		assertFalse("should not intersect", Planar.lineSegmentIntersectsLineSegment(new Line2D.Double(10, 10, 20, 10), new Line2D.Double(21, 10, 30, 10)));
+		assertFalse("should not intersect", Planar.lineSegmentIntersectsLineSegment(new Line2D.Double(10, 10, 20, 10), new Line2D.Double(1, 9, 15, 11)));
 	}
 
 	@Test
