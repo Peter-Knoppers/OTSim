@@ -38,6 +38,8 @@ public class VMS extends RSU {
 	@Override
 	public void pass(Vehicle vehicle) {
     	vehicle.passVMS(getMessage(), this);
+    	if (vehicle.model.t() >= 1800)
+    		vehicle.getDriver().ActLInc = vehicle.getDriver().ActLInc + 0.1;
 	}
 
 	@Override

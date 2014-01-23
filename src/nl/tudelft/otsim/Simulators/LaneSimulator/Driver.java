@@ -1491,8 +1491,9 @@ public class Driver {
      * @param vms {@link VMS}; the VMS that is noticed
      */
     public void notice(VMS vms) {
-    	double s = vehicle.getDistanceToRSU(vms); // s = vehicle.x - vms.x();
-    	if ((vehicle.model.t() >= 1800) && (Math.abs(s)<4)){
+    	double s = vehicle.getDistanceToRSU(vms); // s = vehicle.x - vms.x(); Only look for upstream from RSU.
+    	// Maybe create a VMSSeen ArrayList,  create a condition: (vms instantof VMSSeen)
+    	if ((vehicle.model.t() >= 1800) && (Math.abs(s)<8)){
     		ActLInc  =  ActLInc + 0.1;
     		ActLevel = ActLevel + ActLInc;
         	ActLevel = ActLevel * (1 + RandomAct);
