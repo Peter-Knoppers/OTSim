@@ -148,24 +148,24 @@ public class SimpleVehicle implements SimulatedObject, Step{
 		gp.setColor(color);
 		PositionAndRotation parAtTime = positionAndRotation(time, currentCurvedness);
 		// body of the vehicle
-		gp.drawPolyLine(Planar.rotateTranslatePolyLine(shape(1f), parAtTime.direction, parAtTime.location.x, parAtTime.location.y));
+		gp.drawPolyLine(Planar.rotateTranslatePolyLine(shape(1f), parAtTime.direction, parAtTime.location.x, parAtTime.location.y), true);
 		// left rear wheel
-		gp.drawPolyLine(Planar.rotateTranslatePolyLine(wheelShape(0, width / 2 - wheelHalfWidth, 0d), parAtTime.direction, parAtTime.location.x, parAtTime.location.y));
+		gp.drawPolyLine(Planar.rotateTranslatePolyLine(wheelShape(0, width / 2 - wheelHalfWidth, 0d), parAtTime.direction, parAtTime.location.x, parAtTime.location.y), true);
 		// right rear wheel
-		gp.drawPolyLine(Planar.rotateTranslatePolyLine(wheelShape(0, - width / 2 + wheelHalfWidth, 0d), parAtTime.direction, parAtTime.location.x, parAtTime.location.y));
+		gp.drawPolyLine(Planar.rotateTranslatePolyLine(wheelShape(0, - width / 2 + wheelHalfWidth, 0d), parAtTime.direction, parAtTime.location.x, parAtTime.location.y), true);
 		// right front wheel
 		double extraRotation = 0d;
 		if (0d != currentCurvedness) {
 			double radius = 1d / currentCurvedness;
 			extraRotation = - Math.atan(length / 2 / (radius - width / 2 + wheelHalfWidth / 2));
 		}
-		gp.drawPolyLine(Planar.rotateTranslatePolyLine(wheelShape(length / 2, -width / 2 + wheelHalfWidth, extraRotation), parAtTime.direction, parAtTime.location.x, parAtTime.location.y));
+		gp.drawPolyLine(Planar.rotateTranslatePolyLine(wheelShape(length / 2, -width / 2 + wheelHalfWidth, extraRotation), parAtTime.direction, parAtTime.location.x, parAtTime.location.y), true);
 		// left front wheel
 		if (0d != currentCurvedness) {
 			double radius = 1d / currentCurvedness;
 			extraRotation = - Math.atan(length / 2 / (radius + width / 2 - wheelHalfWidth / 2));
 		}
-		gp.drawPolyLine(Planar.rotateTranslatePolyLine(wheelShape(length / 2, +width / 2 - wheelHalfWidth, extraRotation), parAtTime.direction, parAtTime.location.x, parAtTime.location.y));
+		gp.drawPolyLine(Planar.rotateTranslatePolyLine(wheelShape(length / 2, +width / 2 - wheelHalfWidth, extraRotation), parAtTime.direction, parAtTime.location.x, parAtTime.location.y), true);
 		// brake lights
 		if (currentAcceleration < -passiveDeceleration) {
 			gp.setColor(Color.RED);

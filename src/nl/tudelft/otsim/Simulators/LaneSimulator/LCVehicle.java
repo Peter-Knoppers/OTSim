@@ -5,7 +5,6 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
 
 import nl.tudelft.otsim.GUI.GraphicsPanel;
-import nl.tudelft.otsim.SpatialTools.Planar;
 
 /**
  * Temporary vehicle as a place-holder during a lane change.
@@ -117,7 +116,7 @@ public class LCVehicle extends Movable {
         }
         graphicsPanel.setColor(Color.BLACK);
         graphicsPanel.setStroke(0.1f);
-        graphicsPanel.drawPolyLine(Planar.closePolyline(outline()));
+        graphicsPanel.drawPolyLine(outline(), true);
         Point2D.Double[] outline = outline();
 		graphicsPanel.setColor(new Color(255,192,192));
         graphicsPanel.setStroke(0f);

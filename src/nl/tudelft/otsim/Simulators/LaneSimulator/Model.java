@@ -1,8 +1,5 @@
 package nl.tudelft.otsim.Simulators.LaneSimulator;
 
-import java.util.Collections;
-import java.util.Comparator;
-
 import nl.tudelft.otsim.GUI.Log;
 import nl.tudelft.otsim.GUI.Main;
 

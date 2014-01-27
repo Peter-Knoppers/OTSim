@@ -1018,10 +1018,11 @@ public class Main extends JPanel implements ActionListener {
 		graphicsPanel.setZoom(1, new Point2D.Double(0, 0));
 		if ((null == model) || (null == model.network))
 			return;
-		Line2D.Double bbox = new Line2D.Double(Double.MAX_VALUE, Double.MAX_VALUE, - Double.MAX_VALUE, - Double.MAX_VALUE);
+		Line2D.Double bbox = null;
 		for (Node node : model.network.getAllNodeList(true))
 			bbox = Planar.expandBoundingBox(bbox, node.getX(), node.getY());
-		setZoomRect(bbox, margin);
+		if (null != bbox)
+			setZoomRect(bbox, margin);
 	}
 	
 	private void setZoomRect(Line2D.Double bbox, int margin) {
@@ -1081,7 +1082,7 @@ public class Main extends JPanel implements ActionListener {
 		if (null == selected)
 			return;
 		int margin = 20;
-		Line2D.Double bbox = new Line2D.Double(Double.MAX_VALUE, Double.MAX_VALUE, - Double.MAX_VALUE, - Double.MAX_VALUE);
+		Line2D.Double bbox = null;
 		if ("link".equals(what)) {
 			Link link = (Link) mapping.get(selected);
 			if (null == link)
@@ -1103,7 +1104,8 @@ public class Main extends JPanel implements ActionListener {
 			Movable m = (Movable) mapping.get(selected);
 			bbox = Planar.expandBoundingBox(bbox, m.global.x, m.global.y);
 		}
-		setZoomRect(bbox, margin);			
+		if (null != bbox)
+			setZoomRect(bbox, margin);			
 	}
 	
 	@Override

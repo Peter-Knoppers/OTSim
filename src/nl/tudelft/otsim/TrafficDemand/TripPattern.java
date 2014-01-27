@@ -8,7 +8,6 @@ import java.util.Locale;
 import nl.tudelft.otsim.FileIO.ParsedNode;
 import nl.tudelft.otsim.FileIO.StaXWriter;
 import nl.tudelft.otsim.FileIO.XML_IO;
-import nl.tudelft.otsim.GUI.Storable;
 import nl.tudelft.otsim.Population.MovingPerson;
 import nl.tudelft.otsim.Utilities.Sorter;
 import nl.tudelft.otsim.Utilities.TimeScaleFunction;

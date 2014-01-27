@@ -287,7 +287,7 @@ public class PlanarTest {
 					else
 						expected = (y - x) / Math.sqrt(2);
 				}
-				System.out.println("p (" + x + "," + y + ") expects " + expected);
+				//System.out.println("p (" + x + "," + y + ") expects " + expected);
 				assertEquals("Expected distance", expected, Planar.distancePolygonToPoint(polygon, p), 0.00001);
 			}
 		}
@@ -314,7 +314,7 @@ public class PlanarTest {
 				polygon2[3] = new Point2D.Double(x, y + 2);
 				// figure out the truth
 				final boolean expected = (y > 8) && (y <= 20) && (x > 8) && (x <= 20) && (y < x + 2);
-				System.out.println("p (" + x + "," + y + ") expects " + (expected ? "true" : "false"));
+				//System.out.println("p (" + x + "," + y + ") expects " + (expected ? "true" : "false"));
 				if (expected)
 					assertTrue("Is intersecting", Planar.polygonIntersectsPolygon(polygon1, polygon2));
 				else
@@ -393,14 +393,19 @@ public class PlanarTest {
 		fail("Not yet implemented");
 	}
 
-	@Test
-	public void testNearestPointAtLink() {
-		fail("Not yet implemented");
-	}
-
+	/**
+	 * Test the pointSideOfLine method.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testPointSideOfLine() {
-		fail("Not yet implemented");
+		assertTrue("point is on the left of the line", Planar.pointSideOfLine(new Point2D.Double(1, 1), new Line2D.Double(1, 0, 2, 1)) > 0);
+		assertFalse("point is on the left of the line", Planar.pointSideOfLine(new Point2D.Double(2, 0), new Line2D.Double(1, 0, 2, 1)) > 0);
+		assertEquals("point is on the line", 0, Planar.pointSideOfLine(new Point2D.Double(3, 2), new Line2D.Double(1, 0, 2, 1)), 0.0001);
+		// now reverse the direction of the line and see if the answers are inverted
+		assertFalse("point is on the left of the line", Planar.pointSideOfLine(new Point2D.Double(1, 1), new Line2D.Double(2, 1, 1, 0)) > 0);
+		assertTrue("point is on the left of the line", Planar.pointSideOfLine(new Point2D.Double(2, 0), new Line2D.Double(2, 1, 1, 0)) > 0);
+		assertEquals("point is on the line", 0, Planar.pointSideOfLine(new Point2D.Double(3, 2), new Line2D.Double(2, 1, 1, 0)), 0.0001);
 	}
 
 	/**
@@ -641,27 +646,133 @@ public class PlanarTest {
 
 	@Test
 	public void testCreateParallelVerticesArrayListOfVertexDouble() {
-		fail("Not yet implemented");
+		ArrayList<Vertex> in = new ArrayList<Vertex>();
+		boolean errorThrown = false;
+		try {
+			Planar.createParallelVertices(in, 5);
+		} catch (Error e) {
+			errorThrown = true;
+		}
+		assertTrue("Should have thrown an Error", errorThrown);
+		in.add(new Vertex(10, 20, 30));
+		errorThrown = false;
+		try {
+			Planar.createParallelVertices(in, 5);
+		} catch (Error e) {
+			errorThrown = true;
+		}
+		in.add(new Vertex(10, 20, 100));
+		errorThrown = false;
+		try {
+			Planar.createParallelVertices(in, 5);
+		} catch (Error e) {
+			errorThrown = true;
+		}
+		in.get(1).setX(15);
+		// we now have a line segment from (10, 20, 30) to (15, 20, 100)
+		ArrayList<Vertex> out = Planar.createParallelVertices(in, 3);
+		assertEquals("Should have same number of vertices", in.size(), out.size());
+		for (int i = in.size(); --i >= 0; ) {
+			assertEquals("Should have same Z-coordinate", in.get(i).getZ(), out.get(i).getZ(), 0.000001);
+			assertEquals("Line parallel to X should have same X-coordinates", in.get(i).getX(), out.get(i).getX(), 0.000001);
+			assertEquals("Line parallel to X should have Y-coordinates offset by supplied offset", in.get(i).getY() - 3, out.get(i).getY(), 0.000001);
+		}
+		in.set(1, new Vertex(10, 50, 99));
+		// we now have a line segment from (10, 20, 30) to (10, 50, 99)
+		out = Planar.createParallelVertices(in, 333);
+		assertEquals("Should have same number of vertices", in.size(), out.size());
+		for (int i = in.size(); --i >= 0; ) {
+			assertEquals("Should have same Z-coordinate", in.get(i).getZ(), out.get(i).getZ(), 0.000001);
+			assertEquals("Line parallel to Y should have Y-coordinates offset by supplied offset", in.get(i).getX() + 333, out.get(i).getX(), 0.000001);
+			assertEquals("Line parallel to Y should have same X-coordinates", in.get(i).getY(), out.get(i).getY(), 0.000001);
+		}
+		in.add(new Vertex (70, 50, -12));
+		// we now have a polyline from (10, 20, 30) via (10, 50, 99) to (70, 50, -12
+		out = Planar.createParallelVertices(in, -7);
+		assertEquals("Should have same number of vertices", in.size(), out.size());
+		System.out.println("in : " + Planar.verticesToString(in));
+		System.out.println("out: " + Planar.verticesToString(out));
+		for (int i = in.size(); --i >= 0; )
+			assertEquals("Should have same Z-coordinate", in.get(i).getZ(), out.get(i).getZ(), 0.000001);
+		assertEquals("First point should be shifted along X", 0, out.get(0).getPoint().distance(new Point2D.Double(3, 20)), 0.00001);
+		assertEquals("Third point should be shifted along Y", 0, out.get(2).getPoint().distance(new Point2D.Double(70, 57)), 0.00001);
+
 	}
 
+	/**
+	 * Test closePolyline method
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testClosePolyline() {
-		fail("Not yet implemented");
+		Point2D.Double[] in = new Point2D.Double[1];
+		Point2D.Double[] out = Planar.closePolyline(in);
+		assertTrue("Should return in", in == out);
+		in = new Point2D.Double[2];
+		in[0] = new Point2D.Double(10, 20);
+		in[1] = new Point2D.Double(30, 40);
+		out = Planar.closePolyline(in);
+		assertEquals("Should add one point", 3, out.length);
+		assertTrue("Should be same point", in[0] == out[0]);
+		assertTrue("Should be same point", in[1] == out[1]);
 	}
 
+	/**
+	 * Test the getALignment method
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testGetAlignment() {
-		fail("Not yet implemented");
+		ArrayList<Vertex> in = new ArrayList<Vertex>();
+		for (int i = 0; i < 100; i++) {
+			Point2D.Double[] out = Planar.getAlignment(in);
+			assertEquals("Sizes should be same", in.size(), out.length);
+			for (int k = 0; k < out.length; k++) {
+				assertEquals("X should be equal", in.get(k).getX(), out[k].x, 0.0000001);
+				assertEquals("Y should be equal", in.get(k).getY(), out[k].y, 0.0000001);
+			}
+			in.add(new Vertex(Math.sin(i), Math.sin(i * 0.7 + 0.5), Math.sin(i * 1.8)));
+		}
 	}
 
+	/**
+	 * Test the ArrayListOfPointsToArray method
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testArrayListOfPointsToArray() {
-		fail("Not yet implemented");
+		ArrayList<Point2D.Double> in = new ArrayList<Point2D.Double>();
+		assertEquals("Empty in results in empty out", 0, Planar.ArrayListOfPointsToArray(in).length);
+		for (int i = 0; i < 100; i++) {
+			in.add(new Point2D.Double(i + 10, i + 25));
+			Point2D.Double[] out = Planar.ArrayListOfPointsToArray(in);
+			assertEquals("Length of result is size of input", in.size(), out.length);
+			for (int k = 0; k < out.length; k++) {
+				assertEquals("Point should be same location", 0, in.get(k).distance(out[k]), 0.000001);
+				// out should contain the point of in
+				double save = out[k].x;
+				out[k].x = -1;
+				assertEquals("Should be the same instance of a Point2D.Double", 0, in.get(k).distance(out[k]), 0.000001);
+				out[k].x = save;
+			}
+		}
 	}
 
+	/**
+	 * Test the expandBoundingBox method
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testExpandBoundingBox() {
-		fail("Not yet implemented");
+		Line2D.Double bbox = Planar.expandBoundingBox(null, 10, 20);
+		assertEquals("Bounding box of only one point equals that point", 0, bbox.getP1().distance(new Point2D.Double(10, 20)), 0.0000001);
+		assertEquals("Bounding box of only one point equals that point", 0, bbox.getP2().distance(new Point2D.Double(10, 20)), 0.0000001);
+		bbox = Planar.expandBoundingBox(bbox, 30, 5);	// expand it a bit
+		assertEquals("Bounding box of two points", 0, bbox.getP1().distance(new Point2D.Double(10, 5)), 0.0000001);
+		assertEquals("Bounding box of two points", 0, bbox.getP2().distance(new Point2D.Double(30, 20)), 0.0000001);
+		bbox = Planar.expandBoundingBox(bbox, 12, 8);	// should not expand the bounding box
+		assertEquals("Bounding box of two points", 0, bbox.getP1().distance(new Point2D.Double(10, 5)), 0.0000001);
+		assertEquals("Bounding box of two points", 0, bbox.getP2().distance(new Point2D.Double(30, 20)), 0.0000001);
 	}
 
 }

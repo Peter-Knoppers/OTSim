@@ -8,7 +8,6 @@ import java.util.ArrayList;
 
 import nl.tudelft.otsim.FileIO.StaXWriter;
 import nl.tudelft.otsim.GUI.GraphicsPanel;
-import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.SpatialTools.Planar;
 import nl.tudelft.otsim.Utilities.Reversed;
 

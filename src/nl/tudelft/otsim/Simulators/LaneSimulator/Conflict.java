@@ -1,8 +1,5 @@
 package nl.tudelft.otsim.Simulators.LaneSimulator;
 
-import java.awt.Color;
-import java.awt.geom.Point2D;
-
 import nl.tudelft.otsim.GUI.GraphicsPanel;
 
 /**

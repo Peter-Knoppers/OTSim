@@ -3,7 +3,6 @@ package nl.tudelft.otsim.TrafficDemand;
 import java.util.ArrayList;
 
 import nl.tudelft.otsim.GeoObjects.Node;
-import nl.tudelft.otsim.GUI.Storable;
 import nl.tudelft.otsim.Utilities.TimeScaleFunction;
 
 /**

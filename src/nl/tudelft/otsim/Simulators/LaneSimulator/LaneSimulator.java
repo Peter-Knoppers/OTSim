@@ -534,11 +534,11 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 			
             // up line
             if (lane.up==null && lane.generator==null && !lane.isMerge())
-            	graphicsPanel.drawPolyLine(pol.upEdge());
+            	graphicsPanel.drawPolyLine(pol.upEdge(), false);
 
             // down line
             if (lane.down==null && lane.destination==0 && !lane.isSplit())
-            	graphicsPanel.drawPolyLine(pol.downEdge());
+            	graphicsPanel.drawPolyLine(pol.downEdge(), false);
 
             // left line
             Point2D.Double[] edge;
@@ -559,7 +559,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
                 edge = pol.leftNearEdge();
                 graphicsPanel.setStroke(2, 1f, (float) edge[0].x);
             }
-            graphicsPanel.drawPolyLine(edge);
+            graphicsPanel.drawPolyLine(edge, false);
 
             // right line
             boolean drawRight = false;
@@ -582,7 +582,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
                 drawRight = true;
             }
             if (drawRight) {
-                graphicsPanel.drawPolyLine(edge);
+                graphicsPanel.drawPolyLine(edge, false);
             } 		
         }
 	}
@@ -1025,7 +1025,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
                         else {
 	                    	line[1] = new Point2D.Double(other.global.x - h.x * other.l, 
 	                                other.global.y - h.y * other.l);
-	                        graphicsPanel.drawPolyLine(line);
+	                        graphicsPanel.drawPolyLine(line, false);
                         }
             		}
             	}
@@ -1047,7 +1047,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
                         else {
 	                    	line[1] = new Point2D.Double(other.global.x - h.x * other.l, 
 	                                other.global.y - h.y * other.l);
-	                        graphicsPanel.drawPolyLine(line);
+	                        graphicsPanel.drawPolyLine(line, false);
                         }
             		}
             	}

@@ -9,24 +9,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
 
-import nl.tudelft.otsim.GUI.Log;
 import nl.tudelft.otsim.GUI.Main;
-import nl.tudelft.otsim.GeoObjects.ActivityLocation;
-import nl.tudelft.otsim.GeoObjects.CrossSection;
-import nl.tudelft.otsim.GeoObjects.Lane;
-import nl.tudelft.otsim.GeoObjects.Link;
 import nl.tudelft.otsim.GeoObjects.Vertex;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.index.SpatialIndex;
-import com.vividsolutions.jts.linearref.LinearLocation;
-import com.vividsolutions.jts.linearref.LocationIndexedLine;
 
 /**
  * 
@@ -379,67 +366,6 @@ public class Planar {
 				/ determinant);
 	}
 	
-	// TODO: Move this function out of GeometryTools
-	// Things like "ActivityLocation" and "CrossSection" should not be known about within this class
-	/**
-	 * Find the line/link that is nearest to a certain point
-	 * - first selects lines within a certain search distance
-	 * - than find the nearest point at that line
-	 * @param linkTree the linkTree (Spatial Index) contains all the links of the network
-	 * @param list in this case a list of Buildings (point objects)
-	 */
-	public static void NearestPointAtLink(SpatialIndex linkTree, List<ActivityLocation> list) {
-		for (ActivityLocation activityLocation : list)  {
-			final double MAX_SEARCH_DISTANCE = 1000; 
-			Coordinate point = new Coordinate(activityLocation.getX(),activityLocation.getY(), 0);
-			Envelope search = new Envelope(point);  // search area: set it up
-	        search.expandBy(MAX_SEARCH_DISTANCE);   // search area creates circle
-			@SuppressWarnings("unchecked")
-			List<LineString> links = linkTree.query(search);  // find the links within this area
-	        double minDist = MAX_SEARCH_DISTANCE + 1.0e-6;
-	        Coordinate minDistPoint = null;   // the coordinates of the nearest point of the nearest line 
-	        Link attachedLink = null;
-	        // Find the closest line within the search area (so within MAX_SEARCH_DISTANCE)
-			for (LineString link : links) {
-				LocationIndexedLine line1 = new LocationIndexedLine(link);  // Linear referencing along a line
-	            LinearLocation here = line1.project(point);  // "here" is the point nearest on the line from "point" 
-	            double longitudinal = here.getSegmentFraction() * here.getSegmentLength(link);	            
-	            Coordinate pointFound = line1.extractPoint(here);
-	            double dist = pointFound.distance(point);
-	            if (dist < minDist) {
-	                attachedLink = (Link) link.getUserData(); 	// attached to the line is the field "user data" 
-			   													//	which points to the object "Link"
-	                // find a section with parking lots or parking opportunities
-	                for (CrossSection cs : attachedLink.getCrossSections_r()) {
-	                	for (Lane lane : cs.collectLanes()) {
-	                	//for (CrossSectionElement cse : cs.getCrossSectionElementList_r()) {
-	                		//if (cse.getCrossSectionElementTypology().getDrivable()) {
-	                			//for (Lane lane : cse.getLaneList()) {
-            				if(lane.isParkingLane()) {
-            					double distanceToLane = Math.abs(cs.getLongitudinalPosition_r() - longitudinal);
-            					if (dist + distanceToLane < minDist)  {
-            						minDist = dist + Math.abs(cs.getLongitudinalPosition_r() - longitudinal);
-            		                minDistPoint = pointFound;
-            		                Vertex v = new Vertex(line1.extractPoint(here, minDist));
-            		                activityLocation.setPointAtLinkNearLocation(v);
-            		                activityLocation.setLaneNearLocation(lane); 
-            					}
-	                				//}
-	                			//}
-	                		}
-	                	}
-	                }
-	            }
-	        }
-	        if (minDistPoint == null)	// No line close enough to snap the point to
-	            System.out.println(point + "- X" + attachedLink.getName_r());
-	        else {
-	            System.out.printf("%s - snapped by moving %.4fm\n", point.toString(), minDist );
-	            System.out.println("Link " + attachedLink.getName_r() + "Lane and speed: " + activityLocation.getLaneNearLocation().getID() + "  " + activityLocation.getLaneNearLocation().getMaxSpeed());
-	        }
-		}
-	}
-	
 	/**
 	 * Determine on which side of a line a point lies.
 	 * <br />
@@ -448,14 +374,12 @@ public class Planar {
 	 * which side of a line a point lies</a>
 	 * @param p Point2D.Double; the point
 	 * @param l Line2D.Double; the line
-	 * @return Boolean; true for left; false otherwise (not 100% sure of this)
+	 * @return double; positive for left; negative for right, 0 for spot on
 	 */
-	// Derived from
-	// http://stackoverflow.com/questions/3461453/determine-which-side-of-a-line-a-point-lies
-	// First answer
 	public static double pointSideOfLine(Point2D.Double p, Line2D.Double l) {
 		return (l.x2 - l.x1) * (p.y - l.y1) - (l.y2 - l.y1)* (p.x - l.x1);
 	}
+	
 	/**
 	 * Find the minimum circle that covers a cloud of points.
 	 * <br />
@@ -1048,9 +972,9 @@ public class Planar {
     }
 	
 	/**
-	 * Create a polyline with specified offset from a reference polyline. If
-	 * the reference polyline is malformed (double vertices or no vertices),
-	 * the result may be malformed.
+	 * Create a polyline with specified offset from a reference polyline.
+	 * <br /> Throws Error when the reference polyline is malformed:
+	 * two adjacent vertices with (almost) same X and Y or too few vertices.
 	 * @param referenceVertices ArrayList&lt;{@link Vertex}&gt;; the reference
 	 * polyline
 	 * @param prevReferenceVertices ArrayList&lt;{@link Vertex}&gt;; the reference
@@ -1063,6 +987,8 @@ public class Planar {
     public static ArrayList<Vertex> createParallelVertices(ArrayList<Vertex> referenceVertices, ArrayList<Vertex> prevReferenceVertices, double firstLateralPosition, double subsequentLateralPosition) {
     	// Create an ArrayList of vertices at a certain offset from a reference
     	//System.out.println(String.format("\r\ncreateParallelVertices: offset is %f, number of vertices is %d\r\n\t%s", lateralPosition, referenceVertices.size(), referenceVertices.toString()));
+    	if (referenceVertices.size() < 2)
+    		throw new Error("Malformed referenceVertices");
     	ArrayList<Vertex> result = new ArrayList<Vertex>();
     	Vertex prevVertex = null;
     	Line2D.Double prevParallel = null;
@@ -1074,8 +1000,11 @@ public class Planar {
 			prevParallel = new Line2D.Double(prevVertex1.getX(), prevVertex1.getY(), vertex1.getX(), vertex1.getY());
 			prevDirection = Math.atan2(vertex1.getY() - prevVertex1.getY(), vertex1.getX() - prevVertex1.getX());
     	}
+    	final double tooClose = 0.0001;
     	for (Vertex vertex : referenceVertices) {		
     		if (null != prevVertex)	{
+    			if (prevVertex.getPoint().distance(vertex.getPoint()) <= tooClose)
+    				throw new Error("reference Vertices too close in X and Y");
     			// compute the line parallel to reference line
     			double direction = Math.atan2(vertex.getY() - prevVertex.getY(), vertex.getX() - prevVertex.getX());
     			double perpendicular = direction - Math.PI / 2;
@@ -1099,7 +1028,7 @@ public class Planar {
     				if (null == p)	// probably an (almost) straight line; use the previous point
     					result.add(new Vertex(parallel.x1, parallel.y1, vertex.getZ()));
     				else
-    					result.add(new Vertex(p, vertex.getZ()));
+    					result.add(new Vertex(p, prevVertex.getZ()));
     			}    			
     			prevParallel = parallel;
     			prevDirection = direction;
@@ -1176,6 +1105,8 @@ public class Planar {
 	 * @return Line2D.Double; expanded bounding box
 	 */
 	public static Line2D.Double expandBoundingBox (Line2D.Double rect, double x, double y) {
+		if (null == rect)
+			return (new Line2D.Double(x, y, x, y));
 		Line2D.Double result = new Line2D.Double(rect.x1, rect.y1, rect.x2, rect.y2);
 		if (x < result.x1)
 			result.x1 = x;
@@ -1189,7 +1120,6 @@ public class Planar {
 	}
 
 }
-
 
 // This is used to sort points by some "score",
 // which could be an angle or other metric associated with each point.

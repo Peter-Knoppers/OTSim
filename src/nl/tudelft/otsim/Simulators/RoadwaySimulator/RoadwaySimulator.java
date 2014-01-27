@@ -311,7 +311,7 @@ class BorderOutLine implements SimulatedObject, Step {
 	@Override
 	public void paint(double when, GraphicsPanel graphicsPanel) {
 		graphicsPanel.setColor(Color.RED);
-		graphicsPanel.drawPolyLine(outline);
+		graphicsPanel.drawPolyLine(outline, false);
 	}
 
 	@Override

@@ -1,7 +1,5 @@
 package nl.tudelft.otsim.Simulators.LaneSimulator;
 
-import nl.tudelft.otsim.GeoObjects.VMS.TimedMessage;
-
 /**
  * Simulate a Variable Message Sign
  * 

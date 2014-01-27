@@ -7,7 +7,6 @@ import java.awt.geom.Point2D.Double;
 import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.Simulators.SimulatedObject;
-import nl.tudelft.otsim.SpatialTools.Planar;
 
 /**
  * Default wrapper for a vehicle. It contains a driver and possibly an OBU.
@@ -533,7 +532,7 @@ public class Vehicle extends Movable implements SimulatedObject {
 			return;
         graphicsPanel.setColor(Color.BLACK);
         graphicsPanel.setStroke(0.1f);
-        graphicsPanel.drawPolyLine(Planar.closePolyline(outline(when)));
+        graphicsPanel.drawPolyLine(outline(when), true);
         Point2D.Double[] outline = outline(when);
 		graphicsPanel.setColor(Color.RED);
         graphicsPanel.setStroke(0f);

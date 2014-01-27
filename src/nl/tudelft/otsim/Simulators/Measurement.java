@@ -495,7 +495,7 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 	public void paint(double when, GraphicsPanel graphicsPanel) {
 		graphicsPanel.setColor(Color.BLUE);
 		graphicsPanel.setStroke(0);
-		graphicsPanel.drawPolyLine(area);
+		graphicsPanel.drawPolyLine(area, false);
 	}
 
 	@Override
