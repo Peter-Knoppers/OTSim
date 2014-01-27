@@ -644,6 +644,10 @@ public class PlanarTest {
 		fail("Not yet implemented");
 	}
 
+	/**
+	 * Test the simple createParallelVertices method
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testCreateParallelVerticesArrayListOfVertexDouble() {
 		ArrayList<Vertex> in = new ArrayList<Vertex>();
@@ -687,16 +691,35 @@ public class PlanarTest {
 			assertEquals("Line parallel to Y should have same X-coordinates", in.get(i).getY(), out.get(i).getY(), 0.000001);
 		}
 		in.add(new Vertex (70, 50, -12));
-		// we now have a polyline from (10, 20, 30) via (10, 50, 99) to (70, 50, -12
+		// we now have a polyline from (10, 20, 30) via (10, 50, 99) to (70, 50, -12)
 		out = Planar.createParallelVertices(in, -7);
 		assertEquals("Should have same number of vertices", in.size(), out.size());
-		System.out.println("in : " + Planar.verticesToString(in));
-		System.out.println("out: " + Planar.verticesToString(out));
+		// The next test found a bug in createParallelVertices (Z was derived from the wrong input Vertex)
 		for (int i = in.size(); --i >= 0; )
 			assertEquals("Should have same Z-coordinate", in.get(i).getZ(), out.get(i).getZ(), 0.000001);
 		assertEquals("First point should be shifted along X", 0, out.get(0).getPoint().distance(new Point2D.Double(3, 20)), 0.00001);
 		assertEquals("Third point should be shifted along Y", 0, out.get(2).getPoint().distance(new Point2D.Double(70, 57)), 0.00001);
-
+		assertEquals("Second point should be shifted diagonally", 0, out.get(1).getPoint().distance(new Point2D.Double(3, 57)), 0.00001);
+		in.add(new Vertex(100, 50, 3));
+		// we now have a polyline from (10, 20, 30) via (10, 50, 99) via (70, 50, -12) to (100, 50, 3)
+		out = Planar.createParallelVertices(in, -4);
+		assertEquals("Should have same number of vertices", in.size(), out.size());
+		for (int i = in.size(); --i >= 0; )
+			assertEquals("Should have same Z-coordinate", in.get(i).getZ(), out.get(i).getZ(), 0.000001);
+		assertEquals("First point should be shifted along X", 0, out.get(0).getPoint().distance(new Point2D.Double(6, 20)), 0.00001);
+		assertEquals("Fourth point should be shifted along Y", 0, out.get(3).getPoint().distance(new Point2D.Double(100, 54)), 0.00001);
+		assertEquals("Second point should be shifted diagonally", 0, out.get(1).getPoint().distance(new Point2D.Double(6, 54)), 0.00001);
+		assertEquals("Third point should be shifted laterally along Y", 0, out.get(2).getPoint().distance(new Point2D.Double(70, 54)), 0.00001);
+		in = new ArrayList<Vertex>();
+		in.add(new Vertex(0, 0, 0));
+		in.add(new Vertex(10, 0, 0));
+		in.add(new Vertex(0, 10, 0));
+		out = Planar.createParallelVertices(in, 2);
+		System.out.println("in : " + Planar.verticesToString(in));
+		System.out.println("out: " + Planar.verticesToString(out));
+		assertEquals("First point should be shifted laterally, right, Y", 0, out.get(0).getPoint().distance(new Point2D.Double(0, -2)), 0.00001);
+		assertEquals("Second point should be shifted East-South-East", 0, out.get(1).getPoint().distance(new Point2D.Double(10 + 2 / Math.tan(Math.PI / 8), -2)), 0.00001);
+		assertEquals("Third pount should be shifted North-East", 0, out.get(2).getPoint().distance(new Point2D.Double(Math.sqrt(2), 10 + Math.sqrt(2))), 0.00001);
 	}
 
 	/**
