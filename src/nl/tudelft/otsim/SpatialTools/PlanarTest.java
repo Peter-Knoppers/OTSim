@@ -388,9 +388,34 @@ public class PlanarTest {
 		assertFalse("should not intersect", Planar.lineSegmentIntersectsLineSegment(new Line2D.Double(10, 10, 20, 10), new Line2D.Double(1, 9, 15, 11)));
 	}
 
+	/**
+	 * Test the intersection method.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testIntersection() {
-		fail("Not yet implemented");
+		Line2D.Double l1 = new Line2D.Double(10, 20, 30, 40);
+		Line2D.Double l2 = new Line2D.Double(30, 0, 0, 30);
+		Point2D.Double p = Planar.intersection(l1, l2);
+		assertTrue("Should give a non-null result", null != p);
+		assertEquals("Should intersect at start of l1", 0, p.distance(l1.getP1()), 0.000001);
+		p = Planar.intersection(l2, l1);	// order of arguments should not matter
+		assertTrue("Should give a non-null result", null != p);
+		assertEquals("Should intersect at start of l1", 0, p.distance(l1.getP1()), 0.000001);
+		l2 = new Line2D.Double(30, 40, 50, 60);	// special case; start of l2 is end of l1
+		p = Planar.intersection(l1, l2);
+		assertEquals("Should return common point of l1 and l2", 0, p.distance(l1.getP2()), 0.000001);
+		p = Planar.intersection(l2, l1);
+		assertEquals("Should return common point of l1 and l2", 0, p.distance(l1.getP2()), 0.000001);
+		l2 = new Line2D.Double(50, 60, 30, 40);
+		p = Planar.intersection(l1, l2);
+		assertEquals("Should return common point of l1 and l2", 0, p.distance(l1.getP2()), 0.000001);
+		p = Planar.intersection(l2, l1);
+		assertEquals("Should return common point of l1 and l2", 0, p.distance(l1.getP2()), 0.000001);
+		l1 = new Line2D.Double(0, 0, 0, 10);
+		l2 = new Line2D.Double(10, 0, 10, 10);
+		p = Planar.intersection(l1, l2);
+		assertTrue("Should give a null result", null == p);
 	}
 
 	/**
@@ -579,9 +604,18 @@ public class PlanarTest {
 	}
 
 
+	/**
+	 * Test the intersectLineSegmentAndCircle method
+	 */
+	@SuppressWarnings("static-method")
 	@Test
-	public void testIntersectRayAndCircle() {
-		fail("Not yet implemented");
+	public void testIntersectLineSegmentAndCircle() {
+		Circle c = new Circle(new Point2D.Double(10, 20), 5);
+		assertEquals("This line segment is too short to hit the circle", 0, Planar.intersectLineSegmentAndCircle(new Line2D.Double(5, 5, 10, 10), c).length);
+		assertEquals("This line segment misses the circle", 0, Planar.intersectLineSegmentAndCircle(new Line2D.Double(5, 5, 100, 5), c).length);
+		assertEquals("This line intersects the circle once", 1, Planar.intersectLineSegmentAndCircle(new Line2D.Double(11, 21, 100, 100), c).length);
+		assertEquals("This line intersects the circle once", 1, Planar.intersectLineSegmentAndCircle(new Line2D.Double(100, 100, 11, 21), c).length);
+		assertEquals("This line segment is entirely within the circle", 0, Planar.intersectLineSegmentAndCircle(new Line2D.Double(8, 21, 12, 19), c).length);
 	}
 
 	@Test
@@ -715,8 +749,6 @@ public class PlanarTest {
 		in.add(new Vertex(10, 0, 0));
 		in.add(new Vertex(0, 10, 0));
 		out = Planar.createParallelVertices(in, 2);
-		System.out.println("in : " + Planar.verticesToString(in));
-		System.out.println("out: " + Planar.verticesToString(out));
 		assertEquals("First point should be shifted laterally, right, Y", 0, out.get(0).getPoint().distance(new Point2D.Double(0, -2)), 0.00001);
 		assertEquals("Second point should be shifted East-South-East", 0, out.get(1).getPoint().distance(new Point2D.Double(10 + 2 / Math.tan(Math.PI / 8), -2)), 0.00001);
 		assertEquals("Third pount should be shifted North-East", 0, out.get(2).getPoint().distance(new Point2D.Double(Math.sqrt(2), 10 + Math.sqrt(2))), 0.00001);

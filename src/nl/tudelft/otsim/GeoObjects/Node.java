@@ -361,7 +361,7 @@ public class Node extends Vertex implements XML_IO {
 					Line2D.Double line = cs.vectorAtNode(dl.incoming, true, index, false);
 					if (null == line)
 						continue;
-					Point2D.Double intersections[] = Planar.intersectRayAndCircle(line, circle);
+					Point2D.Double intersections[] = Planar.intersectLineSegmentAndCircle(line, circle);
 					//System.out.format(Main.Locale, "line %s intersects circle %s at %d point(s)\r\n", GeometryTools.Line2DToString(line), circle.toString(), intersections.length);
 					if (intersections.length > 1) {
 						System.err.println("Peter thinks this never happens...");

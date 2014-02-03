@@ -579,17 +579,16 @@ public class Planar {
 	}
 	
 	/**
-	 * Compute all intersection points of a ray and a circle. There are zero,
-	 * one, or two intersection. NB. A ray is a line with one real end point. 
-	 * The other end lies at infinity.
+	 * Compute all intersection points of a line segment and a circle. There 
+	 * are zero, one, or two intersections.
 	 * <br />
 	 * Derived from <a href="http://paulbourke.net/geometry/circlesphere/">Circles
 	 * and spheres by Paul Bourke</a>.
-	 * @param l Line2D.Double; the ray
+	 * @param l Line2D.Double; the line segment
 	 * @param circle Circle; the circle.
 	 * @return Array of Point2D.Double with all intersections
 	 */
-	static public Point2D.Double[] intersectRayAndCircle(Line2D.Double l, Circle circle) {
+	static public Point2D.Double[] intersectLineSegmentAndCircle(Line2D.Double l, Circle circle) {
 		double a = l.getP1().distanceSq(l.getP2());
 		double b = 2 * ((l.x2 - l.x1) * (l.x1 - circle.center().x) + (l.y2 - l.y1) * (l.y1 - circle.center().y));
 		double c = circle.center().x * circle.center().x + circle.center().y * circle.center().y + l.x1 * l.x1 + l.y1 * l.y1 - 2 * (circle.center().x * l.x1 + circle.center().y * l.y1) - circle.radius() * circle.radius(); 
@@ -601,7 +600,7 @@ public class Planar {
 		int solutions = 0;
 		if ((0 <= u1) && (u1 <= 1))
 			solutions++;
-		if ((0 <= u2) && (u1 <= 2))
+		if ((0 <= u2) && (u2 <= 1))
 			solutions++;
 		Point2D.Double result[] = new Point2D.Double[solutions];
 		int index = 0;
