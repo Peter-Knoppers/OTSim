@@ -446,7 +446,7 @@ public class Node extends Vertex implements XML_IO {
 		if (result.size() < 2) {
 			System.err.println("Malformed vertices");
 			System.out.println("vertices are:" + Planar.verticesToString(vertices));
-			System.out.println("polygon is:  " + Planar.pointsToString(polygon));
+			System.out.println("polygon is: " + Planar.pointsToString(polygon));
 			// Uncomment to try again for debugging
 			//truncateHeadAtConflictArea(vertices);
 		}
