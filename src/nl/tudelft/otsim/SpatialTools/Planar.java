@@ -942,6 +942,7 @@ public class Planar {
 	 * @param sameDown boolean; end at prevVertices
 	 * @return ArrayList&lt;{@link Vertex}&gt;; the new polyline
 	 */
+	// FIXME this method is never called with sameUp == sameDown; one of these arguments should be removed.
 	public static ArrayList<Vertex> createPartlyParallelVertices(ArrayList<Vertex> prevVertices, ArrayList<Vertex> curVertices, boolean sameUp, boolean sameDown) {
 		if (prevVertices.size() != curVertices.size())
 			throw new Error ("prevVertices and curVertices have different sizes");
@@ -1001,7 +1002,7 @@ public class Planar {
     public static ArrayList<Vertex> createParallelVertices(ArrayList<Vertex> referenceVertices, ArrayList<Vertex> prevReferenceVertices, double firstLateralPosition, double subsequentLateralPosition) {
     	// Create an ArrayList of vertices at a certain offset from a reference
     	//System.out.println(String.format("\r\ncreateParallelVertices: offset is %f, number of vertices is %d\r\n\t%s", lateralPosition, referenceVertices.size(), referenceVertices.toString()));
-    	if (referenceVertices.size() < 2)
+    	if ((null == referenceVertices) || (referenceVertices.size() < 2))
     		throw new Error("Malformed referenceVertices");
     	ArrayList<Vertex> result = new ArrayList<Vertex>();
     	Vertex prevVertex = null;
@@ -1017,12 +1018,10 @@ public class Planar {
     	final double tooClose = 0.0001;
     	for (Vertex vertex : referenceVertices) {		
     		if (null != prevVertex)	{
-    			if (prevVertex.getPoint().distance(vertex.getPoint()) <= tooClose) {
-    				System.err.println("bad reference vertices: " + verticesToString(referenceVertices));
-    				continue;
-    				//throw new Error("reference Vertices too close in X and Y");
-    			}
+    			if (prevVertex.getPoint().distance(vertex.getPoint()) <= tooClose)
+    				throw new Error("reference Vertices too close in X and Y");
     			// compute the line parallel to reference line
+    			// TODO rewrite this without using atan and friends
     			double direction = Math.atan2(vertex.getY() - prevVertex.getY(), vertex.getX() - prevVertex.getX());
     			double perpendicular = direction - Math.PI / 2;
     			//System.out.println(String.format("dir=%f, perp=%f, offset=%f,%f", direction, perpendicular, offsetX, offsetY));

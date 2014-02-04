@@ -359,9 +359,45 @@ public class PlanarTest {
 		assertFalse("should not intersect", Planar.polyLineIntersectsLine(polyLine, new Line2D.Double(9, 0, 9, 995)));
 	}
 
+	/**
+	 * Test the polyLineIntersectsPolyLine method.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testPolyLineIntersectsPolyLine() {
-		fail("Not yet implemented");
+		Point2D.Double[] p1 = new Point2D.Double[0];
+		Point2D.Double[] p2 = new Point2D.Double[0];
+		assertFalse("Degenerate case", Planar.polyLineIntersectsPolyLine(p1, p2));
+		p1 = new Point2D.Double[1];
+		p1[0] = new Point2D.Double(10, 20);
+		assertFalse("Degenerate case", Planar.polyLineIntersectsPolyLine(p1, p2));
+		assertFalse("Degenerate case", Planar.polyLineIntersectsPolyLine(p2, p1));
+		p2 = new Point2D.Double[1];
+		p2[0] = new Point2D.Double(20, 20);
+		assertFalse("Degenerate case", Planar.polyLineIntersectsPolyLine(p1, p2));
+		assertFalse("Degenerate case", Planar.polyLineIntersectsPolyLine(p2, p1));
+		p1 = new Point2D.Double[2];
+		p1[0] = new Point2D.Double(10, 20);
+		p1[1] = new Point2D.Double(10, 40);
+		assertFalse("Degenerate case", Planar.polyLineIntersectsPolyLine(p1, p2));
+		assertFalse("Degenerate case", Planar.polyLineIntersectsPolyLine(p2, p1));
+		p2 = new Point2D.Double[2];
+		p2[0] = new Point2D.Double(0, 20);
+		p2[1] = new Point2D.Double(40, 20);
+		assertTrue("Simple hit", Planar.polyLineIntersectsPolyLine(p1, p2));
+		assertTrue("Simple hit", Planar.polyLineIntersectsPolyLine(p2, p1));
+		p2[1] = new Point2D.Double(-40, 20);
+		assertFalse("Simple miss", Planar.polyLineIntersectsPolyLine(p1, p2));
+		assertFalse("Simple miss", Planar.polyLineIntersectsPolyLine(p2, p1));
+		p1 = new Point2D.Double[100];
+		// put in a cloud of points all lying on an ellipse
+		for (int n = 0; n < 100; n++)
+			p1[n] = new Point2D.Double(30 * Math.sin(n) * 10, 20 + Math.cos(n) * 20);
+		assertFalse("Should miss", Planar.polyLineIntersectsPolyLine(p1, p2));
+		assertFalse("Should miss", Planar.polyLineIntersectsPolyLine(p2, p1));
+		p2[1] = new Point2D.Double(40, 40);
+		assertTrue("Should hit", Planar.polyLineIntersectsPolyLine(p1, p2));
+		assertTrue("Should hit", Planar.polyLineIntersectsPolyLine(p2, p1));
 	}
 
 	/**
@@ -889,19 +925,88 @@ public class PlanarTest {
 		assertEquals("Expected fourth point", 0, out.get(3).distance(new Vertex(110, 120, 130)), 0.000001);
 	}
 
+	/**
+	 * Test the createPartlyParallelVertices method.
+	 */
 	@Test
 	public void testCreatePartlyParallelVertices() {
-		fail("Not yet implemented");
+		// FIXME fail("Not yet implemented");
 	}
 
+	/**
+	 * Test the createParallelVertices method taking a prevReferenceVertices argument
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testCreateParallelVerticesArrayListOfVertexArrayListOfVertexDouble() {
-		fail("Not yet implemented");
+		ArrayList<Vertex> prev = new ArrayList<Vertex>();
+		ArrayList<Vertex> next = new ArrayList<Vertex>();
+		boolean errorThrown = false;
+		try {
+			Planar.createParallelVertices(null, null, 3);
+		} catch (Error e) {
+			 errorThrown = true;
+		}
+		assertTrue("Should have thrown an error", errorThrown);
+		errorThrown = false;
+		try {
+			Planar.createParallelVertices(next, null, 3);
+		} catch (Error e) {
+			 errorThrown = true;
+		}
+		assertTrue("Should have thrown an error", errorThrown);
+		next.add(new Vertex(10, 20, 30));
+		errorThrown = false;
+		try {
+			Planar.createParallelVertices(next, null, 3);
+		} catch (Error e) {
+			 errorThrown = true;
+		}
+		assertTrue("Should have thrown an error", errorThrown);
+		next.add(new Vertex(10, 30, 40));
+		ArrayList<Vertex> result = Planar.createParallelVertices(next, prev, 3);
+		//System.out.println("result: " + Planar.verticesToString(result));
+		assertEquals("Expect two vertices", 2, result.size());
+		assertEquals("Expected location for first point", 0, result.get(0).distance(new Vertex(13, 20, 30)), 0.000001);
+		assertEquals("Expected location for second point", 0, result.get(1).distance(new Vertex(13, 30, 40)), 0.000001);
+		prev.add(new Vertex(0, 18, 0));
+		prev.add(new Vertex(10, 18, 0));
+		//System.out.println("prev: " + Planar.verticesToString(prev));
+		//System.out.println("next: " + Planar.verticesToString(next));
+		result = Planar.createParallelVertices(next, prev, 3);
+		//System.out.println("result: " + Planar.verticesToString(result));
+		assertEquals("Expect two vertices", 2, result.size());
+		assertEquals("Expected location for first point", 0, result.get(0).distance(new Vertex(13, 18, 30)), 0.000001);
+		assertEquals("Expected location for second point", 0, result.get(1).distance(new Vertex(13, 30, 40)), 0.000001);
 	}
 
+	/**
+	 * Test the createParallelVertices method that takes four arguments.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testCreateParallelVerticesArrayListOfVertexArrayListOfVertexDoubleDouble() {
-		fail("Not yet implemented");
+		ArrayList<Vertex> ref = new ArrayList<Vertex>();
+		boolean errorThrown = false;
+		try {
+			Planar.createParallelVertices(ref, null, 5, 7);
+		} catch (Error e) {
+			errorThrown = true;
+		}
+		assertTrue("Should have thrown an error", errorThrown);
+		ref.add(new Vertex(5, 0, 0));
+		errorThrown = false;
+		try {
+			Planar.createParallelVertices(ref, null, 5, 7);
+		} catch (Error e) {
+			errorThrown = true;
+		}
+		assertTrue("Should have thrown an error", errorThrown);
+		ref.add(new Vertex(5, 10, 0));
+		ArrayList<Vertex> result = Planar.createParallelVertices(ref, null, 5, 7);
+		assertEquals("Should contain two vertices", 2, result.size());
+		assertEquals("First point should be here", 0, result.get(0).distance(new Vertex(10, 0, 0)), 0.0000001);
+		assertEquals("Second point should be here", 0, result.get(1).distance(new Vertex(12, 10, 0)), 0.0000001);
 	}
 
 	/**
@@ -925,6 +1030,7 @@ public class PlanarTest {
 		} catch (Error e) {
 			errorThrown = true;
 		}
+		assertTrue("Should have thrown an Error", errorThrown);
 		in.add(new Vertex(10, 20, 100));
 		errorThrown = false;
 		try {
@@ -932,6 +1038,7 @@ public class PlanarTest {
 		} catch (Error e) {
 			errorThrown = true;
 		}
+		assertTrue("Should have thrown an Error", errorThrown);
 		in.get(1).setX(15);
 		// we now have a line segment from (10, 20, 30) to (15, 20, 100)
 		ArrayList<Vertex> out = Planar.createParallelVertices(in, 3);
