@@ -1546,7 +1546,7 @@ public class Node extends Vertex implements XML_IO {
 			Vertex up = upLane.getLaneVerticesCenter().get(upLane.getLaneVerticesCenter().size()-1);
 			Vertex down = downLane.getLaneVerticesCenter().get(0);		
 			
-			if (up.equals(oldUp)  && sameOutlink)
+			if (up.equals(oldUp) && sameOutlink)
 				sameUp = true;
 			if (down.equals(oldDown))
 				sameDown = true;
@@ -1554,7 +1554,7 @@ public class Node extends Vertex implements XML_IO {
 			prevLaneVerticesCenter = oldLane.getLaneVerticesCenter();
 			laneVerticesCenter = Planar.createParallelVertices(prevLaneVerticesCenter, -oldLane.getLateralWidth());
 			// if same upLane: create weighted vertices in between
-			if (sameUp == true)
+			if (sameUp)
 				laneVerticesCenter = Planar.createPartlyParallelVertices(prevLaneVerticesCenter, laneVerticesCenter, sameUp, sameDown);
 			newLane.setDesignLine(laneVerticesCenter);
 			newLane.setLaneVerticesInner(Planar.createParallelVertices(laneVerticesCenter, - newLane.getLateralWidth() / 2));

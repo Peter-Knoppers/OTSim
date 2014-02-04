@@ -72,6 +72,8 @@ public class Planar {
 	public static double length(ArrayList<Vertex> vertices) {
 		double result = 0;
 		Vertex prevVertex = null;
+		if (null == vertices)
+			throw new Error("vertices may not be null");
 		for (Vertex v : vertices) {
 			if (null != prevVertex)
 				result += prevVertex.distanceTo(v);
@@ -940,10 +942,13 @@ public class Planar {
 	 * @param sameDown boolean; end at prevVertices
 	 * @return ArrayList&lt;{@link Vertex}&gt;; the new polyline
 	 */
-	
 	public static ArrayList<Vertex> createPartlyParallelVertices(ArrayList<Vertex> prevVertices, ArrayList<Vertex> curVertices, boolean sameUp, boolean sameDown) {
 		if (prevVertices.size() != curVertices.size())
 			throw new Error ("prevVertices and curVertices have different sizes");
+		if (sameUp && sameDown)
+			throw new Error("Nonsense combination of sameUp and sameDown (both true)");
+		if ((! sameUp) && (! sameDown))
+			throw new Error("Nonsense combination of sameUp and sameDown (both false)");			
     	ArrayList<Vertex> result = new ArrayList<Vertex>();
     	double distLaneTotal = length(prevVertices);
     	double distLane = 0.0;
@@ -953,9 +958,9 @@ public class Planar {
         	double weight = 0.0;
     		if (prevV != null)
     			distLane = distLane + v.distanceTo(prevV); 
-			if (sameUp == true)
+			if (sameUp)
 				weight = (distLane / distLaneTotal); 
-			else if (sameDown == true)
+			else if (sameDown)
 				weight = 1 - (distLane / distLaneTotal); 
 			result.add(Vertex.weightedVertex(weight,  v, curVertices.get(i)));
 			prevV = v;
@@ -1012,8 +1017,11 @@ public class Planar {
     	final double tooClose = 0.0001;
     	for (Vertex vertex : referenceVertices) {		
     		if (null != prevVertex)	{
-    			if (prevVertex.getPoint().distance(vertex.getPoint()) <= tooClose)
-    				throw new Error("reference Vertices too close in X and Y");
+    			if (prevVertex.getPoint().distance(vertex.getPoint()) <= tooClose) {
+    				System.err.println("bad reference vertices: " + verticesToString(referenceVertices));
+    				continue;
+    				//throw new Error("reference Vertices too close in X and Y");
+    			}
     			// compute the line parallel to reference line
     			double direction = Math.atan2(vertex.getY() - prevVertex.getY(), vertex.getX() - prevVertex.getX());
     			double perpendicular = direction - Math.PI / 2;
