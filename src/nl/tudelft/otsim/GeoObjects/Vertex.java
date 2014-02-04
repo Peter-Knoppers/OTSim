@@ -71,7 +71,7 @@ public class Vertex {
 	 * Create a Vertex with (X, Y, Z) = (0, 0, NaN);
 	 */
 	public Vertex () {
-		super();
+		this(0, 0, Double.NaN);
 	}
 	
 	/**
