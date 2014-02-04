@@ -65,7 +65,7 @@ public class Planar {
 	
 	/**
 	 * Compute path length of ArrayList of vertices.
-	 * @param vertices ArrayList&lt;{@link Vertex}&gt vertices to compute the
+	 * @param vertices ArrayList&lt;{@link Vertex}&gt; vertices to compute the
 	 * path length of
 	 * @return Double; length of the path
 	 */
@@ -886,31 +886,31 @@ public class Planar {
 	}
 	
 	/**
-	 * Shorten a polyline to a sub-section specified by distance. If the
-	 * requested distance range lies outside the range of the polyline an
+	 * Shorten a polyLine to a sub-section specified by distance. If the
+	 * requested distance range lies outside the range of the polyLine an
 	 * empty list of vertices is returned.
-	 * @param polyline ArrayList&lt;{@link Vertex}&gt;; the polyline
+	 * @param polyLine ArrayList&lt;{@link Vertex}&gt;; the polyLine
 	 * @param longitudinalPosition Double; starting position of the slice
 	 * (negative value means starting position is measured from the end)
 	 * @param longitudinalLength Double; length of the requested sub-section
 	 * @return ArrayList&lt;{@link Vertex}&gt;; the sub-section
 	 */
-	public static ArrayList<Vertex> slicePolyline(ArrayList<Vertex> polyline, double longitudinalPosition, double longitudinalLength) {
+	public static ArrayList<Vertex> slicePolyline(ArrayList<Vertex> polyLine, double longitudinalPosition, double longitudinalLength) {
 		ArrayList<Vertex> result = new ArrayList<Vertex> ();
 		double pos = longitudinalPosition;
-		double pathLength = length(polyline);
+		double pathLength = length(polyLine);
 		if (pos < 0)
 			pos = pathLength + pos;
 		if (pos < 0) {
-			//System.err.println("Slice lies before range of polyline");
+			//System.err.println("Slice lies before range of polyLine");
 			return result;
 		}
 		if (pos > pathLength) {
-			//System.err.println("Slice lies beyond range of polyline");
+			//System.err.println("Slice lies beyond range of polyLine");
 			return result;
 		}
 		Vertex prevVertex = null;
-		for (Vertex v : polyline) {
+		for (Vertex v : polyLine) {
 			if (null != prevVertex) {
 				double distance = prevVertex.distanceTo(v);
 				if ((distance > pos) && (result.size() == 0))
@@ -927,29 +927,28 @@ public class Planar {
 			}
 			prevVertex = v;
 		}
-		//System.err.println("Slice lies unexpectadly outside range of polyline");
 		return result;
 	}
 	
 	/**
-	 * Create a polyline which is starts or ends from a reference polyline. 
-	 * If the reference polyline is malformed (double vertices or no vertices),
+	 * Create a polyLine which is starts or ends from a reference polyLine. 
+	 * If the reference polyLine is malformed (double vertices or no vertices),
 	 * the result may be malformed.
 	 * @param prevVertices ArrayList&lt;{@link Vertex}&gt;; the previous
-	 * polyline
+	 * polyLine
 	 * @param curVertices ArrayList&lt;{@link Vertex}&gt;; the reference list
 	 * @param sameUp boolean; start at prevVertices
 	 * @param sameDown boolean; end at prevVertices
-	 * @return ArrayList&lt;{@link Vertex}&gt;; the new polyline
+	 * @return ArrayList&lt;{@link Vertex}&gt;; the new polyLine
 	 */
-	// FIXME this method is never called with sameUp == sameDown; one of these arguments should be removed.
+	// FIXME this method is never called with sameUp == sameDown; one of these arguments can (and should) be removed.
 	public static ArrayList<Vertex> createPartlyParallelVertices(ArrayList<Vertex> prevVertices, ArrayList<Vertex> curVertices, boolean sameUp, boolean sameDown) {
 		if (prevVertices.size() != curVertices.size())
 			throw new Error ("prevVertices and curVertices have different sizes");
 		if (sameUp && sameDown)
-			throw new Error("Nonsense combination of sameUp and sameDown (both true)");
+			throw new Error("Never used combination of sameUp and sameDown (both true)");
 		if ((! sameUp) && (! sameDown))
-			throw new Error("Nonsense combination of sameUp and sameDown (both false)");			
+			throw new Error("Never used combination of sameUp and sameDown (both false)");			
     	ArrayList<Vertex> result = new ArrayList<Vertex>();
     	double distLaneTotal = length(prevVertices);
     	double distLane = 0.0;
@@ -971,33 +970,33 @@ public class Planar {
 	}
 
 	/**
-	 * Create a polyline with specified offset from a reference polyline. If
-	 * the reference polyline is malformed (double vertices or no vertices),
+	 * Create a polyLine with specified offset from a reference polyLine. If
+	 * the reference polyLine is malformed (double vertices or no vertices),
 	 * the result may be malformed.
 	 * @param referenceVertices ArrayList&lt;{@link Vertex}&gt;; the reference
-	 * polyline
+	 * polyLine
 	 * @param prevReferenceVertices ArrayList&lt;{@link Vertex}&gt;; the reference
-	 * polyline of the preceding design line
+	 * polyLine of the preceding design line
 	 * @param lateralPosition Double; offset used for each vertex
 	 * vertices
-	 * @return ArrayList&lt;{@link Vertex}&gt;; the new polyline
+	 * @return ArrayList&lt;{@link Vertex}&gt;; the new polyLine
 	 */
     public static ArrayList<Vertex> createParallelVertices(ArrayList<Vertex> referenceVertices, ArrayList<Vertex> prevReferenceVertices, double lateralPosition) {
     	return createParallelVertices(referenceVertices, prevReferenceVertices, lateralPosition, lateralPosition);
     }
 	
 	/**
-	 * Create a polyline with specified offset from a reference polyline.
-	 * <br /> Throws Error when the reference polyline is malformed:
+	 * Create a polyLine with specified offset from a reference polyLine.
+	 * <br /> Throws Error when the reference polyLine is malformed:
 	 * two adjacent vertices with (almost) same X and Y or too few vertices.
 	 * @param referenceVertices ArrayList&lt;{@link Vertex}&gt;; the reference
-	 * polyline
+	 * polyLine
 	 * @param prevReferenceVertices ArrayList&lt;{@link Vertex}&gt;; the reference
-	 * polyline of the preceding design line
+	 * polyLine of the preceding design line
 	 * @param firstLateralPosition Double; offset used for the first vertex
 	 * @param subsequentLateralPosition Double; offset used for all other
 	 * vertices
-	 * @return ArrayList&lt;{@link Vertex}&gt;; the new polyline
+	 * @return ArrayList&lt;{@link Vertex}&gt;; the new polyLine
 	 */
     public static ArrayList<Vertex> createParallelVertices(ArrayList<Vertex> referenceVertices, ArrayList<Vertex> prevReferenceVertices, double firstLateralPosition, double subsequentLateralPosition) {
     	// Create an ArrayList of vertices at a certain offset from a reference
@@ -1060,13 +1059,13 @@ public class Planar {
     }
     
     /**
-	 * Create a polyline with specified offset from a reference polyline. If
-	 * the reference polyline is malformed (double vertices or no vertices),
+	 * Create a polyLine with specified offset from a reference polyLine. If
+	 * the reference polyLine is malformed (double vertices or no vertices),
 	 * the result may be malformed.
      * @param referenceVertices ArrayList&lt;{@link Vertex}&gt;; the reference
-	 * polyline
+	 * polyLine
      * @param lateralPosition Double; offset used for all vertices
-     * @return ArrayList&lt;{@link Vertex}&gt;; the new polyline
+     * @return ArrayList&lt;{@link Vertex}&gt;; the new polyLine
      */
     public static ArrayList<Vertex> createParallelVertices(ArrayList<Vertex> referenceVertices, double lateralPosition) {
     	return createParallelVertices(referenceVertices, null, lateralPosition, lateralPosition);
@@ -1115,7 +1114,7 @@ public class Planar {
 	
 	/**
 	 * Expand a bounding box.
-	 * @param rect Line2D.Double; initial bounding box
+	 * @param rect Line2D.Double; initial bounding box (may be null)
 	 * @param x Double; x of point to expand bounding box to
 	 * @param y Double; y of point to expand bounding box to
 	 * @return Line2D.Double; expanded bounding box
@@ -1137,9 +1136,11 @@ public class Planar {
 
 }
 
-// This is used to sort points by some "score",
-// which could be an angle or other metric associated with each point.
-// Used (only) in the convexHull algorithm
+/**
+ * This is used to sort points by some "score", which could be an angle or 
+ * other metric associated with each point.
+ * Used (only) in the convexHull algorithm
+ */
 class Point2DAndScore {
 	public Point2D.Double point;
 	public double score;

@@ -6,6 +6,8 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -86,6 +88,13 @@ public class PlanarTest {
 	@SuppressWarnings("static-method")
 	@Test
 	public void testLength() {
+		boolean errorThrown = false;
+		try {
+			Planar.length(null);
+		} catch (Error e) {
+			errorThrown = true;
+		}
+		assertTrue("Should have thrown an Error", errorThrown);
 		ArrayList<Vertex> in = new ArrayList<Vertex> ();
 		assertEquals("empty list has effective length of 0 (this is actually debatable)", 0, Planar.length(in), 0.000001);
 		in.add(new Vertex(10, 20, 30));
@@ -101,7 +110,7 @@ public class PlanarTest {
 	}
 
 	/**
-	 * Test rotateTranslatePolyLine
+	 * Test the rotateTranslatePolyLine method
 	 */
 	@SuppressWarnings("static-method")
 	@Test
@@ -141,7 +150,7 @@ public class PlanarTest {
 	}
 
 	/**
-	 * Test translatePoint
+	 * Test the translatePoint method
 	 */
 	@SuppressWarnings("static-method")
 	@Test
@@ -154,7 +163,7 @@ public class PlanarTest {
 	}
 
 	/**
-	 * Test nearestPointOnLine
+	 * Test the nearestPointOnLine method
 	 */
 	@SuppressWarnings("static-method")
 	@Test
@@ -203,7 +212,7 @@ public class PlanarTest {
 	}
 
 	/**
-	 * Test distanceLineSegmentToPoint
+	 * Test the distanceLineSegmentToPoint method
 	 */
 	@SuppressWarnings("static-method")
 	@Test
@@ -224,7 +233,7 @@ public class PlanarTest {
 	}
 
 	/**
-	 * Test polytonContainsPoint
+	 * Test the polygonContainsPoint method
 	 */
 	@SuppressWarnings("static-method")
 	@Test
@@ -250,7 +259,7 @@ public class PlanarTest {
 	}
 
 	/**
-	 * Test distancePolygonToPoint
+	 * Test the distancePolygonToPoint method
 	 * <br /> A major flaw in distancePolygonToPoint was discovered during
 	 * development of this test.
 	 */
@@ -298,7 +307,7 @@ public class PlanarTest {
 	}
 
 	/**
-	 * Test polygonIntersectsPolygon
+	 * Test the polygonIntersectsPolygon method
 	 */
 	@SuppressWarnings("static-method")
 	@Test
@@ -646,7 +655,7 @@ public class PlanarTest {
 
 
 	/**
-	 * Test the intersectLineSegmentAndCircle method
+	 * Test the intersectLineSegmentAndCircle method.
 	 */
 	@SuppressWarnings("static-method")
 	@Test
@@ -681,7 +690,7 @@ public class PlanarTest {
 	}
 
 	/**
-	 * Test the verticesToString method (one argument version)
+	 * Test the verticesToString method (one argument version).
 	 */
 	@SuppressWarnings("static-method")
 	@Test
@@ -698,7 +707,7 @@ public class PlanarTest {
 	}
 
 	/**
-	 * Test the verticesToString method (two arguments version)
+	 * Test the verticesToString method (two arguments version).
 	 */
 	@SuppressWarnings("static-method")
 	@Test
@@ -707,10 +716,10 @@ public class PlanarTest {
 		ArrayList<Vertex> vertices = new ArrayList<Vertex>();
 		assertEquals("Empty list -> empty string", "", Planar.verticesToString(vertices, false));
 		vertices.add(new Vertex(123.4567, 987.6543, 92.92999));
-		System.out.println(Planar.verticesToString(vertices));
+		//System.out.println(Planar.verticesToString(vertices));
 		assertEquals("Check precision", "(123.457m, 987.654m, 92.930m)", Planar.verticesToString(vertices, false));
 		vertices.add(new Vertex(-1,-2,-3));
-		System.out.println(Planar.verticesToString(vertices));
+		//System.out.println(Planar.verticesToString(vertices));
 		assertEquals("Check precision", "(123.457m, 987.654m, 92.930m) (-1.000m, -2.000m, -3.000m)", Planar.verticesToString(vertices, false));
 		Main.locale = Locale.GERMANY;
 		assertEquals("Check precision", "(123,457m, 987,654m, 92,930m) (-1,000m, -2,000m, -3,000m)", Planar.verticesToString(vertices, false));
@@ -718,10 +727,10 @@ public class PlanarTest {
 		vertices = new ArrayList<Vertex>();
 		assertEquals("Empty list -> empty string", "", Planar.verticesToString(vertices, true));
 		vertices.add(new Vertex(123.4567, 987.6543, 92.92999));
-		System.out.println(Planar.verticesToString(vertices));
+		//System.out.println(Planar.verticesToString(vertices));
 		assertEquals("Check precision", "(123.457m, 987.654m)", Planar.verticesToString(vertices, true));
 		vertices.add(new Vertex(-1,-2,-3));
-		System.out.println(Planar.verticesToString(vertices));
+		//System.out.println(Planar.verticesToString(vertices));
 		assertEquals("Check precision", "(123.457m, 987.654m) (-1.000m, -2.000m)", Planar.verticesToString(vertices, true));
 		Main.locale = Locale.GERMANY;
 		assertEquals("Check precision", "(123,457m, 987,654m) (-1,000m, -2,000m)", Planar.verticesToString(vertices, true));
@@ -747,33 +756,36 @@ public class PlanarTest {
 	@Test
 	public void testGeneralPathToString() {
 		GeneralPath gp = new GeneralPath(Path2D.WIND_EVEN_ODD);
-		System.out.println(String.format("\"%s\"", Planar.generalPathToString(gp)));
+		//System.out.println(String.format("\"%s\"", Planar.generalPathToString(gp)));
 		assertEquals("Empty in -> empty string", "", Planar.generalPathToString(gp));
 		gp.moveTo(123.4567, 987.6543);
-		System.out.println(String.format("\"%s\"", Planar.generalPathToString(gp)));
+		//System.out.println(String.format("\"%s\"", Planar.generalPathToString(gp)));
 		assertEquals("Single move command", "m 123.457,987.654", Planar.generalPathToString(gp));
 		gp.lineTo(-1, -2);
-		System.out.println(String.format("\"%s\"", Planar.generalPathToString(gp)));
+		//System.out.println(String.format("\"%s\"", Planar.generalPathToString(gp)));
 		assertEquals("Move and line command", "m 123.457,987.654 l -1.000,-2.000", Planar.generalPathToString(gp));
 		gp.lineTo(500, 600);
-		System.out.println(String.format("\"%s\"", Planar.generalPathToString(gp)));
+		//System.out.println(String.format("\"%s\"", Planar.generalPathToString(gp)));
 		assertEquals("Move, line and line command", "m 123.457,987.654 l -1.000,-2.000 l 500.000,600.000", Planar.generalPathToString(gp));
 		// Cannot test quadTo and curveTo because the pathIterator reduces 
 		// these to series of line commands in an unpredictable way
 	}
 
 	/**
-	 * Test logPoint method (partially)
+	 * Test the logPoint method (partially)
 	 */
 	@SuppressWarnings("static-method")
 	@Test
 	public void testLogPoint() {
-		// Cannot be fully tested unless System.out is re-routed.
 		for (int i = -100; i < 100; i += 25)
 			for (int j = -1000; j < 1000; j += 100) {
+				ByteArrayOutputStream myOut = new ByteArrayOutputStream();
+				System.setOut(new PrintStream(myOut));
 				Point2D.Double p = new Point2D.Double (0.3 * i, 0.3 * j);
 				Point2D.Double q = Planar.logPoint("test", p);
 				assertEquals("Should be same point", p, q);
+				String output = myOut.toString();
+				assertEquals("Output should be like this", String.format(Locale.US, "%s: (%.3f,%.3f)\r\n", "test", p.x, p.y), output);
 			}
 	}
 
@@ -934,7 +946,7 @@ public class PlanarTest {
 	}
 
 	/**
-	 * Test the createParallelVertices method taking a prevReferenceVertices argument
+	 * Test the createParallelVertices method taking a prevReferenceVertices argument.
 	 */
 	@SuppressWarnings("static-method")
 	@Test
@@ -1010,7 +1022,7 @@ public class PlanarTest {
 	}
 
 	/**
-	 * Test the simple createParallelVertices method
+	 * Test the simple createParallelVertices method.
 	 */
 	@SuppressWarnings("static-method")
 	@Test
@@ -1088,7 +1100,7 @@ public class PlanarTest {
 	}
 
 	/**
-	 * Test closePolyline method
+	 * Test the closePolyline method.
 	 */
 	@SuppressWarnings("static-method")
 	@Test
@@ -1106,7 +1118,7 @@ public class PlanarTest {
 	}
 
 	/**
-	 * Test the getALignment method
+	 * Test the getALignment method.
 	 */
 	@SuppressWarnings("static-method")
 	@Test
@@ -1124,7 +1136,7 @@ public class PlanarTest {
 	}
 
 	/**
-	 * Test the ArrayListOfPointsToArray method
+	 * Test the ArrayListOfPointsToArray method.
 	 */
 	@SuppressWarnings("static-method")
 	@Test
@@ -1147,7 +1159,7 @@ public class PlanarTest {
 	}
 
 	/**
-	 * Test the expandBoundingBox method
+	 * Test the expandBoundingBox method.
 	 */
 	@SuppressWarnings("static-method")
 	@Test
