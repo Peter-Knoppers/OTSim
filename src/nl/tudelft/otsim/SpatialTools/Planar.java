@@ -619,8 +619,11 @@ public class Planar {
 	 */
 	public static String pointsToString(Point2D.Double[] points) {
 		String result = "";
-		for (Point2D.Double p : points)
-			result += String.format(Main.locale, " %.3f,%.3f", p.x, p.y);
+		String separator = "";
+		for (Point2D.Double p : points) {
+			result += String.format(Main.locale, "%s%.3f,%.3f", separator, p.x, p.y);
+			separator = " ";
+		}
 		return result;
 	}
 	
@@ -646,12 +649,15 @@ public class Planar {
 	 */
 	public static String verticesToString(ArrayList<Vertex> vertices, boolean ignoreZ) {
 		String result = "";
-		for (Vertex v : vertices)
+		String separator = "";
+		for (Vertex v : vertices) {
 			if (ignoreZ) {
 				Point2D.Double p = v.getPoint();
-				result += String.format(nl.tudelft.otsim.GUI.Main.locale, "(%.3fm, %.3fm) ", p.x, p.y);
+				result += String.format(nl.tudelft.otsim.GUI.Main.locale, "%s(%.3fm, %.3fm)", separator, p.x, p.y);
 			} else
-				result += v.toString() + " ";
+				result += separator + v.toString();
+			separator = " ";
+		}
 		return result;
 	}
 
@@ -661,7 +667,7 @@ public class Planar {
 	 * @return String
 	 */
 	public static String Line2DToString(Line2D l) {
-		return String.format(Main.locale, "(%.3f, %.3f)->(%.3f,%.3f)", l.getX1(), l.getY1(), l.getX2(), l.getY2());
+		return String.format(Main.locale, "(%.3f,%.3f)->(%.3f,%.3f)", l.getX1(), l.getY1(), l.getX2(), l.getY2());
 	}
 
 	/**
@@ -670,20 +676,23 @@ public class Planar {
 	 * @param generalPath {@link GeneralPath}; the path to convert
 	 * @return String; the human-readable representation of the {@link GeneralPath}
 	 */
-	public static String GeneralPathToString (GeneralPath generalPath) {
+	public static String generalPathToString (GeneralPath generalPath) {
 		String result = "";
+		String separator = "";
 		PathIterator it = generalPath.getPathIterator(null, 1);
 		while (! it.isDone())
 		{
 			float[] data = new float[6];
+			result += separator;
 			switch(it.currentSegment(data)) {
-			case PathIterator.SEG_MOVETO: result += String.format(Locale.US, "m %.3f,%.3f ", data[0], data[1]); break;
-			case PathIterator.SEG_LINETO: result += String.format(Locale.US, "l %.3f,%.3f ", data[0], data[1]); break;
-			case PathIterator.SEG_QUADTO: result += String.format(Locale.US, "q %.3f,%.3f %.3f,%.3f ", data[0], data[1], data[2], data[3]); break;
-			case PathIterator.SEG_CUBICTO: result += String.format(Locale.US, "m %.3f,%.3f %.3f,%.3f %.3f,%.3f ", data[0], data[1], data[2], data[3], data[4], data[5]); break;
-			case PathIterator.SEG_CLOSE: result += "c "; break;
+			case PathIterator.SEG_MOVETO: result += String.format(Locale.US, "m %.3f,%.3f", data[0], data[1]); break;
+			case PathIterator.SEG_LINETO: result += String.format(Locale.US, "l %.3f,%.3f", data[0], data[1]); break;
+			case PathIterator.SEG_QUADTO: result += String.format(Locale.US, "q %.3f,%.3f %.3f,%.3f", data[0], data[1], data[2], data[3]); break;
+			case PathIterator.SEG_CUBICTO: result += String.format(Locale.US, "c %.3f,%.3f %.3f,%.3f %.3f,%.3f", data[0], data[1], data[2], data[3], data[4], data[5]); break;
+			case PathIterator.SEG_CLOSE: result += "C"; break;
 			default: throw new Error("unknown segment type " + it.currentSegment(data));
 			}
+			separator = " ";
 			it.next();
 		}			
 		return result;
@@ -698,7 +707,7 @@ public class Planar {
 	 * @return Point2D.Double; the point
 	 */
 	public static Point2D.Double logPoint(String where, Point2D.Double p) {
-		System.out.format(Main.locale, "%s: (%.3f,%.3f)\r\n", where, p.x, p.y);
+		System.out.format(Locale.US, "%s: (%.3f,%.3f)\r\n", where, p.x, p.y);
 		return p;
 	}
 	
@@ -876,7 +885,7 @@ public class Planar {
 	
 	/**
 	 * Shorten a polyline to a sub-section specified by distance. If the
-	 * requested distance range lies outside the range of the polyline and
+	 * requested distance range lies outside the range of the polyline an
 	 * empty list of vertices is returned.
 	 * @param polyline ArrayList&lt;{@link Vertex}&gt;; the polyline
 	 * @param longitudinalPosition Double; starting position of the slice
@@ -902,20 +911,21 @@ public class Planar {
 		for (Vertex v : polyline) {
 			if (null != prevVertex) {
 				double distance = prevVertex.distanceTo(v);
-				if (distance > pos) {
-					// Slice starts between prevVertex and v
+				if ((distance > pos) && (result.size() == 0))
 					result.add(Vertex.weightedVertex(pos / distance, prevVertex, v));
-					double useLength = longitudinalLength;
-					if (useLength <= 0)
-						useLength = 0.001;
+				if ((pos + longitudinalLength > distance) && (pos < distance))
+					result.add(v);
+				else if (distance > pos) {
 					result.add(Vertex.weightedVertex((pos + longitudinalLength) / distance, prevVertex, v));
 					return result;
 				}
 				pos -= distance;
+				if (pos + longitudinalLength <= 0)
+					return result;
 			}
 			prevVertex = v;
 		}
-		System.err.println("Slice lies unexpectadly outside range of polyline");
+		//System.err.println("Slice lies unexpectadly outside range of polyline");
 		return result;
 	}
 	

@@ -2,10 +2,14 @@ package nl.tudelft.otsim.SpatialTools;
 
 import static org.junit.Assert.*;
 
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
+import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Locale;
 
+import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.GeoObjects.Vertex;
 
 import org.junit.Test;
@@ -412,6 +416,7 @@ public class PlanarTest {
 		assertEquals("Should return common point of l1 and l2", 0, p.distance(l1.getP2()), 0.000001);
 		p = Planar.intersection(l2, l1);
 		assertEquals("Should return common point of l1 and l2", 0, p.distance(l1.getP2()), 0.000001);
+		// Exactly parallel won't work in general unless the lines are parallel to X or Y
 		l1 = new Line2D.Double(0, 0, 0, 10);
 		l2 = new Line2D.Double(10, 0, 10, 10);
 		p = Planar.intersection(l1, l2);
@@ -618,49 +623,270 @@ public class PlanarTest {
 		assertEquals("This line segment is entirely within the circle", 0, Planar.intersectLineSegmentAndCircle(new Line2D.Double(8, 21, 12, 19), c).length);
 	}
 
+	/**
+	 * Test the pointsToString method.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testPointsToString() {
-		fail("Not yet implemented");
+		Main.locale = Locale.US;	// Luckily we can override this
+		Point2D.Double[] array = new Point2D.Double[0];
+		assertEquals("Empty array -> empty string", "", Planar.pointsToString(array));
+		array = new Point2D.Double[1];
+		array[0] = new Point2D.Double(123.4567, 987.654321);
+		assertEquals("Check precision", "123.457,987.654", Planar.pointsToString(array));
+		array = new Point2D.Double[3];
+		array[0] = new Point2D.Double(1, 2);
+		array[1] = new Point2D.Double(-3, -4);
+		array[2] = new Point2D.Double(5, 6);
+		assertEquals("Check precision", "1.000,2.000 -3.000,-4.000 5.000,6.000", Planar.pointsToString(array));
+		Main.locale = Locale.GERMANY;
+		assertEquals("Check precision", "1,000,2,000 -3,000,-4,000 5,000,6,000", Planar.pointsToString(array));
 	}
 
+	/**
+	 * Test the verticesToString method (one argument version)
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testVerticesToStringArrayListOfVertex() {
-		fail("Not yet implemented");
+		Main.locale = Locale.US;	// Luckily we can override this
+		ArrayList<Vertex> vertices = new ArrayList<Vertex>();
+		assertEquals("Empty list -> empty string", "", Planar.verticesToString(vertices));
+		vertices.add(new Vertex(123.4567, 987.6543, 92.92999));
+		assertEquals("Check precision", "(123.457m, 987.654m, 92.930m)", Planar.verticesToString(vertices));
+		vertices.add(new Vertex(-1,-2,-3));
+		assertEquals("Check precision", "(123.457m, 987.654m, 92.930m) (-1.000m, -2.000m, -3.000m)", Planar.verticesToString(vertices));
+		Main.locale = Locale.GERMANY;
+		assertEquals("Check precision", "(123,457m, 987,654m, 92,930m) (-1,000m, -2,000m, -3,000m)", Planar.verticesToString(vertices));
 	}
 
+	/**
+	 * Test the verticesToString method (two arguments version)
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testVerticesToStringArrayListOfVertexBoolean() {
-		fail("Not yet implemented");
+		Main.locale = Locale.US;	// Luckily we can override this
+		ArrayList<Vertex> vertices = new ArrayList<Vertex>();
+		assertEquals("Empty list -> empty string", "", Planar.verticesToString(vertices, false));
+		vertices.add(new Vertex(123.4567, 987.6543, 92.92999));
+		System.out.println(Planar.verticesToString(vertices));
+		assertEquals("Check precision", "(123.457m, 987.654m, 92.930m)", Planar.verticesToString(vertices, false));
+		vertices.add(new Vertex(-1,-2,-3));
+		System.out.println(Planar.verticesToString(vertices));
+		assertEquals("Check precision", "(123.457m, 987.654m, 92.930m) (-1.000m, -2.000m, -3.000m)", Planar.verticesToString(vertices, false));
+		Main.locale = Locale.GERMANY;
+		assertEquals("Check precision", "(123,457m, 987,654m, 92,930m) (-1,000m, -2,000m, -3,000m)", Planar.verticesToString(vertices, false));
+		Main.locale = Locale.US;	// Luckily we can override this
+		vertices = new ArrayList<Vertex>();
+		assertEquals("Empty list -> empty string", "", Planar.verticesToString(vertices, true));
+		vertices.add(new Vertex(123.4567, 987.6543, 92.92999));
+		System.out.println(Planar.verticesToString(vertices));
+		assertEquals("Check precision", "(123.457m, 987.654m)", Planar.verticesToString(vertices, true));
+		vertices.add(new Vertex(-1,-2,-3));
+		System.out.println(Planar.verticesToString(vertices));
+		assertEquals("Check precision", "(123.457m, 987.654m) (-1.000m, -2.000m)", Planar.verticesToString(vertices, true));
+		Main.locale = Locale.GERMANY;
+		assertEquals("Check precision", "(123,457m, 987,654m) (-1,000m, -2,000m)", Planar.verticesToString(vertices, true));
 	}
 
+	/**
+	 * Test the line2dToString method.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testLine2DToString() {
-		fail("Not yet implemented");
+		Main.locale = Locale.US;	// Luckily we can override this
+		Line2D.Double l = new Line2D.Double(123.4567, 987.6543, -3, -4);
+		assertEquals("Check precision", "(123.457,987.654)->(-3.000,-4.000)", Planar.Line2DToString(l));
+		Main.locale = Locale.GERMANY;
+		assertEquals("Check precision", "(123,457,987,654)->(-3,000,-4,000)", Planar.Line2DToString(l));
 	}
 
+	/**
+	 * Test the generalPathToString method.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testGeneralPathToString() {
-		fail("Not yet implemented");
+		GeneralPath gp = new GeneralPath(Path2D.WIND_EVEN_ODD);
+		System.out.println(String.format("\"%s\"", Planar.generalPathToString(gp)));
+		assertEquals("Empty in -> empty string", "", Planar.generalPathToString(gp));
+		gp.moveTo(123.4567, 987.6543);
+		System.out.println(String.format("\"%s\"", Planar.generalPathToString(gp)));
+		assertEquals("Single move command", "m 123.457,987.654", Planar.generalPathToString(gp));
+		gp.lineTo(-1, -2);
+		System.out.println(String.format("\"%s\"", Planar.generalPathToString(gp)));
+		assertEquals("Move and line command", "m 123.457,987.654 l -1.000,-2.000", Planar.generalPathToString(gp));
+		gp.lineTo(500, 600);
+		System.out.println(String.format("\"%s\"", Planar.generalPathToString(gp)));
+		assertEquals("Move, line and line command", "m 123.457,987.654 l -1.000,-2.000 l 500.000,600.000", Planar.generalPathToString(gp));
+		// Cannot test quadTo and curveTo because the pathIterator reduces 
+		// these to series of line commands in an unpredictable way
 	}
 
+	/**
+	 * Test logPoint method (partially)
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testLogPoint() {
-		fail("Not yet implemented");
+		// Cannot be fully tested unless System.out is re-routed.
+		for (int i = -100; i < 100; i += 25)
+			for (int j = -1000; j < 1000; j += 100) {
+				Point2D.Double p = new Point2D.Double (0.3 * i, 0.3 * j);
+				Point2D.Double q = Planar.logPoint("test", p);
+				assertEquals("Should be same point", p, q);
+			}
 	}
 
+	/**
+	 * Test the convexHull method.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testConvexHull() {
-		fail("Not yet implemented");
+		ArrayList<Point2D.Double> points = new ArrayList<Point2D.Double>();
+		assertEquals("Empty in -> empty out", 0, Planar.convexHull(points).size());
+		points.add(new Point2D.Double(10, 10));
+		ArrayList<Point2D.Double> out = Planar.convexHull(points);
+		assertEquals("One in -> one out", 1, out.size());
+		assertEquals("One in -> same out", 0, out.get(0).distance(points.get(0)), 0.00001);
+		points.add(new Point2D.Double(30, 30));
+		out = Planar.convexHull(points);
+		assertEquals("Two in -> two out", 2, out.size());
+		assertEquals("Two in -> same out", 0, out.get(0).distance(points.get(0)), 0.00001);
+		assertEquals("Two in -> same out", 0, out.get(1).distance(points.get(1)), 0.00001);
+		points.add(new Point2D.Double(30, 100));
+		out = Planar.convexHull(points);		
+		assertEquals("Three in (non singular) -> three out", 3, out.size());
+		points.add(new Point2D.Double(30, 30));
+		out = Planar.convexHull(points);		
+		assertEquals("Duplicate point -> same out", 3, out.size());
+		points.clear();
+		for (int i = 0; i < 100; i++) {
+			// Insert a couple of points that lie ON a circle
+			points.add(new Point2D.Double(100 + Math.sin(i), 200 + Math.cos(i)));
+			out = Planar.convexHull(points);
+			assertEquals("N on circle -> N out", i + 1, out.size());
+		}
+		for (int i = 0; i < 100; i++) {
+			// insert additional points INSIDE the previous circle
+			points.add(new Point2D.Double(100 + Math.sin(i + 0.5) / 2, 200 + Math.cos(i + 0.5) / 2));
+			out = Planar.convexHull(points);
+			assertEquals("Adding points within the circle should not increase number of points in result", 100, out.size());
+		}
+		// inserting a point far outside should reduce the number of points in the result
+		Point2D.Double p = new Point2D.Double(100, 1000);
+		points.add(p);
+		out = Planar.convexHull(points);
+		//System.out.println("number is now " + out.size());
+		assertTrue("Adding a point far outside the circle reduces the number of points in the convex hull", out.size() < 100);
+		assertTrue("Number of points should be at least 50", out.size() >= 50);
+		// the new point should be part of the new convex hull
+		int found = 0;
+		for (int i = 0; i < out.size(); i++)
+			if (out.get(i).distance(p) <= 0.000000001)
+				found++;
+		assertEquals("Should find the extreme point once", 1, found);
 	}
 
+	/**
+	 * Test the lineIntersectsPolygon method.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testLineIntersectsPolygon() {
-		fail("Not yet implemented");
+		Point2D.Double[] polygon = new Point2D.Double[0];
+		Line2D.Double l = new Line2D.Double(10, 10, 20, 20);
+		ArrayList<Point2D.Double> out = Planar.lineIntersectsPolygon(l, polygon);
+		assertEquals("Too short in -> empty out", 0, out.size());
+		polygon = new Point2D.Double[1];
+		out = Planar.lineIntersectsPolygon(l, polygon);
+		assertEquals("Too short in -> empty out", 0, out.size());
+		polygon = new Point2D.Double[2];
+		polygon[0] = new Point2D.Double(5, 7);
+		polygon[1] = new Point2D.Double(15, 5);
+		out = Planar.lineIntersectsPolygon(l, polygon);
+		assertEquals("Miss", 0, out.size());
+		polygon[0] = new Point2D.Double(5, 15);
+		out = Planar.lineIntersectsPolygon(l, polygon);
+		assertEquals("Hit", 2, out.size());	// The polyline is implicitly closed; therefore 2 hits
+		assertEquals("Expected location", 0, out.get(0).distance(new Point2D.Double(10, 10)), 0.000001);
+		assertEquals("Expected location", 0, out.get(1).distance(new Point2D.Double(10, 10)), 0.000001);
+		polygon = new Point2D.Double[3];
+		polygon[0] = new Point2D.Double(10, 0);
+		polygon[1] = new Point2D.Double(20, 0);
+		polygon[2] = new Point2D.Double(10, 10);
+		l = new Line2D.Double(15, 1, 16, 2);
+		out = Planar.lineIntersectsPolygon(l, polygon);
+		assertEquals("Line is totally within the polygon", 0, out.size());
+		l = new Line2D.Double(15, -1, 15, 2);
+		out = Planar.lineIntersectsPolygon(l, polygon);
+		assertEquals("One hit", 1, out.size());
+		assertEquals("Expected location of hit", 0, out.get(0).distance(new Point2D.Double(15, 0)), 0.000001);
+		l = new Line2D.Double(15, -1, 15, 200);
+		out = Planar.lineIntersectsPolygon(l, polygon);
+		assertEquals("Two hits", 2, out.size());
+		// Order of returned hits is not really guaranteed...
+		assertEquals("First hit", 0, out.get(0).distance(new Point2D.Double(15, 0)), 0.000001);
+		assertEquals("Second hit", 0, out.get(1).distance(new Point2D.Double(15, 5)), 0.000001);
 	}
 
+	/**
+	 * Test the slicePolyline method.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testSlicePolyline() {
-		fail("Not yet implemented");
+		ArrayList<Vertex> vertices = new ArrayList<Vertex>();
+		ArrayList<Vertex> out = Planar.slicePolyline(vertices, 5, 10);
+		assertEquals("Empty in -> empty out", 0, out.size());
+		vertices.add(new Vertex(10, 20, 30));
+		out = Planar.slicePolyline(vertices, 5, 10);
+		assertEquals("Degenerate in -> empty out", 0, out.size());
+		vertices.add(new Vertex(110, 20, 30));
+		//System.out.println("in :" + Planar.verticesToString(vertices));
+		out = Planar.slicePolyline(vertices, 5, 10);
+		assertEquals("OK in -> two out", 2, out.size());
+		//System.out.println("out:" + Planar.verticesToString(out));
+		assertEquals("Expected first point", 0, out.get(0).distance(new Vertex(15, 20, 30)), 0.000001);
+		assertEquals("Expected second point", 0, out.get(1).distance(new Vertex(25, 20, 30)), 0.000001);
+		out = Planar.slicePolyline(vertices, 5,  1000);
+		//System.out.println("out:" + Planar.verticesToString(out));
+		assertEquals("OK in -> two out", 2, out.size());
+		//System.out.println("out:" + Planar.verticesToString(out));
+		assertEquals("Expected first point", 0, out.get(0).distance(new Vertex(15, 20, 30)), 0.000001);
+		assertEquals("Expected second point", 0, out.get(1).distance(new Vertex(110, 20, 30)), 0.000001);
+		vertices.add(new Vertex(110, 120, 30));
+		//System.out.println("in :" + Planar.verticesToString(vertices));
+		out = Planar.slicePolyline(vertices, 5,  1000);
+		//System.out.println("out:" + Planar.verticesToString(out));
+		assertEquals("OK in -> three out", 3, out.size());
+		assertEquals("Expected first point", 0, out.get(0).distance(new Vertex(15, 20, 30)), 0.000001);
+		assertEquals("Expected second point", 0, out.get(1).distance(new Vertex(110, 20, 30)), 0.000001);
+		assertEquals("Expected third point", 0, out.get(2).distance(new Vertex(110, 120, 30)), 0.000001);
+		out = Planar.slicePolyline(vertices,  5,  150);
+		//System.out.println("out:" + Planar.verticesToString(out));
+		assertEquals("OK in -> three out", 3, out.size());
+		assertEquals("Expected first point", 0, out.get(0).distance(new Vertex(15, 20, 30)), 0.000001);
+		assertEquals("Expected second point", 0, out.get(1).distance(new Vertex(110, 20, 30)), 0.000001);
+		assertEquals("Expected third point", 0, out.get(2).distance(new Vertex(110, 75, 30)), 0.000001);
+		out = Planar.slicePolyline(vertices,  -5,  150);
+		//System.out.println("out:" + Planar.verticesToString(out));
+		assertEquals("OK in -> two out", 2, out.size());
+		assertEquals("Expected first point", 0, out.get(0).distance(new Vertex(110, 115, 30)), 0.000001);
+		assertEquals("Expected second point", 0, out.get(1).distance(new Vertex(110, 120, 30)), 0.000001);
+		vertices.add(new Vertex(110, 120, 130));
+		//System.out.println("in :" + Planar.verticesToString(vertices));
+		out = Planar.slicePolyline(vertices, 5,  1000);
+		//System.out.println("out:" + Planar.verticesToString(out));
+		assertEquals("OK in -> four out", 4, out.size());
+		assertEquals("Expected first point", 0, out.get(0).distance(new Vertex(15, 20, 30)), 0.000001);
+		assertEquals("Expected second point", 0, out.get(1).distance(new Vertex(110, 20, 30)), 0.000001);
+		assertEquals("Expected third point", 0, out.get(2).distance(new Vertex(110, 120, 30)), 0.000001);
+		assertEquals("Expected fourth point", 0, out.get(3).distance(new Vertex(110, 120, 130)), 0.000001);
 	}
 
 	@Test
