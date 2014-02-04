@@ -168,8 +168,12 @@ public class RoadMarkerAlong extends CrossSectionObject implements XML_IO {
 			else
 				throw new Error("Unknown stripe type \"" + stripeType + "\"");
 			double offset = stripeSpacing * (i - (type.length() - 1) / 2.0);
-			ArrayList<Vertex> stripeCenterLine = Planar.createParallelVertices(designLine, null, offset, offset);
-			graphicsPanel.drawPolyLine(stripeCenterLine);
+			try {
+				ArrayList<Vertex> stripeCenterLine = Planar.createParallelVertices(designLine, null, offset, offset);
+				graphicsPanel.drawPolyLine(stripeCenterLine);
+			} catch (Error e) {
+				System.err.println("Ignoring error " + e.toString());
+			}
 		}
 	}
 	
