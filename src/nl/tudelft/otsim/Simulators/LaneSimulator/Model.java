@@ -243,6 +243,21 @@ public class Model {
         }
     }
     
+    
+    
+    // GUUS has added some tests for computer time taken by "Control"
+    // see also Conflict - control()
+    long rsuTime1 = 0;	// visible within package
+    long rsuTime2 = 0;	// visible within package
+    long rsuTime3 = 0;	// visible within package
+    long rsuTime4 = 0;	// visible within package
+    private long beginTime = System.currentTimeMillis();
+    private long time = System.currentTimeMillis() - beginTime;
+    long numberOfRSUCalls = 0;
+    private long numberOfRSU = 0;
+    /** Set to true to output lots of info regarding RSU performance */
+    public boolean debugRSURuntime = false;
+    
     /**
      * Runs all road-side units, on-board units and controllers. This is part of
      * a regular time step, as well as gathering the final data after simulation.
@@ -250,39 +265,25 @@ public class Model {
      * units needs to aggregate data at t=period, that will not happen in the
      * main model loop.
      */
-    
-    
-    // GUUS has added some tests for computer time taken by "Control"
-    // see also Conflict - control()
-    public long rsuTime1 = 0;
-    public long rsuTime2 = 0;
-    public long rsuTime3 = 0;
-    public long rsuTime4 = 0;
-    public long rsuTime5 = 0;
-    public long rsuTime6 = 0;
-    public long beginTime = System.currentTimeMillis();
-    public long time = System.currentTimeMillis() - beginTime;
-    public long numberOfRSUCalls = 0;
-    public long numberOfRSU = 0;
-    protected void runUnits() {
-        // Run road-side units
+    protected void runUnits() {	// Run road-side units
     	int i = 0;
 		int j = 0;
+		final int clusterSize = 100;
     	for (Lane l : network) {
-    		if (i > 100)  {
+    		if (i > clusterSize)  {
     			time = System.currentTimeMillis() - beginTime;
-    			int aantal = j*100 + i;
+    			int lanesProcessed = j * clusterSize + i;
         		
-    			/*
-    			System.out.println("test network number of lanes passed " + aantal);
-    			System.out.println( " number of RSU's " + numberOfRSU);
-    			System.out.println("Total time RSU " + rsuTime1 + " number of RSU's calls " + numberOfRSUCalls);
-    			System.out.println("time RSU 2 " + rsuTime2 );
-    			System.out.println("time RSU 3 " + rsuTime3 );
-    			System.out.println("time RSU 4 " + rsuTime4 );
-
-    			System.out.println("total time " + time);
-    			*/
+    			if (debugRSURuntime) {
+	    			System.out.println("test network number of lanes processed " + lanesProcessed);
+	    			System.out.println( " number of RSU's " + numberOfRSU);
+	    			System.out.println("Total time RSU " + rsuTime1 + " number of RSU's calls " + numberOfRSUCalls);
+	    			System.out.println("time RSU 2 " + rsuTime2 );
+	    			System.out.println("time RSU 3 " + rsuTime3 );
+	    			System.out.println("time RSU 4 " + rsuTime4 );
+	
+	    			System.out.println("total time " + time);
+    			}
     			i = 0;
     			j++;
     		}

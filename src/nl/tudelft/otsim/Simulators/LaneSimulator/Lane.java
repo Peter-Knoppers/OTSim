@@ -524,6 +524,7 @@ public class Lane {
     	return result;
     }
     
+    /*
     public Movable oldfindVehicle(double startX, Model.longDirection updown) {
         Movable veh = null;
         if (updown == Model.longDirection.UP) {
@@ -590,6 +591,7 @@ public class Lane {
         }
         return veh;
     }
+    */
 
     /**
      * Finds the first RSU downstream of a location (not at) within a certain 
