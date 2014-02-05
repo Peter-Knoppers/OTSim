@@ -283,7 +283,7 @@ public class Vertex {
 	}
 
 	/**
-	 * Return the Carthesian distance between this Vertex and another Vertex.
+	 * Return the Cartesian distance between this Vertex and another Vertex.
 	 * <br /> If either vertex has an invalid z-component; the z components
 	 * are considered equal.
 	 * @param other Vertex; the other Vertex
