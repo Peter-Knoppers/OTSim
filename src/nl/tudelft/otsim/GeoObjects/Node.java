@@ -378,7 +378,7 @@ public class Node extends Vertex implements XML_IO {
 						// probably a very near miss
 						double ratio = circle.radius() / line.getP1().distance(circle.center());
 						if ((ratio > 0.99) && (ratio < 1.01))
-							points.add(Planar.logPoint("adding almost intersection", (Point2D.Double)(line.getP1())));
+							points.add(Planar.log("adding almost intersection", (Point2D.Double)(line.getP1())));
 						else
 							System.err.println("Total miss: ratio is " + ratio + " (" + circle.radius() / line.getP2().distance(circle.center()) + ")");
 					}

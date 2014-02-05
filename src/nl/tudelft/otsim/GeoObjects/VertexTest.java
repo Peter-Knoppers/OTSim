@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.awt.geom.Point2D;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.Locale;
 
 import nl.tudelft.otsim.FileIO.ParsedNode;
@@ -87,7 +88,7 @@ public class VertexTest {
 					Vertex.XML_X, Double.toString(v1.x), Vertex.XML_X, 
 					Vertex.XML_Y, Double.toString(v1.y), Vertex.XML_Y, 
 					Vertex.XML_Z, Double.toString(v1.z), Vertex.XML_Z);
-		System.out.println(xmlText);
+		//System.out.println(xmlText);
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(xmlText.getBytes());
 		ParsedNode pn = null;
 		try {
@@ -137,7 +138,7 @@ public class VertexTest {
 		} catch (Exception e) {
 			fail("Caught unexpected exception in creation of the XML text");
 		}
-		System.out.println("outputStream contains\"" + outputStream.toString() + "\"");
+		//System.out.println("outputStream contains\"" + outputStream.toString() + "\"");
 		assertEquals("Expected xml", 
 				"<?xml version=\"1.0\"?>\n" +
 				"<X>1.23456</X>\n" +
@@ -145,94 +146,240 @@ public class VertexTest {
 				"<Z>3.45678</Z>\n", outputStream.toString());
 	}
 
+	/**
+	 * Test the weightedVertex method.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testWeightedVertex() {
-		fail("Not yet implemented");
+		Vertex v1 = new Vertex(10, 20, 30);
+		Vertex v2 = new Vertex(30, 40, 50);
+		assertEquals("Weight 0 should return the first vector", 0, Vertex.weightedVertex(0, v1, v2).distance(v1), 0.000001);
+		assertEquals("Weight 1 should return the second vector", 0, Vertex.weightedVertex(1, v1, v2).distance(v2), 0.000001);
+		assertEquals("Weight 0.5 should return the center", 0, Vertex.weightedVertex(0.5, v1, v2).distance(
+				new Vertex((v1.x + v2.x) / 2, (v1.y + v2.y) / 2, (v1.z + v2.z) / 2)), 0.000001);
+		assertEquals("Extrapolation", 0, Vertex.weightedVertex(2, v1, v2).distance(
+				new Vertex(2 * v2.x - v1.x, 2 * v2.y - v1.y, 2 * v2.z - v1.z)), 0.000001);
+		assertEquals("Extrapolation", 0, Vertex.weightedVertex(-1, v2, v1).distance(
+				new Vertex(2 * v2.x - v1.x, 2 * v2.y - v1.y, 2 * v2.z - v1.z)), 0.000001);
 	}
 
-	@Test
-	public void testDistanceTo() {
-		fail("Not yet implemented");
-	}
-
+	/**
+	 * Test the getX method.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testGetX() {
-		fail("Not yet implemented");
+		for (int i = 0; i < 1000; i += 10) {
+			Vertex v = new Vertex(i / 3.0, i / 7.0, i / 11.0);
+			assertEquals("The getX method should return the x field", i / 3.0, v.getX(), 0.000001);
+		}
 	}
 
+	/**
+	 * Test the setX method.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testSetX() {
-		fail("Not yet implemented");
+		Vertex v = new Vertex (10, 20, 30);
+		for (int i = 0; i < 100; i+= 10) {
+			double value = 123.456 * i;
+			v.setX(value);
+			assertEquals("The setX method should set the x field", value, v.x, 0.0000001);
+			assertEquals("The setX method should not change other fields", 20, v.y, 0.000001);
+			assertEquals("The setX method should not change other fields", 30, v.z, 0.000001);
+		}
 	}
 
+	/**
+	 * Test the getY method.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testGetY() {
-		fail("Not yet implemented");
+		for (int i = 0; i < 1000; i += 10) {
+			Vertex v = new Vertex(i / 3.0, i / 7.0, i / 11.0);
+			assertEquals("The getY method should return the x field", i / 7.0, v.getY(), 0.000001);
+		}
 	}
 
+	/**
+	 * Test the setY method.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testSetY() {
-		fail("Not yet implemented");
+		Vertex v = new Vertex (10, 20, 30);
+		for (int i = 0; i < 100; i+= 10) {
+			double value = 123.456 * i;
+			v.setY(value);
+			assertEquals("The setY method should set the y field", value, v.y, 0.0000001);
+			assertEquals("The setY method should not change other fields", 10, v.x, 0.000001);
+			assertEquals("The setY method should not change other fields", 30, v.z, 0.000001);
+		}
 	}
 
+	/**
+	 * Test the getZ method.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testGetZ() {
-		fail("Not yet implemented");
+		for (int i = 0; i < 1000; i += 10) {
+			Vertex v = new Vertex(i / 3.0, i / 7.0, i / 11.0);
+			assertEquals("The getZ method should return the x field", i / 11.0, v.getZ(), 0.000001);
+		}
 	}
 
+	/**
+	 * Test the setZ method.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testSetZ() {
-		fail("Not yet implemented");
+		Vertex v = new Vertex (10, 20, 30);
+		for (int i = 0; i < 100; i+= 10) {
+			double value = 123.456 * i;
+			v.setZ(value);
+			assertEquals("The setZ method should set the z field", value, v.z, 0.0000001);
+			assertEquals("The setZ method should not change other fields", 10, v.x, 0.000001);
+			assertEquals("The setZ method should not change other fields", 20, v.y, 0.000001);
+		}
 	}
 
+	/**
+	 * Test the getPoint method.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testGetPoint() {
-		fail("Not yet implemented");
+		Vertex v = new Vertex (10, 20, 30);
+		Point2D.Double p = v.getPoint();
+		assertEquals("X of getPoint should be X of vertex", 10, p.x, 0.0000001);
+		assertEquals("Y of getPoint should be Y of vertex", 20, p.y, 0.0000001);
 	}
 
+	/**
+	 * Test the setPoint method taking three double arguments.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testSetPointDoubleDoubleDouble() {
-		fail("Not yet implemented");
+		Vertex v = new Vertex (10, 20, 30);
+		v.setPoint(123, 456, 789.01);
+		assertEquals("X after setPoint", 123, v.x, 0.000001);
+		assertEquals("Y after setPoint", 456, v.y, 0.000001);
+		assertEquals("Z after setPoint", 789.01, v.z, 0.000001);
 	}
 
+	/**
+	 * Test the setPoint method taking a Point2D.Double argument.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testSetPointDouble() {
-		fail("Not yet implemented");
+		Vertex v = new Vertex(10, 20, 30);
+		v.setPoint(new Point2D.Double(40, 50));
+		assertEquals("X after setPoint", 40, v.x, 0.000001);
+		assertEquals("Y after setPoint", 50, v.y, 0.000001);
+		assertEquals("Z after setPoint", 30, v.z, 0.000001);
 	}
 
+	/**
+	 * Test the setPoint method taking a Vertex argument.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testSetPointVertex() {
-		fail("Not yet implemented");
+		Vertex v1 = new Vertex(10, 20, 30);
+		Vertex v2 = new Vertex(30, 40, 50);
+		v1.setPoint(v2);
+		assertEquals("X after setPoint", 30, v2.x, 0.000001);
+		assertEquals("Y after setPoint", 40, v2.y, 0.000001);
+		assertEquals("Z after setPoint", 50, v2.z, 0.000001);
+		
 	}
 
+	/**
+	 * Test the toString method.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testToString() {
-		fail("Not yet implemented");
+		Vertex v = new Vertex(10, 20, 30);
+		nl.tudelft.otsim.GUI.Main.locale = Locale.US;
+		String out = v.toString();
+		assertEquals("ToString using US locale", "(10.000m,20.000m,30.000m)", out);
+		nl.tudelft.otsim.GUI.Main.locale = Locale.GERMAN;
+		out = v.toString();
+		assertEquals("ToString using US locale", "(10,000m,20,000m,30,000m)", out);
 	}
 
+	/**
+	 * Test the log method.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testLog() {
-		fail("Not yet implemented");
+		for (int i = -100; i < 100; i += 25)
+			for (int j = -1000; j < 1000; j += 100) {
+				ByteArrayOutputStream myOut = new ByteArrayOutputStream();
+				System.setOut(new PrintStream(myOut));
+				Vertex v1 = new Vertex (0.3 * i, 0.3 * j, 0.7 * i + 0.11 * j);
+				Vertex v2 = v1.log("test");
+				assertEquals("Should be same vertex", v1, v2);
+				String output = myOut.toString();
+				assertEquals("Output should be like this", String.format(Locale.US, "%s: (%.3fm,%.3fm,%.3fm)\r\n", "test", v1.x, v1.y, v1.z), output);
+			}
 	}
 
+	/**
+	 * Test the paint method. <br /> This is not so easy...
+	 */
 	@Test
 	public void testPaintGraphicsPanel() {
-		fail("Not yet implemented");
+		// fail("Very hard to test");
 	}
 
+	/**
+	 * Test the paint method. <br /> This is not so easy...
+	 */
 	@Test
 	public void testPaintGraphicsPanelColor() {
-		fail("Not yet implemented");
+		//fail("Very hard to test");
 	}
 
+	/**
+	 * Test the equals2D method.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testEquals2D() {
-		fail("Not yet implemented");
+		Vertex v1 = new Vertex(10, 20, 30);
+		Vertex v2 = new Vertex(30, 40, 50);
+		assertFalse("Should test different", v1.equals2D(v2));
+		v2.x = v1.x;
+		assertFalse("Should test different", v1.equals2D(v2));
+		v2.y = v1.y;
+		assertTrue("Should test equal", v1.equals2D(v2));
+		v2.x = 100;
+		assertFalse("Should test different", v1.equals2D(v2));
 	}
 
+	/**
+	 * Test the distanceTo method.
+	 */
+	@SuppressWarnings("static-method")
 	@Test
 	public void testDistance() {
-		fail("Not yet implemented");
+		Vertex v1 = new Vertex(10, 20, 30);
+		Vertex v2 = new Vertex(30, 40, 50);
+		assertEquals("Distance to itself is 0", 0, v1.distance(v1), 0.000001);
+		assertEquals("Distance to itself is 0", 0, v2.distance(v2), 0.000001);
+		assertEquals("Distance to other", Math.sqrt(1200), v1.distance(v2), 0.000001);
+		assertEquals("Distance to other", Math.sqrt(1200), v2.distance(v1), 0.000001);
 	}
+
 
 }

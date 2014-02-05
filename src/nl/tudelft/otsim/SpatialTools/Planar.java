@@ -76,7 +76,7 @@ public class Planar {
 			throw new Error("vertices may not be null");
 		for (Vertex v : vertices) {
 			if (null != prevVertex)
-				result += prevVertex.distanceTo(v);
+				result += prevVertex.distance(v);
 			prevVertex = v;
 		}
 		return result;
@@ -655,7 +655,7 @@ public class Planar {
 		for (Vertex v : vertices) {
 			if (ignoreZ) {
 				Point2D.Double p = v.getPoint();
-				result += String.format(nl.tudelft.otsim.GUI.Main.locale, "%s(%.3fm, %.3fm)", separator, p.x, p.y);
+				result += String.format(nl.tudelft.otsim.GUI.Main.locale, "%s(%.3fm,%.3fm)", separator, p.x, p.y);
 			} else
 				result += separator + v.toString();
 			separator = " ";
@@ -708,7 +708,7 @@ public class Planar {
 	 * @param p Point2D.Double; the point
 	 * @return Point2D.Double; the point
 	 */
-	public static Point2D.Double logPoint(String where, Point2D.Double p) {
+	public static Point2D.Double log(String where, Point2D.Double p) {
 		System.out.format(Locale.US, "%s: (%.3f,%.3f)\r\n", where, p.x, p.y);
 		return p;
 	}
@@ -912,7 +912,7 @@ public class Planar {
 		Vertex prevVertex = null;
 		for (Vertex v : polyLine) {
 			if (null != prevVertex) {
-				double distance = prevVertex.distanceTo(v);
+				double distance = prevVertex.distance(v);
 				if ((distance > pos) && (result.size() == 0))
 					result.add(Vertex.weightedVertex(pos / distance, prevVertex, v));
 				if ((pos + longitudinalLength > distance) && (pos < distance))
@@ -957,7 +957,7 @@ public class Planar {
     	for (Vertex v : prevVertices)  {
         	double weight = 0.0;
     		if (prevV != null)
-    			distLane = distLane + v.distanceTo(prevV); 
+    			distLane = distLane + v.distance(prevV); 
 			if (sameUp)
 				weight = (distLane / distLaneTotal); 
 			else if (sameDown)

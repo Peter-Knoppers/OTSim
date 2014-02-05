@@ -699,11 +699,11 @@ public class PlanarTest {
 		ArrayList<Vertex> vertices = new ArrayList<Vertex>();
 		assertEquals("Empty list -> empty string", "", Planar.verticesToString(vertices));
 		vertices.add(new Vertex(123.4567, 987.6543, 92.92999));
-		assertEquals("Check precision", "(123.457m, 987.654m, 92.930m)", Planar.verticesToString(vertices));
+		assertEquals("Check precision", "(123.457m,987.654m,92.930m)", Planar.verticesToString(vertices));
 		vertices.add(new Vertex(-1,-2,-3));
-		assertEquals("Check precision", "(123.457m, 987.654m, 92.930m) (-1.000m, -2.000m, -3.000m)", Planar.verticesToString(vertices));
+		assertEquals("Check precision", "(123.457m,987.654m,92.930m) (-1.000m,-2.000m,-3.000m)", Planar.verticesToString(vertices));
 		Main.locale = Locale.GERMANY;
-		assertEquals("Check precision", "(123,457m, 987,654m, 92,930m) (-1,000m, -2,000m, -3,000m)", Planar.verticesToString(vertices));
+		assertEquals("Check precision", "(123,457m,987,654m,92,930m) (-1,000m,-2,000m,-3,000m)", Planar.verticesToString(vertices));
 	}
 
 	/**
@@ -717,23 +717,23 @@ public class PlanarTest {
 		assertEquals("Empty list -> empty string", "", Planar.verticesToString(vertices, false));
 		vertices.add(new Vertex(123.4567, 987.6543, 92.92999));
 		//System.out.println(Planar.verticesToString(vertices));
-		assertEquals("Check precision", "(123.457m, 987.654m, 92.930m)", Planar.verticesToString(vertices, false));
+		assertEquals("Check precision", "(123.457m,987.654m,92.930m)", Planar.verticesToString(vertices, false));
 		vertices.add(new Vertex(-1,-2,-3));
 		//System.out.println(Planar.verticesToString(vertices));
-		assertEquals("Check precision", "(123.457m, 987.654m, 92.930m) (-1.000m, -2.000m, -3.000m)", Planar.verticesToString(vertices, false));
+		assertEquals("Check precision", "(123.457m,987.654m,92.930m) (-1.000m,-2.000m,-3.000m)", Planar.verticesToString(vertices, false));
 		Main.locale = Locale.GERMANY;
-		assertEquals("Check precision", "(123,457m, 987,654m, 92,930m) (-1,000m, -2,000m, -3,000m)", Planar.verticesToString(vertices, false));
+		assertEquals("Check precision", "(123,457m,987,654m,92,930m) (-1,000m,-2,000m,-3,000m)", Planar.verticesToString(vertices, false));
 		Main.locale = Locale.US;	// Luckily we can override this
 		vertices = new ArrayList<Vertex>();
 		assertEquals("Empty list -> empty string", "", Planar.verticesToString(vertices, true));
 		vertices.add(new Vertex(123.4567, 987.6543, 92.92999));
 		//System.out.println(Planar.verticesToString(vertices));
-		assertEquals("Check precision", "(123.457m, 987.654m)", Planar.verticesToString(vertices, true));
+		assertEquals("Check precision", "(123.457m,987.654m)", Planar.verticesToString(vertices, true));
 		vertices.add(new Vertex(-1,-2,-3));
 		//System.out.println(Planar.verticesToString(vertices));
-		assertEquals("Check precision", "(123.457m, 987.654m) (-1.000m, -2.000m)", Planar.verticesToString(vertices, true));
+		assertEquals("Check precision", "(123.457m,987.654m) (-1.000m,-2.000m)", Planar.verticesToString(vertices, true));
 		Main.locale = Locale.GERMANY;
-		assertEquals("Check precision", "(123,457m, 987,654m) (-1,000m, -2,000m)", Planar.verticesToString(vertices, true));
+		assertEquals("Check precision", "(123,457m,987,654m) (-1,000m,-2,000m)", Planar.verticesToString(vertices, true));
 	}
 
 	/**
@@ -782,7 +782,7 @@ public class PlanarTest {
 				ByteArrayOutputStream myOut = new ByteArrayOutputStream();
 				System.setOut(new PrintStream(myOut));
 				Point2D.Double p = new Point2D.Double (0.3 * i, 0.3 * j);
-				Point2D.Double q = Planar.logPoint("test", p);
+				Point2D.Double q = Planar.log("test", p);
 				assertEquals("Should be same point", p, q);
 				String output = myOut.toString();
 				assertEquals("Output should be like this", String.format(Locale.US, "%s: (%.3f,%.3f)\r\n", "test", p.x, p.y), output);

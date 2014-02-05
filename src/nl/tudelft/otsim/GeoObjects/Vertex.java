@@ -2,6 +2,8 @@ package nl.tudelft.otsim.GeoObjects;
 
 import java.awt.Color;
 import java.awt.geom.Point2D;
+import java.util.Locale;
+
 import com.vividsolutions.jts.geom.Coordinate;
 import nl.tudelft.otsim.FileIO.ParsedNode;
 import nl.tudelft.otsim.FileIO.StaXWriter;
@@ -139,20 +141,6 @@ public class Vertex {
 		return result;
 	}
 
-	/**
-	 * Compute the 3D distance between this Vertex and another Vertex.
-	 * @param to Other Vertex
-	 * @return Distance between this Vertex and the <code>to</code> Vertex
-	 */
-	public double distanceTo(Vertex to) {
-		double dx = to.x - x;
-		double dy = to.y - y;
-		double dz = to.z - z;
-		if (Double.isNaN(dz))
-			dz = 0.0;
-		return Math.sqrt(dx * dx + dy * dy + dz * dz);
-	}
-
 	/** Retrieve the X-coordinate of this Vertex
 	 * @return Double; the value of the X-coordinate of this Vertex
 	 */
@@ -242,7 +230,7 @@ public class Vertex {
 	 */
 	@Override
 	public String toString() {
-		return String.format(nl.tudelft.otsim.GUI.Main.locale, "(%.3fm, %.3fm, %.3fm)", x, y, z);
+		return String.format(nl.tudelft.otsim.GUI.Main.locale, "(%.3fm,%.3fm,%.3fm)", x, y, z);
 	}
 	
 	/**
@@ -251,12 +239,11 @@ public class Vertex {
 	 * This can be embedded in argument lists of various methods to log the
 	 * values of the parameters of those methods.
 	 * @param where String; description to prepend to the message
-	 * @param v Vertex to write
 	 * @return Vertex (unaltered)
 	 */
-	public static Vertex log(String where, Vertex v) {
-		System.out.println(where + ": vertex is " + v.toString());
-		return v;
+	public Vertex log(String where) {
+		System.out.format(Locale.US, "%s: (%.3fm,%.3fm,%.3fm)\r\n", where, x, y, z);
+		return this;
 	}
 	
     /**
@@ -296,7 +283,7 @@ public class Vertex {
 	}
 
 	/**
-	 * Return the Cathesian distance between this Vertex and another Vertex.
+	 * Return the Carthesian distance between this Vertex and another Vertex.
 	 * <br /> If either vertex has an invalid z-component; the z components
 	 * are considered equal.
 	 * @param other Vertex; the other Vertex
