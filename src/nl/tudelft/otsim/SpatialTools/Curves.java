@@ -126,6 +126,7 @@ public class Curves {
 		difAngle = Math.abs(angle2 - angle1);
 		return difAngle;
 	}
+	
     public static ArrayList<Vertex> connectVerticesCurve(ArrayList<Vertex> up, ArrayList<Vertex> down, 
     		Point2D.Double ctrlPoint1, Double smooth) {
 		ArrayList<Vertex> vertices = new ArrayList<Vertex>();	
