@@ -189,7 +189,7 @@ public class ImportModelShapeWizard implements ActionListener {
 		if (command.startsWith("Finish")) {
 			System.out.println("Finish" + command);
 			try {
-				importedModel = getFeatures(getDataStoreLinks(), getDataStoreNodes(), 
+				importedModel = getOmnitransFeatures(getDataStoreLinks(), getDataStoreNodes(), 
 						getDataStoreZones(), getTableShapeImport().getTableField(), 
 						getTableShapeImport().getTableDirection());
 				if (optionTripPattern.isSelected())  {
@@ -281,7 +281,7 @@ public class ImportModelShapeWizard implements ActionListener {
 
         // TODO explain what this does
         if (Main.mainFrame.getImportModelShapeWizard().getNextButton().isEnabled()) {	
-        	Object[] types = {"Jane", "Kathy", Boolean.TRUE};
+        	Object[] types = {"Type String", "Type String", Boolean.TRUE};
         	Object[][] dataDir = {
 				{"Direction indicator", "DIRECTION"},
 				{"AB", "1"},
@@ -339,17 +339,34 @@ public class ImportModelShapeWizard implements ActionListener {
 	private static TableModelImport getTableShapeImport() {
 		return shapeImport;
 	}
-		
-	private Model getFeatures( DataStore linkStore, DataStore nodeStore, DataStore zoneStore, TableImport tableField, TableImport tableDirection) throws IOException {        
+	private static void readZoneData(Model importedModel, DataStore zoneStore, int zoneID)  {
 		// Reading Centroids (as nodes)
 		DataStore dataStoreZone = zoneStore;
-        String[] typeNameZone = dataStoreZone.getTypeNames();
-        SimpleFeatureSource sourceZone = dataStoreZone.getFeatureSource(typeNameZone[0]);
-        SimpleFeatureCollection featuresZone = sourceZone.getFeatures();
+        String[] typeNameZone = null;
+		try {
+			typeNameZone = dataStoreZone.getTypeNames();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        SimpleFeatureSource sourceZone = null;
+		try {
+			sourceZone = dataStoreZone.getFeatureSource(typeNameZone[0]);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        SimpleFeatureCollection featuresZone = null;
+		try {
+			featuresZone = sourceZone.getFeatures();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         //FeatureCollectionTableModel model = new FeatureCollectionTableModel(featuresNode);
         FeatureIterator<?> iteratorZone = featuresZone.features();	
         String propertyZone = "CENTROIDNR";	
-        int zoneID = 0;
+
         while( iteratorZone.hasNext()) {
         	Vertex v = new Vertex();
         	Feature feature = iteratorZone.next();
@@ -359,33 +376,60 @@ public class ImportModelShapeWizard implements ActionListener {
         		v = new Vertex(coords[i]);
          	Property property = feature.getProperty(propertyZone);
         	String nodeNr = property.getValue().toString();
-        	zoneID = Integer.parseInt(property.getValue().toString());
+        	//zoneID = Integer.parseInt(property.getValue().toString());
         	importedModel.network.addMicroZone(nodeNr, null, zoneID, v.getX(), v.getY(), v.getZ());
         	zoneID++;
         }
-        
-		// Reading Nodes
+	}
+	
+	private static void readNodeData(Model importedModel, DataStore nodeStore, int zoneID)  {
 		DataStore dataStoreNode = nodeStore;
-        String[] typeNameNode = dataStoreNode.getTypeNames();
-        SimpleFeatureSource sourceNode = dataStoreNode.getFeatureSource(typeNameNode[0]);
-        SimpleFeatureCollection featuresNode = sourceNode.getFeatures();
-        //FeatureCollectionTableModel model = new FeatureCollectionTableModel(featuresNode);
-        FeatureIterator<?> iteratorNode = featuresNode.features();	
-        String propertyNode = "NODENR";	
-        int nodeID = zoneID + 1;
-        while( iteratorNode.hasNext()) {
-        	Vertex v = new Vertex();
-        	Feature feature = iteratorNode.next();
-        	Geometry test = (Geometry) feature.getDefaultGeometryProperty().getValue();
-        	Coordinate[] coords = test.getCoordinates();
-        	for (int i = 0; i < coords.length; i++)
-        		v = new Vertex(coords[i]);
-        	Property property = feature.getProperty(propertyNode);
-        	String nodeNr = property.getValue().toString();
-        	nodeID = Integer.parseInt(property.getValue().toString());
-        	importedModel.network.addNode(nodeNr, nodeID, v.getX(), v.getY(), v.getZ());
-        	nodeID++;
-        }
+	    String[] typeNameNode = null;
+		try {
+			typeNameNode = dataStoreNode.getTypeNames();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    SimpleFeatureSource sourceNode = null;
+		try {
+			sourceNode = dataStoreNode.getFeatureSource(typeNameNode[0]);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    SimpleFeatureCollection featuresNode = null;
+		try {
+			featuresNode = sourceNode.getFeatures();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    //FeatureCollectionTableModel model = new FeatureCollectionTableModel(featuresNode);
+	    FeatureIterator<?> iteratorNode = featuresNode.features();	
+	    String propertyNode = "NODENR";	
+	    int nodeID = zoneID + 1;
+	    while( iteratorNode.hasNext()) {
+	    	Vertex v = new Vertex();
+	    	Feature feature = iteratorNode.next();
+	    	Geometry test = (Geometry) feature.getDefaultGeometryProperty().getValue();
+	    	Coordinate[] coords = test.getCoordinates();
+	    	for (int i = 0; i < coords.length; i++)
+	    		v = new Vertex(coords[i]);
+	    	Property property = feature.getProperty(propertyNode);
+	    	String nodeNr = property.getValue().toString();
+	    	nodeID = Integer.parseInt(property.getValue().toString());
+	    	importedModel.network.addNode(nodeNr, nodeID, v.getX(), v.getY(), v.getZ());
+	    	nodeID++;
+	    }
+	}	
+	
+	private Model getOmnitransFeatures( DataStore linkStore, DataStore nodeStore, DataStore zoneStore, TableImport tableField, TableImport tableDirection) throws IOException {        
+		int zoneID = 0;
+		readZoneData(importedModel, zoneStore, zoneID);
+		readNodeData(importedModel, nodeStore, zoneID);
+		// Reading Nodes
+
 		
         //Reading Links
 		DataStore dataStoreLink = linkStore;
@@ -482,7 +526,7 @@ public class ImportModelShapeWizard implements ActionListener {
         	boolean voedingsLinkBA = false;
     		int node;
         	node = Integer.parseInt(property.getValue().toString());
-        	if (node<20) {
+        	if (node < 20) {
         		voedingsLinkAB = true;
         		voedingsLinkBA = true;
         	}
@@ -774,25 +818,25 @@ public class ImportModelShapeWizard implements ActionListener {
 					outLinkNumber = new int[] {outLink};
 					break;
 				case 's': // Main (straight on) lane 
-					if (right == true)
+					if (right)
 						outLink = 1;
 					else
 						outLink = 0;
 					outLinkNumber = new int[] {outLink};
 					break;
 				case 'l': // Left turn only 
-					if (right == true && straight == true)
+					if (right && straight)
 						outLink = 2;
-					else if (right == true)
+					else if (right)
 						outLink = 1;
-					else if (straight == true)
+					else if (straight)
 						outLink = 1;
 					else
 						outLink = 0;
 					outLinkNumber = new int[] {outLink};
 					break;
 				case 'q': // Left turn and straight on 
-					if (right == true)
+					if (right)
 						outLink = 1;
 					else
 						outLink = 0;
@@ -813,7 +857,7 @@ public class ImportModelShapeWizard implements ActionListener {
 					break;
 				case 'b': // Bus lane (straight on) 
 					outLink = 0;
-					if (right == true)
+					if (right)
 						outLink = 1;
 					outLinkNumber = new int[] {outLink};
 					break;
