@@ -212,7 +212,7 @@
       <Z>NaN</Z>
       <trafficLightController>
         <ID>TLC_6633</ID>
-        <ControlURL>fixed:90|TL6633_05,0,25,28|TL6633_08,30,55,58|TL6633_11,60,85,88</ControlURL>
+        <ControlURL>fixed:90|TL6633_08,0,25,28|TL6633_05,30,55,58|TL6633_11,60,85,88</ControlURL>
         <Light>TL6633_05</Light>
         <Light>TL6633_08</Light>
         <Light>TL6633_11</Light>
@@ -529,7 +529,7 @@
       <Z>NaN</Z>
       <trafficLightController>
         <ID>TLC_6621</ID>
-        <ControlURL>fixed:90|TL6621_05,0,25,28|TL6621_08,30,55,58|TL6621_11,60,85,88</ControlURL>
+        <ControlURL>fixed:90|TL6621_08,0,25,28|TL6621_11,30,55,58|TL6621_05,60,85,88</ControlURL>
         <Detector>VD_6621051</Detector>
         <Detector>VD_6621052</Detector>
         <Detector>VD_6621081</Detector>
@@ -693,8 +693,8 @@
       <Z>NaN</Z>
     </node>
     <node>
-      <name>9999</name>
-      <ID>9999</ID>
+      <name>999999999</name>
+      <ID>999999999</ID>
       <X>87200.00</X>
       <Y>447000.00</Y>
       <Z>NaN</Z>
@@ -849,7 +849,7 @@
       <X>87300.00</X>
       <Y>447000.00</Y>
       <Z>NaN</Z>
-      <nodes>9999</nodes>
+      <nodes>999999999</nodes>
     </microZone>
     <microZone>
       <name>SuperZone2</name>
@@ -6030,19 +6030,15 @@
         <elementOffsetLateral>0.0</elementOffsetLateral>
         <element>
           <name>road</name>
-          <width>7.0</width>
+          <width>3.5</width>
           <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
           </roadMarkerAlong>
           <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>3.5</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
             <type>|</type>
-            <lateralPosition>7.0</lateralPosition>
+            <lateralPosition>3.5</lateralPosition>
           </roadMarkerAlong>
         </element>
       </crossSection>
@@ -6058,19 +6054,15 @@
         <elementOffsetLateral>0.0</elementOffsetLateral>
         <element>
           <name>road</name>
-          <width>7.0</width>
+          <width>3.5</width>
           <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
           </roadMarkerAlong>
           <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>3.5</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
             <type>|</type>
-            <lateralPosition>7.0</lateralPosition>
+            <lateralPosition>3.5</lateralPosition>
           </roadMarkerAlong>
         </element>
       </crossSection>
@@ -7248,42 +7240,16 @@
       <trips>1000.000000</trips>
     </tripPattern>
     <tripPattern>
-      <location>z10 z21</location>
-      <trips>734.000000</trips>
-    </tripPattern>
-    <tripPattern>
       <location>z11 z21</location>
       <trips>1000.000000</trips>
     </tripPattern>
     <tripPattern>
       <location>z13 z21</location>
-      <trips>408.000000</trips>
+      <trips>908.000000</trips>
     </tripPattern>
     <tripPattern>
       <location>z16 z21</location>
-      <trips>372.000000</trips>
-    </tripPattern>
-    <tripPattern>
-      <location>z18 z21</location>
-      <trips>254.000000</trips>
-    </tripPattern>
-    <TimeScaleFunction>
-      <Pair>
-        <Time>0.000</Time>
-        <Factor>0.100000</Factor>
-      </Pair>
-      <Pair>
-        <Time>600.000</Time>
-        <Factor>0.100000</Factor>
-      </Pair>
-      <Pair>
-        <Time>600.100</Time>
-        <Factor>1.000000</Factor>
-      </Pair>
-    </TimeScaleFunction>
-    <tripPattern>
-      <location>z1 z2</location>
-      <trips>1000.000000</trips>
+      <trips>872.000000</trips>
     </tripPattern>
   </Demand>
 </model>

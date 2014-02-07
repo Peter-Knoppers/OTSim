@@ -73,6 +73,7 @@ public class TrafficClass implements XML_IO {
      * @param activationLevel Double; activationLevel of the objects in the new TrafficClass
      */
     public TrafficClass(String name, double fraction, double length, double maxSpeed, double activationLevel, double transitionTime) {
+    	this.name = name;
     	this.defaultFraction = fraction;
     	this.length = length;
     	this.maxSpeed = maxSpeed;

@@ -70,8 +70,6 @@ public class GraphicsPanel extends JPanel implements MouseListener, MouseMotionL
 		if (null == p) {
 			System.err.println("null pointer in translate");
 		}
-		if (p.distance(new Point2D.Double(85775.7, 445476.2)) < 0.25)
-			System.out.println("komt ie");
 		double x = p.x * zoom + panX;
 		double y = height - (p.y * zoom - panY);
 		Point2D.Double result = new Point2D.Double(x, y);
@@ -233,20 +231,19 @@ public class GraphicsPanel extends JPanel implements MouseListener, MouseMotionL
      * along. These coordinates must be specified in 
      * {@link nl.tudelft.otsim.GeoObjects.Network Network}, or
      * {@link nl.tudelft.otsim.Simulators.Simulator Simulator} coordinates.
+     * @param closeIt Boolean; connect the end point to the start point
      */
-    public void drawPolyLine(Point2D.Double[] points) {
+    public void drawPolyLine(Point2D.Double[] points, boolean closeIt) {
     	if (null == g2)
     		throw new Error("not painting");
-    	if (0 == points.length)
-    		return;
     	Point2D.Double from = null;
     	for (Point2D.Double p : points) {
-    		if (p.y < -7000)
-    			System.out.println("huh");
     		if (null != from)
     			drawLine(from, p);
      		from = p;
     	}
+    	if (closeIt && (null != from))
+    		drawLine(from, points[0]);
     }
     
     /**

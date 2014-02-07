@@ -54,7 +54,7 @@ public class TrafficLight extends RSU implements SimulatedTrafficLight {
      * @return Whether the traffic light is green.
      */
     public boolean isGreen() {
-        return color==lightColor.GREEN;
+        return color == lightColor.GREEN;
     }
     
     /** 
@@ -62,7 +62,7 @@ public class TrafficLight extends RSU implements SimulatedTrafficLight {
      * @return Whether the traffic light is yellow.
      */
     public boolean isYellow() {
-        return color==lightColor.YELLOW;
+        return color == lightColor.YELLOW;
     }
     
     /** 
@@ -70,7 +70,7 @@ public class TrafficLight extends RSU implements SimulatedTrafficLight {
      * @return Whether the traffic light is red.
      */
     public boolean isRed() {
-        return color==lightColor.RED;
+        return color == lightColor.RED;
     }
     
     /** Sets the traffic light to green. */

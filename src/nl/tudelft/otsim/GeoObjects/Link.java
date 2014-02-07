@@ -95,6 +95,8 @@ public class Link implements XML_IO {
         this.crossSections = crossSections;
         this.maxSpeed = 70;
         this.intermediateVertices = intermediateVertices;
+        for (CrossSection cs : crossSections)
+        	cs.setLink(this);
     }
 
 	/**

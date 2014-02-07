@@ -3,7 +3,6 @@ package nl.tudelft.otsim.TrafficDemand;
 import java.util.ArrayList;
 
 import nl.tudelft.otsim.GeoObjects.Node;
-import nl.tudelft.otsim.GUI.Storable;
 import nl.tudelft.otsim.Utilities.TimeScaleFunction;
 
 /**
@@ -36,7 +35,7 @@ public class TripPatternPath {
 	}
 	public TripPatternPath(TripPattern tripPattern, double numberOfTrips, Node fromNode, Node toNode) {
 		this.tripPattern = tripPattern;
-		flowPattern = new TimeScaleFunction((Storable) null);
+		flowPattern = new TimeScaleFunction();
 		flowPattern.insertPair(0, numberOfTrips);
 		//this.numberOfTrips = numberOfTrips;
 		this.fromNode = fromNode;
@@ -53,7 +52,7 @@ public class TripPatternPath {
 
 	public TripPatternPath(TripPattern tripPattern, double numberOfTrips, ArrayList<Node> nodeList) {
 		this.tripPattern = tripPattern;
-		flowPattern = new TimeScaleFunction((Storable) null);
+		flowPattern = new TimeScaleFunction();
 		flowPattern.insertPair(0, numberOfTrips);
 		//this.numberOfTrips = numberOfTrips;
 		this.setNodeList(nodeList);

@@ -57,6 +57,7 @@ import nl.tudelft.otsim.ModelIO.LoadModel;
 import nl.tudelft.otsim.ModelIO.SaveModel;
 import nl.tudelft.otsim.Simulators.Simulator;
 import nl.tudelft.otsim.Simulators.LaneSimulator.LaneSimulator;
+import nl.tudelft.otsim.Simulators.LaneSimulator.Movable;
 import nl.tudelft.otsim.Simulators.RoadwaySimulator.RoadwaySimulator;
 import nl.tudelft.otsim.SpatialTools.Planar;
 import nl.tudelft.otsim.TrafficDemand.TrafficDemand;
@@ -102,8 +103,16 @@ public class Main extends JPanel implements ActionListener {
 					} catch (Exception e) {
 						WED.showProblem(WED.ENVIRONMENTERROR, "Could not import file \"%s\"\n%s", right, WED.exeptionStackTraceToString(e));
 					}
+        		else if (left.equalsIgnoreCase("Seed"))
+        			Main.seed = Integer.parseInt(right);
+        		else if (left.equalsIgnoreCase("EndTime"))
+        			Main.endTime = Double.parseDouble(right);
+        		else if (left.equalsIgnoreCase("vehicleLifeLog"))
+        			Main.mainFrame.vehicleLifeLogFileName = right;
         		else if (left.equalsIgnoreCase("GenerateEvent"))
     				Main.mainFrame.actionPerformed(new ActionEvent(Main.mainFrame, 0, right));
+        		else if (left.equalsIgnoreCase("RunSimulation"))
+        			Main.mainFrame.runSimulation();
         		else if (left.equalsIgnoreCase("SetStatus"))
         			Main.mainFrame.setStatus(-1, "%s", right);
         		else
@@ -115,6 +124,27 @@ public class Main extends JPanel implements ActionListener {
         Log.logMessage(null, false, "Ready");	// test that LogMessage can log to the Event log
     }
 
+	private void runSimulation() {
+		int index = tabbedPaneProperties.getSelectedIndex();
+		System.out.println("runSimulation: index is " + index);
+		if (index < 0)
+			return;
+    	if (roadWaySimulatorIndex == index) {
+    		if (0 == roadwaySimulatorControlPanel.getComponentCount()) {
+    			WED.showProblem(WED.INFORMATION, "Could not load roadway simulator");
+    			return;
+    		}
+    		((Scheduler) roadwaySimulatorControlPanel.getComponent(0)).runSimulation();
+    	} else if (laneSimulatorIndex == index) {
+    		if (0 == laneSimulatorControlPanel.getComponentCount()) {
+    			WED.showProblem(WED.INFORMATION, "Could not load lane simulator");
+    			return;
+    		}
+    		((Scheduler) laneSimulatorControlPanel.getComponent(0)).runSimulation();
+    	} else 
+    		throw new Error("no Simulator selected");
+	}
+
 	/** GraphicsPanel used in the main window */
 	public GraphicsPanel graphicsPanel;
 	private String workingDir;
@@ -124,6 +154,8 @@ public class Main extends JPanel implements ActionListener {
     private String fileSelectedNetwork;
     /** Currently loaded traffic model */
     public Model model;
+    private static int seed = 1;	// seed for the random generator of the Simulator
+    private static double endTime = 3600d;	// end time of the Simulator
     /** JMenuItem of the Export Model ... menu */
     private JPopupMenu measurementPlanPopup;
     
@@ -229,6 +261,7 @@ public class Main extends JPanel implements ActionListener {
         menuView.add(makeMenuItem("Zoom to link ...", "zoomToLink", null, true));
         menuView.add(makeMenuItem("Zoom to node ...", "zoomToNode", null, true));
         menuView.add(makeMenuItem("Zoom to lane ...", "zoomToLane", null, true));
+        menuView.add(makeMenuItem("Zoom to vehicle ...", "zoomToVehicle", null, true));
 
         // Show the menu
         if (null != parent) {
@@ -684,10 +717,11 @@ public class Main extends JPanel implements ActionListener {
 	 */
 	public static String configuration(String type) {
 		Model model = mainFrame.model;
+		String config = String.format("EndTime:\t%.2f\nSeed:\t%d\n", endTime, seed);
 		if (type.equals(LaneSimulator.simulatorType))
-			return model.exportToMicroSimulation();
+			return config + model.exportToMicroSimulation();
 		if (type.equals(RoadwaySimulator.simulatorType))
-			return model.exportToSubMicroSimulation();
+			return config + model.exportToSubMicroSimulation();
 		throw new Error("Do not know how to create configuration of type " + type);
 	}
 	
@@ -984,10 +1018,11 @@ public class Main extends JPanel implements ActionListener {
 		graphicsPanel.setZoom(1, new Point2D.Double(0, 0));
 		if ((null == model) || (null == model.network))
 			return;
-		Line2D.Double bbox = new Line2D.Double(Double.MAX_VALUE, Double.MAX_VALUE, - Double.MAX_VALUE, - Double.MAX_VALUE);
+		Line2D.Double bbox = null;
 		for (Node node : model.network.getAllNodeList(true))
 			bbox = Planar.expandBoundingBox(bbox, node.getX(), node.getY());
-		setZoomRect(bbox, margin);
+		if (null != bbox)
+			setZoomRect(bbox, margin);
 	}
 	
 	private void setZoomRect(Line2D.Double bbox, int margin) {
@@ -1034,11 +1069,20 @@ public class Main extends JPanel implements ActionListener {
 		else if ("lane".equals(what))
 			for (Lane lane : model.network.getLanes())
 				mapping.put ("lane_" + lane.getID(), lane);
+		else if ("vehicle".equals(what)) {
+			GraphicsPanelClient gpc = graphicsPanel.getClient();
+			if (gpc instanceof LaneSimulator) {
+				for (Movable m : ((LaneSimulator) gpc).getModel().getVehicles())
+					mapping.put("vehicle_" + m.id, m);
+			} else
+				throw new Error("Collecting vehicle list not supported in simulator " + gpc.toString());
+		} else
+			throw new Error("Don't know how to build a list of " + what);
 		String selected = (String) JOptionPane.showInputDialog(new JFrame(), "", "Please select", JOptionPane.PLAIN_MESSAGE, null, mapping.keySet().toArray(), "");
 		if (null == selected)
 			return;
 		int margin = 20;
-		Line2D.Double bbox = new Line2D.Double(Double.MAX_VALUE, Double.MAX_VALUE, - Double.MAX_VALUE, - Double.MAX_VALUE);
+		Line2D.Double bbox = null;
 		if ("link".equals(what)) {
 			Link link = (Link) mapping.get(selected);
 			if (null == link)
@@ -1056,8 +1100,12 @@ public class Main extends JPanel implements ActionListener {
 				bbox = Planar.expandBoundingBox(bbox, v.getX(), v.getY());
 			for (Vertex v : lane.getLaneVerticesOuter())
 				bbox = Planar.expandBoundingBox(bbox, v.getX(), v.getY());
+		} else if ("vehicle".equals(what)) {
+			Movable m = (Movable) mapping.get(selected);
+			bbox = Planar.expandBoundingBox(bbox, m.global.x, m.global.y);
 		}
-		setZoomRect(bbox, margin);			
+		if (null != bbox)
+			setZoomRect(bbox, margin);			
 	}
 	
 	@Override
@@ -1118,6 +1166,8 @@ public class Main extends JPanel implements ActionListener {
 			showZoomDialog("link");
 		else if ("zoomToNode".equals(command))
 			showZoomDialog("node");
+		else if ("zoomToVehicle".equals(command))
+			showZoomDialog("vehicle");
 		else if ("MeasurementPlanChanged".equals(command))
 			switchMeasurementPlan();
 		else if ("EditMeasurementPlanName".equals(command))
@@ -1150,6 +1200,7 @@ public class Main extends JPanel implements ActionListener {
 	public String getVehicleLifeLogFileName () {
 		return vehicleLifeLogFileName;
 	}
+	
 	private void setVehicleLifeLog() {
 		final String defaultExt = "txt";
 		String defaultName = initialDirectory;

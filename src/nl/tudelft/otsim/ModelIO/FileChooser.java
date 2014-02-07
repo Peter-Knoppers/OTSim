@@ -42,6 +42,7 @@ public class FileChooser extends JPanel implements ActionListener {
         layout.setAutoCreateGaps(true);
         layout.setAutoCreateContainerGaps(true);
 
+        // FIXME: This is the most ridiculous violation of the Don't Repeat Yourself (DRY) principle that I've EVER seen (PK)
         layout.setHorizontalGroup(layout.createSequentialGroup()
             .addGroup( layout.createParallelGroup(LEADING)
                 	.addComponent(label[0], GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,  GroupLayout.PREFERRED_SIZE)
@@ -216,11 +217,11 @@ public class FileChooser extends JPanel implements ActionListener {
         );
     }
 	
-	public JButton[] getFileButton() {
+	JButton[] getFileButton() {
 		return fileButton;
 	}
 	
-	public JTextField[] getTextField() {
+	JTextField[] getTextField() {
 		return textField;
 	}
 	
@@ -271,11 +272,11 @@ public class FileChooser extends JPanel implements ActionListener {
 		}
 	}
 
-    public String getCommand() {
+    String getCommand() {
 		return command;
 	}
 
-	public void setModuleName(String moduleName) {
+	void setModuleName(String moduleName) {
 		this.moduleName = moduleName;
 	}
 	

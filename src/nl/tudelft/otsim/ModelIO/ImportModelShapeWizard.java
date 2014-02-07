@@ -58,7 +58,7 @@ import com.vividsolutions.jts.geom.Geometry;
 
 public class ImportModelShapeWizard implements ActionListener {
     private static JPanel cards = new JPanel(new CardLayout());
-	private int cardCounter ;
+	private int cardIndex ;
 	private JButton cancelButton;
 	private JButton finishButton;
     private JButton nextButton;
@@ -67,7 +67,7 @@ public class ImportModelShapeWizard implements ActionListener {
 	private JCheckBox optionNetwork;
 	private JCheckBox optionTripPattern;
 
-	JFrame frame;
+	private JFrame frame;
     private static FileChooser fChooser;
     private Model importedModel = new Model();
     private static String fileImportedMatrix;
@@ -76,15 +76,15 @@ public class ImportModelShapeWizard implements ActionListener {
 	private static int fileCount;
 
 	public ImportModelShapeWizard() {
-		Class<?> klass;
-		klass = Coordinate.class;
-		URL location = klass.getResource('/' + klass.getName().replace(".", "/") + ".class");
-		System.out.print(location);
-        frame = new JFrame() ;
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//Class<?> klass;
+		//klass = Coordinate.class;
+		//URL location = klass.getResource('/' + klass.getName().replace(".", "/") + ".class");
+		//System.out.print(location);
+        frame = new JFrame();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	// Why? It does not actually work because it is overridden later!
         frame.setPreferredSize(new Dimension(700, 400));
         cards.setBorder(BorderFactory.createLineBorder(Color.black));
-        cardCounter = 0;  // start at the initial/first card
+        cardIndex = 0;  // start at the initial/first card
        
     	JPanel choices = new JPanel() ;
         choices.setLayout(new GridBagLayout());	        
@@ -164,12 +164,12 @@ public class ImportModelShapeWizard implements ActionListener {
 		if (command.startsWith("Network Import") )   {
 			//this.getNextButton().setEnabled(true);
 	        Main.mainFrame.getImportModelShapeWizard().getNextButton().setEnabled(true);
+	        // FIXME: use a for loop!
 	        if (optionNetwork.isSelected())  {
 	        	fChooser.getFileButton()[0].setEnabled(true);
 	        	fChooser.getFileButton()[1].setEnabled(true);
 	        	fChooser.getFileButton()[2].setEnabled(true);
-	        }
-        	else  {
+	        } else {
 	        	fChooser.getFileButton()[0].setEnabled(false);
 	        	fChooser.getFileButton()[1].setEnabled(false);
 	        	fChooser.getFileButton()[2].setEnabled(false);	        		
@@ -215,55 +215,53 @@ public class ImportModelShapeWizard implements ActionListener {
 		}
 		if (command.startsWith("\u22b2Prev")) {
             CardLayout cl = (CardLayout) cards.getLayout();
-            if (cardCounter == cards.getComponentCount()-1)  {
+            if (cardIndex == cards.getComponentCount() - 1)
             	this.finishButton.setEnabled(false);
-            }
-            if (cardCounter > 0)  {
+            if (cardIndex > 0) {
             	cl.previous(cards);
             	this.nextButton.setEnabled(true);
-            	cardCounter--;
-            	System.out.print( "cardnumber" + cardCounter +"prev" );
+            	cardIndex--;
+            	System.out.print( "cardnumber" + cardIndex + "prev" );
             }
-            if (cardCounter == 0)
+            if (cardIndex == 0)
             	this.prevButton.setEnabled(false);
 		}
 		if (command.startsWith("Next\u22b3")) {
             CardLayout cl = (CardLayout) cards.getLayout();
-            if (cardCounter != cards.getComponentCount()-1)  {
+            if (cardIndex != cards.getComponentCount() - 1) {
             	cl.next(cards);
             	this.prevButton.setEnabled(true);
-            	cardCounter++;
-            	System.out.print( "cardnumber" + cardCounter +"next" );
+            	cardIndex++;
+            	System.out.print( "cardnumber" + cardIndex + "next" );
             }
-            if (cardCounter == cards.getComponentCount()-1)  { 
+            if (cardIndex == cards.getComponentCount() - 1) { 
             	this.finishButton.setEnabled(true);
             	this.nextButton.setEnabled(false);
             }
         }
 	}
 	
-	public static void importModel() throws Exception   {
+	static void importModel() throws Exception   {
 		if (fChooser.getCommand().startsWith("Shape")) {
 			File file = new File(Main.mainFrame.initialDirectory);
 	        file = JFileDataStoreChooser.showOpenFile("shp", null);
-	        if (file == null) {
+	        if (file == null)
 	            return;
-	        }
 	        
 	        String name = fChooser.getCommand();
-        	if (name == "ShapeLinks" )   {
+	        // FIXME: Peter K thinks this is dangerous and might not work as intended.
+	        // see https://stackoverflow.com/questions/767372/java-string-equals-versus
+        	if (name == "ShapeLinks") {
         		index = 0;
 		        dataStoreLinks = FileDataStoreFinder.getDataStore(file);
 		        dataStoreLinks.getFeatureSource();        		
             	linkAttributeNames = getAttributeNames(dataStoreLinks);
-        	}
-        	else if (name == "ShapeNodes" )   {
+        	} else if (name == "ShapeNodes") {
         		index = 1;
 		        dataStoreNodes = FileDataStoreFinder.getDataStore(file);
 		        dataStoreLinks.getFeatureSource();        		
             	getAttributeNames(dataStoreLinks);
-        	}
-        	else if (name == "ShapeZones" )   {
+        	} else if (name == "ShapeZones") {
         		index = 2;
 		        dataStoreZones = FileDataStoreFinder.getDataStore(file);
 		        dataStoreLinks.getFeatureSource();        		
@@ -282,13 +280,13 @@ public class ImportModelShapeWizard implements ActionListener {
         		Main.mainFrame.getImportModelShapeWizard().getNextButton().setEnabled(false);
 
         // TODO explain what this does
-        if (Main.mainFrame.getImportModelShapeWizard().getNextButton().isEnabled())   {	
+        if (Main.mainFrame.getImportModelShapeWizard().getNextButton().isEnabled()) {	
         	Object[] types = {"Jane", "Kathy", Boolean.TRUE};
         	Object[][] dataDir = {
-			{"Direction indicator", "DIRECTION"},
-			{"AB", "1"},
-			{"BA", "2"},
-			{"AB and BA", "3"},
+				{"Direction indicator", "DIRECTION"},
+				{"AB", "1"},
+				{"BA", "2"},
+				{"AB and BA", "3"},
 			};
     		shapeImport = new TableModelImport(linkAttributeNames, types, dataDir);
     		shapeImport.setOpaque(true); //content panes must be opaque
@@ -568,14 +566,13 @@ public class ImportModelShapeWizard implements ActionListener {
         	if (lanes == 0)
         		System.out.print("geen lanes??????");
         	
-        	double defaultLaneWidth = 3.5;
+        	final double defaultLaneWidth = 3.5;
         	if (voedingsLinkAB == false) {
 	        	if (direction == valueDirectionAB  || direction == valueDirectionABBA) {
 	        		addImportedLink(linkID, typologyName, fromNodeID, toNodeID, defaultLaneWidth, lanes, exitLanes, pointList, turnLanes, length);
 		        	linkID++;
 	        	}
-        	}
-        	else {
+        	} else {
     			List<Integer> nodeList = new ArrayList<Integer>();
         		if (fromNodeID < 20) {
         			nodeList.add(toNodeID);
@@ -619,8 +616,8 @@ public class ImportModelShapeWizard implements ActionListener {
     	fileImportedMatrix = new File(fileName).getPath();
 		fChooser.getTextField()[index].setText(fileImportedMatrix);
         System.out.printf("User selected network file \"%s\"", fileImportedMatrix);
-
     }
+    
 	private void addImportedLink(int linkID, String typologyName, int fromNodeID, int toNodeID,  double laneWidth, int lanes, 
 			int exitLanes, ArrayList<Vertex> pointList, String turnLanes, double length)   {
 		if (null == typologyName)
@@ -636,24 +633,25 @@ public class ImportModelShapeWizard implements ActionListener {
     	cs.setCrossSectionElementList_w(cseList);
 		ArrayList<Vertex> pointListAll = new ArrayList<Vertex>();
 		pointListAll.addAll(pointList);
+		// FIXME: rewrite using Network.lookupNode
 		for (Node node : importedModel.network.getNodeList(false)) {
 			if (node.getNodeID() == fromNodeID)
-				pointListAll.add(0, node);
+				pointListAll.add(0, node);	// insert from-node at start
 			if (node.getNodeID() == toNodeID)
-				pointListAll.add(node);
+				pointListAll.add(node);		// append to-node at end
 		}
     	double calculatedLength = calculateLength(pointListAll);
     	// if turnlanes are defined, we create an intermediate crossSection at a certain pre-defined distance from the junction (toNode)
     	if (turnLanes != null  && ! turnLanes.isEmpty())  {
     		ArrayList<TurnArrow> turnArrowList = analyseTurns(turnLanes, laneWidth);
-    		if (!(lanes == turnArrowList.size()) ) {
+    		if (lanes != turnArrowList.size()) {
     			double longPosition1 = 0;
     			double longPosition2 = 0;
+    			// TODO explain all these constants: 70, 50, 35, 3.0/5, 3.1/5
     			if (calculatedLength > 70)   {
     				longPosition1 = calculatedLength - 50;
     				longPosition2 = calculatedLength - 35;
-    			}
-    			else  {
+    			} else  {
     				longPosition1 = 3.0/5 * calculatedLength;
     				longPosition2 = 3.1/5 * calculatedLength;				
     			}
@@ -681,16 +679,17 @@ public class ImportModelShapeWizard implements ActionListener {
     			//GT volgende uitcommentarieren
   //  			cse = new CrossSectionElement(cs, typologyName, laneWidth * lanes, rmaList, turnArrowList);
     	}
-    	if (exitLanes > 0)  {
-    		if (!(lanes == exitLanes) ) {
+    	if (exitLanes > 0) {
+        	// FIXME: looks too much like the if (lanes !- turnArrorList.size()) code above
+    		if (lanes != exitLanes) {
     			double longPosition1 = 0;
     			double longPosition2 = 0;
+    			// TODO explain all these constants: 70, 50, 65, 2.0/5, 2.1/5
     			if (calculatedLength > 70)   {
     				longPosition1 = 0;
     				longPosition2 = 50;
     				cs.setLongitudalPosition_w(65);
-    			}
-    			else  {
+    			} else {
     				longPosition1 = 0;
     				longPosition2 = (2.0/5) * calculatedLength;
     				cs.setLongitudalPosition_w( 2.1/5 * calculatedLength);
@@ -789,42 +788,42 @@ public class ImportModelShapeWizard implements ActionListener {
 		return turnArrowList;
 	}
 
-	private static int deriveLanes(double capacity, double maxSpeed)   {
+	private static int deriveLanes(double capacity, double maxSpeed) {
 		int lanes = 0;
     	int periodHours = 1;
-		if (maxSpeed < 95)   {
-			if ( (capacity / periodHours < 2200))
+    	// TODO: put those magic constants in final integers (or doubles) with descriptive names
+		if (maxSpeed < 95) {
+			if (capacity / periodHours < 2200)
 				lanes = 1;
-			else if ( (capacity / periodHours >= 2200) && (capacity / periodHours < 4400) )
+			else if ((capacity / periodHours >= 2200) && (capacity / periodHours < 4400))
 				lanes = 2;
 			else
 				lanes = 3;
 		}
 		
-		if (maxSpeed >= 95  && maxSpeed < 140)   {
-			if ( (capacity / periodHours < 2600))
+		if (maxSpeed >= 95  && maxSpeed < 140) {
+			if (capacity / periodHours < 2600)
 				lanes = 1;
-			else if ( (capacity / periodHours >= 2600) && (capacity / periodHours < 5200) )
+			else if ((capacity / periodHours >= 2600) && (capacity / periodHours < 5200))
 				lanes = 2;
-			else if ( (capacity / periodHours >= 5200) && (capacity / periodHours < 7200) )
+			else if ((capacity / periodHours >= 5200) && (capacity / periodHours < 7200))
 				lanes = 3;
-			else if ( (capacity / periodHours >= 7200) && (capacity / periodHours < 9000) )
+			else if ((capacity / periodHours >= 7200) && (capacity / periodHours < 9000))
 				lanes = 4;
-			else if ( (capacity / periodHours >= 9000) && (capacity / periodHours < 10800) )
+			else if ((capacity / periodHours >= 9000) && (capacity / periodHours < 10800))
 				lanes = 5;
-			else if ( (capacity / periodHours >= 10800) )
+			else if (capacity / periodHours >= 10800)
 				lanes = 6;
 		}
 		return lanes;
 	}
 	
-    private static double calculateLength(List<Vertex> vertices) {
-        // compute and set length
+    private static double calculateLength(List<Vertex> vertices) {	// compute length
         double cumLength = 0;
-        for (int i=1; i<=vertices.size()-1; i++) {
-            double dx = vertices.get(i).getX() - vertices.get(i-1).getX();
-            double dy = vertices.get(i).getY() - vertices.get(i-1).getY();
-            cumLength = cumLength + Math.sqrt(dx*dx + dy*dy);
+        for (int i = 1; i <= vertices.size() - 1; i++) {
+            double dx = vertices.get(i).getX() - vertices.get(i - 1).getX();
+            double dy = vertices.get(i).getY() - vertices.get(i - 1).getY();
+            cumLength = cumLength + Math.sqrt(dx * dx + dy * dy);
         }
         return cumLength;
     }
@@ -833,7 +832,7 @@ public class ImportModelShapeWizard implements ActionListener {
     	InputStream fis = null;
     	BufferedReader br = null;
     	ArrayList<TripPattern> tripPatternList = new  ArrayList<TripPattern>();
-    	try  {
+    	try {
     		fis = new FileInputStream(fullFileName);
     		  DataInputStream in = new DataInputStream(fis);
     		  br = new BufferedReader(new InputStreamReader(in));
@@ -841,9 +840,8 @@ public class ImportModelShapeWizard implements ActionListener {
     		  //Read File Line By Line
     		  while ((strLine = br.readLine()) != null)   {
     		  // Print the content on the console  
-    			  if (strLine.startsWith("*"))   {
+    			  if (strLine.startsWith("*"))
     				  continue;
-    			  }
     			  Scanner s = new Scanner(strLine);
     			  s.useDelimiter("\\s+");
     			  while (s.hasNext()) {
@@ -877,15 +875,15 @@ public class ImportModelShapeWizard implements ActionListener {
 		return importedModel;
 	}
 
-	public JButton getFinishButton() {
+	JButton getFinishButton() {
 		return finishButton;
 	}
 
-	public JButton getNextButton() {
+	JButton getNextButton() {
 		return nextButton;
 	}
 
-	public JButton getPrevButton() {
+	JButton getPrevButton() {
 		return prevButton;
 	}
 

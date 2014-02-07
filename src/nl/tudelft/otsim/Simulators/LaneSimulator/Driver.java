@@ -21,6 +21,9 @@ public class Driver {
 	/** Actual Activation level of this driver (smoothing variable: [0, 1]) */
 	public double ActLevel;
 	
+	/** ActLevel increment after a VMS. */
+	public double ActLInc = 0;
+	
 	/** Random value of ActLevel for individual vehicles */
 	public double RandomAct;
 	
@@ -244,6 +247,7 @@ public class Driver {
     public void drive() { 	
     	//a. time function @After TransitionTime(600s) + WarmingupTime(1800s) fully activated to the target level! #Ugly
     	ActLevel = TemporalAct(vehicle.model.t(), transitionTime, 30, activationLevel, 1800); 
+    	ActLevel = ActLevel + ActLInc;
     	
     	//b. Set stochastic driver parameters'
     	ActLevel = ActLevel * (1 + RandomAct);
@@ -295,15 +299,15 @@ public class Driver {
              * generators. Vehicles that are (virtually) upstream of the network
              * would influence this decision so the model is not valid here.
              */
-            if ((vehicle.x > 100) || (vehicle.lane.generator == null)) {
+            if ((vehicle.x > 100) || (vehicle.getLane().generator == null)) {
                 /* === ROUTE ===
                  * First, the lane change desire to leave a lane for the route
                  * on the left, current and right lane is determined based on
                  * remaining distance and remaining time.
                  */
                 // Get remaining distance and number of lane changes from lane
-                double xCur = vehicle.route.xLaneChanges(vehicle.lane) - vehicle.x;
-                int nCur = vehicle.route.nLaneChanges(vehicle.lane);
+                double xCur = vehicle.route.xLaneChanges(vehicle.getLane()) - vehicle.x;
+                int nCur = vehicle.route.nLaneChanges(vehicle.getLane());
                 /* Desire to leave the current lane is either based on remaining
                  * distance or time. For every lane change required, a certain
                  * distance or time is desired.
@@ -319,13 +323,13 @@ public class Driver {
                  * allows to follow the route.
                  */
                 double dLeftRoute = 0;
-                if ((vehicle.lane.left != null) && vehicle.route.canBeFollowedFrom(vehicle.lane.left)) {
+                if ((vehicle.getLane().left != null) && vehicle.route.canBeFollowedFrom(vehicle.getLane().left)) {
                     // The first steps are similar as in the current lane
-                    int nLeft = vehicle.route.nLaneChanges(vehicle.lane.left);
-                    double xLeft = vehicle.route.xLaneChanges(vehicle.lane.left)
+                    int nLeft = vehicle.route.nLaneChanges(vehicle.getLane().left);
+                    double xLeft = vehicle.route.xLaneChanges(vehicle.getLane().left)
                             - vehicle.getAdjacentX(Model.latDirection.LEFT);
                     // We can always include a taper on the left lane if it's there
-                    if (!isTaper(vehicle.lane.left))
+                    if (!isTaper(vehicle.getLane().left))
                         dLeftRoute = Math.max(Math.max(1 - (xLeft / (nLeft * x0)), 1 - ((xLeft / vehicle.v) / (nLeft * t0))), 0);
                     
                     /* We now have the desire to leave the current, and to leave
@@ -348,9 +352,9 @@ public class Driver {
                     dLeftRoute = Double.NEGATIVE_INFINITY;	// Destination becomes unreachable after lane change
                 // Idem. for right lane
                 double dRightRoute = 0;
-                if ((vehicle.lane.right != null) && vehicle.route.canBeFollowedFrom(vehicle.lane.right)) {
-                    int nRight = vehicle.route.nLaneChanges(vehicle.lane.right);
-                    double xRight = vehicle.route.xLaneChanges(vehicle.lane.right)
+                if ((vehicle.getLane().right != null) && vehicle.route.canBeFollowedFrom(vehicle.getLane().right)) {
+                    int nRight = vehicle.route.nLaneChanges(vehicle.getLane().right);
+                    double xRight = vehicle.route.xLaneChanges(vehicle.getLane().right)
                             - vehicle.getAdjacentX(Model.latDirection.RIGHT);
                     // A taper on the right lane is never applicable
                     dRightRoute = Math.max(Math.max(1 - (xRight / (nRight * x0)),
@@ -370,9 +374,9 @@ public class Driver {
                  * anticipated speed.
                  */
                 // Get anticipated speeds in current and adjacent lanes
-                double vAntLeft = anticipatedSpeed(vehicle.lane.left);
-                double vAntCur = anticipatedSpeed(vehicle.lane);
-                double vAntRight = anticipatedSpeed(vehicle.lane.right);
+                double vAntLeft = anticipatedSpeed(vehicle.getLane().left);
+                double vAntCur = anticipatedSpeed(vehicle.getLane());
+                double vAntRight = anticipatedSpeed(vehicle.getLane().right);
                 /* An acceleration factor is determined. As drivers accelerate
                  * more, their lane change desire for speed reduces. This
                  * prevents slow accelerating vehicles from changing lane when
@@ -386,7 +390,7 @@ public class Driver {
                  * it is prohibited or impossible to go there.
                  */
                 double dLeftSpeed = 0;
-                if (vehicle.lane.goLeft)
+                if (vehicle.getLane().goLeft)
                     dLeftSpeed = aGain * (vAntLeft - vAntCur) / vGain;
                 /* For the right lane, desire due to a speed gain is slightly
                  * different. As one is not allowed to overtake on the right, a
@@ -395,7 +399,7 @@ public class Driver {
                  * the right in congestion.
                  */
                 double dRightSpeed = 0;
-                if (vehicle.lane.goRight) {
+                if (vehicle.getLane().goRight) {
                     if (vAntCur >= vCong)
                         dRightSpeed = aGain * Math.min(vAntRight - vAntCur, 0) / vGain;
                     else
@@ -461,6 +465,34 @@ public class Driver {
                     	resetT();
                     } else if (null != leader)
                     	aSelf = Double.NEGATIVE_INFINITY;	// Negative headway; reject gap
+                    else {
+                    	Lane otherLane = Movable.LEFT_DOWN == direction ? vehicle.getLane().left : vehicle.getLane().right;
+                    	if ((null != otherLane) && (null != otherLane.downSplit)) {
+                    		java.util.ArrayList<Movable> leaders = vehicle.findVehiclesDownstreamOfSplit(otherLane);
+                    		double ttc = Double.POSITIVE_INFINITY;
+                    		for (Movable l : leaders) {
+                    			if (vehicle == l)
+                    				continue;
+                    			double headway = vehicle.getHeadway(l);
+                    			if (headway < 0) {	// driving parallel with the tail of this leader
+                    				aSelf = Double.NEGATIVE_INFINITY;
+                    				break;
+                    			}
+                    			double thisTTC = headway / (vehicle.v - l.v);
+                    			if (vehicle.v < l.v)
+                    				thisTTC = Double.POSITIVE_INFINITY;
+                    			if (thisTTC < ttc) {
+                    				leader = l;
+                    				ttc = thisTTC;
+                    			}
+                    		}
+                    		if (null != leader) {
+                            	setT(desire);
+                            	aSelf = calculateAcceleration(vehicle, leader);
+                            	resetT();
+                            } 
+                    	}
+                    }
                     // Determine follower acceleration
                     double aFollow = 0; // assume current speed is fine
                     Movable follower = vehicle.getNeighbor(Movable.flipDirection(direction, Movable.FLIP_UD));
@@ -472,13 +504,13 @@ public class Driver {
                     	} else
                     		aFollow = Double.NEGATIVE_INFINITY;// Negative headway; reject gap
                     } else {	// Do not change lanes right after a merge because some followers may not be visible (BUG)
-                    	Lane otherLane = Movable.LEFT_DOWN == direction ? vehicle.lane.left : vehicle.lane.right;
+                    	Lane otherLane = Movable.LEFT_DOWN == direction ? vehicle.getLane().left : vehicle.getLane().right;
                     	Model.latDirection latDirection = Movable.LEFT_DOWN == direction ? Model.latDirection.LEFT : Model.latDirection.RIGHT;
                     	if ((null != otherLane) && (null != otherLane.upMerge) 
                     			&& (otherLane.upMerge.xAdj(otherLane) + vehicle.getAdjacentX(latDirection) < otherLane.getVLim() * Tmax))
                     		aFollow = Double.NEGATIVE_INFINITY;
                     }
-                    boolean laneChangePermitted = Movable.LEFT_DOWN == direction ? vehicle.lane.goLeft : vehicle.lane.goRight;
+                    boolean laneChangePermitted = Movable.LEFT_DOWN == direction ? vehicle.getLane().goLeft : vehicle.getLane().goRight;
                     /*
                      * The gap is accepted if both accelerations are larger
                      * than a desire dependent threshold (and the lane change
@@ -498,7 +530,7 @@ public class Driver {
                  */
                 if ((dLeft >= dRight) && (dLeft >= dFree) && acceptLeft) {
                     // Set dy to the left
-                    double dur = Math.min((vehicle.route.xLaneChanges(vehicle.lane) - vehicle.x) / (180 / 3.6), duration);
+                    double dur = Math.min((vehicle.route.xLaneChanges(vehicle.getLane()) - vehicle.x) / (180 / 3.6), duration);
                     vehicle.changeLeft(vehicle.model.dt / dur);
                     // Set headway
                     setT(dLeft);
@@ -508,7 +540,7 @@ public class Driver {
                     	follower.getDriver().setT(dLeft);
                 } else if ((dRight >= dLeft) && (dRight >= dFree) && acceptRight) {
                     // Set dy to the right
-                    double dur = Math.min((vehicle.route.xLaneChanges(vehicle.lane) - vehicle.x) / (180 / 3.6), duration);
+                    double dur = Math.min((vehicle.route.xLaneChanges(vehicle.getLane()) - vehicle.x) / (180 / 3.6), duration);
                     vehicle.changeRight(vehicle.model.dt / dur);
                     // Set headway
                     setT(dRight);
@@ -563,9 +595,9 @@ public class Driver {
             lowerAcceleration(calculateAcceleration(vehicle, vehicle.lcVehicle.getNeighbor(Movable.DOWN)));
         }
         // Decelerate for dead end or a required lane change
-        if (vehicle.route.nLaneChanges(vehicle.lane) > 0) {
+        if (vehicle.route.nLaneChanges(vehicle.getLane()) > 0) {
             // remaining distance towards dead-end (minus stopping distance s0)
-            double xRemain = vehicle.route.xLaneChanges(vehicle.lane) - vehicle.x - s0;
+            double xRemain = vehicle.route.xLaneChanges(vehicle.getLane()) - vehicle.x - s0;
             // minimum constant deceleration for current speed
             double bMin = .5 * vehicle.v * vehicle.v / xRemain;
             // apply IDM like approach: dv / dt = -bMin*beta where beta = bMin / bDeadend
@@ -669,8 +701,8 @@ public class Driver {
         // Be sure we exclude the vehicle itself
         double x = vehicle.x + 0.001;
         // In case of an adjacent lane, get the adjacent x
-        if (lane != vehicle.lane) {
-            if ((lane.right != null) && (lane.right == vehicle.lane))
+        if (lane != vehicle.getLane()) {
+            if ((lane.right != null) && (lane.right == vehicle.getLane()))
                 x = vehicle.getAdjacentX(Model.latDirection.LEFT); // lane = left lane of vehicle
             else
                 x = vehicle.getAdjacentX(Model.latDirection.RIGHT); // lane = right lane of vehicle
@@ -728,15 +760,17 @@ public class Driver {
         double vRight = desiredVelocity();
         // Find first leader
         Movable down = lane.findVehicle(x, Model.longDirection.DOWN);
+        //Movable firstDown = down;
         double s = 0;
         double v = 0;
         double v0 = desiredVelocity();
         // Loop leaders while within anticipation region
+        java.util.ArrayList<Movable> downs = new java.util.ArrayList<Movable>();
         while ((down != null) && (s <= x0)) {
             // interpolate from "v(s=x0) = vDes" to "v(s=0) = down.v" e.g.
             // with headway = 0 take vehicle fully into account, and with
             // headway > x0 ignore vehicle, in between interpolate linearly
-            s = down.x+lane.xAdj(down.lane) - down.l - x;
+            s = down.x+lane.xAdj(down.getLane()) - down.l - x;
             // only consider if new headway is within consideration range and
             // speed is below the desired speed, otherwise there is no influence
             if ((s <= x0) && (down.v < v0) && (down != vehicle)) {
@@ -749,13 +783,18 @@ public class Driver {
                  * a slow queue adjacent to an empty lane, where the anticipated
                  * speeds are then consequently low.
                  */
-                if (down.leftIndicator && (lane != vehicle.lane))
+                if (down.leftIndicator && (lane != vehicle.getLane()))
                     vLeft = Math.min(vLeft, v);
-                else if (down.rightIndicator && (lane != vehicle.lane))
+                else if (down.rightIndicator && (lane != vehicle.getLane()))
                     vRight = Math.min(vRight, v);
             }
             // go to next vehicle
             down = down.getNeighbor(Movable.DOWN);
+            if (downs.contains(down))
+            	break;
+            downs.add(down);
+            //if (down == firstDown)
+            //	break;
         }
         // store anticipated speeds
         if (lane.right != null)
@@ -851,7 +890,7 @@ public class Driver {
      */
     public double desiredVelocity() {
         if (isNewTimeStepForAction("desired_velocity"))
-            vDes = desiredVelocity(vehicle.lane);
+            vDes = desiredVelocity(vehicle.getLane());
         return vDes;
     }
     
@@ -925,7 +964,7 @@ public class Driver {
      * @param split RSU located at the split.
      */
     public void notice(Lane.splitRSU split) {
-        if (null == vehicle.getNeighbor(Movable.DOWN)) {
+         if (null == vehicle.getNeighbor(Movable.DOWN)) {
             // get appropriate lane
             Lane lane = split.getLaneForRoute(vehicle.route);
             // lane may be null if not appropriate for the route (will change lane before)
@@ -1002,6 +1041,7 @@ public class Driver {
             // Loop vehicles while upstream vehicle which is on the conflict to 
             // select a vehicle to follow
             boolean loop = true;
+            boolean firstUp = true;
             while ((up != null) && loop) {
                 // Get headway from conflict vehicle to conflict
                 sOther = up.getDistanceToRSU(conflict.otherRSU());
@@ -1012,7 +1052,7 @@ public class Driver {
                     upFollow = up; // this vehicle will be followed (or the next)
                     sFollow = s; // headway to follow that vehicle
                     // Get next upstream vehicle
-                    if ((sOther < 0) && (null == up.getNeighbor(Movable.UP)) && conflict.isMerge()) {
+                    if (firstUp && (sOther < 0) && (null == up.getNeighbor(Movable.UP)) && conflict.isMerge()) {
                         // At a merge, the first vehicle may be partially past the 
                         // conflict and not have an upstream vehicle connected.
                         Movable up2 = conflict.otherRSU().lane.findVehicle(
@@ -1021,6 +1061,7 @@ public class Driver {
                         up = up2 != up ? up2 : null;
                     } else
                         up = up.getNeighbor(Movable.UP); // next upstream vehicle
+                    firstUp = false;
                 } else
                     loop = false;	// Vehicle upstream of self or not on the conflict, stop loop
             }
@@ -1210,7 +1251,7 @@ public class Driver {
             // Accept the gap ?
             boolean gapOK = false;
             if (conflict.visibility()<sSelf) {
-            	System.out.println("Invisible gap not OK (1)");
+            	//System.out.println("Invisible gap not OK (1)");
                 // If major road not visible, reject gap
             } else if (!up.getDriver().vehicle.route.canBeFollowedFrom(conflict.otherRSU().lane))                
                 gapOK = true;	// Crossing vehicle's route does not pass the conflict
@@ -1237,7 +1278,7 @@ public class Driver {
                     if ((ttc_o * estTimeFactor < tte_c) && ((ttc_o+t_dv) * estTimeFactor < tte_c2))
                         gapOK = true;
                     else
-                    	System.out.println("Merge gap not OK (2)");
+                    	;//System.out.println("Merge gap not OK (2)");
                 } else {                    
                     /* Accept gap on crossing if:
                      *  i)   the downstream vehicle is expected to allow 
@@ -1252,8 +1293,8 @@ public class Driver {
                     if ((ttp_d * estTimeFactor < tte_c) && (ttc_o * estTimeFactor < tte_c) && (ttp_d2 * estTimeFactor < tte_c2))
                         gapOK = true;
                     else {
-                    	System.out.println(String.format("Crossing gap not OK (3) ttp_d=%f, estTimeFactor=%f, tte_c=%f, ttc_o=%f, ttp_d2=%f, tte_c2=%f, my id=%d, sOther=%f, up=%s", ttp_d, estTimeFactor, tte_c, ttc_o, ttp_d2, tte_c2, vehicle.id, sOther, up.toString()));
-                    	System.out.println("Conflict on lane " + conflict.lane.id); 
+                    	//System.out.println(String.format("Crossing gap not OK (3) ttp_d=%f, estTimeFactor=%f, tte_c=%f, ttc_o=%f, ttp_d2=%f, tte_c2=%f, my id=%d, sOther=%f, up=%s", ttp_d, estTimeFactor, tte_c, ttc_o, ttp_d2, tte_c2, vehicle.id, sOther, up.toString()));
+                    	//System.out.println("Conflict on lane " + conflict.lane.id); 
                     }
                 }
             }
@@ -1338,8 +1379,8 @@ public class Driver {
         if (s > 0) {
             double s0tmp = this.s0; // remember regular stopping distance value
             this.s0 = s0conflict; // set small value for numerical overshoot          // Decelerate using car-following model
-            if (vehicle.v < 1)
-            	System.out.println(String.format("v=%.3f, s=%.3f", vehicle.v, s));
+            //if (vehicle.v < 1)
+            //	System.out.println(String.format("v=%.3f, s=%.3f", vehicle.v, s));
             double acc = longitudinal(vehicle.v, vehicle.v, desiredVelocity(), s);
             if (safe) {
                 if (acc > -b) {
@@ -1400,9 +1441,9 @@ public class Driver {
             // Consider left lane if route can be followed and conflict is 
             // located within the distance where a lane change is required for
             // the route (i.e the conflict is the next point of interest).
-            if (vehicle.lane.goLeft && vehicle.route.canBeFollowedFrom(vehicle.lane.left) && 
-                    ( (vehicle.route.xLaneChanges(vehicle.lane.left) -
-                    vehicle.lane.getAdjacentX(vehicle.x, Model.latDirection.LEFT)) > x) ) {
+            if (vehicle.getLane().goLeft && vehicle.route.canBeFollowedFrom(vehicle.getLane().left) && 
+                    ( (vehicle.route.xLaneChanges(vehicle.getLane().left) -
+                    vehicle.getLane().getAdjacentX(vehicle.x, Model.latDirection.LEFT)) > x) ) {
                 // Acceleration on left lane
                 double aLeft = calculateAcceleration(vehicle.getNeighbor(Movable.LEFT_DOWN));
                 // Desire is given by the acceleration gain, normalized by the 
@@ -1410,9 +1451,9 @@ public class Driver {
                 dLeftIntersection = (aLeft - aCur) / (a + b);
             }
             // Idem. for right lane.
-            if (vehicle.lane.goRight && vehicle.route.canBeFollowedFrom(vehicle.lane.right) && 
-                    ( (vehicle.route.xLaneChanges(vehicle.lane.right) -
-                    vehicle.lane.getAdjacentX(vehicle.x, Model.latDirection.RIGHT)) > x) ) {
+            if (vehicle.getLane().goRight && vehicle.route.canBeFollowedFrom(vehicle.getLane().right) && 
+                    ( (vehicle.route.xLaneChanges(vehicle.getLane().right) -
+                    vehicle.getLane().getAdjacentX(vehicle.x, Model.latDirection.RIGHT)) > x) ) {
                 double aRight = calculateAcceleration(vehicle.getNeighbor(Movable.RIGHT_DOWN));
                 dRightIntersection = (aRight - aCur) / (a + b);
             }
@@ -1444,7 +1485,36 @@ public class Driver {
             T = tTmp;
         }
     }
-
+    
+    /**
+     * Read the message displayed on a VMS and act on it.
+     * @param vms {@link VMS}; the VMS that is noticed
+     */
+    public void notice(VMS vms) {
+    	double s = vehicle.getDistanceToRSU(vms); // s = vehicle.x - vms.x(); Only look for upstream from RSU.
+    	// Maybe create a VMSSeen ArrayList,  create a condition: (vms instantof VMSSeen)
+    	if ((vehicle.model.t() >= 1800) && (Math.abs(s)<8)){
+    		ActLInc  =  ActLInc + 0.1;
+    		ActLevel = ActLevel + ActLInc;
+        	ActLevel = ActLevel * (1 + RandomAct);
+        	//value constraint:  //(activationLevel<=1 && activationLevel>=0 )
+        	ActLevel = ActLevel < 0? 0 : ActLevel;
+        	ActLevel = ActLevel > 1? 1 : ActLevel;
+        	// set parameters
+            a = 1.25*(1-ActLevel) + ActLevel * 1.25 * (1.46/0.94);
+            aMin = a;
+            b = 2.09*(1-ActLevel) + ActLevel * 2.09 * (0.97/0.87);
+            bSafe = b;
+            Tmin = .56*(1-ActLevel) + ActLevel * .56 * (.25/.78);
+            aInter = 2*(1-ActLevel) + ActLevel * 2 * (1.46/0.94);
+            bYellow = 3.5*(1-ActLevel) + ActLevel * 3.5 * (0.97/0.87);	
+            
+        	String message = vms.getMessage();
+        	System.out.println("Driver of vehicle " + vehicle.toString() + " reads VMS displaying \"" + message + "\"");
+        	// That's it; for now
+    	}
+    }
+    
     /**
      * Is called once at vehicle generation <i>after</i> the stochastic
      * vehicle and driver parameters have been set. It can be used to define
@@ -1461,7 +1531,7 @@ public class Driver {
      * @return Whether the driver is on a taper lane.
      */
     public boolean isOnTaper() {
-        return isTaper(vehicle.lane);
+        return isTaper(vehicle.getLane());
     }
 
     /**
@@ -1475,7 +1545,7 @@ public class Driver {
     
     @Override
 	public String toString() {
-    	return String.format("s0=%.2fm", s0);
+    	return String.format("Driver s0=%.2fm in vehicle %d", s0, vehicle.id);
     }
     
     /**

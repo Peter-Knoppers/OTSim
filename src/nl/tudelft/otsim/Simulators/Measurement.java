@@ -150,8 +150,8 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 		timePopupMenu = buildPopupMenu(timeFormat, "setTimeGranularity", timeGranularities);
 		labelTimeGranularity.addMouseListener(this);
 
-		this.area = Planar.coordinatesToPoints(area.replaceAll("[()m,]", "").split(" "));
-		this.projectionPath = Planar.coordinatesToPoints(projectionPath.replaceAll("[()m,]", "").split(" "));
+		this.area = Planar.coordinatesToPoints(area.replaceAll("[()m]", "").replaceAll("[,]", " ").split(" "));
+		this.projectionPath = Planar.coordinatesToPoints(projectionPath.replaceAll("[()m]", "").replaceAll("[,]", " ").split(" "));
 		this.simulator = simulator;
 		this.scheduler = scheduler;
 		scheduler.enqueueEvent(0, this);
@@ -495,7 +495,7 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 	public void paint(double when, GraphicsPanel graphicsPanel) {
 		graphicsPanel.setColor(Color.BLUE);
 		graphicsPanel.setStroke(0);
-		graphicsPanel.drawPolyLine(area);
+		graphicsPanel.drawPolyLine(area, false);
 	}
 
 	@Override

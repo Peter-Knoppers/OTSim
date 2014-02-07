@@ -9,24 +9,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
 
-import nl.tudelft.otsim.GUI.Log;
 import nl.tudelft.otsim.GUI.Main;
-import nl.tudelft.otsim.GeoObjects.ActivityLocation;
-import nl.tudelft.otsim.GeoObjects.CrossSection;
-import nl.tudelft.otsim.GeoObjects.Lane;
-import nl.tudelft.otsim.GeoObjects.Link;
 import nl.tudelft.otsim.GeoObjects.Vertex;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.index.SpatialIndex;
-import com.vividsolutions.jts.linearref.LinearLocation;
-import com.vividsolutions.jts.linearref.LocationIndexedLine;
 
 /**
  * 
@@ -78,16 +65,18 @@ public class Planar {
 	
 	/**
 	 * Compute path length of ArrayList of vertices.
-	 * @param vertices ArrayList&lt;{@link Vertex}&gt vertices to compute the
+	 * @param vertices ArrayList&lt;{@link Vertex}&gt; vertices to compute the
 	 * path length of
 	 * @return Double; length of the path
 	 */
 	public static double length(ArrayList<Vertex> vertices) {
 		double result = 0;
 		Vertex prevVertex = null;
+		if (null == vertices)
+			throw new Error("vertices may not be null");
 		for (Vertex v : vertices) {
 			if (null != prevVertex)
-				result += prevVertex.distanceTo(v);
+				result += prevVertex.distance(v);
 			prevVertex = v;
 		}
 		return result;
@@ -230,6 +219,7 @@ public class Planar {
 			double distance = distanceLineSegmentToPoint(new Line2D.Double(prevPoint, p), point);
 			if (distance < closest)
 				closest = distance;
+			prevPoint = p;
 		}
 		return closest;
 	}
@@ -334,7 +324,7 @@ public class Planar {
 	 * @param l2 Line2D.Double; second line segment
 	 * @return Boolean; true if the line segments intersect; false otherwise
 	 */
-	public static boolean lineIntersectsLine(Line2D.Double l1, Line2D.Double l2) {
+	public static boolean lineSegmentIntersectsLineSegment(Line2D.Double l1, Line2D.Double l2) {
 		return (lineSegmentIntersectsLineSegment(new Point2D.Double(l1.x1, l1.y1), new Point2D.Double(l1.x2, l1.y2),
 				new Point2D.Double(l2.x1, l2.y1), new Point2D.Double(l2.x2, l2.y2)));
 	}
@@ -378,67 +368,6 @@ public class Planar {
 				/ determinant);
 	}
 	
-	// TODO: Move this function out of GeometryTools
-	// Things like "ActivityLocation" and "CrossSection" should not be known about within this class
-	/**
-	 * Find the line/link that is nearest to a certain point
-	 * - first selects lines within a certain search distance
-	 * - than find the nearest point at that line
-	 * @param linkTree the linkTree (Spatial Index) contains all the links of the network
-	 * @param list in this case a list of Buildings (point objects)
-	 */
-	public static void NearestPointAtLink(SpatialIndex linkTree, List<ActivityLocation> list) {
-		for (ActivityLocation activityLocation : list)  {
-			final double MAX_SEARCH_DISTANCE = 1000; 
-			Coordinate point = new Coordinate(activityLocation.getX(),activityLocation.getY(), 0);
-			Envelope search = new Envelope(point);  // search area: set it up
-	        search.expandBy(MAX_SEARCH_DISTANCE);   // search area creates circle
-			@SuppressWarnings("unchecked")
-			List<LineString> links = linkTree.query(search);  // find the links within this area
-	        double minDist = MAX_SEARCH_DISTANCE + 1.0e-6;
-	        Coordinate minDistPoint = null;   // the coordinates of the nearest point of the nearest line 
-	        Link attachedLink = null;
-	        // Find the closest line within the search area (so within MAX_SEARCH_DISTANCE)
-			for (LineString link : links) {
-				LocationIndexedLine line1 = new LocationIndexedLine(link);  // Linear referencing along a line
-	            LinearLocation here = line1.project(point);  // "here" is the point nearest on the line from "point" 
-	            double longitudinal = here.getSegmentFraction() * here.getSegmentLength(link);	            
-	            Coordinate pointFound = line1.extractPoint(here);
-	            double dist = pointFound.distance(point);
-	            if (dist < minDist) {
-	                attachedLink = (Link) link.getUserData(); 	// attached to the line is the field "user data" 
-			   													//	which points to the object "Link"
-	                // find a section with parking lots or parking opportunities
-	                for (CrossSection cs : attachedLink.getCrossSections_r()) {
-	                	for (Lane lane : cs.collectLanes()) {
-	                	//for (CrossSectionElement cse : cs.getCrossSectionElementList_r()) {
-	                		//if (cse.getCrossSectionElementTypology().getDrivable()) {
-	                			//for (Lane lane : cse.getLaneList()) {
-            				if(lane.isParkingLane()) {
-            					double distanceToLane = Math.abs(cs.getLongitudinalPosition_r() - longitudinal);
-            					if (dist + distanceToLane < minDist)  {
-            						minDist = dist + Math.abs(cs.getLongitudinalPosition_r() - longitudinal);
-            		                minDistPoint = pointFound;
-            		                Vertex v = new Vertex(line1.extractPoint(here, minDist));
-            		                activityLocation.setPointAtLinkNearLocation(v);
-            		                activityLocation.setLaneNearLocation(lane); 
-            					}
-	                				//}
-	                			//}
-	                		}
-	                	}
-	                }
-	            }
-	        }
-	        if (minDistPoint == null)	// No line close enough to snap the point to
-	            System.out.println(point + "- X" + attachedLink.getName_r());
-	        else {
-	            System.out.printf("%s - snapped by moving %.4fm\n", point.toString(), minDist );
-	            System.out.println("Link " + attachedLink.getName_r() + "Lane and speed: " + activityLocation.getLaneNearLocation().getID() + "  " + activityLocation.getLaneNearLocation().getMaxSpeed());
-	        }
-		}
-	}
-	
 	/**
 	 * Determine on which side of a line a point lies.
 	 * <br />
@@ -447,14 +376,12 @@ public class Planar {
 	 * which side of a line a point lies</a>
 	 * @param p Point2D.Double; the point
 	 * @param l Line2D.Double; the line
-	 * @return Boolean; true for left; false otherwise (not 100% sure of this)
+	 * @return double; positive for left; negative for right, 0 for spot on
 	 */
-	// Derived from
-	// http://stackoverflow.com/questions/3461453/determine-which-side-of-a-line-a-point-lies
-	// First answer
 	public static double pointSideOfLine(Point2D.Double p, Line2D.Double l) {
 		return (l.x2 - l.x1) * (p.y - l.y1) - (l.y2 - l.y1)* (p.x - l.x1);
 	}
+	
 	/**
 	 * Find the minimum circle that covers a cloud of points.
 	 * <br />
@@ -654,17 +581,16 @@ public class Planar {
 	}
 	
 	/**
-	 * Compute all intersection points of a ray and a circle. There are zero,
-	 * one, or two intersection. NB. A ray is a line with one real end point. 
-	 * The other end lies at infinity.
+	 * Compute all intersection points of a line segment and a circle. There 
+	 * are zero, one, or two intersections.
 	 * <br />
 	 * Derived from <a href="http://paulbourke.net/geometry/circlesphere/">Circles
 	 * and spheres by Paul Bourke</a>.
-	 * @param l Line2D.Double; the ray
+	 * @param l Line2D.Double; the line segment
 	 * @param circle Circle; the circle.
 	 * @return Array of Point2D.Double with all intersections
 	 */
-	static public Point2D.Double[] intersectRayAndCircle(Line2D.Double l, Circle circle) {
+	static public Point2D.Double[] intersectLineSegmentAndCircle(Line2D.Double l, Circle circle) {
 		double a = l.getP1().distanceSq(l.getP2());
 		double b = 2 * ((l.x2 - l.x1) * (l.x1 - circle.center().x) + (l.y2 - l.y1) * (l.y1 - circle.center().y));
 		double c = circle.center().x * circle.center().x + circle.center().y * circle.center().y + l.x1 * l.x1 + l.y1 * l.y1 - 2 * (circle.center().x * l.x1 + circle.center().y * l.y1) - circle.radius() * circle.radius(); 
@@ -676,7 +602,7 @@ public class Planar {
 		int solutions = 0;
 		if ((0 <= u1) && (u1 <= 1))
 			solutions++;
-		if ((0 <= u2) && (u1 <= 2))
+		if ((0 <= u2) && (u2 <= 1))
 			solutions++;
 		Point2D.Double result[] = new Point2D.Double[solutions];
 		int index = 0;
@@ -695,8 +621,11 @@ public class Planar {
 	 */
 	public static String pointsToString(Point2D.Double[] points) {
 		String result = "";
-		for (Point2D.Double p : points)
-			result += String.format(Main.locale, " %.3f,%.3f", p.x, p.y);
+		String separator = "";
+		for (Point2D.Double p : points) {
+			result += String.format(Main.locale, "%s%.3f,%.3f", separator, p.x, p.y);
+			separator = " ";
+		}
 		return result;
 	}
 	
@@ -722,12 +651,15 @@ public class Planar {
 	 */
 	public static String verticesToString(ArrayList<Vertex> vertices, boolean ignoreZ) {
 		String result = "";
-		for (Vertex v : vertices)
+		String separator = "";
+		for (Vertex v : vertices) {
 			if (ignoreZ) {
 				Point2D.Double p = v.getPoint();
-				result += String.format(nl.tudelft.otsim.GUI.Main.locale, "(%.3fm, %.3fm) ", p.x, p.y);
+				result += String.format(nl.tudelft.otsim.GUI.Main.locale, "%s(%.3fm,%.3fm)", separator, p.x, p.y);
 			} else
-				result += v.toString() + " ";
+				result += separator + v.toString();
+			separator = " ";
+		}
 		return result;
 	}
 
@@ -737,7 +669,7 @@ public class Planar {
 	 * @return String
 	 */
 	public static String Line2DToString(Line2D l) {
-		return String.format(Main.locale, "(%.3f, %.3f)->(%.3f,%.3f)", l.getX1(), l.getY1(), l.getX2(), l.getY2());
+		return String.format(Main.locale, "(%.3f,%.3f)->(%.3f,%.3f)", l.getX1(), l.getY1(), l.getX2(), l.getY2());
 	}
 
 	/**
@@ -746,20 +678,23 @@ public class Planar {
 	 * @param generalPath {@link GeneralPath}; the path to convert
 	 * @return String; the human-readable representation of the {@link GeneralPath}
 	 */
-	public static String GeneralPathToString (GeneralPath generalPath) {
+	public static String generalPathToString (GeneralPath generalPath) {
 		String result = "";
+		String separator = "";
 		PathIterator it = generalPath.getPathIterator(null, 1);
 		while (! it.isDone())
 		{
 			float[] data = new float[6];
+			result += separator;
 			switch(it.currentSegment(data)) {
-			case PathIterator.SEG_MOVETO: result += String.format(Locale.US, "m %.3f,%.3f ", data[0], data[1]); break;
-			case PathIterator.SEG_LINETO: result += String.format(Locale.US, "l %.3f,%.3f ", data[0], data[1]); break;
-			case PathIterator.SEG_QUADTO: result += String.format(Locale.US, "q %.3f,%.3f %.3f,%.3f ", data[0], data[1], data[2], data[3]); break;
-			case PathIterator.SEG_CUBICTO: result += String.format(Locale.US, "m %.3f,%.3f %.3f,%.3f %.3f,%.3f ", data[0], data[1], data[2], data[3], data[4], data[5]); break;
-			case PathIterator.SEG_CLOSE: result += "c "; break;
+			case PathIterator.SEG_MOVETO: result += String.format(Locale.US, "m %.3f,%.3f", data[0], data[1]); break;
+			case PathIterator.SEG_LINETO: result += String.format(Locale.US, "l %.3f,%.3f", data[0], data[1]); break;
+			case PathIterator.SEG_QUADTO: result += String.format(Locale.US, "q %.3f,%.3f %.3f,%.3f", data[0], data[1], data[2], data[3]); break;
+			case PathIterator.SEG_CUBICTO: result += String.format(Locale.US, "c %.3f,%.3f %.3f,%.3f %.3f,%.3f", data[0], data[1], data[2], data[3], data[4], data[5]); break;
+			case PathIterator.SEG_CLOSE: result += "C"; break;
 			default: throw new Error("unknown segment type " + it.currentSegment(data));
 			}
+			separator = " ";
 			it.next();
 		}			
 		return result;
@@ -773,8 +708,8 @@ public class Planar {
 	 * @param p Point2D.Double; the point
 	 * @return Point2D.Double; the point
 	 */
-	public static Point2D.Double logPoint(String where, Point2D.Double p) {
-		System.out.format(Main.locale, "%s: (%.3f,%.3f)\r\n", where, p.x, p.y);
+	public static Point2D.Double log(String where, Point2D.Double p) {
+		System.out.format(Locale.US, "%s: (%.3f,%.3f)\r\n", where, p.x, p.y);
 		return p;
 	}
 	
@@ -943,7 +878,7 @@ public class Planar {
 		Point2D.Double prevPoint = polygon[polygon.length - 1];
 		for (Point2D.Double p : polygon) {
 			Line2D.Double polygonLine = new Line2D.Double(prevPoint, p);
-			if (lineIntersectsLine (line, polygonLine))
+			if (lineSegmentIntersectsLineSegment (line, polygonLine))
 				result.add(intersection(line, polygonLine));
 			prevPoint = p;
 		}
@@ -951,65 +886,69 @@ public class Planar {
 	}
 	
 	/**
-	 * Shorten a polyline to a sub-section specified by distance. If the
-	 * requested distance range lies outside the range of the polyline and
+	 * Shorten a polyLine to a sub-section specified by distance. If the
+	 * requested distance range lies outside the range of the polyLine an
 	 * empty list of vertices is returned.
-	 * @param polyline ArrayList&lt;{@link Vertex}&gt;; the polyline
+	 * @param polyLine ArrayList&lt;{@link Vertex}&gt;; the polyLine
 	 * @param longitudinalPosition Double; starting position of the slice
 	 * (negative value means starting position is measured from the end)
 	 * @param longitudinalLength Double; length of the requested sub-section
 	 * @return ArrayList&lt;{@link Vertex}&gt;; the sub-section
 	 */
-	public static ArrayList<Vertex> slicePolyline(ArrayList<Vertex> polyline, double longitudinalPosition, double longitudinalLength) {
+	public static ArrayList<Vertex> slicePolyline(ArrayList<Vertex> polyLine, double longitudinalPosition, double longitudinalLength) {
 		ArrayList<Vertex> result = new ArrayList<Vertex> ();
 		double pos = longitudinalPosition;
-		double pathLength = length(polyline);
+		double pathLength = length(polyLine);
 		if (pos < 0)
 			pos = pathLength + pos;
 		if (pos < 0) {
-			//System.err.println("Slice lies before range of polyline");
+			//System.err.println("Slice lies before range of polyLine");
 			return result;
 		}
 		if (pos > pathLength) {
-			//System.err.println("Slice lies beyond range of polyline");
+			//System.err.println("Slice lies beyond range of polyLine");
 			return result;
 		}
 		Vertex prevVertex = null;
-		for (Vertex v : polyline) {
+		for (Vertex v : polyLine) {
 			if (null != prevVertex) {
-				double distance = prevVertex.distanceTo(v);
-				if (distance > pos) {
-					// Slice starts between prevVertex and v
+				double distance = prevVertex.distance(v);
+				if ((distance > pos) && (result.size() == 0))
 					result.add(Vertex.weightedVertex(pos / distance, prevVertex, v));
-					double useLength = longitudinalLength;
-					if (useLength <= 0)
-						useLength = 0.001;
+				if ((pos + longitudinalLength > distance) && (pos < distance))
+					result.add(v);
+				else if (distance > pos) {
 					result.add(Vertex.weightedVertex((pos + longitudinalLength) / distance, prevVertex, v));
 					return result;
 				}
 				pos -= distance;
+				if (pos + longitudinalLength <= 0)
+					return result;
 			}
 			prevVertex = v;
 		}
-		System.err.println("Slice lies unexpectadly outside range of polyline");
 		return result;
 	}
 	
 	/**
-	 * Create a polyline which is starts or ends from a reference polyline. 
-	 * If the reference polyline is malformed (double vertices or no vertices),
+	 * Create a polyLine which is starts or ends from a reference polyLine. 
+	 * If the reference polyLine is malformed (double vertices or no vertices),
 	 * the result may be malformed.
 	 * @param prevVertices ArrayList&lt;{@link Vertex}&gt;; the previous
-	 * polyline
+	 * polyLine
 	 * @param curVertices ArrayList&lt;{@link Vertex}&gt;; the reference list
 	 * @param sameUp boolean; start at prevVertices
 	 * @param sameDown boolean; end at prevVertices
-	 * @return ArrayList&lt;{@link Vertex}&gt;; the new polyline
+	 * @return ArrayList&lt;{@link Vertex}&gt;; the new polyLine
 	 */
-	
+	// FIXME this method is never called with sameUp == sameDown; one of these arguments can (and should) be removed.
 	public static ArrayList<Vertex> createPartlyParallelVertices(ArrayList<Vertex> prevVertices, ArrayList<Vertex> curVertices, boolean sameUp, boolean sameDown) {
 		if (prevVertices.size() != curVertices.size())
 			throw new Error ("prevVertices and curVertices have different sizes");
+		if (sameUp && sameDown)
+			throw new Error("Never used combination of sameUp and sameDown (both true)");
+		if ((! sameUp) && (! sameDown))
+			throw new Error("Never used combination of sameUp and sameDown (both false)");			
     	ArrayList<Vertex> result = new ArrayList<Vertex>();
     	double distLaneTotal = length(prevVertices);
     	double distLane = 0.0;
@@ -1018,10 +957,10 @@ public class Planar {
     	for (Vertex v : prevVertices)  {
         	double weight = 0.0;
     		if (prevV != null)
-    			distLane = distLane + v.distanceTo(prevV); 
-			if (sameUp == true)
+    			distLane = distLane + v.distance(prevV); 
+			if (sameUp)
 				weight = (distLane / distLaneTotal); 
-			else if (sameDown == true)
+			else if (sameDown)
 				weight = 1 - (distLane / distLaneTotal); 
 			result.add(Vertex.weightedVertex(weight,  v, curVertices.get(i)));
 			prevV = v;
@@ -1031,37 +970,39 @@ public class Planar {
 	}
 
 	/**
-	 * Create a polyline with specified offset from a reference polyline. If
-	 * the reference polyline is malformed (double vertices or no vertices),
+	 * Create a polyLine with specified offset from a reference polyLine. If
+	 * the reference polyLine is malformed (double vertices or no vertices),
 	 * the result may be malformed.
 	 * @param referenceVertices ArrayList&lt;{@link Vertex}&gt;; the reference
-	 * polyline
+	 * polyLine
 	 * @param prevReferenceVertices ArrayList&lt;{@link Vertex}&gt;; the reference
-	 * polyline of the preceding design line
+	 * polyLine of the preceding design line
 	 * @param lateralPosition Double; offset used for each vertex
 	 * vertices
-	 * @return ArrayList&lt;{@link Vertex}&gt;; the new polyline
+	 * @return ArrayList&lt;{@link Vertex}&gt;; the new polyLine
 	 */
     public static ArrayList<Vertex> createParallelVertices(ArrayList<Vertex> referenceVertices, ArrayList<Vertex> prevReferenceVertices, double lateralPosition) {
     	return createParallelVertices(referenceVertices, prevReferenceVertices, lateralPosition, lateralPosition);
     }
 	
 	/**
-	 * Create a polyline with specified offset from a reference polyline. If
-	 * the reference polyline is malformed (double vertices or no vertices),
-	 * the result may be malformed.
+	 * Create a polyLine with specified offset from a reference polyLine.
+	 * <br /> Throws Error when the reference polyLine is malformed:
+	 * two adjacent vertices with (almost) same X and Y or too few vertices.
 	 * @param referenceVertices ArrayList&lt;{@link Vertex}&gt;; the reference
-	 * polyline
+	 * polyLine
 	 * @param prevReferenceVertices ArrayList&lt;{@link Vertex}&gt;; the reference
-	 * polyline of the preceding design line
+	 * polyLine of the preceding design line
 	 * @param firstLateralPosition Double; offset used for the first vertex
 	 * @param subsequentLateralPosition Double; offset used for all other
 	 * vertices
-	 * @return ArrayList&lt;{@link Vertex}&gt;; the new polyline
+	 * @return ArrayList&lt;{@link Vertex}&gt;; the new polyLine
 	 */
     public static ArrayList<Vertex> createParallelVertices(ArrayList<Vertex> referenceVertices, ArrayList<Vertex> prevReferenceVertices, double firstLateralPosition, double subsequentLateralPosition) {
     	// Create an ArrayList of vertices at a certain offset from a reference
     	//System.out.println(String.format("\r\ncreateParallelVertices: offset is %f, number of vertices is %d\r\n\t%s", lateralPosition, referenceVertices.size(), referenceVertices.toString()));
+    	if ((null == referenceVertices) || (referenceVertices.size() < 2))
+    		throw new Error("Malformed referenceVertices");
     	ArrayList<Vertex> result = new ArrayList<Vertex>();
     	Vertex prevVertex = null;
     	Line2D.Double prevParallel = null;
@@ -1073,9 +1014,13 @@ public class Planar {
 			prevParallel = new Line2D.Double(prevVertex1.getX(), prevVertex1.getY(), vertex1.getX(), vertex1.getY());
 			prevDirection = Math.atan2(vertex1.getY() - prevVertex1.getY(), vertex1.getX() - prevVertex1.getX());
     	}
+    	final double tooClose = 0.0001;
     	for (Vertex vertex : referenceVertices) {		
     		if (null != prevVertex)	{
+    			if (prevVertex.getPoint().distance(vertex.getPoint()) <= tooClose)
+    				throw new Error("reference Vertices too close in X and Y");
     			// compute the line parallel to reference line
+    			// TODO rewrite this without using atan and friends
     			double direction = Math.atan2(vertex.getY() - prevVertex.getY(), vertex.getX() - prevVertex.getX());
     			double perpendicular = direction - Math.PI / 2;
     			//System.out.println(String.format("dir=%f, perp=%f, offset=%f,%f", direction, perpendicular, offsetX, offsetY));
@@ -1098,7 +1043,7 @@ public class Planar {
     				if (null == p)	// probably an (almost) straight line; use the previous point
     					result.add(new Vertex(parallel.x1, parallel.y1, vertex.getZ()));
     				else
-    					result.add(new Vertex(p, vertex.getZ()));
+    					result.add(new Vertex(p, prevVertex.getZ()));
     			}    			
     			prevParallel = parallel;
     			prevDirection = direction;
@@ -1114,13 +1059,13 @@ public class Planar {
     }
     
     /**
-	 * Create a polyline with specified offset from a reference polyline. If
-	 * the reference polyline is malformed (double vertices or no vertices),
+	 * Create a polyLine with specified offset from a reference polyLine. If
+	 * the reference polyLine is malformed (double vertices or no vertices),
 	 * the result may be malformed.
      * @param referenceVertices ArrayList&lt;{@link Vertex}&gt;; the reference
-	 * polyline
+	 * polyLine
      * @param lateralPosition Double; offset used for all vertices
-     * @return ArrayList&lt;{@link Vertex}&gt;; the new polyline
+     * @return ArrayList&lt;{@link Vertex}&gt;; the new polyLine
      */
     public static ArrayList<Vertex> createParallelVertices(ArrayList<Vertex> referenceVertices, double lateralPosition) {
     	return createParallelVertices(referenceVertices, null, lateralPosition, lateralPosition);
@@ -1169,12 +1114,14 @@ public class Planar {
 	
 	/**
 	 * Expand a bounding box.
-	 * @param rect Line2D.Double; initial bounding box
+	 * @param rect Line2D.Double; initial bounding box (may be null)
 	 * @param x Double; x of point to expand bounding box to
 	 * @param y Double; y of point to expand bounding box to
 	 * @return Line2D.Double; expanded bounding box
 	 */
 	public static Line2D.Double expandBoundingBox (Line2D.Double rect, double x, double y) {
+		if (null == rect)
+			return (new Line2D.Double(x, y, x, y));
 		Line2D.Double result = new Line2D.Double(rect.x1, rect.y1, rect.x2, rect.y2);
 		if (x < result.x1)
 			result.x1 = x;
@@ -1189,10 +1136,11 @@ public class Planar {
 
 }
 
-
-// This is used to sort points by some "score",
-// which could be an angle or other metric associated with each point.
-// Used (only) in the convexHull algorithm
+/**
+ * This is used to sort points by some "score", which could be an angle or 
+ * other metric associated with each point.
+ * Used (only) in the convexHull algorithm
+ */
 class Point2DAndScore {
 	public Point2D.Double point;
 	public double score;

@@ -44,7 +44,7 @@ public class ScanTrail {
 		if (polygon)
 			gp.drawPolygon(points);
 		else
-			gp.drawPolyLine(points);
+			gp.drawPolyLine(points, false);
 	}
 
 }

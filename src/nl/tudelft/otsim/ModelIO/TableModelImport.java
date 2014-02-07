@@ -82,8 +82,7 @@ public class TableModelImport extends JPanel implements TableModelListener {
 			{"BA", "2"},
 			{"AB and BA", "3"},
 			};*/
-    	final String[] headerDir = {"Direction indicator",
-            "Value"};
+    	final String[] headerDir = {"Direction indicator", "Value"};
         Object[] longValues = {"Jane", "Kathy"};        
     	tableDirection = new TableImport(dataDir, headerDir, longValues);
     	tableDirection.getTable().setPreferredScrollableViewportSize(new Dimension(500, 70));
@@ -118,19 +117,18 @@ public class TableModelImport extends JPanel implements TableModelListener {
         //Important: determines the type of data!!!!
         Object[] longValuesFields = types;
         	//{"Jane", "Kathy", Boolean.TRUE};
-        final String[] header = {"OpenTraffic",
-                "Import", "Derive"};
+        final String[] header = {"OpenTraffic", "Import", "Derive"};
 
     	Object[][] dataFields = {
-    		{"point(s)", "the_geom", false},
-    		{"fromNode", "ANODE", false},
-    		{"toNode", "BNODE", false},
-    		{"capacity", "CAPACITYAB", false},
-    		{"lanes", "LANESAB", false},
-    		{"turnLanes", "LANESMASAB", false},
-    		{"exitLanes", "EXITLANEAB", false},
-    		{"maxSpeed", "SPEEDAB", false},       		
-    		{"length", "LENGTH", false}       		
+	    		{"point(s)", "the_geom", false},
+	    		{"fromNode", "ANODE", false},
+	    		{"toNode", "BNODE", false},
+	    		{"capacity", "CAPACITYAB", false},
+	    		{"lanes", "LANESAB", false},
+	    		{"turnLanes", "LANESMASAB", false},
+	    		{"exitLanes", "EXITLANEAB", false},
+	    		{"maxSpeed", "SPEEDAB", false},       		
+	    		{"length", "LENGTH", false}       		
     		};
 
         tableField = new TableImport(dataFields, header, longValuesFields);
@@ -179,11 +177,11 @@ public class TableModelImport extends JPanel implements TableModelListener {
 		}
 	}
 
-	public TableImport getTableDirection() {
+	TableImport getTableDirection() {
 		return tableDirection;
 	}
 
-	public TableImport getTableField() {
+	TableImport getTableField() {
 		return tableField;
 	}
 

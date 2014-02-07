@@ -39,7 +39,7 @@ public class FCD {
         x = veh.x;
         v = veh.v;
         a = veh.a;
-        lane = veh.lane;
+        lane = veh.getLane();
         if (veh.lcDirection==Model.latDirection.LEFT)
             lcProgress = -veh.lcProgress; // [-1...0]
         else

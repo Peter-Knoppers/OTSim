@@ -1,8 +1,5 @@
 package nl.tudelft.otsim.Simulators.LaneSimulator;
 
-import java.awt.Color;
-import java.awt.geom.Point2D;
-
 import nl.tudelft.otsim.GUI.GraphicsPanel;
 
 /**
@@ -668,7 +665,7 @@ public class Conflict {
         	long startTime = System.currentTimeMillis();
         	// Check if the current up is covering the end of this Conflict
         	double distanceToVehicle;
-        	if ((null != up) && (((distanceToVehicle = lane.xAdj(up.lane) + up.x - x) == 0) || (distanceToVehicle > up.l)))
+        	if ((null != up) && (((distanceToVehicle = lane.xAdj(up.getLane()) + up.x - x) == 0) || (distanceToVehicle > up.l)))
         		up = null;	// It is not; we'll have to search for a new up.
         	/*
             // remove jLcVehicle as up if the lane change has ended (vehicle==null)
@@ -733,8 +730,6 @@ public class Conflict {
         	up = findVehicleUpOfConflict (defaultMaxDistance);
     		long endTime = System.currentTimeMillis() - startTime;
             model.rsuTime1 = model.rsuTime1 + endTime;
-            if (496 == lane.id)
-            	System.out.println("Time is " + model.t + ", up of conflictRSU at lane " + lane.up + " is " + (null == up ? "null" : up.toString()));
         }
         
         private Movable findVehicleUpOfConflict (double maxDistance) {

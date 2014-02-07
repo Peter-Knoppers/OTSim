@@ -5,11 +5,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import nl.tudelft.otsim.GeoObjects.CrossSectionElement;
 import nl.tudelft.otsim.GeoObjects.Link;
 import nl.tudelft.otsim.GeoObjects.Network;
 import nl.tudelft.otsim.GeoObjects.Node;
@@ -36,6 +36,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 	private Node startNode;
 	private Node endNode;
 	private ArrayList<ArrayList<Node>> returnedPaths = new ArrayList<ArrayList<Node>>(); 
+	final int superNodeID = 999999999;
 	
 	HashMap<Link,Double> penalties = new HashMap<Link,Double>();
 
@@ -107,13 +108,23 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 		double totalCost = 0;
 		ArrayList<Link> links = getPathLinks();
 		for (Link link : links)
-			totalCost += computeCost(link, true);
+			if (superNodeID!=link.getToNodeExpand().getNodeID()) //NGI Simulation: super-node ID = superNodeID (0-cost hyper-links)
+				totalCost += computeCost(link, true);
 		return totalCost;
 	}
 
 	private double computeCost(Link link, boolean ignorePenalties) {
 		// Currently the cost is the driving time (in seconds) of a link
-		double result = link.getLength() / (link.getMaxSpeed_r() / 3.6);
+		//double result = link.getLength() / (link.getMaxSpeed_r() / 3.6);
+		double linkLength = link.getLength();
+		double linkSpeed = link.getMaxSpeed_r() / 3.6;
+		// Look for a speed limit in the first CrossSection
+		for (CrossSectionElement cse : link.getCrossSections_r().get(0).getCrossSectionElementList_r()) {
+			String speedLimit = cse.getSpeedLimit_r();
+			if (null != speedLimit)
+				linkSpeed = Double.parseDouble(speedLimit) / 3.6;
+		}
+		double result = linkLength / linkSpeed;
 		if (ignorePenalties)
 			return result;
 		Double penalty = penalties.get(link);
@@ -123,6 +134,8 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 	}
 	
 	private double getCost(Node node, Node target) {
+		if (superNodeID==target.getNodeID()) //NGI Simulation: super-node ID = superNodeID (0-cost hyper-links)
+			return 0;
 		for (Link link : edges)
 			if (link.getFromNodeExpand().equals(node) && link.getToNodeExpand().equals(target))
 				return computeCost(link, false);
@@ -227,7 +240,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 		}
 	}
 	
-	private final int maxIteration = 20;
+	private final int maxIteration = 50;
 	
 	@Override
 	public boolean hasNext() {

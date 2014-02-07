@@ -1,8 +1,5 @@
 package nl.tudelft.otsim.Simulators.LaneSimulator;
 
-import java.util.Collections;
-import java.util.Comparator;
-
 import nl.tudelft.otsim.GUI.Log;
 import nl.tudelft.otsim.GUI.Main;
 
@@ -176,11 +173,14 @@ public class Model {
                 for (Vehicle veh : vehicles) {
                     // Check for collisions
                     Movable leader = veh.getNeighbor(Movable.DOWN);
+                    if (veh == leader)
+                    	continue;
                     if ((null != leader) && (veh.getHeadway(leader) < 0) &&
-                            ((veh.lane == leader.lane) || !leader.lane.isMerge())) {
-                    	String problem = String.format("Collision: %s %.2f@%d collided with %s %.2f@%d", veh.toString(), veh.x, veh.lane.id, leader.toString(), leader.x, leader.lane.id);
+                            ((veh.getLane() == leader.getLane()) || !leader.getLane().isMerge())) {
+                    	String problem = String.format("Collision: %s %.2f@%d collided with %s %.2f@%d", veh.toString(), veh.x, veh.getLane().id, leader.toString(), leader.x, leader.getLane().id);
                         System.err.println(problem);
-                        throw new RuntimeException(problem);
+                        //veh.getHeadway(leader);
+                        //throw new RuntimeException(problem);
                     }
                     // Check reciprocity of UP and DOWN neighbor links
                     int[] directions = { Movable.UP, Movable.DOWN };
@@ -206,31 +206,31 @@ public class Model {
                 			if ((null != neighbor) && (prevM.x > neighbor.x)) {
                 				String problem = String.format("Movable %s is not correctly sorted with respect to movable %s", prevM.toString(), neighbor.toString());
                 				System.err.println(problem);
-                				throw new RuntimeException (problem);                				
+                				//throw new RuntimeException (problem);                				
                 			}
                 			if (prevM == m) {
                 				String problem = String.format("Movable %s is linked multiple times to a lane", m.toString());
                 				System.err.println(problem);
-                				throw new RuntimeException (problem);                				
+                				//throw new RuntimeException (problem);                				
                 			}
                 			if (null == neighbor) {
                 				String problem = String.format("Movable %s has unset DOWN (should be %s)", prevM.toString(), m.toString());
                 				System.err.println(problem);
-                				throw new RuntimeException (problem);
+                				//throw new RuntimeException (problem);
                 			} else if (m != neighbor) {
                 				String problem = String.format("Movable %s has DOWN set to %s (should be %s)", prevM.toString(), neighbor.toString(), m.toString());
                 				System.err.println(problem);
-                				throw new RuntimeException (problem);                				
+                				//throw new RuntimeException (problem);                				
                 			}
                 			neighbor = m.getNeighbor(Movable.UP);
                 			if (null == neighbor) {
                 				String problem = String.format("Movable %s has unset UP (should be %s)", m.toString(), prevM.toString());
                 				System.err.println(problem);
-                				throw new RuntimeException (problem);                				
+                				//throw new RuntimeException (problem);                				
                 			} else if (prevM != neighbor) {
                 				String problem = String.format("Movable %s has UP set to %s (should be %s)", m.toString(), neighbor.toString(), prevM.toString());
                 				System.err.println(problem);
-                				throw new RuntimeException (problem);                				
+                				//throw new RuntimeException (problem);                				
                 			}
                 		}
                 		prevM = m;
@@ -243,6 +243,21 @@ public class Model {
         }
     }
     
+    
+    
+    // GUUS has added some tests for computer time taken by "Control"
+    // see also Conflict - control()
+    long rsuTime1 = 0;	// visible within package
+    long rsuTime2 = 0;	// visible within package
+    long rsuTime3 = 0;	// visible within package
+    long rsuTime4 = 0;	// visible within package
+    private long beginTime = System.currentTimeMillis();
+    private long time = System.currentTimeMillis() - beginTime;
+    long numberOfRSUCalls = 0;
+    private long numberOfRSU = 0;
+    /** Set to true to output lots of info regarding RSU performance */
+    public boolean debugRSURuntime = false;
+    
     /**
      * Runs all road-side units, on-board units and controllers. This is part of
      * a regular time step, as well as gathering the final data after simulation.
@@ -250,37 +265,25 @@ public class Model {
      * units needs to aggregate data at t=period, that will not happen in the
      * main model loop.
      */
-    
-    
-    // GUUS has added some tests for computer time taken by "Control"
-    // see also Conflict - control()
-    public long rsuTime1 = 0;
-    public long rsuTime2 = 0;
-    public long rsuTime3 = 0;
-    public long rsuTime4 = 0;
-    public long rsuTime5 = 0;
-    public long rsuTime6 = 0;
-    public long beginTime = System.currentTimeMillis();
-    public long time = System.currentTimeMillis() - beginTime;
-    public long numberOfRSUCalls = 0;
-    public long numberOfRSU = 0;
-    protected void runUnits() {
-        // Run road-side units
+    protected void runUnits() {	// Run road-side units
     	int i = 0;
 		int j = 0;
+		final int clusterSize = 100;
     	for (Lane l : network) {
-    		if (i > 100)  {
+    		if (i > clusterSize)  {
     			time = System.currentTimeMillis() - beginTime;
-    			int aantal = j*100 + i;
+    			int lanesProcessed = j * clusterSize + i;
         		
-    			System.out.println("test network number of lanes passed " + aantal);
-    			System.out.println( " number of RSU's " + numberOfRSU);
-    			System.out.println("Total time RSU " + rsuTime1 + " number of RSU's calls " + numberOfRSUCalls);
-    			System.out.println("time RSU 2 " + rsuTime2 );
-    			System.out.println("time RSU 3 " + rsuTime3 );
-    			System.out.println("time RSU 4 " + rsuTime4 );
-
-    			System.out.println("total time " + time);
+    			if (debugRSURuntime) {
+	    			System.out.println("test network number of lanes processed " + lanesProcessed);
+	    			System.out.println( " number of RSU's " + numberOfRSU);
+	    			System.out.println("Total time RSU " + rsuTime1 + " number of RSU's calls " + numberOfRSUCalls);
+	    			System.out.println("time RSU 2 " + rsuTime2 );
+	    			System.out.println("time RSU 3 " + rsuTime3 );
+	    			System.out.println("time RSU 4 " + rsuTime4 );
+	
+	    			System.out.println("total time " + time);
+    			}
     			i = 0;
     			j++;
     		}
@@ -401,7 +404,7 @@ public class Model {
             	else
             		whatIsIt = "Movable";	// That should never happen ...
         		String description = String.format(Main.locale, "Cut %s %s %.3f@%d is still connected from movable %s %.2f@%d in direction %s", 
-        				whatIsIt, cutMovable.toString(), cutMovable.x, cutMovable.lane.id, other.toString(), other.x, other.lane.id, 
+        				whatIsIt, cutMovable.toString(), cutMovable.x, cutMovable.getLane().id, other.toString(), other.x, other.getLane().id, 
                         Movable.directionToString(direction));
             	System.err.println(description);
                 throw new RuntimeException(description);    	        		

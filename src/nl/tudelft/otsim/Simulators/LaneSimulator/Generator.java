@@ -1,5 +1,9 @@
 package nl.tudelft.otsim.Simulators.LaneSimulator;
 
+import java.util.Locale;
+
+import nl.tudelft.otsim.Utilities.TimeScaleFunction;
+
 /**
  * Standard vehicle generator with various types of vehicle generation.
  */
@@ -10,6 +14,8 @@ public class Generator extends Controller {
 
     /** Dynamic demand as two columns with [t, demand]. May be <tt>null</tt>. */
     protected double[][] dynamicDemand;
+    
+    protected TimeScaleFunction tsfDemand = null;
 
     /** Interpolate or stepwise dynamic demand. */
     public boolean interpDemand = true;
@@ -24,7 +30,7 @@ public class Generator extends Controller {
      * Static route probabilities. These may be changed dynamically by an 
      * external controller.
      */
-    public double[] routeProb;
+    private double[] routeProb;
 
     /** Available routes from this generator. */
     public Route[] routes;
@@ -173,6 +179,13 @@ public class Generator extends Controller {
         else if (probabilities != null)
             for (int i = 0; i < probabilities.length; i++)
                 classProbs.put(lane.model.classes.get(i).id(), probabilities[i]);
+        double sumProb = 0;
+        for (int i = 0; i < routeProb.length; i++) {
+        	System.out.println(String.format(Locale.US, "probability %.6f, route %s", routeProb[i], routes[i]));
+        	sumProb += routeProb[i];
+        }
+        if (Math.abs(sumProb - 1.0) > 0.0001)
+        	throw new Error("Probabilities do not add up to approximately 1.0 (sum is " + sumProb + ")");
     }
     
     /**
@@ -199,7 +212,7 @@ public class Generator extends Controller {
             double downX;
             if (down != null) {
                 nextVehicle.v = Math.min(down.v, nextVehicle.getDriver().desiredVelocity(genLane));
-                downX = down.x + genLane.xAdj(down.lane);
+                downX = down.x + genLane.xAdj(down.getLane());
             } else {
                 nextVehicle.v = nextVehicle.driver.desiredVelocity(genLane);
                 downX = Double.POSITIVE_INFINITY;
@@ -265,7 +278,7 @@ public class Generator extends Controller {
             double downX=0;
             double downL=0;
             if (down!=null) {
-                downX = down.x+genLane.xAdj(down.lane);
+                downX = down.x+genLane.xAdj(down.getLane());
                 nextVehicle.v = Math.min(down.v, nextVehicle.driver.desiredVelocity());
                 downL = down.l;
             } else
@@ -279,7 +292,7 @@ public class Generator extends Controller {
                     x = x - vehLane.l;
                     vehLane = vehLane.down;
                 }
-                // make sure the vehicle is at the right location (was initialliy located at x=0)
+                // make sure the vehicle is at the right location (was initially located at x=0)
                 nextVehicle.cut();
                 nextVehicle.paste(vehLane, x);
                 success = true;
@@ -312,6 +325,7 @@ public class Generator extends Controller {
             routeInd++;
         }
         nextVehicle.route = routes[routeInd];
+        //System.out.println("randomVehicle: id= " + nextVehicle.id + ", r = " + r + ", route: " + nextVehicle.route.toString());
     }
 
     /**
@@ -379,6 +393,14 @@ public class Generator extends Controller {
         } else
             dynamicDemand = dem;
     }
+    
+    /**
+     * Set a {@link TimeScaleFunction} as demand pattern.
+     * @param tsf {@link TimeScaleFunction}; the demand pattern
+     */
+    public void setDemand (TimeScaleFunction tsf) {
+    	tsfDemand = tsf;
+    }
 
     /**
      * Determines a headway value based on generator settings.
@@ -386,7 +408,13 @@ public class Generator extends Controller {
      */
     public double headway() {
         double headway = 0;
-        if (dist == distribution.PREDEFINED) {
+        if (null != tsfDemand) {
+        	double currentDemand = tsfDemand.getFactor(model.t);
+        	if (0d == currentDemand)
+        		headway = Double.POSITIVE_INFINITY;
+        	else
+        		headway = 3600d / currentDemand;
+        } else if (dist == distribution.PREDEFINED) {
             if (generated >= preTime.length) {
                 // all vehicles were generated
                 headway = Double.POSITIVE_INFINITY;
@@ -430,7 +458,7 @@ public class Generator extends Controller {
      */
     protected static void passRSUs(Vehicle veh) {
         // upstream lanes (if any)
-        Lane l = veh.lane.up;
+        Lane l = veh.getLane().up;
         while (l != null) {
         	if (l.marked)
         		break;
@@ -441,10 +469,10 @@ public class Generator extends Controller {
             l = l.up;
         }
         // lane itself
-        for (int i = 0; i < veh.lane.RSUcount(); i++)
-            if ((veh.lane.getRSU(i).x <= veh.x) && veh.lane.getRSU(i).passable)
-                veh.lane.getRSU(i).pass(veh);
-        for (l = veh.lane.up; (l != null) && l.marked; l = l.up)
+        for (int i = 0; i < veh.getLane().RSUcount(); i++)
+            if ((veh.getLane().getRSU(i).x <= veh.x) && veh.getLane().getRSU(i).passable)
+                veh.getLane().getRSU(i).pass(veh);
+        for (l = veh.getLane().up; (l != null) && l.marked; l = l.up)
         	l.marked = false;
     }
     
@@ -472,4 +500,17 @@ public class Generator extends Controller {
         /** Vehicles are uniformly spread over time (fixed headway). */
         UNIFORM;
     }
+
+    /**
+     * Set the probabilities for the routes (must add up to approximately 1.0).
+     * @param newProbabilities Double[] the probabilities for the routes
+     */
+	public void setRouteProbabilities(double[] newProbabilities) {
+		routeProb = newProbabilities;
+        double sumProb = 0;
+        for (int i = 0; i < routeProb.length; i++)
+        	sumProb += routeProb[i];
+        if (Math.abs(sumProb - 1.0) > 0.0001)
+        	throw new Error("Probabilities do not add up to approximately 1.0 (sum is " + sumProb + ")");
+	}
 }

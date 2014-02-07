@@ -6,6 +6,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Locale;
 import java.util.Random;
 
 import nl.tudelft.otsim.Events.Scheduler;
@@ -13,7 +14,6 @@ import nl.tudelft.otsim.Events.Step;
 import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.GUI.ObjectInspector;
-import nl.tudelft.otsim.GUI.Storable;
 import nl.tudelft.otsim.GUI.WED;
 import nl.tudelft.otsim.Simulators.Measurement;
 import nl.tudelft.otsim.Simulators.LaneSimulator.Conflict;
@@ -67,7 +67,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 		*/
 		
 		// STUB set reasonable defaults
-		model.period = 1860;
+		model.period = 1800;
         model.dt = .2;
         model.debug = true;
         model.setSeed(1);
@@ -105,8 +105,8 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         		//System.out.println(String.format("microNetwork.add(new jLane(model, %s, %s, %d", x.toString(), y.toString(), id));
         		Lane newLane = new Lane(model, x, y, id);
         		// set origin and destination as default to none
-        		newLane.destination = Lane.none;
-        		newLane.origin = Lane.none;   
+        		newLane.destination = 0;
+        		newLane.origin = 0;   
         		newLane.vLim = speedLimit;
         		microNetwork.add(newLane);
         	}
@@ -122,6 +122,10 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         	
         	if (null == fields[0])
         		continue;
+        	else if (fields[0].equals("EndTime:"))
+        		model.period = Double.parseDouble(fields[1]);
+        	else if (fields[0].equals("Seed:"))
+        		model.setSeed(Integer.parseInt(fields[1]));
         	else if (fields[0].equals("Lane"))
         		continue;
         	else if (fields[0].equals("LaneData")) {	
@@ -315,11 +319,24 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
                 }else if ((driver.activationLevel <= 1) && (driver.activationLevel > 0)) {
                 	clazz.addStochasticDriverParameter("RandomAct", VehicleDriver.distribution.GAUSSIAN, 0, 0.1);
                 }else {
-                	throw new Error("The targeted ActivationLevel input is not a valid value!");
+                	throw new Exception("The targeted ActivationLevel input is not a valid value!");
                 	//System.out.println("The ActivationLevel input is not a valid value!");
                 }
+        	} else if (fields[0].equals("VMS")) {
+        		for (String location : fields[2].split(",")) {
+        			String[] subFields = location.split(" ");
+        			if ((null == subFields[0]) || (subFields[0].equals("")))
+        				System.err.println("VMS " + fields[1] + " lies on no lane");
+        			else {
+        			Lane lane = lookupLane(Integer.parseInt(subFields[0]), microNetwork);
+        			if (null == lane)
+        				throw new Exception("VMS " + fields[1] + " lies on undefined lane " + subFields[0]);
+        			model.addController(new VMS(lane, Double.parseDouble(subFields[1]), fields[1]));
+        			}
+        		}
+
         	} else
-        		throw new Error("Unknown object in LaneSimulator: \"" + fields[0] + "\"");        	
+        		throw new Exception("Unknown object in LaneSimulator: \"" + fields[0] + "\"");        	
     	}
 		if (null != exportTripPattern)
 			tripList.add(exportTripPattern);
@@ -333,8 +350,10 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         ArrayList<Double> routeFlows = new ArrayList<Double>();
         ArrayList<ArrayList<Integer>> routeList = new ArrayList<ArrayList<Integer>>();
         //double flow = 0;
-        flowGraph = new TimeScaleFunction((Storable) null);
+        flowGraph = new TimeScaleFunction();
+        flowGraph.insertPair(0, 0);
         double[] fractions = null;
+        int endNode = -1;
         for (ExportTripPattern trip : tripList) {
 			int nextNode = trip.getRoutes().get(0).get(0);
 			// When next node changes: create a generator for the current Node
@@ -342,18 +361,18 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 				makeGenerator(routeFlows, currentNode, microNetwork, routeList, flowGraph, fractions);
 				routeFlows.clear();
 				routeList.clear();
-				//flow = 0;
+		        flowGraph = new TimeScaleFunction();
+		        flowGraph.insertPair(0, 0);
+		        endNode = -1;
 			}
 			currentNode = nextNode;
-			flowGraph = trip.flowGraph;
-			// TODO: figure out if we need to add up the flowGraphs...
+			int currentEndNode = trip.getRoutes().get(0).get(trip.getRoutes().get(0).size() - 1); 
+			if (endNode != currentEndNode) {
+				flowGraph = flowGraph.add(trip.flowGraph);
+				System.out.println("flowgraph is now " + flowGraph.export());
+				endNode = currentEndNode;
+			}
 			for (int i = 0; i < trip.routeProbabilities.size(); i++) {
-				//flow += trip.getFlow(i);
-				//double currentFlow = flowGraph.getFactor(0d);
-				//currentFlow += trip.getFlow(i).getFactor(0d);
-				//if (flowGraph.size() > 0)
-				//	flowGraph.deletePair(0);
-				//flowGraph.insertPair(0d, currentFlow);
 				routeList.add(trip.getRoutes().get(i));
 				routeFlows.add(trip.getFlow(i).getFactor(0d));
 			}
@@ -380,17 +399,16 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 	}
 	
 	private void makeGenerator(ArrayList<Double> routeFlows, int node, ArrayList<Lane> lanes, ArrayList<ArrayList<Integer>> routes, TimeScaleFunction flowGraph, double classProbabilities[]) throws Exception {
-		double numberOfTrips = flowGraph.getFactor(0d);
-		System.out.print("Creating generator at node " + node + " flow " + numberOfTrips + " with class probabilities [");
+		double numberOfTrips = 0;
+		for (int i = 0; i < routeFlows.size(); i++)
+			numberOfTrips += routeFlows.get(i);
+		System.out.print(String.format(Locale.US, "Creating generator at node %d, numberOfTrips %.4f, class probabilities [", node, numberOfTrips));
 		for (int i = 0; i < classProbabilities.length; i++)
 			System.out.print(String.format("%s%.6f", i > 0 ? ", " : "", classProbabilities[i]));
-		System.out.print("], path flows {");
-		for (int i = 0; i < routeFlows.size(); i++)
-			System.out.print(String.format("%.2f ", routeFlows.get(i)));
-		System.out.println("] and routes [");
+		System.out.println("] flows and routes [");
 		for (int i = 0; i < routes.size(); i++)
-			System.out.println("r" + i + " " + routes.get(i));
-		System.out.println("{ and flow graph " + flowGraph.export() + "\n");
+			System.out.println(String.format(Locale.US, "r%2d: %10.4f veh/h %s", i,  routeFlows.get(i), routes.get(i)));
+		System.out.println("and flow graph {" + flowGraph.export() + "}\n");
 		int routeCount = routeFlows.size();
 		double probabilities[] = new double[routeCount];
 		Route[] routePaths = new Route[routeCount];
@@ -463,12 +481,13 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
     	}
 		Generator generator = new Generator(laneOrigin, Generator.distribution.EXPONENTIAL);
 		generator.routes = routePaths;
-		generator.routeProb = probabilities;
+		generator.setRouteProbabilities(probabilities);
 		generator.setClassProbabilities(classProbabilities);
+		generator.setDemand(flowGraph);
 		// TODO numberOfTrips must be converted to flow [veh/h]
 		// STUB 
-		numberOfTrips = 1000;
-		generator.setDemand(numberOfTrips);
+		//numberOfTrips = 1000;
+		//generator.setDemand(numberOfTrips);
 	}
 	
 	static Lane lookupLane(int id, ArrayList<Lane> lanes) {
@@ -515,11 +534,11 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 			
             // up line
             if (lane.up==null && lane.generator==null && !lane.isMerge())
-            	graphicsPanel.drawPolyLine(pol.upEdge());
+            	graphicsPanel.drawPolyLine(pol.upEdge(), false);
 
             // down line
             if (lane.down==null && lane.destination==0 && !lane.isSplit())
-            	graphicsPanel.drawPolyLine(pol.downEdge());
+            	graphicsPanel.drawPolyLine(pol.downEdge(), false);
 
             // left line
             Point2D.Double[] edge;
@@ -540,7 +559,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
                 edge = pol.leftNearEdge();
                 graphicsPanel.setStroke(2, 1f, (float) edge[0].x);
             }
-            graphicsPanel.drawPolyLine(edge);
+            graphicsPanel.drawPolyLine(edge, false);
 
             // right line
             boolean drawRight = false;
@@ -563,7 +582,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
                 drawRight = true;
             }
             if (drawRight) {
-                graphicsPanel.drawPolyLine(edge);
+                graphicsPanel.drawPolyLine(edge, false);
             } 		
         }
 	}
@@ -1006,7 +1025,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
                         else {
 	                    	line[1] = new Point2D.Double(other.global.x - h.x * other.l, 
 	                                other.global.y - h.y * other.l);
-	                        graphicsPanel.drawPolyLine(line);
+	                        graphicsPanel.drawPolyLine(line, false);
                         }
             		}
             	}
@@ -1028,7 +1047,7 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
                         else {
 	                    	line[1] = new Point2D.Double(other.global.x - h.x * other.l, 
 	                                other.global.y - h.y * other.l);
-	                        graphicsPanel.drawPolyLine(line);
+	                        graphicsPanel.drawPolyLine(line, false);
                         }
             		}
             	}
@@ -1215,7 +1234,7 @@ class ExportTripPattern {
 	 */
 	public ExportTripPattern(Double flow, double[] vehicleTypeFractions) throws Exception {
 		//this.flow = flow;
-		flowGraph = new TimeScaleFunction((Storable) null);
+		flowGraph = new TimeScaleFunction();
 		flowGraph.insertPair(0, flow);
 		this.fractions = vehicleTypeFractions;
 	}
@@ -1227,7 +1246,7 @@ class ExportTripPattern {
 	 * @throws Exception if the routeProbabilities do not add up to (approximately) 1.0
 	 */
 	public ExportTripPattern(TimeScaleFunction flowGraph, double[] vehicleTypeFractions) throws Exception {
-		this.flowGraph = new TimeScaleFunction((Storable) null, flowGraph);
+		this.flowGraph = new TimeScaleFunction(flowGraph);
 		this.fractions = vehicleTypeFractions;
 		checkFractions();
 	}
@@ -1243,7 +1262,7 @@ class ExportTripPattern {
 	public TimeScaleFunction getFlow(int routeIndex) {
 		if ((routeIndex < 0) || (routeIndex >= routeProbabilities.size()))
 			throw new Error("no routes defined");
-		return new TimeScaleFunction((Storable) null, flowGraph, routeProbabilities.get(routeIndex));
+		return new TimeScaleFunction(flowGraph, routeProbabilities.get(routeIndex));
 	}
 
 	public double[] getFractions() {

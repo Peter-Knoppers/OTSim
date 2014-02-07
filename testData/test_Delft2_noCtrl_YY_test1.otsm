@@ -14,13 +14,6 @@
       <X>85265.8671875</X>
       <Y>447079.65625</Y>
       <Z>NaN</Z>
-      <trafficLightController>
-        <ID>TLC_5017</ID>
-        <ControlURL>fixed:90|TL5017_02,0,25,28|TL5017_05,30,55,58|TL5017_08,60,85,88</ControlURL>
-        <Light>TL5017_02</Light>
-        <Light>TL5017_05</Light>
-        <Light>TL5017_08</Light>
-      </trafficLightController>
     </node>
     <node>
       <name>7044</name>
@@ -91,13 +84,6 @@
       <X>85183.890625</X>
       <Y>447469.5</Y>
       <Z>NaN</Z>
-      <trafficLightController>
-        <ID>TLC_6586</ID>
-        <ControlURL>fixed:90|TL6586_11,0,45,48|TL6586_02,50,55,58|TL6586_05,60,85,88</ControlURL>
-        <Light>TL6586_02</Light>
-        <Light>TL6586_05</Light>
-        <Light>TL6586_11</Light>
-      </trafficLightController>
     </node>
     <node>
       <name>6659</name>
@@ -107,17 +93,17 @@
       <Z>NaN</Z>
     </node>
     <node>
-      <name>6590</name>
-      <ID>6590</ID>
-      <X>85365.828125</X>
-      <Y>447543.09375</Y>
-      <Z>NaN</Z>
-    </node>
-    <node>
       <name>6658</name>
       <ID>6658</ID>
       <X>85777.8515625</X>
       <Y>445474.15625</Y>
+      <Z>NaN</Z>
+    </node>
+    <node>
+      <name>6590</name>
+      <ID>6590</ID>
+      <X>85365.828125</X>
+      <Y>447543.09375</Y>
       <Z>NaN</Z>
     </node>
     <node>
@@ -182,13 +168,6 @@
       <X>85614.9140625</X>
       <Y>446540.15625</Y>
       <Z>NaN</Z>
-      <trafficLightController>
-        <ID>TLC_6637</ID>
-        <ControlURL>fixed:90|TL6637_02,0,25,28|TL6637_05,30,55,58|TL6637_11,60,85,88</ControlURL>
-        <Light>TL6637_02</Light>
-        <Light>TL6637_05</Light>
-        <Light>TL6637_11</Light>
-      </trafficLightController>
     </node>
     <node>
       <name>6638</name>
@@ -196,13 +175,6 @@
       <X>85859.59375</X>
       <Y>446644.65625</Y>
       <Z>NaN</Z>
-      <trafficLightController>
-        <ID>TLC_6638</ID>
-        <ControlURL>fixed:90|TL6638_02,0,25,28|TL6638_05,30,55,58|TL6638_08,60,85,88</ControlURL>
-        <Light>TL6638_02</Light>
-        <Light>TL6638_05</Light>
-        <Light>TL6638_08</Light>
-      </trafficLightController>
     </node>
     <node>
       <name>6633</name>
@@ -210,13 +182,6 @@
       <X>85695.4609375</X>
       <Y>446314.875</Y>
       <Z>NaN</Z>
-      <trafficLightController>
-        <ID>TLC_6633</ID>
-        <ControlURL>fixed:90|TL6633_05,0,25,28|TL6633_08,30,55,58|TL6633_11,60,85,88</ControlURL>
-        <Light>TL6633_05</Light>
-        <Light>TL6633_08</Light>
-        <Light>TL6633_11</Light>
-      </trafficLightController>
     </node>
     <node>
       <name>6634</name>
@@ -224,13 +189,6 @@
       <X>85982.4140625</X>
       <Y>446922.21875</Y>
       <Z>NaN</Z>
-      <trafficLightController>
-        <ID>TLC_6634</ID>
-        <ControlURL>fixed:90|TL6634_05,0,25,28|TL6634_08,30,55,58|TL6634_11,60,85,88</ControlURL>
-        <Light>TL6634_05</Light>
-        <Light>TL6634_08</Light>
-        <Light>TL6634_11</Light>
-      </trafficLightController>
     </node>
     <node>
       <name>6635</name>
@@ -238,14 +196,6 @@
       <X>85971.78125</X>
       <Y>446954.15625</Y>
       <Z>NaN</Z>
-      <trafficLightController>
-        <ID>TLC_6635</ID>
-        <ControlURL>fixed:120|TL6635_02,0,25,28|TL6635_05,30,55,58|TL6635_08,60,85,88|TL6635_11,90,115,118</ControlURL>
-        <Light>TL6635_02</Light>
-        <Light>TL6635_05</Light>
-        <Light>TL6635_08</Light>
-        <Light>TL6635_11</Light>
-      </trafficLightController>
     </node>
     <node>
       <name>6631</name>
@@ -295,12 +245,6 @@
       <X>86374.7265625</X>
       <Y>445666.875</Y>
       <Z>NaN</Z>
-      <trafficLightController>
-        <ID>TLC_6649</ID>
-        <ControlURL>fixed:60|TL6649_11,0,25,28|TL6649_08,30,55,58</ControlURL>
-        <Light>TL6649_11</Light>
-        <Light>TL6649_08</Light>
-      </trafficLightController>
     </node>
     <node>
       <name>6648</name>
@@ -315,12 +259,6 @@
       <X>86267.46875</X>
       <Y>445640.1875</Y>
       <Z>NaN</Z>
-      <trafficLightController>
-        <ID>TLC_6650</ID>
-        <ControlURL>fixed:60|TL6650_08,0,25,28|TL6650_09,30,55,58</ControlURL>
-        <Light>TL6650_08</Light>
-        <Light>TL6650_09</Light>
-      </trafficLightController>
     </node>
     <node>
       <name>6645</name>
@@ -328,24 +266,13 @@
       <X>86355.1328125</X>
       <Y>445813.09375</Y>
       <Z>NaN</Z>
-      <trafficLightController>
-        <ID>TLC_6645</ID>
-        <ControlURL>fixed:60|TL6645_11,0,25,28|TL6645_02,30,55,58</ControlURL>
-        <Light>TL6645_11</Light>
-        <Light>TL6645_02</Light>
-      </trafficLightController>
     </node>
     <node>
       <name>6644</name>
       <ID>6644</ID>
-      <X>86512.6875</X>
-      <Y>445885.25</Y>
+      <X>86511.6875</X>
+      <Y>445862.25</Y>
       <Z>NaN</Z>
-      <trafficLightController>
-        <ID>TLC_6644</ID>
-        <ControlURL>fixed:60|TL6644_05,0,25,28</ControlURL>
-        <Light>TL6644_05</Light>
-      </trafficLightController>
     </node>
     <node>
       <name>6647</name>
@@ -360,12 +287,6 @@
       <X>86552.3671875</X>
       <Y>445715.6875</Y>
       <Z>NaN</Z>
-      <trafficLightController>
-        <ID>TLC_6646</ID>
-        <ControlURL>fixed:60|TL6646_05,0,25,28|TL6646_08,30,55,58</ControlURL>
-        <Light>TL6646_05</Light>
-        <Light>TL6646_08</Light>
-      </trafficLightController>
     </node>
     <node>
       <name>6641</name>
@@ -380,13 +301,6 @@
       <X>85636.1875</X>
       <Y>446475.40625</Y>
       <Z>NaN</Z>
-      <trafficLightController>
-        <ID>TLC_6640</ID>
-        <ControlURL>fixed:90|TL6640_02,0,25,28|TL6640_05,30,55,58|TL6640_11,60,85,88</ControlURL>
-        <Light>TL6640_02</Light>
-        <Light>TL6640_05</Light>
-        <Light>TL6640_11</Light>
-      </trafficLightController>
     </node>
     <node>
       <name>6642</name>
@@ -422,13 +336,6 @@
       <X>85796.5859375</X>
       <Y>447671.125</Y>
       <Z>NaN</Z>
-       <trafficLightController>
-        <ID>TLC_6600</ID>
-        <ControlURL>fixed:90|TL6600_02,0,5,8|TL6600_05,10,15,18|TL6600_08,20,85,88</ControlURL>
-        <Light>TL6600_02</Light>
-        <Light>TL6600_05</Light>
-        <Light>TL6600_08</Light>
-      </trafficLightController>
     </node>
     <node>
       <name>6601</name>
@@ -443,26 +350,19 @@
       <X>86040.53125</X>
       <Y>447851.28125</Y>
       <Z>NaN</Z>
-      <trafficLightController>
-        <ID>TLC_6599</ID>
-        <ControlURL>fixed:90|TL6599_05,0,5,8|TL6599_08,10,75,78|TL6599_11,80,85,88</ControlURL>
-        <Light>TL6599_05</Light>
-        <Light>TL6599_08</Light>
-        <Light>TL6599_11</Light>
-      </trafficLightController>
-    </node>
-    <node>
-      <name>6596</name>
-      <ID>6596</ID>
-      <X>85709.28125</X>
-      <Y>448275.03125</Y>
-      <Z>NaN</Z>
     </node>
     <node>
       <name>7019</name>
       <ID>7019</ID>
       <X>85419.40625</X>
       <Y>448067.6875</Y>
+      <Z>NaN</Z>
+    </node>
+    <node>
+      <name>6596</name>
+      <ID>6596</ID>
+      <X>85709.28125</X>
+      <Y>448275.03125</Y>
       <Z>NaN</Z>
     </node>
     <node>
@@ -501,17 +401,17 @@
       <Z>NaN</Z>
     </node>
     <node>
-      <name>6623</name>
-      <ID>6623</ID>
-      <X>85757.8125</X>
-      <Y>446828.8125</Y>
-      <Z>NaN</Z>
-    </node>
-    <node>
       <name>7024</name>
       <ID>7024</ID>
       <X>86601.6171875</X>
       <Y>445034.09375</Y>
+      <Z>NaN</Z>
+    </node>
+    <node>
+      <name>6623</name>
+      <ID>6623</ID>
+      <X>85757.8125</X>
+      <Y>446828.8125</Y>
       <Z>NaN</Z>
     </node>
     <node>
@@ -527,19 +427,6 @@
       <X>85584.9296875</X>
       <Y>446620.46875</Y>
       <Z>NaN</Z>
-      <trafficLightController>
-        <ID>TLC_6621</ID>
-        <ControlURL>fixed:90|TL6621_05,0,25,28|TL6621_08,30,55,58|TL6621_11,60,85,88</ControlURL>
-        <Detector>VD_6621051</Detector>
-        <Detector>VD_6621052</Detector>
-        <Detector>VD_6621081</Detector>
-        <Detector>VD_6621082</Detector>
-        <Detector>VD_6621111</Detector>
-        <Detector>VD_6621112</Detector>
-        <Light>TL6621_05</Light>
-        <Light>TL6621_08</Light>
-        <Light>TL6621_11</Light>
-      </trafficLightController>
     </node>
     <node>
       <name>6620</name>
@@ -547,19 +434,6 @@
       <X>85542.65625</X>
       <Y>446730.5</Y>
       <Z>NaN</Z>
-      <trafficLightController>
-        <ID>TLC_6620</ID>
-        <ControlURL>fixed:90|TL6620_02,0,25,28|TL6620_05,30,55,58|TL6620_11,60,85,88</ControlURL>
-        <Detector>VD_6620021</Detector>
-        <Detector>VD_6620022</Detector>
-        <Detector>VD_6620051</Detector>
-        <Detector>VD_6620052</Detector>
-        <Detector>VD_6620111</Detector>
-        <Detector>VD_6620112</Detector>
-        <Light>TL6620_02</Light>
-        <Light>TL6620_05</Light>
-        <Light>TL6620_11</Light>
-      </trafficLightController>
     </node>
     <node>
       <name>6618</name>
@@ -574,45 +448,19 @@
       <X>86426.8125</X>
       <Y>447145.5625</Y>
       <Z>NaN</Z>
-      <trafficLightController>
-        <ID>TLC_6617</ID>
-        <ControlURL>fixed:90|TL6617_02,0,5,8|TL6617_08,10,75,78|TL6617_11,80,85,88</ControlURL>
-        <Detector>VD_6617021</Detector>
-        <Detector>VD_6617022</Detector>
-        <Detector>VD_6617023</Detector>
-        <Detector>VD_6617024</Detector>
-        <Detector>VD_6617081</Detector>
-        <Detector>VD_6617082</Detector>
-        <Detector>VD_6617083</Detector>
-        <Detector>VD_6617084</Detector>
-        <Detector>VD_6617111</Detector>
-        <Detector>VD_6617112</Detector>
-        <Detector>VD_6617113</Detector>
-        <Detector>VD_6617114</Detector>
-        <Light>TL6617_02</Light>
-        <Light>TL6617_08</Light>
-        <Light>TL6617_11</Light>
-      </trafficLightController>
-    </node>
-    <node>
-      <name>6615</name>
-      <ID>6615</ID>
-      <X>85734.4609375</X>
-      <Y>447055.53125</Y>
-      <Z>NaN</Z>
-      <trafficLightController>
-        <ID>TLC_6615</ID>
-        <ControlURL>fixed:90|TL6615_02,0,25,28|TL6615_05,30,55,58|TL6615_08,60,85,88</ControlURL>
-        <Light>TL6615_02</Light>
-        <Light>TL6615_05</Light>
-        <Light>TL6615_08</Light>
-      </trafficLightController>
     </node>
     <node>
       <name>6882</name>
       <ID>6882</ID>
       <X>86678.2421875</X>
       <Y>444799.125</Y>
+      <Z>NaN</Z>
+    </node>
+    <node>
+      <name>6615</name>
+      <ID>6615</ID>
+      <X>85734.4609375</X>
+      <Y>447055.53125</Y>
       <Z>NaN</Z>
     </node>
     <node>
@@ -623,20 +471,6 @@
       <Z>NaN</Z>
     </node>
     <node>
-      <name>6612</name>
-      <ID>6612</ID>
-      <X>85582.84375</X>
-      <Y>447344.875</Y>
-      <Z>NaN</Z>
-      <trafficLightController>
-        <ID>TLC_6612</ID>
-        <ControlURL>fixed:90|TL6612_05,0,25,28|TL6612_08,30,55,58|TL6612_11,60,85,88</ControlURL>
-        <Light>TL6612_05</Light>
-        <Light>TL6612_08</Light>
-        <Light>TL6612_11</Light>
-      </trafficLightController>
-    </node>
-    <node>
       <name>6881</name>
       <ID>6881</ID>
       <X>86657.4453125</X>
@@ -644,10 +478,10 @@
       <Z>NaN</Z>
     </node>
     <node>
-      <name>6611</name>
-      <ID>6611</ID>
-      <X>85909.046875</X>
-      <Y>447266.90625</Y>
+      <name>6612</name>
+      <ID>6612</ID>
+      <X>85582.84375</X>
+      <Y>447344.875</Y>
       <Z>NaN</Z>
     </node>
     <node>
@@ -655,6 +489,13 @@
       <ID>6886</ID>
       <X>86760.125</X>
       <Y>444335.0625</Y>
+      <Z>NaN</Z>
+    </node>
+    <node>
+      <name>6611</name>
+      <ID>6611</ID>
+      <X>85909.046875</X>
+      <Y>447266.90625</Y>
       <Z>NaN</Z>
     </node>
     <node>
@@ -672,20 +513,6 @@
       <Z>NaN</Z>
     </node>
     <node>
-      <name>6608</name>
-      <ID>6608</ID>
-      <X>85619.2578125</X>
-      <Y>447563.25</Y>
-      <Z>NaN</Z>
-      <trafficLightController>
-        <ID>TLC_6608</ID>
-        <ControlURL>fixed:90|TL6608_02,0,5,8|TL6608_08,10,65,68|TL6608_11,70,85,88</ControlURL>
-        <Light>TL6608_02</Light>
-        <Light>TL6608_08</Light>
-        <Light>TL6608_11</Light>
-      </trafficLightController>
-    </node>
-    <node>
       <name>6885</name>
       <ID>6885</ID>
       <X>86784.828125</X>
@@ -693,10 +520,10 @@
       <Z>NaN</Z>
     </node>
     <node>
-      <name>9999</name>
-      <ID>9999</ID>
-      <X>87200.00</X>
-      <Y>447000.00</Y>
+      <name>6608</name>
+      <ID>6608</ID>
+      <X>85619.2578125</X>
+      <Y>447563.25</Y>
       <Z>NaN</Z>
     </node>
     <microZone>
@@ -843,25 +670,6 @@
       <Z>NaN</Z>
       <nodes>6623</nodes>
     </microZone>
-    <microZone>
-      <name>SuperZone1</name>
-      <ID>20</ID>
-      <X>87300.00</X>
-      <Y>447000.00</Y>
-      <Z>NaN</Z>
-      <nodes>9999</nodes>
-    </microZone>
-    <microZone>
-      <name>SuperZone2</name>
-      <ID>21</ID>
-      <X>87700.00</X>
-      <Y>446000.00</Y>
-      <Z>NaN</Z>
-      <nodes>6596</nodes>
-      <nodes>6607</nodes>
-      <nodes>6704</nodes>
-      <nodes>6886</nodes>
-    </microZone>
     <link>
       <name>0</name>
       <fromNode>6585</fromNode>
@@ -874,14 +682,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6586_11</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>          
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -905,7 +705,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -921,7 +720,7 @@
       <name>10</name>
       <fromNode>6608</fromNode>
       <toNode>6600</toNode>
-      <distance>207.5627123088721</distance>
+      <distance>207.56271230887216</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -929,7 +728,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -946,12 +744,11 @@
       </crossSection>
       <crossSection>
         <ID>1</ID>
-        <crossSectionPositionLongitudinal>20.0</crossSectionPositionLongitudinal>
+        <crossSectionPositionLongitudinal>50.0</crossSectionPositionLongitudinal>
         <elementOffsetLateral>0.0</elementOffsetLateral>
         <element>
           <name>road</name>
-          <width>10.5</width>
-          <speedLimit>50</speedLimit>
+          <width>7.0</width>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -961,30 +758,35 @@
             <lateralPosition>3.5</lateralPosition>
           </roadMarkerAlong>
           <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>7.0</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
             <type>|</type>
-            <lateralPosition>10.5</lateralPosition>
+            <lateralPosition>7.0</lateralPosition>
           </roadMarkerAlong>
         </element>
       </crossSection>
       <crossSection>
         <ID>2</ID>
-        <crossSectionPositionLongitudinal>30.0</crossSectionPositionLongitudinal>
+        <crossSectionPositionLongitudinal>65.0</crossSectionPositionLongitudinal>
         <elementOffsetLateral>0.0</elementOffsetLateral>
         <element>
           <name>road</name>
-          <width>10.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6600_08</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>10.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-5.0</longitudinalPosition>
-          </trafficLight>
+          <width>3.5</width>
+          <roadMarkerAlong>
+            <type>|</type>
+            <lateralPosition>0.0</lateralPosition>
+          </roadMarkerAlong>
+          <roadMarkerAlong>
+            <type>|</type>
+            <lateralPosition>3.5</lateralPosition>
+          </roadMarkerAlong>
+        </element>
+      </crossSection>
+      <crossSection>
+        <ID>3</ID>
+        <crossSectionPositionLongitudinal>157.56271230887214</crossSectionPositionLongitudinal>
+        <elementOffsetLateral>0.0</elementOffsetLateral>
+        <element>
+          <name>road</name>
+          <width>14.0</width>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -998,8 +800,41 @@
             <lateralPosition>7.0</lateralPosition>
           </roadMarkerAlong>
           <roadMarkerAlong>
-            <type>|</type>
+            <type>:</type>
             <lateralPosition>10.5</lateralPosition>
+          </roadMarkerAlong>
+          <roadMarkerAlong>
+            <type>|</type>
+            <lateralPosition>14.0</lateralPosition>
+          </roadMarkerAlong>
+        </element>
+      </crossSection>
+      <crossSection>
+        <ID>4</ID>
+        <crossSectionPositionLongitudinal>172.56271230887214</crossSectionPositionLongitudinal>
+        <elementOffsetLateral>0.0</elementOffsetLateral>
+        <element>
+          <name>road</name>
+          <width>14.0</width>
+          <roadMarkerAlong>
+            <type>|</type>
+            <lateralPosition>0.0</lateralPosition>
+          </roadMarkerAlong>
+          <roadMarkerAlong>
+            <type>:</type>
+            <lateralPosition>3.5</lateralPosition>
+          </roadMarkerAlong>
+          <roadMarkerAlong>
+            <type>:</type>
+            <lateralPosition>7.0</lateralPosition>
+          </roadMarkerAlong>
+          <roadMarkerAlong>
+            <type>:</type>
+            <lateralPosition>10.5</lateralPosition>
+          </roadMarkerAlong>
+          <roadMarkerAlong>
+            <type>|</type>
+            <lateralPosition>14.0</lateralPosition>
           </roadMarkerAlong>
         </element>
       </crossSection>
@@ -1016,7 +851,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>100</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1040,7 +874,7 @@
       <name>101</name>
       <fromNode>7025</fromNode>
       <toNode>6647</toNode>
-      <distance>163.10331531665798</distance>
+      <distance>163.10331531665796</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -1048,7 +882,6 @@
         <element>
           <name>road</name>
           <width>14.0</width>
-          <speedLimit>100</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1084,7 +917,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>100</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1116,7 +948,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>100</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1148,7 +979,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>100</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1180,7 +1010,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>100</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1212,7 +1041,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>100</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1254,7 +1082,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>100</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1296,7 +1123,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>100</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1338,7 +1164,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>100</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1390,7 +1215,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1408,7 +1232,6 @@
         <element>
           <name>road</name>
           <width>17.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1442,14 +1265,6 @@
         <element>
           <name>road</name>
           <width>17.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6608_11</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>17.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-8.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1499,7 +1314,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>100</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1536,7 +1350,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1565,7 +1378,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1587,7 +1399,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1613,14 +1424,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL5017_08</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>10.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1652,7 +1455,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1668,7 +1470,7 @@
       <name>114</name>
       <fromNode>7055</fromNode>
       <toNode>6614</toNode>
-      <distance>39.774326773843704</distance>
+      <distance>39.7743267738437</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -1676,7 +1478,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1692,7 +1493,7 @@
       <name>115</name>
       <fromNode>6549</fromNode>
       <toNode>7055</toNode>
-      <distance>318.68504920046223</distance>
+      <distance>318.6850492004622</distance>
       <intermediatePoint>
         <X>85029.7265625</X>
         <Y>446998.34375</Y>
@@ -1705,7 +1506,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1721,7 +1521,7 @@
       <name>116</name>
       <fromNode>7055</fromNode>
       <toNode>6549</toNode>
-      <distance>318.68504920046223</distance>
+      <distance>318.6850492004622</distance>
       <intermediatePoint>
         <X>85029.7265625</X>
         <Y>446998.34375</Y>
@@ -1734,7 +1534,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1762,7 +1561,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1780,7 +1578,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1806,7 +1603,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1838,7 +1634,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1862,7 +1657,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1890,7 +1684,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1912,7 +1705,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1938,7 +1730,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -1962,7 +1753,7 @@
       <name>120</name>
       <fromNode>7055</fromNode>
       <toNode>5017</toNode>
-      <distance>32.561023876391026</distance>
+      <distance>32.56102387639102</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -1970,14 +1761,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL5017_02</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2016,28 +1799,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6620_11</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
-          <vehicleDetector>
-            <ID>VD_6620111</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.0</width>
-            <length>1.0</length>
-            <longitudinalPosition>426.0</longitudinalPosition>
-          </vehicleDetector>
-          <vehicleDetector>
-            <ID>VD_6620112</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.0</width>
-            <length>10.0</length>
-            <longitudinalPosition>396.0</longitudinalPosition>
-          </vehicleDetector>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2053,7 +1814,7 @@
       <name>122</name>
       <fromNode>6620</fromNode>
       <toNode>5017</toNode>
-      <distance>448.3339275518122</distance>
+      <distance>448.3339275518121</distance>
       <intermediatePoint>
         <X>85459.9765625</X>
         <Y>446861.96875</Y>
@@ -2076,7 +1837,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2094,7 +1854,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2116,14 +1875,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL5017_05</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>7</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2161,14 +1912,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6640_02</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2202,14 +1945,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6638_05</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2243,14 +1978,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6635_08</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2284,14 +2011,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6615_02</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2307,7 +2026,7 @@
       <name>127</name>
       <fromNode>6634</fromNode>
       <toNode>6638</toNode>
-      <distance>422.6067032019302</distance>
+      <distance>422.60670320193026</distance>
       <intermediatePoint>
         <X>86032.703125</X>
         <Y>446810.96875</Y>
@@ -2325,14 +2044,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6638_02</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2366,14 +2077,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6634_05</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2417,7 +2120,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2435,7 +2137,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2457,42 +2158,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6617_11</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>7</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
-          <vehicleDetector>
-            <ID>VD_6617111</ID>
-            <lateralCenter>-1.8</lateralCenter>
-            <width>3.0</width>
-            <length>1.0</length>
-            <longitudinalPosition>23.0</longitudinalPosition>
-          </vehicleDetector>
-          <vehicleDetector>
-            <ID>VD_6617113</ID>
-            <lateralCenter>-1.8</lateralCenter>
-            <width>3.0</width>
-            <length>10.0</length>
-            <longitudinalPosition>3.0</longitudinalPosition>
-          </vehicleDetector>
-          <vehicleDetector>
-            <ID>VD_6617112</ID>
-            <lateralCenter>1.8</lateralCenter>
-            <width>3.0</width>
-            <length>1.0</length>
-            <longitudinalPosition>23.0</longitudinalPosition>
-          </vehicleDetector>
-          <vehicleDetector>
-            <ID>VD_6617114</ID>
-            <lateralCenter>1.8</lateralCenter>
-            <width>3.0</width>
-            <length>10.0</length>
-            <longitudinalPosition>3.0</longitudinalPosition>
-          </vehicleDetector>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2512,7 +2177,7 @@
       <name>13</name>
       <fromNode>6609</fromNode>
       <toNode>6590</toNode>
-      <distance>167.95887835699654</distance>
+      <distance>167.95887835699656</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -2520,7 +2185,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2542,7 +2206,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2568,7 +2231,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2620,7 +2282,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2638,7 +2299,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2660,14 +2320,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6599_05</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>7.0</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2700,7 +2352,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2722,7 +2373,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2744,7 +2394,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2773,7 +2422,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2791,7 +2439,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2813,7 +2460,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2834,26 +2480,6 @@
       <fromNode>6645</fromNode>
       <toNode>6649</toNode>
       <distance>151.03249770052497</distance>
-      <intermediatePoint>
-        <X>86350.92333984375</X>
-        <Y>445788.12744140625</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
-      <intermediatePoint>
-        <X>86350.92333984375</X>
-        <Y>445762.9455566406</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
-      <intermediatePoint>
-        <X>86353.44140625</X>
-        <Y>445733.5666503906</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
-      <intermediatePoint>
-        <X>86356.79931640625</X>
-        <Y>445703.3483886719</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -2861,14 +2487,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6649_11</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>10.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2930,7 +2548,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2948,7 +2565,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -2970,7 +2586,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3028,7 +2643,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3044,7 +2658,7 @@
       <name>16</name>
       <fromNode>6608</fromNode>
       <toNode>6609</toNode>
-      <distance>93.74451676673216</distance>
+      <distance>93.74451676673215</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -3052,7 +2666,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3074,7 +2687,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3100,7 +2712,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3132,7 +2743,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3149,12 +2759,11 @@
       </crossSection>
       <crossSection>
         <ID>1</ID>
-        <crossSectionPositionLongitudinal>40.0</crossSectionPositionLongitudinal>
+        <crossSectionPositionLongitudinal>50.0</crossSectionPositionLongitudinal>
         <elementOffsetLateral>0.0</elementOffsetLateral>
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3171,45 +2780,28 @@
       </crossSection>
       <crossSection>
         <ID>2</ID>
-        <crossSectionPositionLongitudinal>43.74451676673215</crossSectionPositionLongitudinal>
+        <crossSectionPositionLongitudinal>65.0</crossSectionPositionLongitudinal>
         <elementOffsetLateral>0.0</elementOffsetLateral>
         <element>
           <name>road</name>
-          <width>10.5</width>
-          <speedLimit>50</speedLimit>
+          <width>3.5</width>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
           </roadMarkerAlong>
           <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>3.5</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>7.0</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
             <type>|</type>
-            <lateralPosition>10.5</lateralPosition>
+            <lateralPosition>3.5</lateralPosition>
           </roadMarkerAlong>
         </element>
       </crossSection>
       <crossSection>
         <ID>3</ID>
-        <crossSectionPositionLongitudinal>58.74451676673215</crossSectionPositionLongitudinal>
+        <crossSectionPositionLongitudinal>43.74451676673215</crossSectionPositionLongitudinal>
         <elementOffsetLateral>0.0</elementOffsetLateral>
         <element>
           <name>road</name>
-          <width>10.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6608_08</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>10.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-8.0</longitudinalPosition>
-          </trafficLight>
+          <width>14.0</width>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3223,8 +2815,41 @@
             <lateralPosition>7.0</lateralPosition>
           </roadMarkerAlong>
           <roadMarkerAlong>
-            <type>|</type>
+            <type>:</type>
             <lateralPosition>10.5</lateralPosition>
+          </roadMarkerAlong>
+          <roadMarkerAlong>
+            <type>|</type>
+            <lateralPosition>14.0</lateralPosition>
+          </roadMarkerAlong>
+        </element>
+      </crossSection>
+      <crossSection>
+        <ID>4</ID>
+        <crossSectionPositionLongitudinal>58.74451676673215</crossSectionPositionLongitudinal>
+        <elementOffsetLateral>0.0</elementOffsetLateral>
+        <element>
+          <name>road</name>
+          <width>14.0</width>
+          <roadMarkerAlong>
+            <type>|</type>
+            <lateralPosition>0.0</lateralPosition>
+          </roadMarkerAlong>
+          <roadMarkerAlong>
+            <type>:</type>
+            <lateralPosition>3.5</lateralPosition>
+          </roadMarkerAlong>
+          <roadMarkerAlong>
+            <type>:</type>
+            <lateralPosition>7.0</lateralPosition>
+          </roadMarkerAlong>
+          <roadMarkerAlong>
+            <type>:</type>
+            <lateralPosition>10.5</lateralPosition>
+          </roadMarkerAlong>
+          <roadMarkerAlong>
+            <type>|</type>
+            <lateralPosition>14.0</lateralPosition>
           </roadMarkerAlong>
         </element>
       </crossSection>
@@ -3266,7 +2891,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3284,7 +2908,6 @@
         <element>
           <name>road</name>
           <width>17.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3318,14 +2941,6 @@
         <element>
           <name>road</name>
           <width>17.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6600_05</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>17.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-8.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3384,19 +2999,14 @@
         <elementOffsetLateral>0.0</elementOffsetLateral>
         <element>
           <name>road</name>
-          <width>7.0</width>
-          <speedLimit>50</speedLimit>
+          <width>3.5</width>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
           </roadMarkerAlong>
           <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>3.5</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
             <type>|</type>
-            <lateralPosition>7.0</lateralPosition>
+            <lateralPosition>3.5</lateralPosition>
           </roadMarkerAlong>
         </element>
       </crossSection>
@@ -3405,7 +3015,17 @@
       <name>2</name>
       <fromNode>6586</fromNode>
       <toNode>6590</toNode>
-      <distance>208.02188701665628</distance>
+      <distance>208.0218870166563</distance>
+      <intermediatePoint>
+        <X>85257.8203125</X>
+        <Y>447528.21875</Y>
+        <Z>NaN</Z>
+      </intermediatePoint>
+      <intermediatePoint>
+        <X>85306.3671875</X>
+        <Y>447551.0</Y>
+        <Z>NaN</Z>
+      </intermediatePoint>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -3413,7 +3033,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3430,12 +3049,11 @@
       </crossSection>
       <crossSection>
         <ID>1</ID>
-        <crossSectionPositionLongitudinal>140.0</crossSectionPositionLongitudinal>
+        <crossSectionPositionLongitudinal>158.0218870166563</crossSectionPositionLongitudinal>
         <elementOffsetLateral>0.0</elementOffsetLateral>
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3456,12 +3074,11 @@
       </crossSection>
       <crossSection>
         <ID>2</ID>
-        <crossSectionPositionLongitudinal>155.0</crossSectionPositionLongitudinal>
+        <crossSectionPositionLongitudinal>173.0218870166563</crossSectionPositionLongitudinal>
         <elementOffsetLateral>0.0</elementOffsetLateral>
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3498,7 +3115,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3511,12 +3127,11 @@
       </crossSection>
       <crossSection>
         <ID>1</ID>
-        <crossSectionPositionLongitudinal>310.85459143615424</crossSectionPositionLongitudinal>
+        <crossSectionPositionLongitudinal>315.85459143615424</crossSectionPositionLongitudinal>
         <elementOffsetLateral>0.0</elementOffsetLateral>
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3533,12 +3148,11 @@
       </crossSection>
       <crossSection>
         <ID>2</ID>
-        <crossSectionPositionLongitudinal>325.85459143615424</crossSectionPositionLongitudinal>
+        <crossSectionPositionLongitudinal>330.85459143615424</crossSectionPositionLongitudinal>
         <elementOffsetLateral>0.0</elementOffsetLateral>
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3571,14 +3185,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6612_08</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3602,7 +3208,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3618,7 +3223,7 @@
       <name>23</name>
       <fromNode>6614</fromNode>
       <toNode>6586</toNode>
-      <distance>348.7671518777588</distance>
+      <distance>348.76715187775875</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -3626,7 +3231,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3644,7 +3248,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3666,14 +3269,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6586_05</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>7.0</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3706,14 +3301,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6612_11</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3742,7 +3329,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3760,7 +3346,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3782,7 +3367,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3810,7 +3394,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3826,26 +3409,21 @@
       <name>27</name>
       <fromNode>6618</fromNode>
       <toNode>6617</toNode>
-      <distance>323.6971436703026</distance>
+      <distance>323.6971436703025</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
         <elementOffsetLateral>0.0</elementOffsetLateral>
         <element>
           <name>road</name>
-          <width>7.0</width>
-          <speedLimit>50</speedLimit>
+          <width>3.5</width>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
           </roadMarkerAlong>
           <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>3.5</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
             <type>|</type>
-            <lateralPosition>7.0</lateralPosition>
+            <lateralPosition>3.5</lateralPosition>
           </roadMarkerAlong>
         </element>
       </crossSection>
@@ -3856,7 +3434,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3878,42 +3455,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6617_08</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>7</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
-          <vehicleDetector>
-            <ID>VD_6617081</ID>
-            <lateralCenter>-1.8</lateralCenter>
-            <width>3.0</width>
-            <length>1.0</length>
-            <longitudinalPosition>23.0</longitudinalPosition>
-          </vehicleDetector>
-          <vehicleDetector>
-            <ID>VD_6617083</ID>
-            <lateralCenter>-1.8</lateralCenter>
-            <width>3.0</width>
-            <length>10.0</length>
-            <longitudinalPosition>3.0</longitudinalPosition>
-          </vehicleDetector>
-          <vehicleDetector>
-            <ID>VD_6617082</ID>
-            <lateralCenter>1.8</lateralCenter>
-            <width>3.0</width>
-            <length>1.0</length>
-            <longitudinalPosition>23.0</longitudinalPosition>
-          </vehicleDetector>
-          <vehicleDetector>
-            <ID>VD_6617084</ID>
-            <lateralCenter>1.8</lateralCenter>
-            <width>3.0</width>
-            <length>10.0</length>
-            <longitudinalPosition>3.0</longitudinalPosition>
-          </vehicleDetector>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3941,28 +3482,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6621_11</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
-          <vehicleDetector>
-            <ID>VD_6621111</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.0</width>
-            <length>1.0</length>
-            <longitudinalPosition>105.0</longitudinalPosition>
-          </vehicleDetector>
-          <vehicleDetector>
-            <ID>VD_6621112</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.0</width>
-            <length>10.0</length>
-            <longitudinalPosition>75.0</longitudinalPosition>
-          </vehicleDetector>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -3978,7 +3497,7 @@
       <name>29</name>
       <fromNode>6621</fromNode>
       <toNode>6620</toNode>
-      <distance>117.87247131806862</distance>
+      <distance>117.8724713180686</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -3986,28 +3505,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6620_05</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
-          <vehicleDetector>
-            <ID>VD_6620051</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.0</width>
-            <length>1.0</length>
-            <longitudinalPosition>106.0</longitudinalPosition>
-          </vehicleDetector>
-          <vehicleDetector>
-            <ID>VD_6620052</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.0</width>
-            <length>10.0</length>
-            <longitudinalPosition>76.0</longitudinalPosition>
-          </vehicleDetector>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4023,7 +3520,17 @@
       <name>3</name>
       <fromNode>6590</fromNode>
       <toNode>6586</toNode>
-      <distance>208.0218870166563</distance>
+      <distance>208.02188701665628</distance>
+      <intermediatePoint>
+        <X>85306.3671875</X>
+        <Y>447551.0</Y>
+        <Z>NaN</Z>
+      </intermediatePoint>
+      <intermediatePoint>
+        <X>85257.8203125</X>
+        <Y>447528.21875</Y>
+        <Z>NaN</Z>
+      </intermediatePoint>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -4031,14 +3538,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6586_02</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>7.0</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4066,7 +3565,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4090,14 +3588,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6615_05</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4121,7 +3611,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4145,28 +3634,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6620_02</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
-          <vehicleDetector>
-            <ID>VD_6620021</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.0</width>
-            <length>1.0</length>
-            <longitudinalPosition>224.0</longitudinalPosition>
-          </vehicleDetector>
-          <vehicleDetector>
-            <ID>VD_6620022</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.0</width>
-            <length>10.0</length>
-            <longitudinalPosition>194.0</longitudinalPosition>
-          </vehicleDetector>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4190,7 +3657,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4214,28 +3680,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6621_08</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
-          <vehicleDetector>
-            <ID>VD_6621081</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.0</width>
-            <length>1.0</length>
-            <longitudinalPosition>310.0</longitudinalPosition>
-          </vehicleDetector>
-          <vehicleDetector>
-            <ID>VD_6621082</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.0</width>
-            <length>10.0</length>
-            <longitudinalPosition>280.0</longitudinalPosition>
-          </vehicleDetector>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4259,14 +3703,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6633_08</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4290,7 +3726,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4306,7 +3741,7 @@
       <name>38</name>
       <fromNode>6623</fromNode>
       <toNode>6634</toNode>
-      <distance>243.25005532682601</distance>
+      <distance>243.25005532682596</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -4314,14 +3749,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6634_08</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4337,7 +3764,7 @@
       <name>39</name>
       <fromNode>6634</fromNode>
       <toNode>6623</toNode>
-      <distance>243.25005532682601</distance>
+      <distance>243.25005532682596</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -4345,7 +3772,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4361,7 +3787,7 @@
       <name>4</name>
       <fromNode>6596</fromNode>
       <toNode>6599</toNode>
-      <distance>537.8574392903755</distance>
+      <distance>537.8574392903756</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -4369,7 +3795,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4387,7 +3812,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4409,14 +3833,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6599_11</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>7.0</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4464,14 +3880,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6635_11</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4515,14 +3923,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6612_05</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4546,14 +3946,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6635_02</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4569,26 +3961,21 @@
       <name>43</name>
       <fromNode>6635</fromNode>
       <toNode>6618</toNode>
-      <distance>169.95243187893047</distance>
+      <distance>169.95243187893044</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
         <elementOffsetLateral>0.0</elementOffsetLateral>
         <element>
           <name>road</name>
-          <width>7.0</width>
-          <speedLimit>50</speedLimit>
+          <width>3.5</width>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
           </roadMarkerAlong>
           <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>3.5</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
             <type>|</type>
-            <lateralPosition>7.0</lateralPosition>
+            <lateralPosition>3.5</lateralPosition>
           </roadMarkerAlong>
         </element>
       </crossSection>
@@ -4605,14 +3992,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6635_05</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4636,14 +4015,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6634_11</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4667,14 +4038,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6637_11</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4698,28 +4061,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6621_05</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
-          <vehicleDetector>
-            <ID>VD_6621051</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.0</width>
-            <length>1.0</length>
-            <longitudinalPosition>73.0</longitudinalPosition>
-          </vehicleDetector>
-          <vehicleDetector>
-            <ID>VD_6621052</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.0</width>
-            <length>10.0</length>
-            <longitudinalPosition>43.0</longitudinalPosition>
-          </vehicleDetector>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4743,14 +4084,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6638_08</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4766,7 +4099,7 @@
       <name>49</name>
       <fromNode>6638</fromNode>
       <toNode>6637</toNode>
-      <distance>266.0608942988384</distance>
+      <distance>266.0608942988383</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -4774,14 +4107,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6637_02</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4797,26 +4122,21 @@
       <name>5</name>
       <fromNode>6599</fromNode>
       <toNode>6596</toNode>
-      <distance>537.8574392903755</distance>
+      <distance>537.8574392903756</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
         <elementOffsetLateral>0.0</elementOffsetLateral>
         <element>
           <name>road</name>
-          <width>7.0</width>
-          <speedLimit>50</speedLimit>
+          <width>3.5</width>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
           </roadMarkerAlong>
           <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>3.5</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
             <type>|</type>
-            <lateralPosition>7.0</lateralPosition>
+            <lateralPosition>3.5</lateralPosition>
           </roadMarkerAlong>
         </element>
       </crossSection>
@@ -4825,7 +4145,7 @@
       <name>50</name>
       <fromNode>6633</fromNode>
       <toNode>6640</toNode>
-      <distance>171.12458216056777</distance>
+      <distance>171.1245821605678</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -4833,14 +4153,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6640_05</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4864,14 +4176,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6633_11</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4895,14 +4199,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6640_11</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4926,14 +4222,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6637_05</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4950,16 +4238,6 @@
       <fromNode>6644</fromNode>
       <toNode>6641</toNode>
       <distance>525.5568152119886</distance>
-      <intermediatePoint>
-        <X>86487.203125</X>
-        <Y>445915.15625</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
-      <intermediatePoint>
-        <X>86425.9921875</X>
-        <Y>446062.09375</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -4967,7 +4245,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -4984,16 +4261,6 @@
       <fromNode>6642</fromNode>
       <toNode>6645</toNode>
       <distance>551.5499955242519</distance>
-      <intermediatePoint>
-        <X>86347.9140625</X>
-        <Y>445962.21875</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
-      <intermediatePoint>
-        <X>86358.2734375</X>
-        <Y>445868.5</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -5001,14 +4268,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6645_11</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>7.0</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -5029,26 +4288,6 @@
       <fromNode>6644</fromNode>
       <toNode>6645</toNode>
       <distance>179.77895244235998</distance>
-      <intermediatePoint>
-        <X>86478.359375</X>
-        <Y>445888.4375</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
-      <intermediatePoint>
-        <X>86437.2578125</X>
-        <Y>445871.46875</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
-      <intermediatePoint>
-        <X>86413.140625</X>
-        <Y>445853.5625</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
-      <intermediatePoint>
-        <X>86389.0234375</X>
-        <Y>445834.84375</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -5056,7 +4295,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -5072,69 +4310,6 @@
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>10.5</lateralPosition>
-          </roadMarkerAlong>
-        </element>
-      </crossSection>
-      <crossSection>
-        <ID>1</ID>
-        <crossSectionPositionLongitudinal>20.0</crossSectionPositionLongitudinal>
-        <elementOffsetLateral>0.0</elementOffsetLateral>
-        <element>
-          <name>road</name>
-          <width>10.5</width>
-          <speedLimit>50</speedLimit>
-          <roadMarkerAlong>
-            <type>|</type>
-            <lateralPosition>0.0</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>3.5</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>7.0</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>|</type>
-            <lateralPosition>10.5</lateralPosition>
-          </roadMarkerAlong>
-        </element>
-      </crossSection>
-      <crossSection>
-        <ID>2</ID>
-        <crossSectionPositionLongitudinal>40.0</crossSectionPositionLongitudinal>
-        <elementOffsetLateral>0.0</elementOffsetLateral>
-        <element>
-          <name>road</name>
-          <width>14.0</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6645_02</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>14.0</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
-          <roadMarkerAlong>
-            <type>|</type>
-            <lateralPosition>0.0</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>3.5</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>7.0</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>10.5</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
-            <type>|</type>
-            <lateralPosition>14.0</lateralPosition>
           </roadMarkerAlong>
         </element>
       </crossSection>
@@ -5144,31 +4319,6 @@
       <fromNode>6646</fromNode>
       <toNode>6644</toNode>
       <distance>199.8726042734456</distance>
-      <intermediatePoint>
-        <X>86566.796875</X>
-        <Y>445742.8125</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
-      <intermediatePoint>
-        <X>86575.7265625</X>
-        <Y>445770.53125</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
-      <intermediatePoint>
-        <X>86575.7265625</X>
-        <Y>445802.65625</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
-      <intermediatePoint>
-        <X>86564.1171875</X>
-        <Y>445836.59375</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
-      <intermediatePoint>
-        <X>86543.9453125</X>
-        <Y>445864.8125</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -5176,14 +4326,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6644_05</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>10.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-6.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -5208,26 +4350,6 @@
       <fromNode>6647</fromNode>
       <toNode>6646</toNode>
       <distance>399.0618101791373</distance>
-      <intermediatePoint>
-        <X>86552.3671875</X>
-        <Y>445467.9375</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
-      <intermediatePoint>
-        <X>86546.2421875</X>
-        <Y>445515.03125</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
-      <intermediatePoint>
-        <X>86540.890625</X>
-        <Y>445585.59375</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
-      <intermediatePoint>
-        <X>86539.1015625</X>
-        <Y>445644.53125</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -5235,14 +4357,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6646_05</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>7.0</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -5262,22 +4376,7 @@
       <name>59</name>
       <fromNode>6649</fromNode>
       <toNode>6646</toNode>
-      <distance>186.72903759445148</distance>
-      <intermediatePoint>
-        <X>86403.3125</X>
-        <Y>445672.25</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
-      <intermediatePoint>
-        <X>86447.0859375</X>
-        <Y>445678.5</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
-      <intermediatePoint>
-        <X>86497.1171875</X>
-        <Y>445685.65625</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
+      <distance>186.7290375944515</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -5285,14 +4384,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6646_08</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>10.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-6.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -5324,7 +4415,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -5342,7 +4432,6 @@
         <element>
           <name>road</name>
           <width>14.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -5372,14 +4461,6 @@
         <element>
           <name>road</name>
           <width>14.0</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6600_02</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>14</width>
-            <length>1.0</length>
-            <longitudinalPosition>-8.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -5407,22 +4488,7 @@
       <name>60</name>
       <fromNode>6649</fromNode>
       <toNode>6648</toNode>
-      <distance>505.80601523639405</distance>
-      <intermediatePoint>
-        <X>86407.78125</X>
-        <Y>445621.3125</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
-      <intermediatePoint>
-        <X>86425.6484375</X>
-        <Y>445574.875</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
-      <intermediatePoint>
-        <X>86443.515625</X>
-        <Y>445523.96875</Y>
-        <Z>NaN</Z>
-      </intermediatePoint>
+      <distance>505.806015236394</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -5430,7 +4496,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -5450,7 +4515,7 @@
       <name>61</name>
       <fromNode>6650</fromNode>
       <toNode>6649</toNode>
-      <distance>110.53257481334352</distance>
+      <distance>110.5325748133435</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -5458,7 +4523,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -5475,12 +4539,11 @@
       </crossSection>
       <crossSection>
         <ID>1</ID>
-        <crossSectionPositionLongitudinal>20.0</crossSectionPositionLongitudinal>
+        <crossSectionPositionLongitudinal>30.0</crossSectionPositionLongitudinal>
         <elementOffsetLateral>0.0</elementOffsetLateral>
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -5501,19 +4564,11 @@
       </crossSection>
       <crossSection>
         <ID>2</ID>
-        <crossSectionPositionLongitudinal>50.0</crossSectionPositionLongitudinal>
+        <crossSectionPositionLongitudinal>40.0</crossSectionPositionLongitudinal>
         <elementOffsetLateral>0.0</elementOffsetLateral>
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6649_08</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>10.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -5537,7 +4592,7 @@
       <name>62</name>
       <fromNode>6652</fromNode>
       <toNode>6650</toNode>
-      <distance>297.86623590905515</distance>
+      <distance>297.8662359090552</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -5545,14 +4600,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6650_08</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>7.0</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -5572,7 +4619,7 @@
       <name>63</name>
       <fromNode>6652</fromNode>
       <toNode>6653</toNode>
-      <distance>80.33087095335765</distance>
+      <distance>80.33087095335766</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -5580,7 +4627,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -5600,7 +4646,7 @@
       <name>64</name>
       <fromNode>6653</fromNode>
       <toNode>6652</toNode>
-      <distance>80.33087095335765</distance>
+      <distance>80.33087095335766</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -5608,7 +4654,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -5636,7 +4681,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -5660,14 +4704,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6633_05</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>7.0</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -5687,7 +4723,7 @@
       <name>67</name>
       <fromNode>6658</fromNode>
       <toNode>6650</toNode>
-      <distance>520.4168125260916</distance>
+      <distance>520.4168125260917</distance>
       <intermediatePoint>
         <X>85933.640625</X>
         <Y>445544.34375</Y>
@@ -5710,14 +4746,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>100</speedLimit>
-          <trafficLight>
-            <ID>TL6650_09</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>7.0</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -5745,7 +4773,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -5763,7 +4790,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -5789,7 +4815,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -5848,7 +4873,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -5870,7 +4894,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -5891,19 +4914,14 @@
         <elementOffsetLateral>0.0</elementOffsetLateral>
         <element>
           <name>road</name>
-          <width>7.0</width>
-          <speedLimit>50</speedLimit>
+          <width>3.5</width>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
           </roadMarkerAlong>
           <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>3.5</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
             <type>|</type>
-            <lateralPosition>7.0</lateralPosition>
+            <lateralPosition>3.5</lateralPosition>
           </roadMarkerAlong>
         </element>
       </crossSection>
@@ -5914,7 +4932,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -5936,14 +4953,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6599_08</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>7.0</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -5963,7 +4972,7 @@
       <name>70</name>
       <fromNode>6645</fromNode>
       <toNode>5010</toNode>
-      <distance>90.93642913082967</distance>
+      <distance>90.93642913082965</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -5971,7 +4980,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6003,7 +5011,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6023,26 +5030,21 @@
       <name>72</name>
       <fromNode>6660</fromNode>
       <toNode>6653</toNode>
-      <distance>23.657056263093178</distance>
+      <distance>23.65705626309318</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
         <elementOffsetLateral>0.0</elementOffsetLateral>
         <element>
           <name>road</name>
-          <width>7.0</width>
-          <speedLimit>50</speedLimit>
+          <width>3.5</width>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
           </roadMarkerAlong>
           <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>3.5</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
             <type>|</type>
-            <lateralPosition>7.0</lateralPosition>
+            <lateralPosition>3.5</lateralPosition>
           </roadMarkerAlong>
         </element>
       </crossSection>
@@ -6051,7 +5053,7 @@
       <name>73</name>
       <fromNode>6654</fromNode>
       <toNode>6660</toNode>
-      <distance>487.41650326620044</distance>
+      <distance>487.4165032662004</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -6059,7 +5061,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6087,7 +5088,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6107,7 +5107,7 @@
       <name>75</name>
       <fromNode>5010</fromNode>
       <toNode>6660</toNode>
-      <distance>357.0994769047489</distance>
+      <distance>357.0994769047488</distance>
       <intermediatePoint>
         <X>86152.9765625</X>
         <Y>445703.8125</Y>
@@ -6120,7 +5120,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6140,7 +5139,7 @@
       <name>76</name>
       <fromNode>5010</fromNode>
       <toNode>6659</toNode>
-      <distance>542.8366220277119</distance>
+      <distance>542.8366220277118</distance>
       <intermediatePoint>
         <X>86229.5625</X>
         <Y>445712.84375</Y>
@@ -6163,7 +5162,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6183,7 +5181,7 @@
       <name>77</name>
       <fromNode>6664</fromNode>
       <toNode>6658</toNode>
-      <distance>656.822147166044</distance>
+      <distance>656.8221471660441</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -6191,7 +5189,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6211,7 +5208,7 @@
       <name>78</name>
       <fromNode>6659</fromNode>
       <toNode>6665</toNode>
-      <distance>693.4542262586737</distance>
+      <distance>693.4542262586735</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -6219,7 +5216,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6246,19 +5242,14 @@
         <elementOffsetLateral>0.0</elementOffsetLateral>
         <element>
           <name>road</name>
-          <width>7.0</width>
-          <speedLimit>50</speedLimit>
+          <width>3.5</width>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
           </roadMarkerAlong>
           <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>3.5</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
             <type>|</type>
-            <lateralPosition>7.0</lateralPosition>
+            <lateralPosition>3.5</lateralPosition>
           </roadMarkerAlong>
         </element>
       </crossSection>
@@ -6294,19 +5285,14 @@
         <elementOffsetLateral>0.0</elementOffsetLateral>
         <element>
           <name>road</name>
-          <width>7.0</width>
-          <speedLimit>50</speedLimit>
+          <width>3.5</width>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
           </roadMarkerAlong>
           <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>3.5</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
             <type>|</type>
-            <lateralPosition>7.0</lateralPosition>
+            <lateralPosition>3.5</lateralPosition>
           </roadMarkerAlong>
         </element>
       </crossSection>
@@ -6323,7 +5309,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6341,7 +5326,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6363,42 +5347,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6617_02</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>7</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
-          <vehicleDetector>
-            <ID>VD_6617021</ID>
-            <lateralCenter>-1.8</lateralCenter>
-            <width>3.0</width>
-            <length>1.0</length>
-            <longitudinalPosition>23.0</longitudinalPosition>
-          </vehicleDetector>
-          <vehicleDetector>
-            <ID>VD_6617023</ID>
-            <lateralCenter>-1.8</lateralCenter>
-            <width>3.0</width>
-            <length>10.0</length>
-            <longitudinalPosition>3.0</longitudinalPosition>
-          </vehicleDetector>
-          <vehicleDetector>
-            <ID>VD_6617022</ID>
-            <lateralCenter>1.8</lateralCenter>
-            <width>3.0</width>
-            <length>1.0</length>
-            <longitudinalPosition>23.0</longitudinalPosition>
-          </vehicleDetector>
-          <vehicleDetector>
-            <ID>VD_6617024</ID>
-            <lateralCenter>1.8</lateralCenter>
-            <width>3.0</width>
-            <length>10.0</length>
-            <longitudinalPosition>3.0</longitudinalPosition>
-          </vehicleDetector>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6425,19 +5373,14 @@
         <elementOffsetLateral>0.0</elementOffsetLateral>
         <element>
           <name>road</name>
-          <width>7.0</width>
-          <speedLimit>50</speedLimit>
+          <width>3.5</width>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
           </roadMarkerAlong>
           <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>3.5</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
             <type>|</type>
-            <lateralPosition>7.0</lateralPosition>
+            <lateralPosition>3.5</lateralPosition>
           </roadMarkerAlong>
         </element>
       </crossSection>
@@ -6454,7 +5397,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6478,7 +5420,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>100</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6510,7 +5451,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>100</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6542,7 +5482,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6558,7 +5497,7 @@
       <name>86</name>
       <fromNode>6988</fromNode>
       <toNode>6615</toNode>
-      <distance>177.72451981605593</distance>
+      <distance>177.7245198160559</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -6566,14 +5505,6 @@
         <element>
           <name>road</name>
           <width>3.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6615_08</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>3.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-4.0</longitudinalPosition>
-          </trafficLight>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6597,7 +5528,6 @@
         <element>
           <name>road</name>
           <width>14.0</width>
-          <speedLimit>100</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6633,7 +5563,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>100</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6665,7 +5594,6 @@
         <element>
           <name>road</name>
           <width>14.0</width>
-          <speedLimit>100</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6693,7 +5621,7 @@
       <name>9</name>
       <fromNode>6600</fromNode>
       <toNode>6608</toNode>
-      <distance>207.56271230887214</distance>
+      <distance>207.5627123088721</distance>
       <crossSection>
         <ID>0</ID>
         <crossSectionPositionLongitudinal>0.0</crossSectionPositionLongitudinal>
@@ -6701,7 +5629,6 @@
         <element>
           <name>road</name>
           <width>7.0</width>
-          <speedLimit>50</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6722,8 +5649,7 @@
         <elementOffsetLateral>0.0</elementOffsetLateral>
         <element>
           <name>road</name>
-          <width>10.5</width>
-          <speedLimit>50</speedLimit>
+          <width>7.0</width>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6733,12 +5659,8 @@
             <lateralPosition>3.5</lateralPosition>
           </roadMarkerAlong>
           <roadMarkerAlong>
-            <type>:</type>
-            <lateralPosition>7.0</lateralPosition>
-          </roadMarkerAlong>
-          <roadMarkerAlong>
             <type>|</type>
-            <lateralPosition>10.5</lateralPosition>
+            <lateralPosition>7.0</lateralPosition>
           </roadMarkerAlong>
         </element>
       </crossSection>
@@ -6748,15 +5670,24 @@
         <elementOffsetLateral>0.0</elementOffsetLateral>
         <element>
           <name>road</name>
-          <width>10.5</width>
-          <speedLimit>50</speedLimit>
-          <trafficLight>
-            <ID>TL6608_02</ID>
-            <lateralCenter>0.0</lateralCenter>
-            <width>10.5</width>
-            <length>1.0</length>
-            <longitudinalPosition>-8.0</longitudinalPosition>
-          </trafficLight>
+          <width>3.5</width>
+          <roadMarkerAlong>
+            <type>|</type>
+            <lateralPosition>0.0</lateralPosition>
+          </roadMarkerAlong>
+          <roadMarkerAlong>
+            <type>|</type>
+            <lateralPosition>3.5</lateralPosition>
+          </roadMarkerAlong>
+        </element>
+      </crossSection>
+      <crossSection>
+        <ID>3</ID>
+        <crossSectionPositionLongitudinal>157.56271230887214</crossSectionPositionLongitudinal>
+        <elementOffsetLateral>0.0</elementOffsetLateral>
+        <element>
+          <name>road</name>
+          <width>17.5</width>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6770,8 +5701,49 @@
             <lateralPosition>7.0</lateralPosition>
           </roadMarkerAlong>
           <roadMarkerAlong>
-            <type>|</type>
+            <type>:</type>
             <lateralPosition>10.5</lateralPosition>
+          </roadMarkerAlong>
+          <roadMarkerAlong>
+            <type>:</type>
+            <lateralPosition>14.0</lateralPosition>
+          </roadMarkerAlong>
+          <roadMarkerAlong>
+            <type>|</type>
+            <lateralPosition>17.5</lateralPosition>
+          </roadMarkerAlong>
+        </element>
+      </crossSection>
+      <crossSection>
+        <ID>4</ID>
+        <crossSectionPositionLongitudinal>172.56271230887214</crossSectionPositionLongitudinal>
+        <elementOffsetLateral>0.0</elementOffsetLateral>
+        <element>
+          <name>road</name>
+          <width>17.5</width>
+          <roadMarkerAlong>
+            <type>|</type>
+            <lateralPosition>0.0</lateralPosition>
+          </roadMarkerAlong>
+          <roadMarkerAlong>
+            <type>:</type>
+            <lateralPosition>3.5</lateralPosition>
+          </roadMarkerAlong>
+          <roadMarkerAlong>
+            <type>:</type>
+            <lateralPosition>7.0</lateralPosition>
+          </roadMarkerAlong>
+          <roadMarkerAlong>
+            <type>:</type>
+            <lateralPosition>10.5</lateralPosition>
+          </roadMarkerAlong>
+          <roadMarkerAlong>
+            <type>:</type>
+            <lateralPosition>14.0</lateralPosition>
+          </roadMarkerAlong>
+          <roadMarkerAlong>
+            <type>|</type>
+            <lateralPosition>17.5</lateralPosition>
           </roadMarkerAlong>
         </element>
       </crossSection>
@@ -6788,7 +5760,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>100</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6830,7 +5801,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>100</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6862,7 +5832,6 @@
         <element>
           <name>road</name>
           <width>14.0</width>
-          <speedLimit>100</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6908,7 +5877,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>100</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6940,7 +5908,6 @@
         <element>
           <name>road</name>
           <width>14.0</width>
-          <speedLimit>100</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -6986,7 +5953,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>100</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -7018,7 +5984,6 @@
         <element>
           <name>road</name>
           <width>14.0</width>
-          <speedLimit>100</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -7069,7 +6034,6 @@
         <element>
           <name>road</name>
           <width>10.5</width>
-          <speedLimit>100</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -7101,7 +6065,6 @@
         <element>
           <name>road</name>
           <width>14.0</width>
-          <speedLimit>100</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -7137,7 +6100,6 @@
         <element>
           <name>road</name>
           <width>14.0</width>
-          <speedLimit>100</speedLimit>
           <roadMarkerAlong>
             <type>|</type>
             <lateralPosition>0.0</lateralPosition>
@@ -7191,99 +6153,29 @@
     </roadMarkerType>
   </Network>
   <Demand>
-    <trafficClass>
-      <name>passengerCar_normal</name>
-      <activationLevel>0.0</activationLevel>
-      <defaultFraction>0.18</defaultFraction>
-      <length>4.000</length>
-      <maximumSpeed>130</maximumSpeed>
-      <transitionTime>0</transitionTime>
-    </trafficClass>
-    <trafficClass>
-      <name>truck_normal</name>
-      <activationLevel>0.0</activationLevel>
-      <defaultFraction>0.02</defaultFraction>
-      <length>15.000</length>
-      <maximumSpeed>85</maximumSpeed>
-      <transitionTime>0</transitionTime>
-    </trafficClass>
-    <trafficClass>
-      <name>passengerCar_act</name>
-      <activationLevel>0.9</activationLevel>
-      <defaultFraction>0.76</defaultFraction>
-      <length>4.000</length>
-      <maximumSpeed>140</maximumSpeed>
-      <transitionTime>600</transitionTime>
-    </trafficClass>
-    <trafficClass>
-      <name>truck_act</name>
-      <activationLevel>0.9</activationLevel>
-      <defaultFraction>0.04</defaultFraction>
-      <length>15.000</length>
-      <maximumSpeed>90</maximumSpeed>
-      <transitionTime>600</transitionTime>
-    </trafficClass>
     <tripPattern>
-      <location>z1 z21</location>
-      <trips>852.000000</trips>
+      <location>z1 z7</location>
+      <trips>11.000000</trips>
     </tripPattern>
     <tripPattern>
-      <location>z3 z21</location>
-      <trips>800.000000</trips>
+      <location>z1 z9</location>
+      <trips>247.000000</trips>
     </tripPattern>
     <tripPattern>
-      <location>z4 z21</location>
-      <trips>800.000000</trips>
+      <location>z1 z10</location>
+      <trips>46.000000</trips>
     </tripPattern>
     <tripPattern>
-      <location>z5 z21</location>
-      <trips>800.000000</trips>
+      <location>z1 z16</location>
+      <trips>72.000000</trips>
     </tripPattern>
     <tripPattern>
-      <location>z6 z21</location>
-      <trips>3768.000000</trips>
+      <location>z1 z17</location>
+      <trips>37.000000</trips>
     </tripPattern>
     <tripPattern>
-      <location>z8 z21</location>
-      <trips>1000.000000</trips>
-    </tripPattern>
-    <tripPattern>
-      <location>z10 z21</location>
-      <trips>734.000000</trips>
-    </tripPattern>
-    <tripPattern>
-      <location>z11 z21</location>
-      <trips>1000.000000</trips>
-    </tripPattern>
-    <tripPattern>
-      <location>z13 z21</location>
-      <trips>408.000000</trips>
-    </tripPattern>
-    <tripPattern>
-      <location>z16 z21</location>
-      <trips>372.000000</trips>
-    </tripPattern>
-    <tripPattern>
-      <location>z18 z21</location>
-      <trips>254.000000</trips>
-    </tripPattern>
-    <TimeScaleFunction>
-      <Pair>
-        <Time>0.000</Time>
-        <Factor>0.100000</Factor>
-      </Pair>
-      <Pair>
-        <Time>600.000</Time>
-        <Factor>0.100000</Factor>
-      </Pair>
-      <Pair>
-        <Time>600.100</Time>
-        <Factor>1.000000</Factor>
-      </Pair>
-    </TimeScaleFunction>
-    <tripPattern>
-      <location>z1 z2</location>
-      <trips>1000.000000</trips>
+      <location>z1 z18</location>
+      <trips>12.000000</trips>
     </tripPattern>
   </Demand>
 </model>

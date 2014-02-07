@@ -184,6 +184,7 @@ public class Model implements Storable {
     			+ network.exportTrafficLights()
     			+ network.exportDetectors()
     			+ network.exportTrafficLightControllers()
+    			+ network.exportVMSs()
     			+ exportMeasurementPlans();
 	}
     

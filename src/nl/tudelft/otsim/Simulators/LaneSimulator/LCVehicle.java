@@ -5,7 +5,6 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
 
 import nl.tudelft.otsim.GUI.GraphicsPanel;
-import nl.tudelft.otsim.SpatialTools.Planar;
 
 /**
  * Temporary vehicle as a place-holder during a lane change.
@@ -38,30 +37,32 @@ public class LCVehicle extends Movable {
         // Move movable downstream
         x += dx;
         //justExceededLane = false;
-        if (x > lane.l) {
+        if (x > getLane().l) {
             //justExceededLane = true;
             // check whether adjacent neighbors need to be reset
             // these will be found automatically by updateNeighbour() in
             // the main model loop
-            if ((lane.left != null) && (lane.left.down != lane.down.left)) {
+            if ((getLane().left != null) && (getLane().left.down != getLane().down.left)) {
             	setNeighbor(Movable.LEFT_UP, null);
             	setNeighbor(Movable.LEFT_DOWN, null);
             }
-            if ((lane.right != null) && (lane.right.down != lane.down.right)) {
+            if ((getLane().right != null) && (getLane().right.down != getLane().down.right)) {
             	setNeighbor(Movable.RIGHT_UP, null);
             	setNeighbor(Movable.RIGHT_DOWN, null);
             }
             // put on downstream lane
-            x -= lane.l;
-            lane.cut(this);
-            lane.down.paste(this, x);
-            lane = lane.down;
-            if (lane.isMerge() || lane.isSplit()) {
-                Lane lTmp = lane;
+            x -= getLane().l;
+            getLane().cut(this);
+            getLane().down.paste(this, x);
+            setLane(getLane().down);
+            if (getLane().isMerge() || getLane().isSplit()) {
+                Lane lTmp = getLane();
                 cut();
                 paste(lTmp, x);
             }
         }
+        getLane().cut(this);
+        getLane().paste(this, this.x);
     }
 
     /**
@@ -107,7 +108,7 @@ public class LCVehicle extends Movable {
 	 * @param graphicsPanel {@link GraphicsPanel} drawing target
 	 */
 	public void paint(double when, GraphicsPanel graphicsPanel) {
-		if (! lane.isVisible())
+		if (! getLane().isVisible())
 			return;
         if (null == global) {
         	System.err.println("LCVehicle.outline: global is NULL");
@@ -115,7 +116,7 @@ public class LCVehicle extends Movable {
         }
         graphicsPanel.setColor(Color.BLACK);
         graphicsPanel.setStroke(0.1f);
-        graphicsPanel.drawPolyLine(Planar.closePolyline(outline()));
+        graphicsPanel.drawPolyLine(outline(), true);
         Point2D.Double[] outline = outline();
 		graphicsPanel.setColor(new Color(255,192,192));
         graphicsPanel.setStroke(0f);

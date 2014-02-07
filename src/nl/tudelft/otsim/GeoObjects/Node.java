@@ -338,7 +338,7 @@ public class Node extends Vertex implements XML_IO {
 								Line2D.Double otherDLLine = otherCS.vectorAtNode(otherDL.incoming, true, otherIndex, false);
 								if (null == otherDLLine)
 									continue;
-								if (Planar.lineIntersectsLine(dlLine, otherDLLine))
+								if (Planar.lineSegmentIntersectsLineSegment(dlLine, otherDLLine))
 									pointCloud.add(Planar.intersection(dlLine, otherDLLine));
 							}
 						}
@@ -361,7 +361,7 @@ public class Node extends Vertex implements XML_IO {
 					Line2D.Double line = cs.vectorAtNode(dl.incoming, true, index, false);
 					if (null == line)
 						continue;
-					Point2D.Double intersections[] = Planar.intersectRayAndCircle(line, circle);
+					Point2D.Double intersections[] = Planar.intersectLineSegmentAndCircle(line, circle);
 					//System.out.format(Main.Locale, "line %s intersects circle %s at %d point(s)\r\n", GeometryTools.Line2DToString(line), circle.toString(), intersections.length);
 					if (intersections.length > 1) {
 						System.err.println("Peter thinks this never happens...");
@@ -378,7 +378,7 @@ public class Node extends Vertex implements XML_IO {
 						// probably a very near miss
 						double ratio = circle.radius() / line.getP1().distance(circle.center());
 						if ((ratio > 0.99) && (ratio < 1.01))
-							points.add(Planar.logPoint("adding almost intersection", (Point2D.Double)(line.getP1())));
+							points.add(Planar.log("adding almost intersection", (Point2D.Double)(line.getP1())));
 						else
 							System.err.println("Total miss: ratio is " + ratio + " (" + circle.radius() / line.getP2().distance(circle.center()) + ")");
 					}
@@ -438,11 +438,18 @@ public class Node extends Vertex implements XML_IO {
 					result.clear();
 					result.add(new Vertex(replacementPoint, z));
 				}
-				else
-					result.add(v);
+				// 20140120/PK: WRONG: else	(must ALWAYS add vertex v)
+				result.add(v);
 			}
 			prevPoint = p;
 		}		
+		if (result.size() < 2) {
+			System.err.println("Malformed vertices");
+			System.out.println("vertices are:" + Planar.verticesToString(vertices));
+			System.out.println("polygon is: " + Planar.pointsToString(polygon));
+			// Uncomment to try again for debugging
+			//truncateHeadAtConflictArea(vertices);
+		}
 		return result;
 	}
 	
@@ -467,6 +474,8 @@ public class Node extends Vertex implements XML_IO {
 		} 
 		if (distanceStart < circle.radius()) {
 			vertices = truncateHeadAtConflictArea(vertices);
+			if (vertices.size() < 2)
+				throw new Error("Malformed vertices");
 			return vertices;
 		}
 		if (distanceEnd < circle.radius()) {
@@ -474,12 +483,12 @@ public class Node extends Vertex implements XML_IO {
 			// We'd better make sure that the caller does not mind...
 			Collections.reverse(vertices);
 			vertices = truncateHeadAtConflictArea(vertices);
-
+			if (vertices.size() < 2)
+				throw new Error("Malformed vertices");
 			Collections.reverse(vertices);
 			return vertices;
 		}
 		// Neither end of vertices is near the conflict area
-
 		return vertices;
 	}
 	
@@ -1493,7 +1502,7 @@ public class Node extends Vertex implements XML_IO {
 				for (Vertex vB : verticesB) {
 					if (! (prevB == null))   {
 						Line2D.Double lineB = new Line2D.Double(prevB.getX(),prevB.getY(),vB.getX(),vB.getY());
-						if (Planar.lineIntersectsLine(lineA, lineB))
+						if (Planar.lineSegmentIntersectsLineSegment(lineA, lineB))
 							return Planar.intersection(lineA,  lineB);
 					}
 					prevB = vB;
@@ -1548,7 +1557,7 @@ public class Node extends Vertex implements XML_IO {
 			Vertex up = upLane.getLaneVerticesCenter().get(upLane.getLaneVerticesCenter().size()-1);
 			Vertex down = downLane.getLaneVerticesCenter().get(0);		
 			
-			if (up.equals(oldUp)  && sameOutlink)
+			if (up.equals(oldUp) && sameOutlink)
 				sameUp = true;
 			if (down.equals(oldDown))
 				sameDown = true;
@@ -1556,7 +1565,7 @@ public class Node extends Vertex implements XML_IO {
 			prevLaneVerticesCenter = oldLane.getLaneVerticesCenter();
 			laneVerticesCenter = Planar.createParallelVertices(prevLaneVerticesCenter, -oldLane.getLateralWidth());
 			// if same upLane: create weighted vertices in between
-			if (sameUp == true)
+			if (sameUp)
 				laneVerticesCenter = Planar.createPartlyParallelVertices(prevLaneVerticesCenter, laneVerticesCenter, sameUp, sameDown);
 			newLane.setDesignLine(laneVerticesCenter);
 			newLane.setLaneVerticesInner(Planar.createParallelVertices(laneVerticesCenter, - newLane.getLateralWidth() / 2));

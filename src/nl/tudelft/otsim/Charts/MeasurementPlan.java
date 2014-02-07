@@ -338,7 +338,7 @@ public class MeasurementPlan extends JPanel implements GraphicsPanelClient, Stor
 
 	private void appendPart(ArrayList<Vertex> existingPart, ArrayList<Vertex> newPart) {
 		int first = 0;
-		if ((existingPart.size() > 0) && (existingPart.get(existingPart.size() - 1).distanceTo(newPart.get(0)) < veryClose))
+		if ((existingPart.size() > 0) && (existingPart.get(existingPart.size() - 1).distance(newPart.get(0)) < veryClose))
 			first = 1;
 		while (first < newPart.size())
 			existingPart.add(newPart.get(first++));

@@ -17,7 +17,25 @@ public abstract class Movable  {
     public Model model;
 
     /** Lane where the movable is at. */
-    public Lane lane;
+    private Lane lane;
+    
+    /**
+     * Retrieve the {@link Lane} on which this Movable is located.
+     * @return {@link Lane}; the Lane on which this Movable is located
+     */
+    public Lane getLane() {
+    	return lane;
+    }
+    
+    /**
+     * Set the {@link Lane} on which this Movable is located.
+     * @param newLane {@link Lane}; the new lane of this Movable
+     */
+    public void setLane(Lane newLane) {
+    	if ((6 == id) && (model.t > 646.1))
+    		System.out.println("movable " + id + " changing from " + lane.toString() + " to " + newLane.toString());
+    	lane = newLane;
+    }
 
     /** Position on the lane. */
     public double x;
@@ -134,7 +152,7 @@ public abstract class Movable  {
     		newNeighbor.reverseNeighbors.add(this);
     	neighbors[direction] = newNeighbor;
     	if ((neighbors[UP] == neighbors[DOWN]) && (neighbors[UP] != null))
-    		System.out.println("whoops");
+    		System.out.println("whoops up neighbor is equal to down neighbor (and not null)");
     }
     
     /**
@@ -280,6 +298,32 @@ public abstract class Movable  {
      */
     public abstract void translate(double dx);
 
+    private double getHeadway(Movable leader, int relation) {
+    	double adjust;
+    	switch (relation) {
+    	case 1:
+    		if (0 == (adjust = lane.xAdj(leader.lane)))
+    			return Double.MAX_VALUE;
+    		return leader.x + adjust - x;
+    	case 2:
+    		if ((null == leader.lane.right) || (0 == (adjust = lane.xAdj(leader.lane.right))))
+    			return Double.MAX_VALUE;
+    		return leader.getAdjacentX(Model.latDirection.RIGHT) + adjust - x;
+    	case 3:
+    		if ((null == lane.left) || (0 == (adjust = lane.left.xAdj(leader.lane))))
+    			return Double.MAX_VALUE;
+    		return leader.x + adjust - getAdjacentX(Model.latDirection.LEFT);
+    	case 4:
+    		if ((null == leader.lane.left) || (0 == (adjust = lane.xAdj(leader.lane.left))))
+    			return Double.MAX_VALUE;
+    		return leader.getAdjacentX(Model.latDirection.LEFT) + adjust - x;
+    	case 5:
+    		if ((null == lane.right) || (0 == (adjust = lane.right.xAdj(leader.lane))))
+    			return Double.MAX_VALUE;
+    		return leader.x + adjust - getAdjacentX(Model.latDirection.RIGHT);
+    	default: throw new Error("Bad relation (" + relation + ")");
+    	}
+    }
     /**
      * Returns the net headway to a given vehicle. This vehicle should be on the
      * same or an adjacent lane, or anywhere up- or downstream of those lanes.
@@ -294,7 +338,7 @@ public abstract class Movable  {
             return Double.POSITIVE_INFINITY;
         }
         double s;
-        double xAdjTmp;
+        //double xAdjTmp;
         if (lane == leader.lane) {
             s = leader.x - x; // same lane
             if (s < 0)
@@ -303,43 +347,30 @@ public abstract class Movable  {
             s = leader.getAdjacentX(Model.latDirection.LEFT) - x; // leader is right
         else if (lane==leader.lane.right)
             s = leader.getAdjacentX(Model.latDirection.RIGHT) - x; // leader is left
-        else if ((xAdjTmp=lane.xAdj(leader.lane)) != 0)
-            s = leader.x + xAdjTmp - x; // leader is up- or downstream
-        else if ((xAdjTmp=lane.xAdj(leader.lane.left)) != 0)
-            s = leader.getAdjacentX(Model.latDirection.LEFT) + xAdjTmp - x; // leader is on right lane up- or downstream
-        else if (lane.right!=null && (xAdjTmp=lane.right.xAdj(leader.lane)) != 0)
-            s = leader.x + xAdjTmp - getAdjacentX(Model.latDirection.RIGHT); // leader is on right lane up- or downstream (no up/down lane)
-        else if ((xAdjTmp=lane.xAdj(leader.lane.right)) != 0)
-            s = leader.getAdjacentX(Model.latDirection.RIGHT) + xAdjTmp - x; // leader is on left lane up- or downstream
-        else if (lane.left!=null && (xAdjTmp=lane.left.xAdj(leader.lane)) != 0)
-            s = leader.x + xAdjTmp - getAdjacentX(Model.latDirection.LEFT); // leader is on left lane up- or downstream (no up/down lane)
-        else if (this instanceof Vehicle) {
-            // leader may actually be a leader of the lane change vehicle
-            /*
-             * This happens for a neighbor of an lcVehicle as:
-             * ------------
-             *          A
-             * ------------
-             *     B
-             * ------------
-             *     C
-             * ------------
-             * Vehicle A wants the acceleration B->A so it won't cut B off. The
-             * acceleration is calculated by the driver of vehicle B. However, B
-             * is a lane change vehicle (of C) and has no driver.
-             * "B.getDriver()" returns the driver of vehicle C. That driver then
-             * needs a headway between it's vehicle (C) and A. This will not be
-             * found and so the headway between B and A will be needed.
-             */
-            Vehicle veh = (Vehicle) this;
-            if (veh.lcVehicle == null) {
-                // give warning as vehicles are not adjacent
-                System.err.println("Headway not found from lanes: "+x+"@"+lane.id+"->"+leader.x+"@"+leader.lane.id+", returning Inf");
-                s = Double.POSITIVE_INFINITY;
-            } else
-                s = veh.lcVehicle.getHeadway(leader);
-        } else
-        	throw new Error ("Cannot compute headway of non-related lanes");
+        else {
+        	if ((leader == this.getNeighbor(DOWN)) || (this == leader.getNeighbor(UP)))
+        		s = getHeadway(leader, 1);
+        	else if ((leader == this.getNeighbor(LEFT_DOWN)) || (this == leader.getNeighbor(RIGHT_UP))) {
+        		s = getHeadway(leader, 2);
+        		s = Math.min(s, getHeadway(leader, 3));
+        	} else if ((leader == this.getNeighbor(RIGHT_DOWN)) || (this == leader.getNeighbor(LEFT_UP))) {
+        		s = getHeadway(leader, 4);
+        		s = Math.min(s,  getHeadway(leader, 5));
+        	} else {
+        		s = Double.MAX_VALUE;
+        		for (int relation = 1; relation <= 5; relation++)
+        			s = Math.min(s, getHeadway(leader, relation));
+        	}
+            // consider LcVehicle
+            if ((this instanceof Vehicle) && ((Vehicle) this).lcVehicle != null) {
+                double s2 = ((Vehicle) this).lcVehicle.getHeadway(leader) + leader.l;
+                // minimum of both, excluding NaN
+                s = (Double.isNaN(s2) || (!Double.isNaN(s) && s<s2)) ? s : s2;
+            }
+            if ((this instanceof Vehicle) && Double.isNaN(s))
+                throw new Error("Cannot determine distance to leader");
+
+        }
         s = s - leader.l; // gross -> net
         return s;
     }
@@ -347,13 +378,21 @@ public abstract class Movable  {
     /**
      * Returns the distance between a vehicle and a RSU.
      * @param rsu RSU.
-     * @return Distance [m] between vehicle and RSU.
+     * @return Distance [m] from vehicle to RSU.
      */
     public double getDistanceToRSU(RSU rsu) {
-    	double reverseDistance = rsu.lane.xAdj(lane) + x - rsu.x;
-    	if ((0 == reverseDistance) || (reverseDistance > l)) 
-            return rsu.x + lane.xAdj(rsu.lane) - x; // Not found; or too far away on loop
-    	return - reverseDistance;	// vehicle nose downstream of rsu and rear upstream of rsu
+    	if (lane == rsu.lane){
+    		if (x > rsu.x + l)	// we drove beyond the RSU
+    			return rsu.x + lane.xAdj(rsu.lane) - x; // Not found; or too far away on loop
+    		// not beyond RSU
+    		return rsu.x - x;
+    	}
+    	// different lanes
+    	double reverseXAdj = rsu.lane.xAdj(lane);
+    	double reverseDistance = reverseXAdj + x - rsu.x;
+    	if ((0 == reverseXAdj) || (reverseDistance > l))
+            return rsu.x + lane.xAdj(rsu.lane) - x; // Not found; or too far away on loop    		
+    	return - reverseDistance;	// vehicle nose downstream of RSU and rear upstream of RSU
     }
 
     /**
@@ -522,8 +561,13 @@ public abstract class Movable  {
         	setNeighbor(DOWN, atLane.findVehicle(atX, Model.longDirection.DOWN));
         if ((null != getNeighbor(DOWN)) && (getNeighbor(DOWN).lane.upMerge == atLane.upMerge))
         	getNeighbor(DOWN).setNeighbor(UP, this);	// same lane, down has this as up
+        // Reset the neighborUpdated flags XXX DOES NOT HELP
+        if (null != getNeighbor(DOWN))
+        	getNeighbor(DOWN).neighborUpdated[DOWN] = -1;
+        if (null != getNeighbor(UP))
+        	getNeighbor(UP).neighborUpdated[UP] = -1;
         // set properties
-        lane = atLane;
+        setLane(atLane);
         x = atX;
         // Set pointers to this of vehicles at other side of split or merge.
         if ((null != lane.upMerge) && (null == getNeighbor(UP))) {
