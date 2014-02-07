@@ -192,9 +192,11 @@ public class ImportModelShapeWizard implements ActionListener {
 				importedModel = getFeatures(getDataStoreLinks(), getDataStoreNodes(), 
 						getDataStoreZones(), getTableShapeImport().getTableField(), 
 						getTableShapeImport().getTableDirection());
-				ArrayList<TripPattern> tripPatternList = importMatrix(getFileImportedMatrix());
-				importedModel.trafficDemand.setTripPatternList(tripPatternList);
-				importedModel.trafficDemand.rebuild();
+				if (optionTripPattern.isSelected())  {
+					ArrayList<TripPattern> tripPatternList = importMatrix(getFileImportedMatrix());
+					importedModel.trafficDemand.setTripPatternList(tripPatternList);
+					importedModel.trafficDemand.rebuild();
+				}
 				//importedModel.trafficDemand.createTripPatternList(tripPatternList);
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
@@ -663,6 +665,7 @@ public class ImportModelShapeWizard implements ActionListener {
     			int newLanes = turnArrowList.size();
     			newRmaList = createRMA(newLanes, laneWidth);	
     			CrossSectionElement cse1 = new CrossSectionElement(cs1, typologyName, laneWidth * newLanes , newRmaList, turnArrowList);
+    			newRmaList = createRMA(newLanes, laneWidth);	
     			CrossSectionElement cse2 = new CrossSectionElement(cs2, typologyName, laneWidth * newLanes , newRmaList, turnArrowList);
         		ArrayList<CrossSectionElement> cse1List = new ArrayList<CrossSectionElement>();
             	cse1List.add(cse1);
@@ -671,7 +674,12 @@ public class ImportModelShapeWizard implements ActionListener {
             	cse2List.add(cse2);
             	cs2.setCrossSectionElementList_w(cse2List);
     		} else
-    			cse = new CrossSectionElement(cs, typologyName, laneWidth * lanes, rmaList, turnArrowList);
+   	        if (null != turnArrowList)  {    	        	
+  	        	for (TurnArrow ta : turnArrowList)
+    	        		cse.getObjects().add(ta);
+            }
+    			//GT volgende uitcommentarieren
+  //  			cse = new CrossSectionElement(cs, typologyName, laneWidth * lanes, rmaList, turnArrowList);
     	}
     	if (exitLanes > 0)  {
     		if (!(lanes == exitLanes) ) {
@@ -695,6 +703,7 @@ public class ImportModelShapeWizard implements ActionListener {
     			int newLanes = exitLanes;
     			newRmaList = createRMA(newLanes, laneWidth);	
     			CrossSectionElement cse1 = new CrossSectionElement(cs1, typologyName, laneWidth * newLanes , newRmaList, null);
+   			newRmaList = createRMA(newLanes, laneWidth);
     			CrossSectionElement cse2 = new CrossSectionElement(cs2, typologyName, laneWidth * newLanes , newRmaList, null);
         		ArrayList<CrossSectionElement> cse1List = new ArrayList<CrossSectionElement>();
             	cse1List.add(cse1);
@@ -713,32 +722,64 @@ public class ImportModelShapeWizard implements ActionListener {
 		int lanes = turnLanes.length();
 		int[] outLinkNumber = null;
 		ArrayList<TurnArrow> turnArrowList = new ArrayList<TurnArrow>();
+		// in case a turn starts with a straight movement, the outLinkNumber starts with a zero (0)
+		int outLink = 0;
+		outLinkNumber = new int[] {outLink};
 		for (int i = 0; i < lanes; i++)   {
 			char turn = turnLanes.charAt(i);
+			boolean right = false;
+			boolean straight = false;
+			boolean left = false;
 			switch (turn)   {
 				case 'r': // Right turn only
-					outLinkNumber = new int[] {1};
+					outLinkNumber = new int[] {outLink};
+					right = true;
 					break;
 				case 's': // Main (straight on) lane 
-					outLinkNumber = new int[] {2};
+					if (right = true)
+						outLink = 1;
+					outLinkNumber = new int[] {outLink};
+					straight = true;
 					break;
 				case 'l': // Left turn only 
-					outLinkNumber = new int[] {3};
+					if (right = true && straight == true)
+						outLink = 2;
+					else if (right = true)
+						outLink = 1;
+					else if (straight = true)
+						outLink = 1;
+					else
+						outLink = 0;
+					outLinkNumber = new int[] {outLink};
+					left = true;
 					break;
 				case 'q': // Left turn and straight on 
-					outLinkNumber = new int[] {2, 3};
+					if (right = true)
+						outLink = 1;
+					outLinkNumber = new int[] {outLink, outLink + 1};
+					straight = true;
+					left = true;					
 					break;
 				case 'p': // Right turn and straight on
-					outLinkNumber = new int[] {1, 2};
+					outLinkNumber = new int[] {outLink, outLink + 1};
+					right = true;
+					straight = true;					
 					break;
 				case 'u': // Left turn and right turn 
-					outLinkNumber = new int[] {1, 2};
+					outLinkNumber = new int[] {outLink, outLink + 1};
+					right = true;
+					left = true;					
 					break;
 				case 'a': // Any turn lane 
-					outLinkNumber = new int[] {1, 2, 3};
+					outLinkNumber = new int[] {outLink, outLink + 1, outLink + 2};
+					right = true;
+					straight = true;
+					left = true;					
 					break;
-				case 'b': // Bus lane (straight on 
-					outLinkNumber = new int[] {2};
+				case 'b': // Bus lane (straight on) 
+					if (right = true)
+						outLink = 1;
+					outLinkNumber = new int[] {outLink};
 					break;
 			}
 			Double lateralPosition = (i * laneWidth) + laneWidth / 2;
