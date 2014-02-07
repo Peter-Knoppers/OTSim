@@ -652,16 +652,22 @@ public class ImportModelShapeWizard implements ActionListener {
     	// if turnlanes are defined, we create an intermediate crossSection at a certain pre-defined distance from the junction (toNode)
     	if (turnLanes != null  && ! turnLanes.isEmpty())  {
     		ArrayList<TurnArrow> turnArrowList = analyseTurns(turnLanes, laneWidth);
+
     		if (lanes != turnArrowList.size()) {
     			double longPosition1 = 0;
     			double longPosition2 = 0;
-    			// TODO explain all these constants: 70, 50, 35, 3.0/5, 3.1/5
-    			if (calculatedLength > 70)   {
-    				longPosition1 = calculatedLength - 50;
-    				longPosition2 = calculatedLength - 35;
+    			final int minimalLengthTurnLanes = 70;
+    			
+    			if (calculatedLength > minimalLengthTurnLanes)   {
+        			final int createCrossSection1 = 50;
+        			final int createCrossSection2 = 35;
+    				longPosition1 = calculatedLength - createCrossSection1;
+    				longPosition2 = calculatedLength - createCrossSection2;
     			} else  {
-    				longPosition1 = 3.0/5 * calculatedLength;
-    				longPosition2 = 3.1/5 * calculatedLength;				
+        			final double createCrossSectionRelative1 = 0.6;
+        			final double createCrossSectionRelative2 = 0.7;
+    				longPosition1 = createCrossSectionRelative1 * calculatedLength;
+    				longPosition2 = createCrossSectionRelative2 * calculatedLength;				
     			}
     			CrossSection cs1 = new CrossSection(longPosition1, 0.0, null);    			
     			CrossSection cs2 = new CrossSection(longPosition2, 0.0, null);
@@ -692,15 +698,20 @@ public class ImportModelShapeWizard implements ActionListener {
     		if (lanes != exitLanes) {
     			double longPosition1 = 0;
     			double longPosition2 = 0;
-    			// TODO explain all these constants: 70, 50, 65, 2.0/5, 2.1/5
-    			if (calculatedLength > 70)   {
+    			final double minimalLengthLinkExitLanes = 40.0;
+    			
+    			if (calculatedLength > minimalLengthLinkExitLanes)   {
+        			final double endPositionExitLanes = .90;
+        			final double relativeLengthExitLanes = .80;
     				longPosition1 = 0;
-    				longPosition2 = 50;
-    				cs.setLongitudalPosition_w(65);
+    				longPosition2 = relativeLengthExitLanes * minimalLengthLinkExitLanes;
+    				cs.setLongitudalPosition_w(endPositionExitLanes * minimalLengthLinkExitLanes);
     			} else {
+        			final double endPositionExitLanes = .90;
+        			final double relativeLengthExitLanes = .80;
     				longPosition1 = 0;
-    				longPosition2 = (2.0/5) * calculatedLength;
-    				cs.setLongitudalPosition_w( 2.1/5 * calculatedLength);
+    				longPosition2 = relativeLengthExitLanes * calculatedLength;
+    				cs.setLongitudalPosition_w( endPositionExitLanes * calculatedLength);
     			}
     			CrossSection cs1 = new CrossSection(longPosition1, 0.0, null);    			
     			CrossSection cs2 = new CrossSection(longPosition2, 0.0, null);
@@ -710,7 +721,7 @@ public class ImportModelShapeWizard implements ActionListener {
     			int newLanes = exitLanes;
     			newRmaList = createRMA(newLanes, laneWidth);	
     			CrossSectionElement cse1 = new CrossSectionElement(cs1, typologyName, laneWidth * newLanes , newRmaList, null);
-   			newRmaList = createRMA(newLanes, laneWidth);
+    			newRmaList = createRMA(newLanes, laneWidth);
     			CrossSectionElement cse2 = new CrossSectionElement(cs2, typologyName, laneWidth * newLanes , newRmaList, null);
         		ArrayList<CrossSectionElement> cse1List = new ArrayList<CrossSectionElement>();
             	cse1List.add(cse1);
@@ -837,7 +848,6 @@ public class ImportModelShapeWizard implements ActionListener {
 		int lanes = 0;
 		// assume a one hour period
     	final int periodHours = 1;
-    	// TODO: put those magic constants in final integers (or doubles) with descriptive names
     	final int speedBorderUrbanFreeway = 95;
     	final int maxSpeedFreeway = 140;    	
     	final int capacityLaneUrban = 2000;
