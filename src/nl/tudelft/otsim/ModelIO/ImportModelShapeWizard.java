@@ -17,7 +17,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -57,6 +56,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 
 public class ImportModelShapeWizard implements ActionListener {
+	// FIXME: Why is cards declared static?
     private static JPanel cards = new JPanel(new CardLayout());
 	private int cardIndex ;
 	private JButton cancelButton;
@@ -76,10 +76,6 @@ public class ImportModelShapeWizard implements ActionListener {
 	private static int fileCount;
 
 	public ImportModelShapeWizard() {
-		//Class<?> klass;
-		//klass = Coordinate.class;
-		//URL location = klass.getResource('/' + klass.getName().replace(".", "/") + ".class");
-		//System.out.print(location);
         frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	// Why? It does not actually work because it is overridden later!
         frame.setPreferredSize(new Dimension(700, 400));
@@ -108,27 +104,12 @@ public class ImportModelShapeWizard implements ActionListener {
         choices.add(optionTripPattern, gbConstraints);
         cards.add(choices, "Options");
 
-        fChooser = null;
-    	int files = 4;
-    	String[] fileNames = new String[files];
-    	fileNames[0] = "Browse";
-    	fileNames[1] = "Browse";
-    	fileNames[2] = "Browse";
-    	fileNames[3] = "Browse";
-    	String[] labels = new String[files];
-    	labels[0] = "Shape Links: ";
-    	labels[1] = "Shape Nodes: ";
-    	labels[2] = "Shape Zones: ";
-    	labels[3] = "Matrix file: ";	    	
+    	String[] fileNames = { "Browse", "Browse", "Browse", "Browse" }; 
+    	String[] labels = { "Shape Links: ", "Shape Nodes: ", "Shape Zones: ", "Matrix file: " };	    	
     	fileCount = fileNames.length;
-    	String[] commandNames = new String[files];
-    	commandNames[0] = "ShapeLinks";
-    	commandNames[1] = "ShapeNodes";
-    	commandNames[2] = "ShapeZones";
-    	commandNames[3] = "Matrix";
-    	fChooser = new FileChooser(files, labels, fileNames, commandNames);
+    	String[] commandNames = { "ShapeLinks", "ShapeNodes", "ShapeZones", "Matrix" };
+    	fChooser = new FileChooser(labels, fileNames, commandNames, "ImportModelShape");
     	fChooser.setVisible(true); 
-    	fChooser.setModuleName("ImportModelShape");
     	cards.add(fChooser, fChooser.toString());
 
     	JPanel control = new JPanel() ;
@@ -146,7 +127,6 @@ public class ImportModelShapeWizard implements ActionListener {
     	control.add(finishButton);
     	cancelButton = new JButton("Cancel");
     	cancelButton.addActionListener(this);
-    	cancelButton.setEnabled(true);  	
     	control.add(cancelButton);
 
     	frame.add(cards, BorderLayout.CENTER);
@@ -154,6 +134,7 @@ public class ImportModelShapeWizard implements ActionListener {
         frame.pack();
         frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frame.setLocationRelativeTo(null);
+        fixButtons();
         frame.setVisible(true);
     }
 
@@ -162,28 +143,14 @@ public class ImportModelShapeWizard implements ActionListener {
 		String command = e.getActionCommand();
 		System.out.println("actionperformed: command is " + command);
 		if (command.startsWith("Network Import") )   {
-			//this.getNextButton().setEnabled(true);
 	        Main.mainFrame.getImportModelShapeWizard().getNextButton().setEnabled(true);
-	        // FIXME: use a for loop!
-	        if (optionNetwork.isSelected())  {
-	        	fChooser.getFileButton()[0].setEnabled(true);
-	        	fChooser.getFileButton()[1].setEnabled(true);
-	        	fChooser.getFileButton()[2].setEnabled(true);
-	        } else {
-	        	fChooser.getFileButton()[0].setEnabled(false);
-	        	fChooser.getFileButton()[1].setEnabled(false);
-	        	fChooser.getFileButton()[2].setEnabled(false);	        		
-        	}        		
+	        for (int i = 0; i <= 2; i++)
+	        	fChooser.getFileButton()[i].setEnabled(optionNetwork.isSelected());
 	    }
 
 		if (command.startsWith("TripPattern") )   {
 	        Main.mainFrame.getImportModelShapeWizard().getNextButton().setEnabled(true);
-	        if (optionNetwork.isSelected())  {
-	        	fChooser.getFileButton()[3].setEnabled(true);	        		
-	        }
-        	else  {
-	        	fChooser.getFileButton()[3].setEnabled(false);
-        	} 
+	        fChooser.getFileButton()[3].setEnabled(optionNetwork.isSelected());
 		}
 
 		if (command.startsWith("Finish")) {
@@ -212,31 +179,26 @@ public class ImportModelShapeWizard implements ActionListener {
 			//add close statement
 		}
 		if (command.startsWith("\u22b2Prev")) {
-            CardLayout cl = (CardLayout) cards.getLayout();
-            if (cardIndex == cards.getComponentCount() - 1)
-            	this.finishButton.setEnabled(false);
-            if (cardIndex > 0) {
-            	cl.previous(cards);
-            	this.nextButton.setEnabled(true);
-            	cardIndex--;
-            	System.out.print( "cardnumber" + cardIndex + "prev" );
-            }
-            if (cardIndex == 0)
-            	this.prevButton.setEnabled(false);
+			if (0 == cardIndex)
+				return;	// should not happen; race ?
+			cardIndex--;
+            ((CardLayout) cards.getLayout()).previous(cards);
+			fixButtons();
 		}
 		if (command.startsWith("Next\u22b3")) {
-            CardLayout cl = (CardLayout) cards.getLayout();
-            if (cardIndex != cards.getComponentCount() - 1) {
-            	cl.next(cards);
-            	this.prevButton.setEnabled(true);
-            	cardIndex++;
-            	System.out.print( "cardnumber" + cardIndex + "next" );
-            }
-            if (cardIndex == cards.getComponentCount() - 1) { 
-            	this.finishButton.setEnabled(true);
-            	this.nextButton.setEnabled(false);
-            }
+			if (cards.getComponentCount() - 1 == cardIndex)
+				return;	// should not happen; race ?
+			cardIndex++;
+            ((CardLayout) cards.getLayout()).next(cards);
+			fixButtons();
         }
+	}
+	
+	private void fixButtons() {
+    	System.out.print( "cardnumber" + cardIndex + "next" );
+		nextButton.setEnabled(cardIndex < cards.getComponentCount() - 1);
+		prevButton.setEnabled(cardIndex > 0);
+		finishButton.setEnabled(cardIndex == cards.getComponentCount() - 1);
 	}
 	
 	static void importModel() throws Exception   {
@@ -273,7 +235,7 @@ public class ImportModelShapeWizard implements ActionListener {
 		}
 		//set enabled true, but if not all files are selected puts it back to false
         Main.mainFrame.getImportModelShapeWizard().getNextButton().setEnabled(true);
-        for (int i = 0; i < fileCount-1; i++)
+        for (int i = 0; i < fileCount - 1; i++)
         	if (fChooser.getTextField()[i].getText().toString().isEmpty())
         		Main.mainFrame.getImportModelShapeWizard().getNextButton().setEnabled(false);
 

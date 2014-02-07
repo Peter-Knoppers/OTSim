@@ -84,9 +84,8 @@ public class LoadModel implements ActionListener {
     	String[] commandNames = new String[files];
     	commandNames[0] = "Model";
     	commandNames[1] = "Demand";
-    	fChooser = new FileChooser(files, labels, fileNames, commandNames);
+    	fChooser = new FileChooser(labels, fileNames, commandNames, "LoadModel");
     	fChooser.setVisible(true);
-    	fChooser.setModuleName("LoadModel");
     	// The module name is used in the class FileChooser to select the action
     	// of the file chooser!!!!
     	cards.add(fChooser, fChooser.toString());
