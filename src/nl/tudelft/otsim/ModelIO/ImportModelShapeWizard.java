@@ -835,29 +835,35 @@ public class ImportModelShapeWizard implements ActionListener {
 
 	private static int deriveLanes(double capacity, double maxSpeed) {
 		int lanes = 0;
-    	int periodHours = 1;
+		// assume a one hour period
+    	final int periodHours = 1;
     	// TODO: put those magic constants in final integers (or doubles) with descriptive names
-		if (maxSpeed < 95) {
-			if (capacity / periodHours < 2200)
+    	final int speedBorderUrbanFreeway = 95;
+    	final int maxSpeedFreeway = 140;    	
+    	final int capacityLaneUrban = 2000;
+    	final int capacityLaneFreeway = 2500;
+
+    	if (maxSpeed < speedBorderUrbanFreeway) {
+			if (capacity / periodHours < capacityLaneUrban)
 				lanes = 1;
-			else if ((capacity / periodHours >= 2200) && (capacity / periodHours < 4400))
+			else if ((capacity / periodHours >= capacityLaneUrban) && (capacity / periodHours < 2 * capacityLaneUrban))
 				lanes = 2;
 			else
 				lanes = 3;
 		}
 		
-		if (maxSpeed >= 95  && maxSpeed < 140) {
-			if (capacity / periodHours < 2600)
+		if (maxSpeed >= speedBorderUrbanFreeway  && maxSpeed < maxSpeedFreeway) {
+			if (capacity / periodHours < capacityLaneFreeway)
 				lanes = 1;
-			else if ((capacity / periodHours >= 2600) && (capacity / periodHours < 5200))
+			else if ((capacity / periodHours >= capacityLaneFreeway) && (capacity / periodHours < capacityLaneFreeway * 2))
 				lanes = 2;
-			else if ((capacity / periodHours >= 5200) && (capacity / periodHours < 7200))
+			else if ((capacity / periodHours >= capacityLaneFreeway * 2) && (capacity / periodHours < capacityLaneFreeway * 3))
 				lanes = 3;
-			else if ((capacity / periodHours >= 7200) && (capacity / periodHours < 9000))
+			else if ((capacity / periodHours >= capacityLaneFreeway * 3) && (capacity / periodHours < capacityLaneFreeway * 4))
 				lanes = 4;
-			else if ((capacity / periodHours >= 9000) && (capacity / periodHours < 10800))
+			else if ((capacity / periodHours >= capacityLaneFreeway * 4) && (capacity / periodHours < capacityLaneFreeway * 5))
 				lanes = 5;
-			else if (capacity / periodHours >= 10800)
+			else if (capacity / periodHours >= capacityLaneFreeway * 5)
 				lanes = 6;
 		}
 		return lanes;
