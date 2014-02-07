@@ -772,7 +772,12 @@ public class CrossSectionElement implements XML_IO {
     	connectUnequalSections(prevCSE, prevCSECSO,  curCSO, increaseOfLanes);
     }
   
-    private static void ConnectLanes(Lane upLane, Lane downLane)   {
+    public TreeSet<CrossSectionObject> getObjects() {
+		return objects;
+	}
+
+
+	private static void ConnectLanes(Lane upLane, Lane downLane)   {
 		// all lanes of two crossSections are connected to each other: 
 		// 		prevLane(0) with curLane(0)
 		// 		prevLane(1) with curLane(1)  ... etc.
