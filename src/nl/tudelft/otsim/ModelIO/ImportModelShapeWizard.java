@@ -723,60 +723,97 @@ public class ImportModelShapeWizard implements ActionListener {
 		ArrayList<TurnArrow> turnArrowList = new ArrayList<TurnArrow>();
 		// in case a turn starts with a straight movement, the outLinkNumber starts with a zero (0)
 		int outLink = 0;
+		boolean right = false;
+		boolean straight = false;
+		boolean left = false;
 		outLinkNumber = new int[] {outLink};
+		// first we detect all movements from the incoming link by checking all turns
 		for (int i = 0; i < lanes; i++)   {
-			char turn = turnLanes.charAt(i);
-			boolean right = false;
-			boolean straight = false;
-			boolean left = false;
+			char turn = '\0';
+			if(Character.isLetter(turnLanes.charAt(i)))
+				turn = Character.toLowerCase(turnLanes.charAt(i));
 			switch (turn)   {
 				case 'r': // Right turn only
-					outLinkNumber = new int[] {outLink};
 					right = true;
 					break;
 				case 's': // Main (straight on) lane 
-					if (right = true)
-						outLink = 1;
-					outLinkNumber = new int[] {outLink};
 					straight = true;
 					break;
 				case 'l': // Left turn only 
-					if (right = true && straight == true)
-						outLink = 2;
-					else if (right = true)
-						outLink = 1;
-					else if (straight = true)
-						outLink = 1;
-					else
-						outLink = 0;
-					outLinkNumber = new int[] {outLink};
 					left = true;
 					break;
 				case 'q': // Left turn and straight on 
-					if (right = true)
-						outLink = 1;
-					outLinkNumber = new int[] {outLink, outLink + 1};
 					straight = true;
 					left = true;					
 					break;
 				case 'p': // Right turn and straight on
-					outLinkNumber = new int[] {outLink, outLink + 1};
 					right = true;
 					straight = true;					
 					break;
 				case 'u': // Left turn and right turn 
-					outLinkNumber = new int[] {outLink, outLink + 1};
 					right = true;
 					left = true;					
 					break;
 				case 'a': // Any turn lane 
-					outLinkNumber = new int[] {outLink, outLink + 1, outLink + 2};
 					right = true;
 					straight = true;
 					left = true;					
 					break;
 				case 'b': // Bus lane (straight on) 
-					if (right = true)
+					straight = true;
+					break;
+			}
+		}
+		for (int i = 0; i < lanes; i++)   {
+			char turn = '\0';
+			if(Character.isLetter(turnLanes.charAt(i)))
+				turn = Character.toLowerCase(turnLanes.charAt(i));
+			switch (turn)   {
+				case 'r': // Right turn only
+					outLink = 0;
+					outLinkNumber = new int[] {outLink};
+					break;
+				case 's': // Main (straight on) lane 
+					if (right == true)
+						outLink = 1;
+					else
+						outLink = 0;
+					outLinkNumber = new int[] {outLink};
+					break;
+				case 'l': // Left turn only 
+					if (right == true && straight == true)
+						outLink = 2;
+					else if (right == true)
+						outLink = 1;
+					else if (straight == true)
+						outLink = 1;
+					else
+						outLink = 0;
+					outLinkNumber = new int[] {outLink};
+					break;
+				case 'q': // Left turn and straight on 
+					if (right == true)
+						outLink = 1;
+					else
+						outLink = 0;
+					outLinkNumber = new int[] {outLink, outLink + 1};
+					left = true;					
+					break;
+				case 'p': // Right turn and straight on
+					outLink = 0;
+					outLinkNumber = new int[] {outLink, outLink + 1};
+					break;
+				case 'u': // Left turn and right turn 
+					outLink = 0;
+					outLinkNumber = new int[] {outLink, outLink + 1};
+					break;
+				case 'a': // Any turn lane 
+					outLink = 0;
+					outLinkNumber = new int[] {outLink, outLink + 1, outLink + 2};
+					break;
+				case 'b': // Bus lane (straight on) 
+					outLink = 0;
+					if (right == true)
 						outLink = 1;
 					outLinkNumber = new int[] {outLink};
 					break;
