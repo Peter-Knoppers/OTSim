@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
@@ -301,19 +302,19 @@ public class ImportModelShapeWizard implements ActionListener {
 	private static TableModelImport getTableShapeImport() {
 		return shapeImport;
 	}
-	private static void readZoneData(Model importedModel, DataStore zoneStore, int zoneID)  {
+	private HashMap<Integer, Integer> readZoneData(Model importedModel, DataStore zoneStore, int zoneID)  {
 		// Reading Centroids (as nodes)
-		DataStore dataStoreZone = zoneStore;
+		HashMap<Integer, Integer> findZoneIDfromNodeNr = new HashMap<Integer, Integer>();
         String[] typeNameZone = null;
 		try {
-			typeNameZone = dataStoreZone.getTypeNames();
+			typeNameZone = zoneStore.getTypeNames();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
         SimpleFeatureSource sourceZone = null;
 		try {
-			sourceZone = dataStoreZone.getFeatureSource(typeNameZone[0]);
+			sourceZone = zoneStore.getFeatureSource(typeNameZone[0]);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -328,7 +329,6 @@ public class ImportModelShapeWizard implements ActionListener {
         //FeatureCollectionTableModel model = new FeatureCollectionTableModel(featuresNode);
         FeatureIterator<?> iteratorZone = featuresZone.features();	
         String propertyZone = "CENTROIDNR";	
-
         while( iteratorZone.hasNext()) {
         	Vertex v = new Vertex();
         	Feature feature = iteratorZone.next();
@@ -337,25 +337,26 @@ public class ImportModelShapeWizard implements ActionListener {
         	for (int i = 0; i < coords.length; i++)
         		v = new Vertex(coords[i]);
          	Property property = feature.getProperty(propertyZone);
-        	String nodeNr = property.getValue().toString();
+        	Integer nodeNr = (int) (long) property.getValue();
         	//zoneID = Integer.parseInt(property.getValue().toString());
-        	importedModel.network.addMicroZone(nodeNr, null, zoneID, v.getX(), v.getY(), v.getZ());
+        	importedModel.network.addMicroZone(nodeNr.toString(), null, zoneID, v.getX(), v.getY(), v.getZ());
+        	findZoneIDfromNodeNr.put(nodeNr, zoneID);
         	zoneID++;
         }
+        return findZoneIDfromNodeNr;
 	}
 	
-	private static void readNodeData(Model importedModel, DataStore nodeStore, int zoneID)  {
-		DataStore dataStoreNode = nodeStore;
+	private void readNodeData(Model importedModel, DataStore nodeStore, int zoneID)  {
 	    String[] typeNameNode = null;
 		try {
-			typeNameNode = dataStoreNode.getTypeNames();
+			typeNameNode = nodeStore.getTypeNames();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	    SimpleFeatureSource sourceNode = null;
 		try {
-			sourceNode = dataStoreNode.getFeatureSource(typeNameNode[0]);
+			sourceNode = nodeStore.getFeatureSource(typeNameNode[0]);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -386,50 +387,62 @@ public class ImportModelShapeWizard implements ActionListener {
 	    }
 	}	
 	
-	private Model getOmnitransFeatures( DataStore linkStore, DataStore nodeStore, DataStore zoneStore, TableImport tableField, TableImport tableDirection) throws IOException {        
-		int zoneID = 0;
-		readZoneData(importedModel, zoneStore, zoneID);
-		readNodeData(importedModel, nodeStore, zoneID);
-		// Reading Nodes
-
-		
-        //Reading Links
-		DataStore dataStoreLink = linkStore;
-        String[] typeNameLink = dataStoreLink.getTypeNames();
-        SimpleFeatureSource sourceLink = dataStoreLink.getFeatureSource(typeNameLink[0]);
-        SimpleFeatureCollection featuresLink = sourceLink.getFeatures();
-        FeatureIterator<?> iteratorLink = featuresLink.features();	 
-        // select the attributes
-        String propertyLength = null;
-        String propertyDirection = null;
-        String propertyFromNode = null;
-        String propertyToNode = null;
-        String propertyCapacity = null;
-        String propertyCapacityBA = null;
-        String propertyLanes = null;
-        String propertyLanesBA = null;
-        String propertyTurnLanes = null;
-        String propertyTurnLanesBA = null;
-        String propertyExitLanes = null;
-        String propertyExitLanesBA = null;
-        String propertyMaxSpeed = null;
-        String propertyMaxSpeedBA = null;
-        int valueDirectionAB = -1;
-        int valueDirectionBA = -1;
-        int valueDirectionABBA = -1;
-        for (int i = 0; i < tableDirection.getTable().getRowCount(); i++) {
+	private void readLinkData(Model importedModel, DataStore linkStore, int zoneID, HashMap<Integer, Integer> findZoneIDfromNodeNr, TableImport tableDirection, TableImport tableField)  {
+	    //Reading Links
+	    String[] typeNameLink = null;
+		try {
+			typeNameLink = linkStore.getTypeNames();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    SimpleFeatureSource sourceLink = null;
+		try {
+			sourceLink = linkStore.getFeatureSource(typeNameLink[0]);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    SimpleFeatureCollection featuresLink = null;
+		try {
+			featuresLink = sourceLink.getFeatures();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    FeatureIterator<?> iteratorLink = featuresLink.features();	 
+	    // select the attributes
+	    String propertyLength = null;
+	    String propertyDirection = null;
+	    String propertyFromNode = null;
+	    String propertyToNode = null;
+	    String[] propertyCapacity = {"",""};
+	    String[] propertyLanes = {"",""};
+	    String[] propertyTurnLanes = {"",""};
+	    String[] propertyExitLanes = {"",""};
+	    String[] propertyMaxSpeed = {"",""};
+	    //int valueDirectionAB = -1;
+	    int valueDirectionBA = -1;
+	    int valueDirectionABBA = -1;
+	    for (int i = 0; i < tableDirection.getTable().getRowCount(); i++) {
+	    	// reads the name of the direction indicator from the table
+	    	// and the values that indicate if it is from A to B, B to A, or both directions
 			tableDirection.getTable().getValueAt(i, 0);
 			Object attr2 = tableDirection.getTable().getValueAt(i, 1);	 
 			if (i == 0)
 				 propertyDirection = attr2.toString();
-			if (i == 1)
-				 valueDirectionAB = Integer.parseInt( attr2.toString() );
+/*			if (i == 1)
+				// A to B
+				 valueDirectionAB = Integer.parseInt( attr2.toString() );*/
 			if (i == 2)
-				 valueDirectionBA = Integer.parseInt(attr2.toString() );
+				// B to A
+				valueDirectionBA = Integer.parseInt(attr2.toString() );
 			if (i == 3)
+				// both directions
 				 valueDirectionABBA = Integer.parseInt(attr2.toString() );
-        }
-		for (int i = 0; i < tableField.getTable().getRowCount(); i++) {
+	    }
+
+	    for (int i = 0; i < tableField.getTable().getRowCount(); i++) {
 			tableField.getTable().getValueAt(i, 0);
 			Object attr2 = tableField.getTable().getValueAt(i, 1);
 			tableField.getTable().getValueAt(i, 2);
@@ -439,164 +452,153 @@ public class ImportModelShapeWizard implements ActionListener {
 				else if (i == 2)
 					 propertyToNode = attr2.toString();
 				else if (i == 3) {
-					 propertyCapacity = attr2.toString();
-					 propertyCapacityBA = propertyCapacity.replaceAll("AB", "BA");
+					 propertyCapacity[0] = attr2.toString();
+					 propertyCapacity[1] = propertyCapacity[0].replaceAll("AB", "BA");
 				} else if (i == 4) {
-					 propertyLanes = attr2.toString();
-					 propertyLanesBA = propertyLanes.replaceAll("AB", "BA");
+					 propertyLanes[0] = attr2.toString();
+					 propertyLanes[1] = propertyLanes[0].replaceAll("AB", "BA");
 				} else if (i == 5) {
-					propertyTurnLanes = attr2.toString();
-					propertyTurnLanesBA = propertyTurnLanes.replaceAll("AB", "BA");
+					propertyTurnLanes[0] = attr2.toString();
+					propertyTurnLanes[1] = propertyTurnLanes[0].replaceAll("AB", "BA");
 				} else if (i == 6) {
-					propertyExitLanes = attr2.toString();
-					propertyExitLanesBA = propertyExitLanes.replaceAll("AB", "BA");
+					propertyExitLanes[0] = attr2.toString();
+					propertyExitLanes[1] = propertyExitLanes[0].replaceAll("AB", "BA");
 				} else if (i == 7) {
-					 propertyMaxSpeed = attr2.toString();
-					 propertyMaxSpeedBA = propertyMaxSpeed.replaceAll("AB", "BA");
+					 propertyMaxSpeed[0] = attr2.toString();
+					 propertyMaxSpeed[1] = propertyMaxSpeed[0].replaceAll("AB", "BA");
 				} else if (i == 8)
 					 propertyLength = attr2.toString();
 			}
-
+	
 		}
-
-    	int linkID = 0;
-        while( iteratorLink.hasNext())   {
-        	Feature feature = iteratorLink.next();
-        	Geometry test = (Geometry) feature.getDefaultGeometryProperty().getValue();
-        	Coordinate[] coords = test.getCoordinates();
-			ArrayList<Vertex> pointList = new ArrayList<Vertex>();
-			ArrayList<Vertex> pointListBA = new ArrayList<Vertex>();					
+	
+		int linkID = 0;
+	    while( iteratorLink.hasNext())   {
+	    	Feature feature = iteratorLink.next();
+	    	Geometry test = (Geometry) feature.getDefaultGeometryProperty().getValue();
+	    	Coordinate[] coords = test.getCoordinates();
+	    	List<List<Vertex>> pointList = new ArrayList<List<Vertex>>(2);
+	    	List<Vertex> list = new ArrayList<Vertex>(); 
+	    	pointList.add(list);
+	    	list = new ArrayList<Vertex>(); 
+	    	pointList.add(list);
 			int fromNodeID = -1;
 			int toNodeID = -1;
-			double length = -1;
-			double capacity = -1;
-			String turnLanes = "";
-			int exitLanes = -1;
-			double maxSpeed = -1;
-			int lanes = -1;
-			double capacityBA = -1;
-			String turnLanesBA = "";
-			int exitLanesBA = -1;
-			double maxSpeedBA = -1;
+			double[] length = {-1,-1};
+			double[] capacity = {-1,-1};
+			String[] turnLanes = {"",""};
+			int exitLanes[] = {-1,-1};
+			double maxSpeed[] = {-1,-1};
+			int lanes[] = {-1,-1};
 			int direction = -1; 
-			int lanesBA = -1;
 			String typologyName = "road";
-			String linkType = "ANODE";
+//			String linkType = "ANODE";
 			Property property = null;
-        	property = feature.getProperty(linkType);
-    		boolean voedingsLinkAB = false;
-        	boolean voedingsLinkBA = false;
-    		int node;
-        	node = Integer.parseInt(property.getValue().toString());
-        	if (node < 20) {
-        		voedingsLinkAB = true;
-        		voedingsLinkBA = true;
-        	}
-        	if (!propertyDirection.equals(""))   {
+//	    	property = feature.getProperty(linkType);
+			boolean voedingsLink = false;
+//			int node;
+//	    	node = Integer.parseInt(property.getValue().toString());
+/*	    	if (zoneIDtoNumber.get(node) != null)  {	    		
+	    		voedingsLink = true;
+	    	}*/
+	    	if (!propertyDirection.equals(""))   {
 	        	property = feature.getProperty(propertyDirection);
 	        	direction = Integer.parseInt(property.getValue().toString());
-        	}
-        	
-        	if (!propertyFromNode.equals(""))   {
+	    	}
+	    	
+	    	if (!propertyFromNode.equals(""))   {
 	        	property = feature.getProperty(propertyFromNode);
 	        	fromNodeID = Integer.parseInt(property.getValue().toString());
-        	}
-        	if (!propertyToNode.equals(""))   {
+		    	if (findZoneIDfromNodeNr.get(fromNodeID) != null)  	    		
+		    		voedingsLink = true;
+	    	}
+	    	if (!propertyToNode.equals(""))   {
 	        	property = feature.getProperty(propertyToNode);
 	        	toNodeID = Integer.parseInt(property.getValue().toString());
+		    	if (findZoneIDfromNodeNr.get(toNodeID) != null)  	    		
+		    		voedingsLink = true;
+	    	}
+
+        	for (int i = 1; i < coords.length - 1; i++) {
+        		Vertex v = new Vertex(coords[i]);
+        		pointList.get(0).add(v);
         	}
-        	if (direction == valueDirectionAB  || direction == valueDirectionABBA)  {
-	        	for (int i = 1; i < coords.length - 1; i++) {
-	        		Vertex v = new Vertex(coords[i]);
-	        		pointList.add(v);
+        	for (int i = coords.length - 2; i > 0; i--) {
+        		Vertex v = new Vertex(coords[i]);
+        		pointList.get(1).add(v);
+        	}
+
+        	int start = 0;
+        	int end = 0;
+        	if (direction == valueDirectionBA) {
+            	start = 1;
+            	end = 1;        		
+        	}
+        	if (direction == valueDirectionABBA) {
+        		start = 0;
+        		end = 1;
+        	}
+        	for (int i = start; i <= end; i++) {
+	        	if (! (propertyCapacity[i].equals("") || feature.getProperty(propertyCapacity[i]) == null))   {
+		        	property = feature.getProperty(propertyCapacity[i]);	        	
+		        	capacity[i] = Double.parseDouble(property.getValue().toString());
 	        	}
-	        	
-	        	if (! (propertyCapacity.equals("") || feature.getProperty(propertyCapacity)==null))   {
-		        	property = feature.getProperty(propertyCapacity);
-		        	capacity = Double.parseDouble(property.getValue().toString());
+	        	if (! (propertyTurnLanes[i].equals("") || feature.getProperty(propertyTurnLanes[i])==null))   {
+		        	property = feature.getProperty(propertyTurnLanes[i]);
+		        	turnLanes[i] = property.getValue().toString();
 	        	}
-	        	if (! (propertyTurnLanes.equals("") || feature.getProperty(propertyTurnLanes)==null))   {
-		        	property = feature.getProperty(propertyTurnLanes);
-		        	turnLanes = property.getValue().toString();
-	        	}
-	        	if (! (propertyExitLanes.equals("") || feature.getProperty(propertyExitLanes)==null))   {
-		        	property = feature.getProperty(propertyExitLanes);
+	        	if (! (propertyExitLanes[i].equals("") || feature.getProperty(propertyExitLanes[i])==null))   {
+		        	property = feature.getProperty(propertyExitLanes[i]);
 		        	// exitLanes are defined for the opposite direction!!!
-		        	exitLanesBA = Integer.parseInt(property.getValue().toString());
+		        	int j = i == 0 ? 1 : 0;
+		        	exitLanes[j] = Integer.parseInt(property.getValue().toString());
 	        	}
-	        	if (! (propertyMaxSpeed.equals("") || feature.getProperty(propertyMaxSpeed)==null))   {
-		        	property = feature.getProperty(propertyMaxSpeed);
-		        	maxSpeed = Double.parseDouble(property.getValue().toString());
+	        	if (! (propertyMaxSpeed[i].equals("") || feature.getProperty(propertyMaxSpeed[i])==null))   {
+		        	property = feature.getProperty(propertyMaxSpeed[i]);
+		        	maxSpeed[i] = Double.parseDouble(property.getValue().toString());
 	        	}			        	
 	        	if (! (propertyLength.equals("") || feature.getProperty(propertyLength)==null))   {
 		        	property = feature.getProperty(propertyLength);
-		        	length = Double.parseDouble(property.getValue().toString()) * 1000 ;
+		        	length[i] = Double.parseDouble(property.getValue().toString()) * 1000 ;
 	        	}			        	
-	        	if (! (propertyLanes.equals("") || feature.getProperty(propertyLanes)==null))   {
-	        		property = feature.getProperty(propertyLanes);
-		        	lanes = Integer.parseInt(property.getValue().toString());
-	        	}
+	        	if (! (propertyLanes[i].equals("") || feature.getProperty(propertyLanes[i])==null))   {
+	        		property = feature.getProperty(propertyLanes[i]);
+		        	lanes[i] = Integer.parseInt(property.getValue().toString());
+	        	}	        	
+		    	if (lanes[i] <= 0)
+		    		lanes[i] = deriveLanes(capacity[i], maxSpeed[i]);
+		    	if (lanes[i] == 0)
+		    		System.out.print("geen lanes??????");	        	
         	}
-
-        	if (direction == valueDirectionBA  || direction == valueDirectionABBA)  {
-	        	for (int i = coords.length - 2; i > 0; i--) {
-	        		Vertex v = new Vertex(coords[i]);
-	        		pointListBA.add(v);
-	        	}
-	        	if (! (propertyCapacityBA.equals("") || feature.getProperty(propertyCapacityBA) == null)) {
-		        	property = feature.getProperty(propertyCapacityBA);
-		        	capacityBA = Double.parseDouble(property.getValue().toString());
-	        	}
-	        	if (! (propertyTurnLanesBA.equals("") || feature.getProperty(propertyTurnLanesBA) == null)) {
-		        	property = feature.getProperty(propertyTurnLanesBA);
-		        	turnLanesBA = property.getValue().toString();
-	        	}
-	        	if (! (propertyExitLanesBA.equals("") || feature.getProperty(propertyExitLanesBA) == null)) {
-		        	property = feature.getProperty(propertyExitLanesBA);
-		        	// exitLanes are defined for the opposite direction!!!
-		        	exitLanes = Integer.parseInt(property.getValue().toString());
-	        	}
-	        	if (! (propertyMaxSpeedBA.equals("") || feature.getProperty(propertyMaxSpeedBA) == null)) {
-		        	property = feature.getProperty(propertyMaxSpeedBA);
-		        	maxSpeedBA = Double.parseDouble(property.getValue().toString());
-	        	}
-	        	if (! (propertyLanesBA.equals("") || feature.getProperty(propertyLanesBA)==null)) {
-	        		property = feature.getProperty(propertyLanesBA);
-		        	lanesBA = Integer.parseInt(property.getValue().toString());
-	        	}
-        	}  
-        	if (lanes <= 0)
-        		lanes = deriveLanes(capacity, maxSpeed);
-        	if (lanesBA <= 0)
-        		lanesBA =  deriveLanes(capacityBA, maxSpeedBA);
-        	if (lanes == 0)
-        		System.out.print("geen lanes??????");
-        	
-        	final double defaultLaneWidth = 3.5;
-        	if (voedingsLinkAB == false) {
-	        	if (direction == valueDirectionAB  || direction == valueDirectionABBA) {
-	        		addImportedLink(linkID, typologyName, fromNodeID, toNodeID, defaultLaneWidth, lanes, exitLanes, pointList, turnLanes, length);
-		        	linkID++;
-	        	}
-        	} else {
-    			List<Integer> nodeList = new ArrayList<Integer>();
-        		if (fromNodeID < 20) {
-        			nodeList.add(toNodeID);
-        			importedModel.network.lookupMicroZone(fromNodeID).setNodeList(nodeList);
-        		} else {
-	        		nodeList.add(fromNodeID);
-        			importedModel.network.lookupMicroZone(toNodeID);
-        		}
-        	}
-        		
-        	if (! voedingsLinkBA) {
-	        	if (direction == valueDirectionBA  || direction == valueDirectionABBA) {
-	        		addImportedLink(linkID, typologyName, toNodeID, fromNodeID, defaultLaneWidth, lanesBA, exitLanesBA, pointListBA, turnLanesBA, length);
-		        	linkID++;
-	        	}
-        	}
-        }
-        
+	    	final double defaultLaneWidth = 3.5;
+	    	for (int i = start; i <= end; i++) {
+		    	if (! voedingsLink) {
+		    		if (i == 0)
+		    			addImportedLink(linkID++, typologyName, fromNodeID, toNodeID, defaultLaneWidth, lanes[i], exitLanes[i], (ArrayList<Vertex>) pointList.get(i), turnLanes[i], length[i]);
+		    		else if (i == 1)
+		    			addImportedLink(linkID++, typologyName, toNodeID, fromNodeID, defaultLaneWidth, lanes[i], exitLanes[i], (ArrayList<Vertex>) pointList.get(i), turnLanes[i], length[i]);
+		    	} else {
+					List<Integer> nodeList = new ArrayList<Integer>();
+		    		if (findZoneIDfromNodeNr.get(fromNodeID) != null) {
+		    			nodeList.add(toNodeID);
+		    			importedModel.network.lookupMicroZone(findZoneIDfromNodeNr.get(fromNodeID)).setNodeList(nodeList);
+		    		} else {
+		        		nodeList.add(fromNodeID);
+		    			importedModel.network.lookupMicroZone(findZoneIDfromNodeNr.get(fromNodeID));
+		    		}
+		    		break;
+		    	}
+		    	
+	    	}
+	    }
+	}
+	
+	private Model getOmnitransFeatures( DataStore linkStore, DataStore nodeStore, DataStore zoneStore, TableImport tableField, TableImport tableDirection) throws IOException {        
+		int zoneID = 0;
+		HashMap<Integer, Integer> findZoneIDfromNodeNr = new HashMap<Integer, Integer>();
+		findZoneIDfromNodeNr = readZoneData(importedModel, zoneStore, zoneID);
+		readNodeData(importedModel, nodeStore, zoneID);
+		readLinkData(importedModel, linkStore, zoneID, findZoneIDfromNodeNr, tableDirection, tableField);
 		// Construct the model
     	//settings.rebuild();
         importedModel.network.rebuild();
