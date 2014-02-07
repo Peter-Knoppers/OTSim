@@ -1008,41 +1008,49 @@ public class Node extends Vertex implements XML_IO {
 			    		// loop through the lanes of the entering link
 			    		// sometimes a lane needs to be connected more than once (more turning movements per lane)
 			    		// in that case the index is reset minus 1
-			    		int turnCount = 0;
-						int outLinkIndex = 0;
+			    		int turnCount = 0;  // the index of the inlane 
+						int outLinkIndex = 0; // the rank of the current outgoing Link
 	            		for (int indexInlane = 0; indexInlane < inLanesAll.size(); indexInlane++) {
-	            			// We start with the right turn
+	            			// We start with the first (anti-clockwise so often right) turn
 				    		Lane currentInLane = inLanesAll.get(indexInlane);
-            				// retrieve the index of the outgoing links (one by one)
-            				int outLinkRank = inLanesAll.get(indexInlane).getTurnArrow().getOutLinkNumbers()[turnCount];
+            				// retrieve the rank of the link to turn to from this inlane (from 0 to maxOutlinks - 1)
+            				int outLinkRank = currentInLane.getTurnArrow().getOutLinkNumbers()[turnCount];
             				// we look for the connecting outLane by looping through all outlanes at this node
             				OutLinkInfo currentOutlinkInfo = outLanesAndLinkList.get(outLinkIndex);
             				// connect to the lane of a leaving arm
             				// find the index of the correct outgoing link first
+            				// while they are not equal
 							while (outLinkRank != currentOutlinkInfo.getLinkRank()) {
 								if (outLinkIndex >= 0) {
+									// find the correct outLink
 									if (outLinkRank < currentOutlinkInfo.getLinkRank())
 										outLinkIndex--;
 									else
 										outLinkIndex++;
 								}
 								// retrieve the index of the current outlane
-								if (outLinkIndex >= outLanesAndLinkList.size())
+								if (outLinkIndex >= outLanesAndLinkList.size())  {
+									System.out.println("this should not happen: error in the turning definition");
 									break;
+								}
 								if (outLinkIndex < 0)
 									System.out.println("strange: less than zero");
 								currentOutlinkInfo = outLanesAndLinkList.get(outLinkIndex);
 							}
 							// for an inlane, all outlanes of the corresponding outLink are checked:
 							int inLanesToConnect = 1;
-							// find the number of lanes with the same turning direction
+							// look if there are more turn lanes with the same turning direction
 							while (indexInlane + inLanesToConnect < inLanesAll.size()) {										
 								if (inLanesAll.get(indexInlane + inLanesToConnect).getTurnArrow().getOutLinkNumbers()[0] == outLinkRank)  {
-									break;
+									inLanesToConnect++;
 								}
-								inLanesToConnect++;
+								else
+									break;
+
 							}
 							for (int i = 0; i < inLanesToConnect; i++) {
+								if (i >= currentOutlinkInfo.getOutLanes().size())
+									System.out.println("error inlanes to connect higher than outlanes");
 								Lane outLane = currentOutlinkInfo.getOutLanes().get(i);
 								// if a lane has got no stopLine (no priority defined) an "empty"  stopLine is added
 					    		if (currentInLane.getStopLine() == null) {
@@ -1051,8 +1059,9 @@ public class Node extends Vertex implements XML_IO {
 					    		}
 					    		currentInLane = inLanesAll.get(indexInlane);
 								LaneConnect laneConnect = new LaneConnect(currentInLane, outLane, currentOutlinkInfo.getLinkRank());
-								connectedLanesList.add(laneConnect);
-					    		indexInlane++;
+								connectedLanesList.add(laneConnect);		
+					    		if (inLanesToConnect - i > 1)
+					    			indexInlane++;
 							}
 /*							if (currentOutlinkInfo.getInLane() == null)
 								System.out.println("strange: no inLane");*/
@@ -1063,6 +1072,8 @@ public class Node extends Vertex implements XML_IO {
             				// if more than one turning movement from an incoming lane?
             				// keep this lane at the next loop (until all turns are dealt with)
             				turnCount++; 
+//            				if (indexInlane >= inLanesAll.get(indexInlane).getTurnArrow().getOutLinkNumbers().length)
+            				// if the inlane 
             				if (turnCount < inLanesAll.get(indexInlane).getTurnArrow().getOutLinkNumbers().length)  {
             					indexInlane--;
             				} else // go to the next inLane and reset turncount to zero

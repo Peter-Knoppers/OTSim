@@ -48,9 +48,10 @@ public class CrossSection implements XML_IO {
      * @param sectionElementList ArrayList<{@link CrossSectionElement} specifying the CrossSectionElements of the new CrossSection
      */
 	public CrossSection(double longitudalPosition, double lateralOffset, ArrayList<CrossSectionElement> sectionElementList) {
+		if (sectionElementList != null)
 	      setCrossSectionElementList_w(sectionElementList);
-          this.longitudinalPosition = longitudalPosition; 
-	      this.lateralOffset = lateralOffset;
+		this.longitudinalPosition = longitudalPosition; 
+		this.lateralOffset = lateralOffset;
 	}
 	
 	/**

@@ -98,16 +98,26 @@ public class Curves {
 		
 		Line2D.Double line1 = new Line2D.Double(prevStart.getX(), prevStart.getY(), start.getX(), start.getY());
 		Line2D.Double line2 = new Line2D.Double(end.getX(), end.getY(), endNext.getX(), endNext.getY());
-		Point2D.Double ctrlPoint1 = Planar.intersection(line1, line2);
-		if (difAngle(line1, line2) < 0.3 * Math.PI) {
+		Point2D.Double ctrlPoint1 = new Point2D.Double();
+		if (difAngle(line1, line2) < 0.3 * Math.PI || difAngle(line1, line2) > 1.7 * Math.PI) {
 			// This covers the case that the lines are parallel (and ctrlPoint1 is null)
 			Double x = line1.getX2() + (line2.getX1() - line1.getX2()) / 2;
 			Double y = line1.getY2() + (line2.getY1() - line1.getY2()) / 2;
 			ctrlPoint1 = new Point2D.Double(x, y);
+			if (ctrlPoint1 == null)
+				System.out.println("stop strange");
+		}
+		else {
+			ctrlPoint1 = Planar.intersection(line1, line2);
+			if (ctrlPoint1 == null)
+				System.out.println("stop strange");
 		}
 		Point2D.Double p1 = new Point2D.Double(start.getX(), start.getY());
 		Point2D.Double p2 = new Point2D.Double(end.getX(), end.getY());
 		//if (ctrlPoint1.distance(p1) + ctrlPoint1.distance(p2) >  )
+		if (ctrlPoint1 == null)
+			System.out.println("stop strange");
+
 		return ctrlPoint1;
 	}
 	
@@ -132,6 +142,12 @@ public class Curves {
 		ArrayList<Vertex> vertices = new ArrayList<Vertex>();	
 		Vertex start = up.get(up.size() - 1);
 		Vertex end = down.get(0);
+		int a1 = (int) start.getX();
+		int a2= (int) end.getX();
+		int a3 = (int) ctrlPoint1.getX();
+		int a4 = (int) smooth.intValue();
+		
+		System.out.println("Curve " + a1 + " b " + a2 + " c " + a3 + " d " + a4);
 		Geometry curve = createQuadCurve(new Coordinate(start.getX(), start.getY()), new Coordinate(end.getX(), end.getY()), new Coordinate(ctrlPoint1.getX(), ctrlPoint1.getY()), smooth);
         Coordinate[] points1 = curve.getCoordinates();
     	for (Coordinate c : points1)  {
