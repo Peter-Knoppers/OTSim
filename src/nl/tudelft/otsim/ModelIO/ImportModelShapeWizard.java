@@ -416,6 +416,7 @@ public class ImportModelShapeWizard implements ActionListener {
 	    String propertyDirection = null;
 	    String propertyFromNode = null;
 	    String propertyToNode = null;
+	    // we assume a bidirectional link (AB and BA direction) 
 	    String[] propertyCapacity = {"",""};
 	    String[] propertyLanes = {"",""};
 	    String[] propertyTurnLanes = {"",""};
@@ -693,7 +694,7 @@ public class ImportModelShapeWizard implements ActionListener {
     			//GT volgende uitcommentarieren
   //  			cse = new CrossSectionElement(cs, typologyName, laneWidth * lanes, rmaList, turnArrowList);
     	}
-    	if (exitLanes > 0) {
+    	/*if (exitLanes > 0) {
         	// FIXME: looks too much like the if (lanes !- turnArrorList.size()) code above
     		if (lanes != exitLanes) {
     			double longPosition1 = 0;
@@ -730,7 +731,7 @@ public class ImportModelShapeWizard implements ActionListener {
             	cse2List.add(cse2);
             	cs2.setCrossSectionElementList_w(cse2List);
     		}
-    	}
+    	}*/
 
     	String name = String.valueOf(linkID);
     	importedModel.network.addLink(name, fromNodeID, toNodeID, length, true, csList, pointList);
