@@ -1157,6 +1157,38 @@ public class PlanarTest {
 			}
 		}
 	}
+	
+	/**
+	 * Test the areaOfSimplePolygon method.
+	 */
+	@SuppressWarnings("static-method")
+	@Test
+	public void testAreaOfSimplePolygon() {
+		Point2D.Double[] points = new Point2D.Double[0];
+		assertEquals("Empty polygon has 0 area", 0, Planar.areaOfSimplePolygon(points), 0);
+		points = new Point2D.Double[1];
+		points[0] = new Point2D.Double(123.456, 567.890);
+		assertEquals("Polygon of one point has 0 area", 0, Planar.areaOfSimplePolygon(points), 0);
+		points = new Point2D.Double[2];
+		points[0] = new Point2D.Double(123.456, 567.890);
+		points[1] = new Point2D.Double(321.098, 765.432);
+		assertEquals("Polygon of two points has 0 area", 0, Planar.areaOfSimplePolygon(points), 0.00001);
+		points = new Point2D.Double[3];
+		points[0] = new Point2D.Double(10, 0);
+		points[1] = new Point2D.Double(20, 0);
+		points[2] = new Point2D.Double(20, 20);
+		assertEquals("Triangle should have area of base times height / 2", 100, Planar.areaOfSimplePolygon(points), 0.00001);
+		points[2] = new Point2D.Double(20, -20);
+		assertEquals("Triangle with points in wrong order should have negative area of base times height / 2", -100, Planar.areaOfSimplePolygon(points), 0.00001);
+		points = new Point2D.Double[6];
+		points[0] = new Point2D.Double(10, 0);
+		points[1] = new Point2D.Double(20, 0);
+		points[2] = new Point2D.Double(20, 10);
+		points[3] = new Point2D.Double(18, 10);
+		points[4] = new Point2D.Double(0, 10);
+		points[5] = new Point2D.Double(10, 10);
+		assertEquals("Degenerate square should have expected area", 100, Planar.areaOfSimplePolygon(points), 0.00001);
+	}
 
 	/**
 	 * Test the expandBoundingBox method.

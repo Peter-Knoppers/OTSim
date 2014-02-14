@@ -1113,6 +1113,25 @@ public class Planar {
 	}
 	
 	/**
+	 * Compute the surface area of a simple polygon. The points of the polygon
+	 * must be in counter-clockwise order (or the result will be negative).
+	 * <br /> A simple polygon is a polygon that is not self-intersecting.
+	 * @param polygon
+	 * @return Double; the surface are of the polygon
+	 */
+	public static double areaOfSimplePolygon(Point2D.Double[] polygon) {
+		if (0 == polygon.length)
+			return 0;		// Take care of the easy cases first
+		double result = 0;
+		Point2D.Double prevPoint = polygon[polygon.length - 1];
+		for (Point2D.Double p : polygon) {
+			result += prevPoint.x * p.y - prevPoint.y * p.x;
+			prevPoint = p;
+		}
+		return result / 2;
+	}
+	
+	/**
 	 * Expand a bounding box.
 	 * @param rect Line2D.Double; initial bounding box (may be null)
 	 * @param x Double; x of point to expand bounding box to

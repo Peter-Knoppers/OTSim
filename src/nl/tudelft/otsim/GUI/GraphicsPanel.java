@@ -299,17 +299,19 @@ public class GraphicsPanel extends JPanel implements MouseListener, MouseMotionL
 	/**
 	 * Draw a GeneralPath on this GraphicsPanel.
 	 * @param polygon GeneralPath; the GeneralPath to draw
-	 * @param lineColor Color to draw the line with
-	 * @param fillColor Color to fill the area with
+	 * @param lineColor Color to draw the line with (if null; the line is not drawn)
+	 * @param fillColor Color to fill the area with (if null; the area is not filled)
 	 */
     public void drawGeneralPath(GeneralPath polygon, Color lineColor, Color fillColor) {
     	if (null == g2)
     		throw new Error("not painting");
     	GeneralPath drawPath = translatePath(polygon);
-    	g2.setColor(fillColor);
-    	g2.fill(drawPath);
-    	g2.setColor(lineColor);
-    	//g2.draw(drawPath);
+    	if (null != fillColor) {
+    		g2.setColor(fillColor);
+    		g2.fill(drawPath);
+    	}
+    	if (null != lineColor)
+    		g2.setColor(lineColor);
     }
     
     /**

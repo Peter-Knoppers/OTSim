@@ -44,7 +44,7 @@ public class Node extends Vertex implements XML_IO {
     private boolean sink = false;
     private boolean source = false;
 	private TreeSet<DirectionalLink> links = null;
-	private ArrayList<Vertex> conflictArea = null;
+	private SimplePolygon area = null;
 	private ArrayList<ArrayList<Vertex>> closingLines = new ArrayList<ArrayList<Vertex>>();
 	private TrafficLightController trafficLightController = null;
 	private Network network;
@@ -388,18 +388,13 @@ public class Node extends Vertex implements XML_IO {
 			return;
 		// Compute the convex hull (in 2D) and convert that into an ArrayList<Vertex>
 		//System.out.println("Computing convex hull of " + points.toString());
-		conflictArea = new ArrayList<Vertex>();
-		for (Point2D.Double p : Planar.convexHull(points))
-			conflictArea.add(new Vertex(p, z));	// use Z-component of this node
-		conflictArea.add(conflictArea.get(0));	// close the polygon
+		area = new SimplePolygon(points, z);
 		//System.out.println("convex hull is " + conflictArea.toString());
 	}
 	
 	private ArrayList<Vertex> truncateHeadAtConflictArea(ArrayList<Vertex> vertices) {
 		// Generate the polygon of the conflictArea
-		Point2D.Double polygon[] = new Point2D.Double[conflictArea.size()];
-		for (int i = conflictArea.size(); --i >= 0; )
-			polygon[i] = conflictArea.get(i).getPoint();
+		Point2D.Double polygon[] = area.getProjection(); 
 		ArrayList<Vertex> result = new ArrayList<Vertex>();
 		result.add(vertices.get(0));
 		Point2D.Double prevPoint = null;
@@ -1749,17 +1744,7 @@ public class Node extends Vertex implements XML_IO {
      * @return GeneralPath; the contour of the conflictArea of this Node
      */
 	public GeneralPath createJunctionPolygon()   {
-		GeneralPath polygon = new GeneralPath(Path2D.WIND_EVEN_ODD);
-		boolean firstPoint = true;
-		for (Vertex v : conflictArea)  {
-			if (firstPoint)
-				polygon.moveTo(v.getX(), v.getY());
-			else
-				polygon.lineTo(v.getX(), v.getY());
-			firstPoint = false;
-		}
-		polygon.closePath();
-		return polygon;
+		return area.getGeneralPath(); 
 	}
     
     /**
@@ -1791,10 +1776,10 @@ public class Node extends Vertex implements XML_IO {
         	graphicsPanel.drawCircle(point, Color.RED, selectedNodeDiameter);
         if ((null != network.endNode) && (getNodeID() == network.endNode.getNodeID()))
         	graphicsPanel.drawCircle(point, Color.PINK, selectedNodeDiameter);
-        if (null != conflictArea) {
+        if (null != area) {
         	graphicsPanel.setStroke(0F);
         	graphicsPanel.setColor(Color.CYAN);
-        	graphicsPanel.drawPolyLine(conflictArea);
+        	graphicsPanel.drawGeneralPath(area.getGeneralPath(), Color.CYAN, null);
         }
         if (null != circle) {
         	graphicsPanel.setStroke(0F);
@@ -1833,7 +1818,7 @@ public class Node extends Vertex implements XML_IO {
 	 * this Node does not have a real conflict area
 	 */
 	public boolean hasConflictArea() {
-		return (null != conflictArea) && (conflictArea.size() > 0);
+		return (null != area) && (area.surfaceArea() != 0);
 	}
 
 	/**
