@@ -11,8 +11,6 @@ import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GUI.InputValidator;
 
 public class MicroZone extends Vertex implements XML_IO {
-	private static final long serialVersionUID = 1L;
-	
 	/** Name for a MicroZone element when stored in XML format */
 	public static final String XMLTAG = "microZone";
 	

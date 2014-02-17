@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Polygon;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
-import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -699,6 +698,7 @@ public class Node extends Vertex implements XML_IO {
     
     
     
+	/*
     private class OutLaneInfo {
     	private Lane outLane;
     	private int linkRank;
@@ -710,7 +710,6 @@ public class Node extends Vertex implements XML_IO {
     		this.linkRank = linkRank;
     		this.angleDifference = angleDifference;
     	}
-    	
 		public Lane getLane() {
 			return outLane;
 		}
@@ -728,125 +727,131 @@ public class Node extends Vertex implements XML_IO {
 		}
 		public void setInLane(Lane inLane) {
 			this.inLane = inLane;
-		}	
+		}
 
     }
-		public enum Turn {RIGHT_UTURN, RIGHT_SHARP, RIGHT, STRAIGHT, LEFT, LEFT_SHARP, LEFT_UTURN};	
+	*/	
+
+	public enum Turn {RIGHT_UTURN, RIGHT_SHARP, RIGHT, STRAIGHT, LEFT, LEFT_SHARP, LEFT_UTURN};	
+	
+    private class OutLinkInfo {
+    	private ArrayList<Lane> outLanes;
+    	private double angleDifference;
+    	private int linkRank;
+		private int turnIndex;
+		private int numberOfLanes;	
+		private String turnName;
+		private boolean startRight;
+		private boolean UTurn = false;
+	
+    	private OutLinkInfo(ArrayList<Lane> outLanes, Double angleDifference, int linkRank)  {
+    		this.outLanes = outLanes;
+    		this.linkRank = linkRank;
+    		this.angleDifference = angleDifference;
+    		turnType(angleDifference, linkRank);
+    		this.numberOfLanes = outLanes.size();
+    	}    	
+		public void turnType(double angleDif, int linkRank) {
+			int index = 0;
+    		final double uTurnRight = 0.10 * Math.PI;
+    		final double sharpRight = 0.25 * Math.PI;
+    		final double right = 0.75 * Math.PI;
+    		final double straight = 1.25 * Math.PI;
+    		final double left = 1.75 * Math.PI;
+    		final double sharpLeft = 1.90 * Math.PI;
+
+    		if ( angleDif < uTurnRight && linkRank == 0) {
+				index = 0;
+				UTurn = true;
+    		}
+			else if ( angleDif >= uTurnRight  && angleDif <= sharpRight )
+				index = 1;
+			else if ( angleDif >= sharpRight  && angleDif <= right )
+				index = 2;
+			else if ( angleDif >= right  && angleDif <= straight )
+				index = 3;
+			else if ( angleDif >= straight  && angleDif <= left )
+				index = 4;
+			else if ( angleDif >= left  && angleDif <= sharpLeft )
+				index = 5;
+			// only the last arm can be a U-turn
+			else if ( (angleDif > sharpLeft || angleDif < uTurnRight) && linkRank > 0) {
+				index = 6;	
+				UTurn = true;
+				if (angleDif != 0)
+					index = 6;
+			}
+			
+			this.turnIndex= index;
+			Turn[] turns = Turn.values();
+			this.turnName = turns[turnIndex].toString();
+			if (index <= Turn.STRAIGHT.ordinal())
+				startRight = true;
+			else
+				startRight = false;
+			
+		}	 
 		
-	    private class OutLinkInfo {
-	    	private ArrayList<Lane> outLanes;
-	    	private double angleDifference;
-	    	private int linkRank;
-			private int turnIndex;
-			private int numberOfLanes;	
-			private String turnName;
-			private boolean startRight;
-			private boolean UTurn = false;
+		/*
+		public String getName()  {
+			return turnName;
+		}
+		*/
 		
-	    	private OutLinkInfo(ArrayList<Lane> outLanes, Double angleDifference, int linkRank)  {
-	    		this.outLanes = outLanes;
-	    		this.linkRank = linkRank;
-	    		this.angleDifference = angleDifference;
-	    		turnType(angleDifference, linkRank);
-	    		this.numberOfLanes = outLanes.size();
-	    	}    	
-			public void turnType(double angleDif, int linkRank) {
-				int index = 0;
-	    		final double uTurnRight = 0.10 * Math.PI;
-	    		final double sharpRight = 0.25 * Math.PI;
-	    		final double right = 0.75 * Math.PI;
-	    		final double straight = 1.25 * Math.PI;
-	    		final double left = 1.75 * Math.PI;
-	    		final double sharpLeft = 1.90 * Math.PI;
+		public int getIndex()  {
+			return turnIndex;
+		}
 
-	    		if ( angleDif < uTurnRight && linkRank == 0) {
-					index = 0;
-					UTurn = true;
-	    		}
-				else if ( angleDif >= uTurnRight  && angleDif <= sharpRight )
-					index = 1;
-				else if ( angleDif >= sharpRight  && angleDif <= right )
-					index = 2;
-				else if ( angleDif >= right  && angleDif <= straight )
-					index = 3;
-				else if ( angleDif >= straight  && angleDif <= left )
-					index = 4;
-				else if ( angleDif >= left  && angleDif <= sharpLeft )
-					index = 5;
-				// only the last arm can be a U-turn
-				else if ( (angleDif > sharpLeft || angleDif < uTurnRight) && linkRank > 0) {
-					index = 6;	
-					UTurn = true;
-					if (angleDif != 0)
-						index = 6;
-				}
-				
-				this.turnIndex= index;
-				Turn[] turns = Turn.values();
-				this.turnName = turns[turnIndex].toString();
-				if (index <= Turn.STRAIGHT.ordinal())
-					startRight = true;
-				else
-					startRight = false;
-				
-			}	 
-			
-			public String getName()  {
-				return turnName;
-			}	    			
-			public int getIndex()  {
-				return turnIndex;
-			}
+		public ArrayList<Lane> getOutLanes() {
+			return outLanes;
+		}
+		
+		public int getLinkRank() {
+			return linkRank;
+		}
+		
+		/*
+		public int getNumberOfLanes() {
+			return numberOfLanes;
+		}
 
-			public ArrayList<Lane> getOutLanes() {
-				return outLanes;
-			}
-			
-			public int getLinkRank() {
-				return linkRank;
-			}
-			
-			public int getNumberOfLanes() {
-				return numberOfLanes;
-			}
+		public double getAngleDifference() {
+			return angleDifference;
+		}
+		*/
 
+		public boolean isStartRight() {
+			return startRight;
+		}
 
-			public double getAngleDifference() {
-				return angleDifference;
-			}
+		public boolean isUTurn() {
+			return UTurn;
+		}
 
-			public boolean isStartRight() {
-				return startRight;
-			}
-
-			public boolean isUTurn() {
-				return UTurn;
-			}
-
-	    }
+    }
 	    
-	    private class LaneConnect {
-	    	private Lane inLane;
-			private Lane outLane;
-			private int linkRank; 
+    private class LaneConnect {
+    	private Lane inLane;
+		private Lane outLane;
+		private int linkRank; 
 
-			private LaneConnect(Lane inlane, Lane outLane, int linkRank)  {
-	    		this.inLane = inlane;
-	    		this.outLane = outLane;
-	    		this.linkRank = linkRank;
-	    	}
-			
-			public Lane getInLane() {
-				return inLane;
-			}
+		private LaneConnect(Lane inlane, Lane outLane, int linkRank)  {
+    		this.inLane = inlane;
+    		this.outLane = outLane;
+    		this.linkRank = linkRank;
+    	}
+		
+		public Lane getInLane() {
+			return inLane;
+		}
 
-			public Lane getOutLane() {
-				return outLane;
-			}
+		public Lane getOutLane() {
+			return outLane;
+		}
 
-			public int getLinkRank() {
-				return linkRank;
-			}
+		public int getLinkRank() {
+			return linkRank;
+		}
 			
     }
 
@@ -979,14 +984,10 @@ public class Node extends Vertex implements XML_IO {
 	    	    					junction = false;
 	    	    			}
 	    				}
-	    			}
-	    			else 
+	    			} else 
 	    				junction = true;
-	    		}
-	    		// a junction requires at least three links and one leaving link
-	    		else if (outLanesAndLinkList.size() > 0 && (numberOfIncomingArms + outLanesAndLinkList.size()) > 2) {
-	    			junction = true;
-	    		}
+	    		} else if (outLanesAndLinkList.size() > 0 && (numberOfIncomingArms + outLanesAndLinkList.size()) > 2)
+	    			junction = true; // a junction requires at least three links and one leaving link
 
 				int numberOfLeavingLinks = linkRank;
         		ArrayList<RoadMarkerAlong> rmaList = new ArrayList<RoadMarkerAlong>();
@@ -1036,12 +1037,10 @@ public class Node extends Vertex implements XML_IO {
 							int inLanesToConnect = 1;
 							// look if there are more turn lanes with the same turning direction
 							while (indexInlane + inLanesToConnect < inLanesAll.size()) {										
-								if (inLanesAll.get(indexInlane + inLanesToConnect).getTurnArrow().getOutLinkNumbers()[0] == outLinkRank)  {
+								if (inLanesAll.get(indexInlane + inLanesToConnect).getTurnArrow().getOutLinkNumbers()[0] == outLinkRank)
 									inLanesToConnect++;
-								}
 								else
 									break;
-
 							}
 							for (int i = 0; i < inLanesToConnect; i++) {
 								if (i >= currentOutlinkInfo.getOutLanes().size())
@@ -1069,9 +1068,9 @@ public class Node extends Vertex implements XML_IO {
             				turnCount++; 
 //            				if (indexInlane >= inLanesAll.get(indexInlane).getTurnArrow().getOutLinkNumbers().length)
             				// if the inlane 
-            				if (turnCount < inLanesAll.get(indexInlane).getTurnArrow().getOutLinkNumbers().length)  {
+            				if (turnCount < inLanesAll.get(indexInlane).getTurnArrow().getOutLinkNumbers().length)
             					indexInlane--;
-            				} else // go to the next inLane and reset turncount to zero
+            				else // go to the next inLane and reset turncount to zero
             					turnCount = 0;
             				outLinkIndex = 0;
 	            		}
@@ -1080,7 +1079,7 @@ public class Node extends Vertex implements XML_IO {
 		    		// STEP 2B
 		    		// if no turning movements are defined for this link/lane, 
 		    		// construct the movements with some pre defined rules
-	    			if (inLanesAll.get(0).getTurnArrow().getOutLinkNumbers() == null)  { 
+	    			if (inLanesAll.get(0).getTurnArrow().getOutLinkNumbers() == null) { 
         				Lane currentOutLane = null;
 
         				// explore all turns of the junction from this incoming arm
@@ -1101,6 +1100,7 @@ public class Node extends Vertex implements XML_IO {
 	                       	// from the outer-lane)
 							Lane currentInLane = null;
 	        				OutLinkInfo currentOutLinkInfo = outLanesAndLinkList.get(outLink);
+	        				// FIXME: most software should not use the ordinal method of an enum
 	        				if (currentOutLinkInfo.getIndex() == Turn.LEFT_UTURN.ordinal() )
 	        					priorityShare[outLink] = 0;
 	        				else if (currentOutLinkInfo.getIndex() == Turn.RIGHT_UTURN.ordinal() )
@@ -1131,33 +1131,29 @@ public class Node extends Vertex implements XML_IO {
     					
 						// a shortage of lanes: either share lanes or less than demanded         					
 
-    					if (sumCeil > numberOfTurnLanes  )  { 
+    					if (sumCeil > numberOfTurnLanes) { 
     						// int lanesToShare = numberOfLeavingLinks - 1;
     						while (indexFirst < indexLast && lanesToShare > 0) {
         						if (priorityShare[indexFirst] <= priorityShare[indexFirst + 1]) {
         							// if the right-side movement has lower priority, than share lanes
-        							if (priorityShare[indexFirst] <= priorityShare[indexLast] )  {
-        								if (shareLaneNextMovement[indexFirst] == 0 && laneSharing) {
+        							if (priorityShare[indexFirst] <= priorityShare[indexLast]) {
+        								if (shareLaneNextMovement[indexFirst] == 0 && laneSharing)
         									shareLaneNextMovement[indexFirst]++;
-        								}
         								else
         									ceilShareOfLanes[indexFirst]--;
         								indexFirst++;
-        							}
-        							else  {
-        								if (shareLaneNextMovement[indexLast] == 0 && laneSharing) {
+        							} else {
+        								if ((0 == shareLaneNextMovement[indexLast]) && laneSharing)
         									shareLaneNextMovement[indexLast]++;
-        								}
         								else
         									ceilShareOfLanes[indexLast]--;
         								indexLast--;
         							}
         						}
         						else if (priorityShare[indexFirst] > priorityShare[indexFirst + 1]) {
-        							if (priorityShare[indexFirst + 1] < priorityShare[indexLast] )  {
-        								if (shareLaneNextMovement[indexFirst + 1] == 0 && laneSharing) {
+        							if (priorityShare[indexFirst + 1] < priorityShare[indexLast] ) {
+        								if (shareLaneNextMovement[indexFirst + 1] == 0 && laneSharing)
         									shareLaneNextMovement[indexFirst + 1]++;
-        								}
         								else
         									if (ceilShareOfLanes[indexFirst + 1] > 1)
         										ceilShareOfLanes[indexFirst + 1]--;
@@ -1165,11 +1161,9 @@ public class Node extends Vertex implements XML_IO {
         										shareLaneNextMovement[indexFirst]++;
         								indexFirst++;
         								indexFirst++;        								
-        							}
-        							else  {
-        								if (shareLaneNextMovement[indexLast] == 0 && laneSharing) {
+        							} else {
+        								if (shareLaneNextMovement[indexLast] == 0 && laneSharing)
         									shareLaneNextMovement[indexLast - 1]++;
-        								}
         								else {
         									if (ceilShareOfLanes[indexLast] > 1)
         										ceilShareOfLanes[indexLast]--;
@@ -1183,7 +1177,7 @@ public class Node extends Vertex implements XML_IO {
     						}
     					}
     					// Strange junction or a merge!!
-    					if (sumCeil < numberOfTurnLanes  )  {  
+    					if (sumCeil < numberOfTurnLanes) {  
     						// int lanesToShare = numberOfLeavingLinks - 1;
     						while (lanesToShare < 0) {
     							mergeLanes++;
@@ -1209,12 +1203,10 @@ public class Node extends Vertex implements XML_IO {
 					    			StopLine stopLine = new StopLine(currentInLane.getCse(), StopLine.NOSTOPLINE,-4.0, 2.0, 0.0); 
 					    			currentInLane.setStopLine(stopLine);
 					    		}
-    							if (currentOutLinkInfo.isStartRight()) {						
+    							if (currentOutLinkInfo.isStartRight())						
 	        						currentOutLane = outLanes.get(i);
-	    						}
-    							else {
+    							else
 	        						currentOutLane = outLanes.get(currentOutLinkInfo.numberOfLanes - ceilShareOfLanes[outLink] + i);
-    							}
     							if (currentInLane == null)
     								System.out.print("no inlane??");
     							LaneConnect laneConnect = new LaneConnect(currentInLane, currentOutLane, outLink);
@@ -1247,8 +1239,7 @@ public class Node extends Vertex implements XML_IO {
 
 									LaneConnect laneConnect = new LaneConnect(currentInLane, currentOutLane, outLink);
 									connectedLanesList.add(laneConnect);
-								}
-								else  {
+								} else {
 /*	    							if (outLink == ceilShareOfLanes.length)
 	    								System.out.print("error junction");
 	    							if (indexCurrentInlane - ceilShareOfLanes[outLink] == inLanesAll.size())
@@ -1265,10 +1256,8 @@ public class Node extends Vertex implements XML_IO {
 							}
 							indexCurrentInlane = indexCurrentInlane - shareLaneNextMovement[outLink];
     					}
-        				
 	    			}   //FINISHED STEP 2B	
             	}
-            		
             		
         		//STEP 3: create new turning links at the junction
 				// every link can have one or more lanes
@@ -1289,8 +1278,7 @@ public class Node extends Vertex implements XML_IO {
 	        				if (connectLanes.getLinkRank() != connectedLanesList.get(laneIndex-1).getLinkRank()) {
 	    						addLink = true;
 	    						sameOutLink = false;
-	        				}
-	        				else
+	        				} else
 	        					sameOutLink = true;
 	    				
 	    				if (addLink) {

@@ -145,7 +145,7 @@ public class Curves {
 		int a1 = (int) start.getX();
 		int a2= (int) end.getX();
 		int a3 = (int) ctrlPoint1.getX();
-		int a4 = (int) smooth.intValue();
+		int a4 = smooth.intValue();
 		
 		System.out.println("Curve " + a1 + " b " + a2 + " c " + a3 + " d " + a4);
 		Geometry curve = createQuadCurve(new Coordinate(start.getX(), start.getY()), new Coordinate(end.getX(), end.getY()), new Coordinate(ctrlPoint1.getX(), ctrlPoint1.getY()), smooth);
