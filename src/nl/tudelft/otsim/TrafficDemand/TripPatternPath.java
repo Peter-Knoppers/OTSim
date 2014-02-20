@@ -131,7 +131,7 @@ public class TripPatternPath {
 	private void computeRouteProbabilities() {
 		if (costs.size() < 1)
 			throw new Error("No routes");
-		CostsToProbabilities costsToProbabilities = new LogitModel(-0.2);
+		CostsToProbabilities costsToProbabilities = new LogitModel(-0.1);
 		probabilities = costsToProbabilities.probabilities(costs);
 	}
 

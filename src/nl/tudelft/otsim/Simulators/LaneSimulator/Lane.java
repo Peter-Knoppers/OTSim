@@ -478,7 +478,7 @@ public class Lane {
      */
     public Movable findVehicle(double startX, Model.longDirection updown) {
     	if (startX > l + 0.002)		// UGLY! This margin must be bigger than margin used in Driver.anticipatedSpeed
-    		throw new Error("StartX is out of range");
+    		throw new Error("StartX is out of range"); // FIXME
     	int index = findVehicleIndex(startX);
         if (updown == Model.longDirection.UP) {
         	if (index > 0)
