@@ -388,7 +388,7 @@ public class Planar {
 	 * Derived from <a href="http://www.ces.clemson.edu//~pmdrn/Dearing/location/minimax.pdf">minimax.pdf</a>.
 	 * The algorithm presented there is n<sup>2</sup>, but it is fairly easy to 
 	 * understand and n should be quite small for our uses.
-	 * @param points List of points that must be covered
+	 * @param points ArrayList&lt;Point2D.Double&gt; the points that must be covered
 	 * @return The minimal circle covering the points
 	 */
 	public static Circle circleCoveringPoints(ArrayList<Point2D.Double> points) {
@@ -579,6 +579,23 @@ public class Planar {
 		//Log.logMessage("d:/circleCovering.txt", false, "Final result: circle centered at %f,%f, radius %f", center.x, center.y, radius);
 		return new Circle(center, radius);
 	}
+	
+	/**
+	 * Find the minimum circle that covers a cloud of points.
+	 * <br />
+	 * Derived from <a href="http://www.ces.clemson.edu//~pmdrn/Dearing/location/minimax.pdf">minimax.pdf</a>.
+	 * The algorithm presented there is n<sup>2</sup>, but it is fairly easy to 
+	 * understand and n should be quite small for our uses.
+	 * @param points Array of Point2D.Double that must be covered
+	 * @return The minimal circle covering the points
+	 */
+	public static Circle circleCoveringPoints(Point2D.Double[] points) {
+		ArrayList<Point2D.Double> pts = new ArrayList<Point2D.Double>(points.length);
+		for (Point2D.Double p : points)
+			pts.add(p);
+		return circleCoveringPoints(pts);
+	}
+
 	
 	/**
 	 * Compute all intersection points of a line segment and a circle. There 

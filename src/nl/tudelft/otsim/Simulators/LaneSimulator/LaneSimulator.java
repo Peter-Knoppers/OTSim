@@ -215,12 +215,9 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         		flowGraph = new TimeScaleFunction(fields[2]);
         		//numberOfTripsPath = Double.parseDouble(fields[2]);	// Only numberOfTrips is actually used
         	else if (fields[0].equals("Path:")) {
-        		//if (! flowGraph.isTrivial()) {
-        		//if (numberOfTripsPath > 0) {
-        			if (null != exportTripPattern)
-        				tripList.add(exportTripPattern);
-        			exportTripPattern = new ExportTripPattern(flowGraph, classProbabilities);
-        		//}		
+    			if (null != exportTripPattern)
+    				tripList.add(exportTripPattern);
+    			exportTripPattern = new ExportTripPattern(flowGraph, classProbabilities);
         		ArrayList<Integer> route = new ArrayList<Integer>(); 
         		for (int i = 3; i < fields.length; i++) {
         			String field = fields[i];

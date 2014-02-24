@@ -41,7 +41,7 @@ import nl.tudelft.otsim.SpatialTools.Planar;
  * A <i>modified</i> flag is used to track unsaved changes that the user may
  * want to write to permanent storage instead of discarding.
  * 
- * @author gjtamminga, Peter Knoppers
+ * @author Guus J Tamminga, Peter Knoppers
  */
 public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Storable {
 	/** Name for a Network element when stored in XML format */
@@ -460,7 +460,7 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 	 * Nodes that are automatically added to fix geometry at junctions. The
 	 * returned list is sorted by the IDs of the Nodes. 
 	 * @param mayRebuild Boolean; true to permit reconstruction of geometry at 
-	 * junctions; false to prevent reconstruction of geomtry at junctions
+	 * junctions; false to prevent reconstruction of geometry at junctions
 	 * @return List&lt;Node&gt; List of Nodes in this Network
 	 */
 	public ArrayList<Node> getAllNodeList(boolean mayRebuild) {
@@ -477,7 +477,7 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 	}
 
 	/**
-	 * Add a Link to this Network.
+	 * Add a {@link Link} to this Network.
 	 * @param linkName String; name of the new Link (must be unique)
 	 * @param fromNodeID Integer; ID of the {@link Node} where the new Link starts
 	 * @param toNodeID Integer; ID of the {@link Node} where the new Link ends
@@ -491,6 +491,7 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 	 * @return {@link Link}; the newly created Link
 	 */
 	public Link addLink(String linkName, int fromNodeID, int toNodeID, double length, boolean priority, ArrayList<CrossSection> crossSections, ArrayList<Vertex> intermediateVertices) {
+		System.out.println("Adding link " + linkName + " to network ");
 		if (null != lookupLink(linkName))			
 			throw new Error(String.format("Link with name %s already exists", linkName));
 		Link result;
@@ -498,6 +499,33 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 		setModified();
 		return result;
 	}
+	
+	/**
+	 * Add a {@link Link} to this Network.
+	 * @param linkName String; name of the new Link (must be unique)
+	 * @param fromNetwork {@link Network}; (sub-)Network where the new link starts
+	 * @param fromNodeID Integer; ID of the node in the (sub-)\ Network where the new Link starts
+	 * @param toNetwork {@link Network}; (sub-)Network where the new link ends
+	 * @param toNodeID Integer; ID of the node in the (sub-)Network where the new link ends
+	 * @param length Double; Length of the new Link in m
+	 * @param priority Boolean; Priority of the new Link
+	 * @param crossSections ArrayList&lt;{@link CrossSection}&gt; List of 
+	 * CrossSections of the new Link 
+	 * @param intermediateVertices ArrayList&lt;{@link Vertex}&gt; List of
+	 * vertices that specify additional points on the <i>design line</i> of the 
+	 * new Link
+	 * @return {@link Link}; the newly created Link
+	 */
+	/*public Link addLink(String linkName, Network fromNetwork, int fromNodeID, Network toNetwork, int toNodeID, double length, boolean priority, ArrayList<CrossSection> crossSections, ArrayList<Vertex> intermediateVertices) {
+		if (null != lookupLink(linkName))			
+			throw new Error(String.format("Link with name %s already exists", linkName));
+		Link result;
+		links.put(linkName,  result = new Link(this, linkName, fromNetwork.lookupNode(fromNodeID, false), toNetwork.lookupNode(toNodeID, false), length, priority, crossSections, intermediateVertices));
+		setModified();
+		fromNetwork.setModified();
+		toNetwork.setModified();
+		return result;
+	}*/
 	
 	/**
 	 * Retrieve the entire set of {@link ActivityLocation ActivityLocations} of 
@@ -718,15 +746,15 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 				// within a link: connect all successive cross sections by cs-element (weglaten???)
 				fixParallelSectionElements();
 				// add junction connection lanes (generates new lanes and links)
+				rebuildLanes();
+				expandNodes();
 				fixNodes();
 				// create the RMA vertices 
 				// create lanes for the first time, with lateral connections (right or left neighbours)
 				// and initial centerlines
 				// still without connections between successive cross sections
-				rebuildLanes();
 				// connect the connections between links 
 				// at a node with more than two links a junction is generated!				
-				expandNodes();
 				// connect the connections of lanes and CSEs between cross sections at a link
 				fixConnectionLanesAtLink();
 				// Create  a smooth and correct geometry
@@ -768,6 +796,7 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 		// rebuild the list of DirectionalLinks at this node
 		for (Node node : nodes.values()) {
 			node.clearLinks();
+			//System.out.println("Adding links to node " + node.getName_r());
 			for (Link link : links.values()) {
 				if (link.getFromNode_r() == node)
 					node.addLink(link, false);

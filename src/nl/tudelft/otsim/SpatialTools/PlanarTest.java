@@ -484,10 +484,10 @@ public class PlanarTest {
 	}
 
 	/**
-	 * Test the circleCoveringPoints method.
+	 * Test the circleCoveringPoints method taking an ArrayList.
 	 */
 	@Test
-	public void testCircleCoveringPoints() {
+	public void testCircleCoveringPointsArrayListPoints() {
 		ArrayList<Point2D.Double> points = new ArrayList<Point2D.Double>();
 		assertNull("Empty input list should return null", Planar.circleCoveringPoints(points));
 		points.add(new Point2D.Double(123.4, 567.9));
@@ -653,6 +653,10 @@ public class PlanarTest {
 		Planar.circleCoveringPoints(points);
 	}
 
+	@Test
+	public void testCircleCoveringPointsArray () {
+		fail("Not implemented yet");
+	}
 
 	/**
 	 * Test the intersectLineSegmentAndCircle method.

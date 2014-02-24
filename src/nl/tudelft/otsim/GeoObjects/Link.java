@@ -367,7 +367,7 @@ public class Link implements XML_IO {
      * @param fromNodeExpand The new inserted {@link Node} near the start of this link 
      */
 	public void setFromNodeExpand(Node fromNodeExpand) {
-		if (null == toNode)
+		if (null == fromNode)
 			throw new Error("WTF");
 		this.fromNodeExpand = fromNodeExpand;
 	}
