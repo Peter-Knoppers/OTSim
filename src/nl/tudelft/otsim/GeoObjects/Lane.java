@@ -16,10 +16,10 @@ import nl.tudelft.otsim.Utilities.Reversed;
  * Class that implements traffic lanes. Used to export network topology to
  * lane simulators.
  * 
- * @author gtamminga
+ * @author Guus F Tamminga
  */
 public class Lane extends CrossSectionObject {
-    private int id;
+    private final int id;
     //private int capacity;
 	private Lane right;
 	private Lane left;

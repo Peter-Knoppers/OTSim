@@ -19,7 +19,7 @@ import nl.tudelft.otsim.Utilities.Reversed;
  * of this CrossSection. Subsequent CrossSectionElements are placed next to the
  * preceding one.
  * 
- * @author gtamminga, Peter Knoppers
+ * @author Guus F Tamminga, Peter Knoppers
  *
  */
 public class CrossSection implements XML_IO {
@@ -471,16 +471,15 @@ public class CrossSection implements XML_IO {
 	 * @param node Node; 
 	 * */
 	public static ArrayList<CrossSection> getCrossSectionsAtNode(Node node) {
-    	ArrayList<DirectionalLink> dlList = node.getLinksFromJunction();
 		int inCount = node.incomingCount();
 		int outCount = node.leavingCount();
 		// the simple case: two links 
 		ArrayList<CrossSection> csList = null;
 		if ((inCount == 1) && (outCount == 1))	{
-			// set the neighbour index of the end cross section of the entering
+			// set the neighbor index of the end cross section of the entering
 			// and the starting cross section of the leaving link
-	    	Link fromLink = dlList.get(0).incoming ? dlList.get(0).link : dlList.get(1).link;
-	    	Link toLink = dlList.get(0).incoming ? dlList.get(1).link : dlList.get(0).link;
+	    	Link fromLink = node.getLinksFromJunction(true).get(0).link;
+	    	Link toLink = node.getLinksFromJunction(false).get(0).link;
 	    	if (! fromLink.getFromNode_r().equals(toLink.getToNode_r())) {
 		    	csList = new ArrayList<CrossSection>();
 				CrossSection inCS = fromLink.getCrossSections_r().get(fromLink.getCrossSections_r().size() - 1);

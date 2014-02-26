@@ -18,7 +18,6 @@ import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GUI.InputValidator;
 import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.SpatialTools.Circle;
-import nl.tudelft.otsim.SpatialTools.Curves;
 import nl.tudelft.otsim.SpatialTools.Planar;
 
 /**
@@ -259,7 +258,7 @@ public class Node extends Vertex implements XML_IO {
 	 * @author Peter Knoppers
 	 */
 	public class DirectionalLink implements Comparable<DirectionalLink> {
-		public Link link;
+		Link link;
 		double angle;
 		boolean incoming;
 
@@ -277,14 +276,7 @@ public class Node extends Vertex implements XML_IO {
 			ArrayList<Vertex> vertices = link.getVertices();
 			Point2D.Double p0 = vertices.get(incoming ? vertices.size() - 1 : 0).getPoint();
 			Point2D.Double p1 = vertices.get(incoming ? vertices.size() - 2 : 1).getPoint();
-			double dy;
-			double dx;
-			angle = Math.atan2(dy = p1.y - p0.y, dx = p1.x - p0.x);
-			if (angle < 0)
-				angle += 2 * Math.PI;
-			if (angle >= 2 * Math.PI)
-				angle -= 2 * Math.PI;
-			//System.out.println(String.format(Locale.US, "%s: p1=%8.3f,%8.3f p0=%8.3f,%8.3f dx=%8.3f, dy=%8.3f, a=%3.0f: %s", Planar.verticesToString(vertices), p1.x, p1.y, p0.x, p0.y, dx, dy, angle * 180 / Math.PI, toString()));
+			angle = Planar.normalizeAngle(Math.atan2(p1.y - p0.y, p1.x - p0.x));
 		}
 		
 		@Override
@@ -593,14 +585,15 @@ public class Node extends Vertex implements XML_IO {
 		return directionalCount(false);
 	}
 	
-	private ArrayList<DirectionalLink> getLinks() {
+	private ArrayList<DirectionalLink> getLinks(Boolean which) {
 		ArrayList<DirectionalLink> result = new ArrayList<DirectionalLink> ();
 		if (null == links) {
 			System.err.println("Links is null (this is node " + toString() + ")");
 			return result;
 		}
 		for (DirectionalLink dl : links)
-			result.add(dl);
+			if ((null == which) || (which == dl.incoming))
+				result.add(dl);
 		return result;
 	}
 	
@@ -622,21 +615,21 @@ public class Node extends Vertex implements XML_IO {
 	    	// This node has at precisely one incoming and one outgoing link
     		// If both connect to the same other node, this node is BOTH a
     		// source AND a sink
-	    	ArrayList<DirectionalLink> dlList = getLinks();
-			int incomingIndex = dlList.get(0).incoming ? 0 : 1;  
-			int leavingIndex = 1 - incomingIndex;
-			if (dlList.get(incomingIndex).link.getFromNode_r().equals(dlList.get(leavingIndex).link.getToNode_r()))
-				sink = source = true;  
+    		if (getLinks(true).get(0).link.getFromNode_r().equals(getLinks(false).get(0).link.getToNode_r()))
+    			sink = source = true;
     	}
     }
     
     /**
      * Return a list of {@link DirectionalLink DirectionalLinks} of this Node.
+     * @param which Boolean; if true, all incoming DirectionalLinks are returned;
+     * if false, all outgoing DirectionalLinks are returned; if null, all
+     * DirectionalLinks are returned
      * @return ArrayList&lt;{@link DirectionalLink}&gt;; the list of DirectionalLinks of this Node 
      */
-	public ArrayList<DirectionalLink> getLinksFromJunction() {
+	public ArrayList<DirectionalLink> getLinksFromJunction(Boolean which) {
 	    determineSinkOrSource();	// FIXME: is this call needed?
-		return getLinks();
+		return getLinks(which);
 	}
 	
 

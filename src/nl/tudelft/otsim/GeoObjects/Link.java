@@ -517,15 +517,14 @@ public class Link implements XML_IO {
 	}
 	
 	public static void connectSuccessiveLanesAtNode(Node node) {
-    	ArrayList<DirectionalLink> dlList = node.getLinksFromJunction();
 		int inCount = node.incomingCount();
 		int outCount = node.leavingCount();
 		// the simple case: two links 
 		if ((inCount == 1) && (outCount == 1) )	{
 			// set the neighbour index of the end cross section of the entering
 			// and the starting cross section of the leaving link
-	    	Link fromLink = dlList.get(0).incoming ? dlList.get(0).link : dlList.get(1).link;
-	    	Link toLink = dlList.get(0).incoming ? dlList.get(1).link : dlList.get(0).link;
+	    	Link fromLink = node.getLinksFromJunction(true).get(0).link;
+	    	Link toLink = node.getLinksFromJunction(false).get(0).link;
 	    	if (! fromLink.getFromNode_r().equals(toLink.getToNode_r())) {
 		    	ArrayList<CrossSection> csList = new ArrayList<CrossSection>();
 				CrossSection inCS = fromLink.getCrossSections_r().get(fromLink.getCrossSections_r().size() - 1);
