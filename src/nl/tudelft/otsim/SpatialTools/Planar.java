@@ -1169,6 +1169,20 @@ public class Planar {
 			result.y2 = y;
 		return result;
 	}
+	
+	/**
+	 * Normalize an angle to a value between 0 and 2 * PI.
+	 * @param angle double; the angle to normalize
+	 * @return double; the normalized angle
+	 */
+	public static double normalizeAngle (double angle) {
+		final double modulus = 2 * Math.PI;
+		while (angle < 0)
+			angle += modulus;
+		while (angle >= modulus)
+			angle -= modulus;
+		return angle;
+	}
 
 }
 

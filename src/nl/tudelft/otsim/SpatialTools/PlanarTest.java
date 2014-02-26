@@ -1210,5 +1210,19 @@ public class PlanarTest {
 		assertEquals("Bounding box of two points", 0, bbox.getP1().distance(new Point2D.Double(10, 5)), 0.0000001);
 		assertEquals("Bounding box of two points", 0, bbox.getP2().distance(new Point2D.Double(30, 20)), 0.0000001);
 	}
+	
+	/**
+	 * Test the normalizeAngle method.
+	 */
+	@SuppressWarnings("static-method")
+	@Test
+	public void testNormalizeAngle() {
+		for (int i = -100; i < 100; i++) {
+			double in = i;
+			double out = Planar.normalizeAngle(in);
+			assertEquals("sine shoud be equal", Math.sin(in), Math.sin(out), 0.0000001);
+			assertEquals("cosine shoud be equal", Math.cos(in), Math.cos(out), 0.0000001);
+		}
+	}
 
 }
