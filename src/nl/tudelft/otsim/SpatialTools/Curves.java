@@ -83,58 +83,29 @@ public class Curves {
 		Vertex start = up.get(up.size() - 1);
 		Vertex prevStart = up.get(up.size() - 2);
 		//when distance between vertices the angle is not robust. Choose a vertex further away
-		int i = 2;
-		while ((start.distance(prevStart) < 3)  && (up.size() - i - 1 >= 0)) {
+		for (int i = 2; (start.distance(prevStart) < 3)  && (up.size() - i - 1 >= 0); i++)
 			prevStart = up.get(up.size() - i - 1);
-			i++;
-		}
 		Vertex end = down.get(0);
 		Vertex endNext = down.get(1);
-		i = 2; // third (next) vertex
-		while ((end.distance(endNext) < 3) && (i < down.size())) {
+		for (int i = 2; (end.distance(endNext) < 3) && (i < down.size()); i++)
 			endNext = down.get(i);
-			i++;
-		}
 		
-		Line2D.Double line1 = new Line2D.Double(prevStart.getX(), prevStart.getY(), start.getX(), start.getY());
-		Line2D.Double line2 = new Line2D.Double(end.getX(), end.getY(), endNext.getX(), endNext.getY());
-		Point2D.Double ctrlPoint1 = new Point2D.Double();
-		if (difAngle(line1, line2) < 0.3 * Math.PI || difAngle(line1, line2) > 1.7 * Math.PI) {
-			// This covers the case that the lines are parallel (and ctrlPoint1 is null)
-			Double x = line1.getX2() + (line2.getX1() - line1.getX2()) / 2;
-			Double y = line1.getY2() + (line2.getY1() - line1.getY2()) / 2;
-			ctrlPoint1 = new Point2D.Double(x, y);
-			if (ctrlPoint1 == null)
-				System.out.println("stop strange");
-		}
-		else {
-			ctrlPoint1 = Planar.intersection(line1, line2);
-			if (ctrlPoint1 == null)
-				System.out.println("stop strange");
-		}
-		Point2D.Double p1 = new Point2D.Double(start.getX(), start.getY());
-		Point2D.Double p2 = new Point2D.Double(end.getX(), end.getY());
-		//if (ctrlPoint1.distance(p1) + ctrlPoint1.distance(p2) >  )
+		Line2D.Double line1 = new Line2D.Double(prevStart.getPoint(), start.getPoint());
+		Line2D.Double line2 = new Line2D.Double(end.getPoint(), endNext.getPoint());
+		if (headingDifference(line1, line2) < 0.3 * Math.PI || headingDifference(line1, line2) > 1.7 * Math.PI)
+			// Take care of the case that the lines are (almost) parallel (and ctrlPoint1 would be null)
+			return new Point2D.Double(line1.getX2() + (line2.getX1() - line1.getX2()) / 2, 
+					line1.getY2() + (line2.getY1() - line1.getY2()) / 2);
+		Point2D.Double ctrlPoint1 = Planar.intersection(line1, line2);
 		if (ctrlPoint1 == null)
 			System.out.println("stop strange");
-
 		return ctrlPoint1;
 	}
 	
-	public static double difAngle(Line2D.Double line1, Line2D.Double line2)  {
-		Double angle1 = Math.atan2(line1.getY2() - line1.getY1() , line1.getX2() - line1.getX1());
-		Double angle2 = Math.atan2(line2.getY2() - line2.getY1() , line2.getX2() - line2.getX1());
-		Double difAngle;
-		if (angle1 < 0)
-			angle1 += 2 * Math.PI;
-		if (angle1 >= 2 * Math.PI)
-			angle1 -= 2 * Math.PI;
-		if (angle2 < 0)
-			angle2 += 2 * Math.PI;
-		if (angle2 >= 2 * Math.PI)
-			angle2 -= 2 * Math.PI;
-		difAngle = Math.abs(angle2 - angle1);
-		return difAngle;
+	private static double headingDifference(Line2D.Double line1, Line2D.Double line2)  {
+		Double angle1 = Planar.normalizeAngle(Math.atan2(line1.getY2() - line1.getY1() , line1.getX2() - line1.getX1()));
+		Double angle2 = Planar.normalizeAngle(Math.atan2(line2.getY2() - line2.getY1() , line2.getX2() - line2.getX1()));
+		return Math.abs(angle2 - angle1);
 	}
 	
     public static ArrayList<Vertex> connectVerticesCurve(ArrayList<Vertex> up, ArrayList<Vertex> down, 
@@ -150,9 +121,8 @@ public class Curves {
 		System.out.println("Curve " + a1 + " b " + a2 + " c " + a3 + " d " + a4);
 		Geometry curve = createQuadCurve(new Coordinate(start.getX(), start.getY()), new Coordinate(end.getX(), end.getY()), new Coordinate(ctrlPoint1.getX(), ctrlPoint1.getY()), smooth);
         Coordinate[] points1 = curve.getCoordinates();
-    	for (Coordinate c : points1)  {
+    	for (Coordinate c : points1)
     		vertices.add(new Vertex(c.x, c.y, 0.0));
-    	}
 		return vertices;
     }
 }
