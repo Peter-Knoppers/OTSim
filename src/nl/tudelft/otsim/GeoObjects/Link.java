@@ -19,7 +19,7 @@ import nl.tudelft.otsim.Utilities.Reversed;
  * follows zero or more intermediate vertices and ends at the destination
  * {@link Node}. The way the Link looks is described by one or more
  * {@link CrossSection CrossSections} that are <i>swept</i> along the design line.
- * @author gtamminga, Peter Knoppers
+ * @author Guus F Tamminga, Peter Knoppers
  *
  */
 public class Link implements XML_IO {
@@ -474,20 +474,10 @@ public class Link implements XML_IO {
 	
 	/**
 	 * Re-calculate the length of this Link from the specified list of vertices.
-	 * @param vertices ArrayList<{@link Vertex} for the design line of the Link
 	 */
-    public void calculateLength(List<Vertex> vertices) {
-        // compute and set length
-        double cumLength = 0;
-        double dx;
-        double dy;
-        for (int i=1; i<=vertices.size()-1; i++) {
-            dx = vertices.get(i).getX() - vertices.get(i-1).getX();
-            dy = vertices.get(i).getY() - vertices.get(i-1).getY();
-            cumLength = cumLength + Math.sqrt(dx*dx + dy*dy);
-        }
-        this.length = cumLength;
-    }
+    public void calculateLength() {
+    	length = Planar.length(getVertices());
+   }
 
     /**
      * Re-build the list of {@link Lane Lanes} of the Link.
@@ -521,7 +511,7 @@ public class Link implements XML_IO {
 		int outCount = node.leavingCount();
 		// the simple case: two links 
 		if ((inCount == 1) && (outCount == 1) )	{
-			// set the neighbour index of the end cross section of the entering
+			// set the neighbor index of the end cross section of the entering
 			// and the starting cross section of the leaving link
 	    	Link fromLink = node.getLinksFromJunction(true).get(0).link;
 	    	Link toLink = node.getLinksFromJunction(false).get(0).link;

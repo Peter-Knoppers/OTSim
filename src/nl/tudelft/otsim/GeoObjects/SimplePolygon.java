@@ -43,7 +43,7 @@ public class SimplePolygon implements XML_IO {
 	 */
 	public SimplePolygon (java.util.ArrayList<java.awt.geom.Point2D.Double> points, Double z) {
 		if ((points.size() >= 2) && (points.get(0).distance(points.get(points.size() - 1)) < tooClose))
-				throw new Error("list of points should not be closed");
+			throw new Error("list of points should not be closed");
 		if (points.size() == 0)
 			return;
 		Point2D.Double prevPoint = points.get(points.size() - 1);

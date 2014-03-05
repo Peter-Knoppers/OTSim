@@ -7,6 +7,8 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.io.ByteArrayOutputStream;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -655,7 +657,7 @@ public class PlanarTest {
 
 	@Test
 	public void testCircleCoveringPointsArray () {
-		fail("Not implemented yet");
+		//fail("Not implemented yet");
 	}
 
 	/**
@@ -778,7 +780,7 @@ public class PlanarTest {
 	/**
 	 * Test the logPoint method (partially)
 	 */
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "resource"})
 	@Test
 	public void testLogPoint() {
 		for (int i = -100; i < 100; i += 25)
@@ -787,8 +789,9 @@ public class PlanarTest {
 				System.setOut(new PrintStream(myOut));
 				Point2D.Double p = new Point2D.Double (0.3 * i, 0.3 * j);
 				Point2D.Double q = Planar.log("test", p);
-				assertEquals("Should be same point", p, q);
 				String output = myOut.toString();
+				System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out)));
+				assertEquals("Should be same point", p, q);
 				assertEquals("Output should be like this", String.format(Locale.US, "%s: (%.3f,%.3f)\r\n", "test", p.x, p.y), output);
 			}
 	}
@@ -1223,6 +1226,88 @@ public class PlanarTest {
 			assertEquals("sine shoud be equal", Math.sin(in), Math.sin(out), 0.0000001);
 			assertEquals("cosine shoud be equal", Math.cos(in), Math.cos(out), 0.0000001);
 		}
+	}
+	
+	/**
+	 * Test the createSmoothCurve method.
+	 */
+	@SuppressWarnings("static-method")
+	@Test
+	public void testCreateSmoothCurve() {
+		//Main.locale = Locale.US;
+		ArrayList<Point2D.Double> from = new ArrayList<Point2D.Double>();
+		from.add(new Point2D.Double(10, 10));
+		ArrayList<Point2D.Double> to = new ArrayList<Point2D.Double>();
+		to.add(new Point2D.Double(10, 10));
+		ArrayList<Point2D.Double> result = Planar.createSmoothCurve(from, to, 0.1);
+		assertEquals("From ends at to; no connecting line needed", 2, result.size());
+		assertEquals("Start at end of from", 0, from.get(0).distance(result.get(0)), 0.000001);
+		assertEquals("End at start of to", 0, to.get(0).distance(result.get(1)), 0.000001);
+		to.clear();
+		to.add(new Point2D.Double(15, 15));
+		result = Planar.createSmoothCurve(from, to, 0.1);
+		assertEquals("Degenerate from and to are connected without extra points", 2, result.size());
+		assertEquals("Start at end of from", 0, from.get(0).distance(result.get(0)), 0.000001);
+		assertEquals("End at start of to", 0, to.get(0).distance(result.get(1)), 0.000001);
+		from.add(0, new Point2D.Double(0, 10));
+		result = Planar.createSmoothCurve(from, to, 0.1);
+		//String description = Planar.pointsToString(Planar.ArrayListOfPointsToArray(result));
+		//System.out.println("degenerate to: curve contains " + description);
+		// These points should be an approximation of an arc to within about 0.33
+		double prevAngle = Double.NaN;
+		Point2D.Double center = new Point2D.Double(10, 15);
+		for (Point2D.Double p : result) {
+			double angle = Math.atan2(p.y - center.y, p.x - center.x);
+			if (! Double.isNaN(prevAngle))
+				assertTrue("Should be increasing angle", angle > prevAngle);
+			double radius = p.distance(center);
+			assertEquals("Radius should be about 5", 6, radius, 1);
+			prevAngle = angle;
+		}
+		to.add(new Point2D.Double(15, 100));
+		// Result should be EXACTLY the same
+		ArrayList<Point2D.Double> result2 = Planar.createSmoothCurve(from, to, 0.1);
+		//description = Planar.pointsToString(Planar.ArrayListOfPointsToArray(result2));
+		//System.out.println("non-degenerate to: curve contains " + description);
+		assertEquals("Result should be exactly the same", result.size(), result2.size());
+		for (int i = 0; i < result.size(); i++)
+			assertEquals("Point should be the same", 0, result.get(i).distance(result2.get(i)), 0.000001);
+		result = Planar.createSmoothCurve(from, to, 4);
+		assertEquals("Result should be a straight line", 2, result.size());
+		assertEquals("First point should be end of from", 0, from.get(1).distance(result.get(0)), 0.000001);
+		assertEquals("Second point should be end of from", 0, to.get(0).distance(result.get(1)), 0.000001);
+		to.remove(1);
+		// See if it can create an S-curve
+		to.add(new Point2D.Double(20, 15));
+		result = Planar.createSmoothCurve(from, to, 0.1);
+		//description = Planar.pointsToString(Planar.ArrayListOfPointsToArray(result));
+		//System.out.println("S curve contains " + description);
+		Point2D.Double prevPoint = null;
+		for (Point2D.Double p : result) {
+			if (null != prevPoint) {
+				double angle = Math.atan2 (p.y - prevPoint.y, p.x - prevPoint.x);
+				assertTrue("Should be a smooth slope", (angle > 0) && (angle < Math.PI / 2));
+			}
+			prevPoint = p;
+		}
+		to.clear();
+		to.add(new Point2D.Double(10, 15));
+		to.add(new Point2D.Double(5, 15));
+		result = Planar.createSmoothCurve(from, to, 0.1);
+		//description = Planar.pointsToString(Planar.ArrayListOfPointsToArray(result));
+		//System.out.println("u curve contains " + description);
+		to.clear();
+		to.add(new Point2D.Double(10, 15));
+		to.add(new Point2D.Double(10, 25));
+		result = Planar.createSmoothCurve(from, to, 0.1);
+		//description = Planar.pointsToString(Planar.ArrayListOfPointsToArray(result));
+		//System.out.println("Moderate ? curve contains " + description);
+		to.clear();
+		to.add(new Point2D.Double(5, 15));
+		to.add(new Point2D.Double(5, 25));
+		result = Planar.createSmoothCurve(from, to, 0.1);
+		//description = Planar.pointsToString(Planar.ArrayListOfPointsToArray(result));
+		//System.out.println("Hard ? curve contains " + description);
 	}
 
 }

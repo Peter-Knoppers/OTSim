@@ -1,16 +1,22 @@
 package nl.tudelft.otsim.SpatialTools;
 
 import java.lang.Double;
+import java.awt.Shape;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
+import java.awt.geom.QuadCurve2D;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
 
 import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.GeoObjects.Vertex;
@@ -1186,48 +1192,68 @@ public class Planar {
 	/**
 	 * Generate a list of points forming a smooth curve connecting two given curves
 	 * @param from ArrayList&lt;Point2D.Double&gt;; the incoming curve
-	 * @param to ArrayList&lt;Point2D.Double&gt;; the curve to connect to
-	 * @param smoothNess Double; maximum deviation from a perfectly smooth path
-	 * @return ArrayList&lt;Point2D.Double&gt;; a list of points that smoothly 
+	 * @param to List&lt;Point2D.Double&gt;; the curve to connect to
+	 * @param smoothness Double; maximum deviation from a perfectly smooth path
+	 * @return List&lt;Point2D.Double&gt;; a list of points that smoothly 
 	 * connects the given curves (the last point of <code>from</code> and the 
 	 * first point of <code>to</code> are <b>not</b> included in the result) 
 	 */
-	public static ArrayList<Point2D.Double> createSmoothCurve (ArrayList<Point2D.Double> from, ArrayList<Point2D.Double> to, double smoothness) {
+	public static ArrayList<Point2D.Double> createSmoothCurve (List<Point2D.Double> from, List<Point2D.Double> to, double smoothness) {
+		final double hookMargin = 0.2;
 		Point2D.Double start = from.get(from.size() - 1);
 		Point2D.Double prevStart = from.size() > 1 ? from.get(from.size() - 2) : start;
 		Point2D.Double end = to.get(0);
 		Point2D.Double endNext = to.size() > 1 ? to.get(1) : end;
-		ArrayList<Point2D.Double> result = new ArrayList<Point2D.Double>(); 
+		ArrayList<Point2D.Double> result = new ArrayList<Point2D.Double>();
 		double distance = start.distance(end);
-		if (distance < smoothness)
+		if ((distance < smoothness) || (prevStart.distance(start) <= smoothness) && (end.distance(endNext) <= smoothness)) {
+			// Distance to cover is shorter than smoothness, or the closest segment of both lines is shorter than smoothness
+			result.add(start);
+			result.add(end);
 			return result;
-		if ((prevStart.distance(start) <= smoothness) && (end.distance(endNext) <= smoothness))
-			return result;	// Both lines are degenerate; no additional points needed
+		}
 		if (prevStart.distance(start) < smoothness)
-			prevStart = mirror(endNext, start, end);
+			prevStart = mirror(endNext, start, end);	// Make start line a real line
 		if (end.distance(endNext) < smoothness)
-			endNext = mirror(prevStart, start, end);
-		
-		Point2D.Double midPoint = new Point2D.Double((from.get(from.size() - 1).x + to.get(0).x) / 2, (from.get(from.size() - 1).y + to.get(0).y) / 2);
+			endNext = mirror(prevStart, start, end);	// Make end line a real line
+		double fromLength = prevStart.distance(start);
+		Point2D.Double extendFrom = new Point2D.Double(start.x + (start.x - prevStart.x) * distance / fromLength / 2, 
+				start.y + (start.y - prevStart.y)* distance / fromLength / 2);
+		double toLength = endNext.distance(end);
+		Point2D.Double extendTo = new Point2D.Double(end.x + (end.x - endNext.x) * distance / toLength / 2, 
+				end.y + (end.y - endNext.y)* distance / toLength / 2);
+		Point2D.Double midPoint = new Point2D.Double((extendFrom.x + extendTo.x) / 2, (extendFrom.y + extendTo.y) / 2);
 		Line2D.Double line1 = new Line2D.Double(prevStart, start);
 		Line2D.Double line2 = new Line2D.Double(end, endNext);
 		Point2D.Double intersectionPoint = intersection(line1, line2);
 		if (null == intersectionPoint)	// lines are parallel
 			return connectUsingMidPoint (from, midPoint, to, smoothness);
-		Point2D.Double projection = nearestPointOnLine(line1, midPoint);
-		if (projection.distance(midPoint) <= )
-		
+		Point2D.Double projection = nearestPointOnLine(line1, intersectionPoint);
+		if (projection.distance(prevStart) <= fromLength + distance * hookMargin)
+			return connectUsingMidPoint (from, midPoint, to, smoothness);
+		projection = nearestPointOnLine(line2, intersectionPoint);
+		if (projection.distance(endNext) < toLength + distance * hookMargin)
+			return connectUsingMidPoint (from, midPoint, to, smoothness);
 		// Use a quadratic curve (requires one control point)
-		// TODO implement it
+		Shape curve = new QuadCurve2D.Double(start.x, start.y, intersectionPoint.x, intersectionPoint.y, end.x, end.y);
+		PathIterator iter = curve.getPathIterator(null, smoothness);
+		// provide a length 6 array is required for the iterator
+		double[] iterBuf = new double[6];
+		while (! iter.isDone()) {
+			iter.currentSegment(iterBuf);
+			result.add(new Point2D.Double(iterBuf[0], iterBuf[1]));
+			iter.next();
+		}
 		return result;
 	}
 	
-	private static ArrayList<Point2D.Double> connectUsingMidPoint(ArrayList<Point2D.Double> from, Point2D.Double midPoint, ArrayList<Point2D.Double> to, double smoothness) {
+	private static ArrayList<Point2D.Double> connectUsingMidPoint(List<Point2D.Double> from, Point2D.Double midPoint, List<Point2D.Double> to, double smoothness) {
 		ArrayList<Point2D.Double> halfWay = new ArrayList<Point2D.Double>(1);
 		halfWay.add(midPoint);
 		ArrayList<Point2D.Double> result = createSmoothCurve(from, halfWay, smoothness);
-		result.add(halfWay.get(0));
-		result.addAll(createSmoothCurve(halfWay, to, smoothness));
+		ArrayList<Point2D.Double> tail = createSmoothCurve(halfWay, to, smoothness);
+		for (int i = 1; i < tail.size(); i++)
+			result.add(tail.get(i));
 		return result;
 	}
 

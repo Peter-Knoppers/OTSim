@@ -78,6 +78,8 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 	/** CrossSection selected for editing */
 	public CrossSection selectedCrossSection = null;
 	private Component repaintComponent = null;
+	private static int nextID = 0;
+	private static int ID = ++nextID;
 
 	/**
 	 * Clear the <i>modified</i> flag. (Should be called when this Network has 
@@ -145,14 +147,6 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 				throw new Exception("Microzone with id " + newActivityLocation.getActivityLocationID_r() + " already defined");
 			activityLocationList.put(newActivityLocation.getActivityLocationID_r(), newActivityLocation);
 		}
-		/* TrafficLightControllers are now embedded in a Node.
-		for (int index = 0; index < networkRoot.size(TrafficLightController.XMLTAG); index++) {
-			TrafficLightController newTLC = new TrafficLightController(this, networkRoot.getSubNode(TrafficLightController.XMLTAG, index));
-			if (null != trafficLightControllers.get(newTLC.getName_r()))
-				throw new Exception("TrafficLightController with name " + newTLC.getName_r() + " already defined");
-			trafficLightControllers.put(newTLC.getName_r(), newTLC);
-		}
-		*/
 		/*
 		for (String key : networkRoot.getKeys()) {
 			else if (key.equals(MicroZone.XMLTAG))
@@ -730,7 +724,7 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 		RebuildResult result = RebuildResult.SUCCESS;
 		if (dirty) {
 			reBuilding = true;
-			System.out.println("Network rebuild started");
+			System.out.println("Network rebuild started for Network " + ID);
 			try {
 				// Determine the maximum node ID in this Network
 				nodeMaxId = -1;
@@ -766,10 +760,10 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 				*/
 			} catch (Exception e) {
 				result = RebuildResult.FAIL;
-				System.err.println("Network rebuild failed");
+				System.err.println("Network rebuild failed for Network " + ID);
 				e.printStackTrace();
 			}
-			System.out.println("Network rebuild finished");
+			System.out.println("Network rebuild finished for Network " + ID);
 			reBuilding = false;
 		} else
 			result = RebuildResult.NOTNEEDED;
@@ -957,7 +951,7 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
     
     private void fixLinkLengths() {
     	for (Link link : links.values())
-    		link.calculateLength(link.getVertices());
+    		link.calculateLength();
     }
     
     /**
