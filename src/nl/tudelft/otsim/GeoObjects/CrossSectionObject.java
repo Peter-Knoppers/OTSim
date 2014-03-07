@@ -126,7 +126,7 @@ public abstract class CrossSectionObject implements XML_IO, Comparable<CrossSect
 	 */
 	public void setCrossSectionElement(CrossSectionElement crossSectionElement) {
 		if ((null != this.crossSectionElement) && (this.crossSectionElement != crossSectionElement))
-			throw new Error ("This CrossSectionObject already has crossSectionElement set");
+			throw new Error ("This CrossSectionObject already has a crossSectionElement set");
 		this.crossSectionElement = crossSectionElement;		
 	}
 	

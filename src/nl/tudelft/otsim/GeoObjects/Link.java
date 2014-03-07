@@ -527,9 +527,8 @@ public class Link implements XML_IO {
 				CrossSection outCS = toLink.getCrossSections_r().get(0);
 				csList.add(inCS);
 				csList.add(outCS);
-				if (! fromLink.getFromNode_r().equals(toLink.getToNode_r()))  {
+				if (! fromLink.getFromNode_r().equals(toLink.getToNode_r()))
 					inCS.linkToCrossSection(outCS); 				
-				}
 				connectSectionElements(inCS, outCS);	
 	    	}
 		}

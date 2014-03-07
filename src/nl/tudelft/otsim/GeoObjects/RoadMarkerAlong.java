@@ -101,14 +101,6 @@ public class RoadMarkerAlong extends CrossSectionObject implements XML_IO {
 	}
 
 	/**
-	 * Set the internal list of {@link Vertex Vertices} of this RoadMarkerAlong.
-	 * @param vertices ArrayList&lt;{@link Vertex}&gt;; the list of Vertices of this RoadMarkerAlong
-	 */
-	public void setVertices(ArrayList<Vertex> vertices) {
-		this.vertices = vertices;
-	}
-
-	/**
 	 * Create or re-create the vertices for the path of this RoadMarkerAlong.
 	 */
 	public void createVertices() {
