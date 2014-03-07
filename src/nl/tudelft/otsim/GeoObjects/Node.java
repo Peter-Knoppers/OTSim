@@ -537,7 +537,7 @@ public class Node extends Vertex implements XML_IO {
 						if ((null == fromVertex) || (null == toVertex))
 							System.err.println("null vertex in closeHoles");
 						else if (fromVertex.getPoint().distance(toVertex.getPoint()) > veryClose) {
-							System.out.println(String.format("Missing link from %s to %s index=%d, otherIndex=%d", fromVertex.toString(), toVertex.toString(), index, otherIndex));
+							System.out.println(String.format("Adding closing line from %s to %s index=%d, otherIndex=%d", fromVertex.toString(), toVertex.toString(), index, otherIndex));
 							ArrayList<Vertex> closingLine = new ArrayList<Vertex>();
 							closingLine.add(new Vertex(fromVertex));
 							closingLine.add(new Vertex(toVertex));

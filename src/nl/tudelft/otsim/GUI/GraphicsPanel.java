@@ -16,9 +16,12 @@ import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Locale;
+
 import javax.swing.JPanel;
 
 import nl.tudelft.otsim.GeoObjects.Vertex;
+import nl.tudelft.otsim.SpatialTools.Planar;
 
 /**
  * This class implements the minimum drawing primitives that allow a
@@ -306,12 +309,39 @@ public class GraphicsPanel extends JPanel implements MouseListener, MouseMotionL
     	if (null == g2)
     		throw new Error("not painting");
     	GeneralPath drawPath = translatePath(polygon);
+    	checkHugeJumps(drawPath);
     	if (null != fillColor) {
     		g2.setColor(fillColor);
     		g2.fill(drawPath);
     	}
     	if (null != lineColor)
     		g2.setColor(lineColor);
+    }
+    
+    private static void checkHugeJumps (GeneralPath path) {
+    	final double huge = 250;	// [m]
+    	Point2D.Double currentPoint = null;
+        for (PathIterator pi = path.getPathIterator(null); ! pi.isDone(); pi.next()) {
+            double[] coords = new double[6];
+            Point2D.Double p;
+            switch (pi.currentSegment(coords)) {
+            case PathIterator.SEG_MOVETO:
+        		currentPoint = new Point2D.Double(coords[0],coords[1]);
+                break;
+            case PathIterator.SEG_LINETO:
+        		p = new Point2D.Double(coords[0],coords[1]);
+        		if (null == currentPoint)
+        			throw new Error ("LINETO without MOVETO");
+        		if (currentPoint.distance(p) > huge)
+        			System.out.println(String.format(Locale.US, "Huge jump in path from %.3f,%.3f to %.3f,%.3f in %s", currentPoint.x, currentPoint.y, p.x, p.y, Planar.generalPathToString(path)));
+        		currentPoint = p;
+        		break;
+            case PathIterator.SEG_CLOSE:
+        		break;
+        	default:
+                throw new IllegalArgumentException("Path contains curves");
+            }
+        }
     }
     
     /**
@@ -324,7 +354,7 @@ public class GraphicsPanel extends JPanel implements MouseListener, MouseMotionL
     public GeneralPath translatePath(Path2D path) {	
         double[] coords = new double[6];
         int numSubPaths = 0;
-        GeneralPath drawPath = new  GeneralPath(Path2D.WIND_EVEN_ODD, 3);
+        GeneralPath drawPath = new GeneralPath(Path2D.WIND_EVEN_ODD, 3);
         for (PathIterator pi = path.getPathIterator(null); ! pi.isDone(); pi.next()) {
             switch (pi.currentSegment(coords)) {
             case PathIterator.SEG_MOVETO:
