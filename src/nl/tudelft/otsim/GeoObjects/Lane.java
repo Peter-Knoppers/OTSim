@@ -94,6 +94,8 @@ public class Lane extends CrossSectionObject {
      */
     public Lane() {
     	this.id = laneCount;
+    	if (laneCount == 48)
+    		System.out.println("Creating lane " + laneCount);
     	laneCount++;
 	}
     

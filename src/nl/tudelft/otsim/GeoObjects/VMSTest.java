@@ -46,7 +46,7 @@ public class VMSTest {
 	}
 	
 	private static VMS createVMSOnLink () {
-		Network network = new Network();
+		Network network = new Network(null);
 		Node n1 = network.addNode("n1", 1, 10, 20, 30);
 		Node n2 = network.addNode("n2", 2, 20, 30, 50);
 		Link l = createLink(network, "n1_n2", n1, n2, 1);

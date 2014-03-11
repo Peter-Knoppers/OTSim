@@ -80,6 +80,7 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 	private Component repaintComponent = null;
 	private static int nextID = 0;
 	private static int ID = ++nextID;
+	private final Node parentNode;
 
 	/**
 	 * Clear the <i>modified</i> flag. (Should be called when this Network has 
@@ -92,8 +93,9 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 	
 	/**
 	 * Create a new empty network.
+	 * @param parentNode {@link Node}; the parent Node of the new Network (null if this is the top level Network)
 	 */
-	public Network() {
+	public Network(Node parentNode) {
 		// Minimal code is needed to create an empty network
 		addCrossSectionElementTypology("road", true, CrossSectionElementTypology.COUPLING_PRIORITY_AUTOMATIC);
 		addCrossSectionElementTypology("barrier", false, CrossSectionElementTypology.COUPLING_PRIORITY_AUTOMATIC);
@@ -103,14 +105,16 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 		addRoadMarkerAlongTemplate(":|",0.2);
 		addRoadMarkerAlongTemplate("|:",0.2);
 		modified = false;
+		this.parentNode = parentNode;
 	}
 	
 	/**
 	 * Create a Network from a parsed XML file.
 	 * @param networkRoot {@link ParsedNode}; root of the Network field in the parsed XML file
+	 * @param parentNode {@link Node}; the Node that owns this Network (may be null)
 	 * @throws Exception
 	 */
-	public Network(ParsedNode networkRoot) throws Exception {
+	public Network(ParsedNode networkRoot, Node parentNode) throws Exception {
 		// First obtain all CrossSectionElementTypologies
 		for (int index = 0; index < networkRoot.size(CrossSectionElementTypology.XMLTAG); index++)
 			crossSectionElementTypologyList.add(new CrossSectionElementTypology(networkRoot.getSubNode(CrossSectionElementTypology.XMLTAG, index)));
@@ -157,6 +161,7 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 		        throw new Exception ("Unknown network object " + key + " at " + data.lineNumber + ", " + data.columnNumber);
 		}
 		*/
+		this.parentNode = parentNode;  
 		dirty = true;
 		rebuild();
 		for (TrafficLightController tlc : trafficLightControllerList())
@@ -704,7 +709,7 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
         	node.paint(graphicsPanel);
     }
     
-	private static volatile boolean reBuilding = false;
+	private volatile boolean reBuilding = false;
 	enum RebuildResult { REBUILDING, NOTNEEDED, SUCCESS, FAIL};
 	/**
 	 * Clear, then rebuild the automatically generated geometry at junctions.
@@ -728,7 +733,8 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 				for (Node node : nodes.values())
 					if (node.getNodeID() > nodeMaxId)
 						nodeMaxId = node.getNodeID();
-				Lane.resetLaneIDGenerator();
+				if (null == parentNode)
+					Lane.resetLaneIDGenerator();
 			    // adding some plain CrossSection Element-info
 				fixLinksPhase1();
 				// determine the links for every node and define a "node boundary circle"
@@ -853,7 +859,7 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 			node.expand();
 	}
 
-    private void fixConnectionLanesAtLink() {
+    void fixConnectionLanesAtLink() {
         for (Link link : getLinkList())
         	Link.connectSuccessiveLanesAtLink(link.getCrossSections_r());
         	
@@ -1733,6 +1739,11 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 		for (Link link : getLinks())
 			for (CrossSection cs : link.getCrossSections_r())
 				result.addAll(cs.collectLanes());
+		for (Node node : nodes.values()) {
+			Network subNetwork = node.getSubNetwork();
+			if (null != subNetwork)
+				result.addAll(subNetwork.getLanes());
+		}
 		return result;
 	}
 

@@ -829,6 +829,12 @@ public class CrossSectionElement implements XML_IO {
 			wide = curCSO;
 			narrow = prevCSECSO;    			
     	}
+    	// FIXME: This SHOULD happen in the code below, but that code fails to do it...
+    	if ((wide.size() == 1) && (narrow.size() == 1)) {
+    		ConnectLanes(wide, narrow, 0, 0);
+    		return;
+    	}
+    		
     	// if there is a decrease in lanes, we try to find out which of the
 		// previous lanes are connected and which previous lane(s) not
 		int narrowLaneIndex = 0; // start with the lane nearest to the centerline of the link
@@ -840,10 +846,7 @@ public class CrossSectionElement implements XML_IO {
     		if (narrowLaneIndex >= narrow.size()) 
 	        	break; // All lanes of the current link are now connected. Break from this loop
     		if (wideLanesToConnect == narrowLanesToConnect) {
-    			//if (increaseOfLanes < 0)
-    				ConnectLanes(wide, narrow, wideLaneIndex - 1, narrowLaneIndex);
-    			//else if (increaseOfLanes < 0)
-    			//	ConnectLanes(narrow, wide, narrowLaneIndex, wideLaneIndex - 1);
+    			ConnectLanes(wide, narrow, wideLaneIndex - 1, narrowLaneIndex);
     			break;
     		}
     		// the lane of the narrow CrossSection

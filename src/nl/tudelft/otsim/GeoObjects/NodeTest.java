@@ -366,7 +366,7 @@ public class NodeTest {
 	private void buildTestJunction(String description) {
 		junction = new Junction(description);
 		// Create a Network that matches this junction
-		network = new Network();
+		network = new Network(null);
 		// Location of the junction Node
 		final double cx = 0;
 		final double cy = 0;

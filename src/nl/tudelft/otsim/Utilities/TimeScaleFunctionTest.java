@@ -20,7 +20,7 @@ public class TimeScaleFunctionTest {
 	@SuppressWarnings("static-method")
 	@Test
 	public void testTimeScaleFunctionStorable() {
-		Network network = new Network();
+		Network network = new Network(null);
 		network.clearModified();
 		TimeScaleFunction f = new TimeScaleFunction();
 		f.setStorable(network);

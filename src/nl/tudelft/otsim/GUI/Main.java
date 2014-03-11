@@ -868,7 +868,7 @@ public class Main extends JPanel implements ActionListener {
 		if (! mayDiscardChanges(storable))
 			return;		// cancel New
 		if (storable instanceof Network)
-			model.network = new Network();
+			model.network = new Network(null);
 		else if (storable instanceof TrafficDemand)
 			model.trafficDemand = new TrafficDemand(model);
 		else if (storable instanceof MeasurementPlan) {
@@ -909,7 +909,7 @@ public class Main extends JPanel implements ActionListener {
 				throw new Error("XML node contains " + pn.size(key) + " " + storable.description()  + "s (should be 1)");
 				ParsedNode subNode = pn.getSubNode(key,  0);
 				if (storable instanceof Network)
-					storable = model.network = new Network(subNode);
+					storable = model.network = new Network(subNode, null);
 				else if (storable instanceof TrafficDemand) {
 					storable = model.trafficDemand = new TrafficDemand(model, subNode);
 					model.trafficDemand.rebuild();
@@ -1001,7 +1001,7 @@ public class Main extends JPanel implements ActionListener {
 		if (! mayDiscardChanges())
 			return;
 		model = new Model();
-		model.network = new Network();
+		model.network = new Network(null);
         fileSelectedNetwork = "";
         mainFrame.setTitle(myName);
     	setActiveGraph();

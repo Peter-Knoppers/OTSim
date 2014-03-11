@@ -333,7 +333,7 @@ public class GraphicsPanel extends JPanel implements MouseListener, MouseMotionL
         		if (null == currentPoint)
         			throw new Error ("LINETO without MOVETO");
         		if (currentPoint.distance(p) > huge)
-        			System.out.println(String.format(Locale.US, "Huge jump in path from %.3f,%.3f to %.3f,%.3f in %s", currentPoint.x, currentPoint.y, p.x, p.y, Planar.generalPathToString(path)));
+        			;//System.out.println(String.format(Locale.US, "Huge jump in path from %.3f,%.3f to %.3f,%.3f in %s", currentPoint.x, currentPoint.y, p.x, p.y, Planar.generalPathToString(path)));
         		currentPoint = p;
         		break;
             case PathIterator.SEG_CLOSE:

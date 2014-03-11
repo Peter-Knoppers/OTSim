@@ -93,7 +93,7 @@ public class ImportOSM {
 				throw new Exception("way " + id + " refers to undefined node " + ref);
 			node.incrementReferenceCount();			
 		}
-		Network result = new Network();
+		Network result = new Network(null);
 		for (long key : nodes.keySet()) {
 			OSMNode node = nodes.get(key);
 			if (node.referenceCount > 0) {	// nodes with referenceCount > 0 become nodes in the network

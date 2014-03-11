@@ -15,7 +15,7 @@ import nl.tudelft.otsim.TrafficDemand.TrafficDemand;
  * This class holds a traffic model with activities, population, network,
  * settings and traffic demand.
  * 
- * @author gtamminga
+ * @author Guus F Tamminga
  */
 public class Model implements Storable {
 	/** Tag of Model node in an XML file */
@@ -23,7 +23,7 @@ public class Model implements Storable {
 	/** Extension of Model files */
 	public static final String FILETYPE = "otsm";
 	/** {@link Network} of this model */
-	public Network network = new Network();
+	public Network network = new Network(null);
 	/** {@link Population} of this model */
 	public Population population = new Population(this);
 	/** {@link Activities} of this model */
@@ -64,7 +64,7 @@ public class Model implements Storable {
 			else	// complain, then continue
 				WED.showProblem(WED.INFORMATION, "Unsupported node \"%s\" ignored", key);
 		}
-		network = new Network(modelNode.getSubNode(Network.XMLTAG, 0));
+		network = new Network(modelNode.getSubNode(Network.XMLTAG, 0), null);
 		trafficDemand = new TrafficDemand(this, modelNode.getSubNode(TrafficDemand.XMLTAG, 0));	
 		for (int index = 0; index < modelNode.size(MeasurementPlan.XMLTAG); index++)
 			addMeasurementPlan(new MeasurementPlan(this, modelNode.getSubNode(MeasurementPlan.XMLTAG, index)));
@@ -134,7 +134,7 @@ public class Model implements Storable {
 					if (modelTree.size(key) != 1)
 						throw new Error("Network XML node contains " + modelTree.size(key) + " networks (should be 1)");
 					ParsedNode networkNode = modelTree.getSubNode(key,  0);
-						network = new Network(networkNode);
+						network = new Network(networkNode, null);
 				} else
 					throw new Error("Do not know what to do with a " + key);
 			}
