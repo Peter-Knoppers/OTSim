@@ -1149,7 +1149,7 @@ public class CrossSectionElement implements XML_IO {
     	ArrayList<Vertex> inner = getVerticesInner();
     	ArrayList<Vertex> outer = getVerticesOuter();
     	if ((null == inner) || (null == outer)) {
-    		System.err.println("CSE.paint: CSEVertices is null");
+    		System.err.println("CSE.createCSEPolygon: CSEVertices is null");
     		return null;
     	}
 		GeneralPath polygon = new GeneralPath(Path2D.WIND_EVEN_ODD);

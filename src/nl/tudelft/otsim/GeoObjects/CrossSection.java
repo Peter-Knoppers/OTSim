@@ -9,6 +9,7 @@ import nl.tudelft.otsim.FileIO.StaXWriter;
 import nl.tudelft.otsim.FileIO.XML_IO;
 import nl.tudelft.otsim.GUI.InputValidator;
 import nl.tudelft.otsim.GeoObjects.Node.DirectionalLink;
+import nl.tudelft.otsim.SpatialTools.Planar;
 import nl.tudelft.otsim.Utilities.Reversed;
 
 /**
@@ -280,7 +281,15 @@ public class CrossSection implements XML_IO {
 			vertices.add(linkVertices.get(linkVertices.size() - 1));
 		}
 		if (vertices.get(0).distance(vertices.get(vertices.size() - 1)) < 0.0001)
-			System.err.println("Vertices is " + vertices.toString() + " linkVertices is " + linkVertices.toString());
+			System.err.println("Vertices cover very short distance " + vertices.toString() + " linkVertices is " + linkVertices.toString());
+		if (parentList.indexOf(this) < parentList.size() - 1) {
+			double lateralOffsetChange = parentList.get(parentList.indexOf(this) + 1).lateralOffset - this.lateralOffset;
+			ArrayList<Vertex> endList = Planar.createParallelVertices(vertices, lateralOffsetChange);
+			ArrayList<Vertex> weightedList = new ArrayList<Vertex>(vertices.size());
+			for (int i = 0; i < vertices.size(); i++)
+				weightedList.add(Vertex.weightedVertex(1.0 * i / vertices.size(), vertices.get(i), endList.get(i)));
+			vertices = weightedList;
+		}
 		return vertices;
 	}
 
