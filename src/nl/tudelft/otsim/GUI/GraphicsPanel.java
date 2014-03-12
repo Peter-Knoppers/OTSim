@@ -241,6 +241,8 @@ public class GraphicsPanel extends JPanel implements MouseListener, MouseMotionL
     		throw new Error("not painting");
     	Point2D.Double from = null;
     	for (Point2D.Double p : points) {
+    		//if (p.distance(new Point2D.Double(161,-17)) < 5)
+    		//	System.out.println("weird point");
     		if (null != from)
     			drawLine(from, p);
      		from = p;
@@ -501,6 +503,8 @@ public class GraphicsPanel extends JPanel implements MouseListener, MouseMotionL
     public void drawCircle(Point2D.Double p, Color color, int diameter) {
     	if (null == g2)
     		throw new Error("not painting");
+    	if (p.distance(new Point2D.Double(133,-115)) < 1)
+    		System.out.println("strange form point");
     	g2.setColor(color);
     	p = translate(p);
     	g2.drawOval((int) (p.x - diameter / 2),(int) (p.y - diameter / 2), diameter, diameter);

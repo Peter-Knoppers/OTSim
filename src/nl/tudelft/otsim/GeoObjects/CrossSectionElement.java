@@ -1051,6 +1051,8 @@ public class CrossSectionElement implements XML_IO {
     			if (crossSection.getLink().getCrossSections_r().size() - 1 == myIndex)
     				destination = crossSection.getLink().getToNode_r().getNodeID();
     			Lane lane = createLane(rmaPrev, rma, turn, stopLineLane, origin, destination);
+    			if (59 == lane.getID())
+    				System.out.println("Created Lane " + lane.getID());
     			
     			if (prevLane != null)
     				prevLane.connectLateralRight(lane);	            				
@@ -1063,18 +1065,18 @@ public class CrossSectionElement implements XML_IO {
 					if (rma.getVertices().size() != rmaPrev.getVertices().size())
 						System.err.println("rma and prevRMA have different sizes");
 					for (int i = 0; i < rma.getVertices().size(); i++)
-						lineVertices.add(Vertex.weightedVertex(0.5,  rma.getVertices().get(i), rmaPrev.getVertices().get(i)));
+						lineVertices.add(Vertex.weightedVertex(0.5, rma.getVertices().get(i), rmaPrev.getVertices().get(i)));
 					//System.out.println(" center:" + Planar.verticesToString(lineVertices));
 					lane.setDesignLine(lineVertices);
 					lineVertices = new ArrayList<Vertex>();
-					
-					for (int i = 0; i < rma.getVertices().size(); i++)  {
-						lineVertices.add(Vertex.weightedVertex(0.0,  rma.getVertices().get(i), rmaPrev.getVertices().get(i)));
+					// FIXME: calling weightedVertex with a weight of 0.0 or 1.0 is an expensive way to duplicate a Vertex ...
+					for (int i = 0; i < rma.getVertices().size(); i++) {
+						lineVertices.add(Vertex.weightedVertex(0.0, rma.getVertices().get(i), rmaPrev.getVertices().get(i)));
 					}
 					lane.setLaneVerticesInner(lineVertices);
 					lineVertices = new ArrayList<Vertex>();
 					for (int i = 0; i < rma.getVertices().size(); i++)  {
-						lineVertices.add(Vertex.weightedVertex(1.0,  rma.getVertices().get(i), rmaPrev.getVertices().get(i)));
+						lineVertices.add(Vertex.weightedVertex(1.0, rma.getVertices().get(i), rmaPrev.getVertices().get(i)));
 					}
 					lane.setLaneVerticesOuter(lineVertices);
 				}

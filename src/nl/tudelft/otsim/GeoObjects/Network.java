@@ -273,8 +273,8 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 		        return lane1.getID() - lane2.getID();
 		    }
 		}
-
-		List<Lane> laneList = new ArrayList<Lane>();
+		List<Lane> laneList = getLanes();
+				/*new ArrayList<Lane>();
 		for(Link link : getLinkList()) {
 			//System.out.println("link: " + link.toString());
 			int indexCs = -1;
@@ -292,7 +292,7 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 					laneList.add(lane);
 				}
 			}
-		}
+		}*/
 		// sort list by laneId
 		Collections.sort(laneList, new CompareLaneNumbers());
 		return laneList;
@@ -459,7 +459,7 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 	 * @return List&lt;Node&gt; List of Nodes in this Network
 	 */
 	public ArrayList<Node> getAllNodeList(boolean mayRebuild) {
-		class ComparatorNodeNumbers implements Comparator<Node> {
+		class CompareByNodeNumber implements Comparator<Node> {
 		    @Override
 			public int compare(Node node1, Node node2) {
 		        return node1.getNodeID() - node2.getNodeID();
@@ -467,8 +467,34 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 		}
 		ArrayList<Node> allNodeList = new ArrayList<Node>();
 		allNodeList.addAll(getNodeList(mayRebuild));
-		Collections.sort(allNodeList, new ComparatorNodeNumbers());
+		for (Node n : nodes.values()) {
+			Network subNetwork = n.getSubNetwork();
+			if (null != subNetwork)
+				allNodeList.addAll(subNetwork.getAllNodeList(mayRebuild));
+		}
+		Collections.sort(allNodeList, new CompareByNodeNumber());
 		return allNodeList;
+	}
+	
+	public ArrayList<Node> getAllVisitableNodes(boolean mayRebuild) {
+		class CompareByNodeNumber implements Comparator<Node> {
+		    @Override
+			public int compare(Node node1, Node node2) {
+		        return node1.getNodeID() - node2.getNodeID();
+		    }
+		}
+		ArrayList<Node> result = new ArrayList<Node>();
+		result.addAll(getNodeList(mayRebuild));
+		for (Node n : nodes.values()) {
+			Network subNetwork = n.getSubNetwork();
+			if (null != subNetwork) {
+				result.remove(n);
+				result.addAll(subNetwork.getAllNodeList(mayRebuild));
+			}
+		}
+		Collections.sort(result, new CompareByNodeNumber());
+		return result;
+		
 	}
 
 	/**
@@ -667,11 +693,14 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 	 * @param showFormLines TODO
 	 */
     private void paintLinks(GraphicsPanel graphicsPanel, boolean showOnlyDrivable, boolean showLaneIDs, boolean showFormPoints, boolean showFormLines) {
-        for (Link link :  getLinkList())
+        for (Link link :  getLinkList()) {
+        	if (showFormLines)
+        		link.paint(graphicsPanel);
         	for (CrossSection cs : link.getCrossSections_r())
                 for (CrossSectionElement cse : cs.getCrossSectionElementList_r())
                     if ((! showOnlyDrivable) || cse.getCrossSectionElementTypology().getDrivable())
                     	cse.paint(graphicsPanel, showFormPoints, showFormLines);
+        }
         if (showLaneIDs) // These must be drawn last; else some might be invisible
         	for (CrossSectionObject cso : getCrossSectionObjects(Lane.class))
         		((Lane) cso).paintID(graphicsPanel);
@@ -1727,6 +1756,18 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 		ArrayList<Link> result = new ArrayList<Link>();
 		for (String linkName : links.keySet())
 			result.add(links.get(linkName));
+		return result;
+	}
+	
+	public ArrayList<Link> getAllLinks() {
+		ArrayList<Link> result = new ArrayList<Link>();
+		result.addAll(links.values());
+		for (Node n : nodes.values()) {
+			Network subNetwork = n.getSubNetwork();
+			if (null != subNetwork)
+				result.addAll(subNetwork.getAllLinks());
+		}
+			
 		return result;
 	}
 

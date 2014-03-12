@@ -1,5 +1,6 @@
 package nl.tudelft.otsim.GeoObjects;
 
+import java.awt.Color;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -8,8 +9,8 @@ import java.util.List;
 import nl.tudelft.otsim.FileIO.ParsedNode;
 import nl.tudelft.otsim.FileIO.StaXWriter;
 import nl.tudelft.otsim.FileIO.XML_IO;
+import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GUI.InputValidator;
-import nl.tudelft.otsim.GeoObjects.Node.DirectionalLink;
 import nl.tudelft.otsim.SpatialTools.Planar;
 import nl.tudelft.otsim.Utilities.Reversed;
 
@@ -584,6 +585,16 @@ public class Link implements XML_IO {
 		for (CrossSection cs : getCrossSections_r())
 			for (CrossSectionElement cse : cs.getCrossSectionElementList_r())
 				cse.regenerateVertices();
+	}
+
+	/**
+	 * Draw the design line of this Link on a GraphicsPanel.
+	 * @param graphicsPanel {@link GraphicsPanel}; the GraphicsPanel to draw on.
+	 */
+	public void paint(GraphicsPanel graphicsPanel) {
+		graphicsPanel.setColor(Color.BLUE);
+		graphicsPanel.setStroke(0); // hair line
+		graphicsPanel.drawPolyLine(getVertices());
 	}
 	
 }

@@ -47,8 +47,8 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 	 */
 	public DijkstraAlgorithm(Network network, double maximumTotalCostRatio) {
 		super (network);
-		totalNodes = network.getAllNodeList(true).size();
-		edges = network.getLinkList();
+		totalNodes = network.getAllVisitableNodes(true).size();
+		edges = network.getAllLinks();
 		this.maximumTotalCostRatio = maximumTotalCostRatio;
 	}
 	
@@ -88,7 +88,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 			}
 		}
 		if (totalNodes != settledNodes.size())
-			System.out.println(String.format("Dijkstra: Disjunct network: total nodes; %s, settled nodes: %d, start node %s", totalNodes, settledNodes.size(), startNode.toString()));
+			System.out.println(String.format("Dijkstra: Disjunct network: total nodes; %s, settled nodes: %d, start node %s, unsetteldNodes contains %s", totalNodes, settledNodes.size(), startNode.toString(), unSettledNodes.toString()));
 		if (null == cost.get(endNode))
 			return null;
 		ArrayList<Node> pathNodes = new ArrayList<Node>();
