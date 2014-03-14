@@ -288,8 +288,6 @@ public class Driver {
         vehicle.leftIndicator = false; // for vehicle interaction
         vehicle.rightIndicator = false;
         
-        if ((vehicle.id == 44) && (vehicle.x > 100))
-        	System.out.println("driving vehicle " + vehicle.id);
         if (vehicle.lcProgress == 0) {	// Apply the lane change model only when not already changing lane
             /* The headway is exponentially relaxed towards the normal value of
              * Tmax. The relaxation time is tau, which can never be smaller than
@@ -438,7 +436,7 @@ public class Driver {
                 if ((dLeftRoute * dVoluntary >= 0) || (Math.abs(dLeftRoute) <= dSync))
                     thetaLeft = 1;	// Same direction or low mandatory desire
                 else if ((dLeftRoute * dVoluntary < 0) && (dSync < Math.abs(dLeftRoute)) && (Math.abs(dLeftRoute) < dCoop))
-                    thetaLeft = (dCoop - Math.abs(dLeftRoute)) / (dCoop - dSync); // Voluntary incentives paritally included
+                    thetaLeft = (dCoop - Math.abs(dLeftRoute)) / (dCoop - dSync); // Voluntary incentives partially included
                 dLeft = dLeftRoute + thetaLeft * dVoluntary;
                 // Idem. for right
                 double thetaRight = 0;
@@ -462,6 +460,7 @@ public class Driver {
                     double aSelf = 0; // assume current speed is fine
                     double desire = Movable.LEFT_DOWN == direction ? dLeft : dRight;
                     if ((null != leader) && (vehicle.getHeadway(leader) > 0)) {
+                    	// FIXME: this is nasty: desire should be a parameter of calculateAcceleration
                     	setT(desire);
                     	aSelf = calculateAcceleration(vehicle, leader);
                     	resetT();
@@ -482,7 +481,7 @@ public class Driver {
                     			}
                     			double thisTTC = headway / (vehicle.v - l.v);
                     			if (vehicle.v < l.v)
-                    				thisTTC = Double.POSITIVE_INFINITY;
+                    				thisTTC = Double.POSITIVE_INFINITY;	// FIXME: use continue here
                     			if (thisTTC < ttc) {
                     				leader = l;
                     				ttc = thisTTC;
