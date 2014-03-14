@@ -436,15 +436,15 @@ public class CrossSectionElement implements XML_IO {
         }
 
 		if (referenceVertices.size() < 2)
-			throw new Error("Malformed vertices");
+			throw new Error("Malformed reference vertices");
         ArrayList<Vertex> result = Planar.createParallelVertices(referenceVertices, prevReferenceVertices, previousLateralPosition, myLateralPosition);
 		if (result.size() < 2)
-			throw new Error("Malformed vertices");
+			throw new Error("Malformed parallel vertices");
         ArrayList<CrossSection> csList = crossSection.getLink().getCrossSections_r();
         if (crossSection == csList.get(0) && this.connectedFrom == null)
         	result = crossSection.getLink().getFromNode_r().truncateAtConflictArea(result);
 		if (result.size() < 2)
-			throw new Error("Malformed vertices");
+			throw new Error("Malformed truncated parallel vertices");
         //&& ! csList.get(csList.size() - 1).getLink().getToNodeExpand().equals(csList.get(csList.size() - 1).getLink().getToNode_r())
         if (crossSection == csList.get(csList.size() - 1)  && ! adjustLink)  {
         	result = crossSection.getLink().getToNode_r().truncateAtConflictArea(result);
@@ -802,6 +802,7 @@ public class CrossSectionElement implements XML_IO {
 		// all lanes of two crossSections are connected to each other: 
 		// 		prevLane(0) with curLane(0)
 		// 		prevLane(1) with curLane(1)  ... etc.
+		System.out.println("Connecting lane " + upLane.getID() + " to " + downLane.getID());
 		upLane.addDownLane(downLane);
 		downLane.addUpLane(upLane);
     }
@@ -814,8 +815,9 @@ public class CrossSectionElement implements XML_IO {
     	for (int i = current; i < prevCSECSO.size(); i++) {
     		Lane prevLane = (Lane) prevCSECSO.get(i - dif);
     		Lane curLane = (Lane) curCSO.get(i);
-    		prevLane.addDownLane(curLane);
-    		curLane.addUpLane(prevLane);
+    		ConnectLanes(prevLane, curLane);
+    		//prevLane.addDownLane(curLane);
+    		//curLane.addUpLane(prevLane);
     	}
     }
     

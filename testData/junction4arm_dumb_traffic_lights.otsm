@@ -165,7 +165,7 @@
             <lateralPosition>0.2</lateralPosition>
           </roadMarkerAlong>
           <roadMarkerAlong>
-            <type>|</type>
+            <type>:</type>
             <lateralPosition>5.5</lateralPosition>
           </roadMarkerAlong>
           <roadMarkerAlong>
@@ -192,14 +192,18 @@
         </element>
         <element>
           <name>road</name>
-          <width>3.5</width>
+          <width>8.0</width>
           <roadMarkerAlong>
             <type>|</type>
-            <lateralPosition>0.1</lateralPosition>
+            <lateralPosition>0.2</lateralPosition>
+          </roadMarkerAlong>
+          <roadMarkerAlong>
+            <type>:</type>
+            <lateralPosition>3.8</lateralPosition>
           </roadMarkerAlong>
           <roadMarkerAlong>
             <type>|</type>
-            <lateralPosition>3.3</lateralPosition>
+            <lateralPosition>7.5</lateralPosition>
           </roadMarkerAlong>
         </element>
         <element>

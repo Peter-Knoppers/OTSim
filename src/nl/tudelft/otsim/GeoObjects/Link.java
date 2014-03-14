@@ -506,9 +506,8 @@ public class Link implements XML_IO {
 	public static void connectSuccessiveLanesAtLink(ArrayList<CrossSection> csList) {
    		CrossSection csPrev = null;
    		for (CrossSection cs : csList) {
-        	if (csPrev != null)  {
+        	if (csPrev != null) 
         		connectSectionElements(csPrev, cs);
-            }
         	csPrev = cs;
    		}
 	}

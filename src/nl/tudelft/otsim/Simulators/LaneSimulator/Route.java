@@ -61,7 +61,14 @@ public class Route {
         // TODO: check correctness of this handling with Wouter Schakel
         if (destinations.length == 0)
         	return false;
-        return lane.leadsTo(destinations[0]);
+        // 20140314/PK: Also try the second destination
+        boolean result = lane.leadsTo(destinations[0]);
+        if ((! result) && (destinations.length > 1))
+        	result = lane.leadsTo(destinations[1]);
+        if ((! result) && (destinations.length > 2))
+        	result = lane.leadsTo(destinations[2]);
+        return result;
+        //return lane.leadsTo(destinations[0]);
     }
     
     /**

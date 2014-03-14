@@ -303,7 +303,9 @@ public class Lane {
     public void initLaneChangeInfo() {
     	//if (destination > 0 && leadsTo(destination))
     	//	endpoints.put(destination, l);
-        if (destination>0 && !leadsTo(destination)) {
+    	// 20140313/PK: changed > into >= in the next line
+    	//int depth = 0;
+        if (destination>=0 && !leadsTo(destination)) {
             // find all lanes in cross section with same destination and set initial info
             java.util.ArrayList<Lane> curlanes = new java.util.ArrayList<Lane>();
             curlanes.add(this);
@@ -325,6 +327,15 @@ public class Lane {
             }
             // move through network and set lane change information
             while (!curlanes.isEmpty()) {
+            	/*
+                if (2 == destination) {
+                	System.out.println("Carving route at depth " + depth + ", destination " + destination + "; curlanes contains");
+                	for (Lane cl : curlanes) {
+                		System.out.println("  lane " + cl.id() + " lanechanges: " + cl.lanechanges);
+                	}
+                    depth++;
+                }
+                */
                 // move left
                 int n = curlanes.size();
                 for (int i=0; i<n; i++) {
@@ -368,22 +379,22 @@ public class Lane {
                         // can be used with less lane changes or 
                         // can be used with more remaining space 
                         //  (equal number of lane changes, but now coming from downstream)
-                    	if (0 == curlane.up.destination) {
+                    	//if (0 == curlane.up.destination) {
 	                        uplanes.add(curlane.up); // add to uplanes
 	                        // copy number of lane changes
 	                        curlane.up.lanechanges.put(destination, curlane.lanechanges.get(destination));
 	                        // increase with own length
 	                        curlane.up.endpoints.put(destination, curlane.endpoints.get(destination)+curlane.up.l);
-                    	}
+                    	//}
                     }
                     for (Lane j : curlane.ups) {
-                    	if (0 == j.destination) {
+                    	//if (0 == j.destination) {
 	                        uplanes.add(j);
 	                        j.lanechanges.put(destination, curlane.lanechanges.get(destination));
 	                        if (null != j.endpoints.get(destination))
 	                        	System.out.println("updating cost; current cost is " + j.endpoints.get(destination));
 	                        j.endpoints.put(destination, curlane.endpoints.get(destination)+j.l);
-                    	}
+                    	//}
                     }
                 }
                 // set curlanes for next loop
@@ -1004,10 +1015,15 @@ public class Lane {
      * @return Whether this lane leads to the given destination.
      */
     public boolean leadsTo(int whichDestination) {
-    	if (lanechanges.isEmpty())
+    	if (lanechanges.isEmpty()) {
     		for (Lane downLane : downs)
     			if (downLane.leadsTo(whichDestination))
     				return true;
+    		// 20140314/PK also check down (if non-null)
+    		if (null != down)
+    			if (down.leadsTo(whichDestination))
+    				return true;
+    	}
         return lanechanges.containsKey(whichDestination);
     }
     
@@ -1031,6 +1047,11 @@ public class Lane {
      * @return Number of lane changes that needs to be performed for this destination.
      */
     public double xLaneChanges(int whichDestination) {
+    	Double result = endpoints.get(whichDestination);
+    	if (null == result) {
+    		System.out.println("Unknown number of lanechanges; faking 1");
+    		return 1;
+    	}
         return endpoints.get(whichDestination);
     }
     
@@ -1101,8 +1122,6 @@ public class Lane {
          */
         @Override
         public void pass(Vehicle vehicle) {
-            //if (3 == vehicle.id)
-            //	System.out.println("vehicle " + vehicle.id + " passes a splitRSU");
             Lane lan = getLaneForRoute(vehicle.route);
             if (lan != null) {
                 if (vehicle.lcVehicle != null) {
@@ -1132,8 +1151,6 @@ public class Lane {
                     } else
                         break;
                 }
-                if ((6 == vehicle.id) && (model.t > 646.9))
-                	System.out.println("vehicle " + vehicle.id + " will be cut");
                 vehicle.cut();
                 vehicle.paste(lan, atX);
                 //vehicle.setNeighbor(Movable.LEFT_DOWN, null);
@@ -1141,6 +1158,7 @@ public class Lane {
                 //vehicle.setNeighbor(Movable.RIGHT_DOWN, null);
                 //vehicle.setNeighbor(Movable.RIGHT_UP, null);
             } else {
+                getLaneForRoute(vehicle.route);
                 vehicle.model.deleted++;
                 System.err.println("Vehicle deleted while split was entered ("+model.deleted+"), no applicable downstream lane.");
                 vehicle.delete();
@@ -1159,9 +1177,12 @@ public class Lane {
         	Lane bestLane = null;
             for (Lane lan : downs)
                 if (route.canBeFollowedFrom(lan)) {
-                    double thisCost = lan.endpoints.get(route.destinations[0]);
+                	// 20140314/PK: STUB: If primary destination is not in lan.endpoints; just select this lane
+                    Double thisCost = lan.endpoints.get(route.destinations[0]);
+                    if (null == thisCost)
+                    	bestLane = lan;
                     //System.out.println(String.format("destination %d: lane %d cost %.2f", route.destinations[0], lan.id, thisCost));
-                    if (thisCost < cost) {
+                    else if (thisCost < cost) {
                     	cost = thisCost;
                     	bestLane = lan;
                     }

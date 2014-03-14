@@ -288,6 +288,8 @@ public class Driver {
         vehicle.leftIndicator = false; // for vehicle interaction
         vehicle.rightIndicator = false;
         
+        if ((vehicle.id == 44) && (vehicle.x > 100))
+        	System.out.println("driving vehicle " + vehicle.id);
         if (vehicle.lcProgress == 0) {	// Apply the lane change model only when not already changing lane
             /* The headway is exponentially relaxed towards the normal value of
              * Tmax. The relaxation time is tau, which can never be smaller than
@@ -530,7 +532,8 @@ public class Driver {
                  */
                 if ((dLeft >= dRight) && (dLeft >= dFree) && acceptLeft) {
                     // Set dy to the left
-                    double dur = Math.min((vehicle.route.xLaneChanges(vehicle.getLane()) - vehicle.x) / (180 / 3.6), duration);
+                	// 20140314/PK: prevent negative lane change durations
+                    double dur = Math.max(0.1, Math.min((vehicle.route.xLaneChanges(vehicle.getLane()) - vehicle.x) / (180 / 3.6), duration));
                     vehicle.changeLeft(vehicle.model.dt / dur);
                     // Set headway
                     setT(dLeft);
@@ -540,7 +543,8 @@ public class Driver {
                     	follower.getDriver().setT(dLeft);
                 } else if ((dRight >= dLeft) && (dRight >= dFree) && acceptRight) {
                     // Set dy to the right
-                    double dur = Math.min((vehicle.route.xLaneChanges(vehicle.getLane()) - vehicle.x) / (180 / 3.6), duration);
+                	// 20140314/PK: prevent negative lane change durations
+                    double dur = Math.max(0.1, Math.min((vehicle.route.xLaneChanges(vehicle.getLane()) - vehicle.x) / (180 / 3.6), duration));
                     vehicle.changeRight(vehicle.model.dt / dur);
                     // Set headway
                     setT(dRight);

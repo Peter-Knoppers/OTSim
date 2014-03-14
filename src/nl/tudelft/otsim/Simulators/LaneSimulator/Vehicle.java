@@ -90,8 +90,6 @@ public class Vehicle extends Movable implements SimulatedObject {
     	// skip if moved
     	if (moved >= getLane().model.k)
     		return;
-    	if ((6 == id) && (model.t > 646.7))
-    		System.out.println("moving " + id + " lane is " + getLane().toString());
     	/*
     	// move leaders first
     	Movable leader = getNeighbor(Movable.DOWN);
@@ -170,7 +168,13 @@ public class Vehicle extends Movable implements SimulatedObject {
                 for (RSU j : next) {
                     RSUsInRange.add(j);
                     if (j instanceof Lane.splitRSU) {	// continue search on next lane after split
-                        lastLane = ((Lane.splitRSU) j).getLaneForRoute(route);
+                        try {
+							lastLane = ((Lane.splitRSU) j).getLaneForRoute(route);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							lastLane = ((Lane.splitRSU) j).getLaneForRoute(route);
+						}
                         lastX = 0;
                     } else {	// continue search after RSU
                         lastLane = j.lane;
@@ -215,14 +219,17 @@ public class Vehicle extends Movable implements SimulatedObject {
             } else {	// update route
                 if (getLane().destination > 0)
                     route = route.subRouteAfter(getLane().destination);
+                /*
                 // check whether route is still reachable
                 if (!route.canBeFollowedFrom(getLane().down)) {
 	                model.deleted++;
-	                System.out.println("Vehicle deleted as lane " + getLane().id + " is exceeded (" + model.deleted + "), route unreachable");
+	                System.out.println("Vehicle deleted as lane " + getLane().id + " is exceeded (" + model.deleted + "), route " + route.toString() + " unreachable");
+	                System.out.println(getLane().lanechanges.entrySet());
 	                System.out.println(toString());
 	                delete();
 	                return;
                 } 
+                */
             	// abort impossible lane change
                 if (null != lcVehicle )
                     if ((lcDirection==Model.latDirection.RIGHT && (getLane().down.right==null || getLane().down.right!=lcVehicle.getLane().down)) ||
@@ -231,6 +238,12 @@ public class Vehicle extends Movable implements SimulatedObject {
                 // check whether adjacent neighbors need to be reset
                 // these will be found automatically by updateNeighbour() in
                 // the main model loop
+                if (null == getLane().down) {
+	                model.deleted++;
+	                System.out.println("Vehicle deleted as it reaches a dead end on " + getLane().id + " (" + model.deleted + "), route " + route.toString() + " unreachable");
+	                delete();
+	                return;
+                }
                 if ((null != getLane().left) && (getLane().left.down != getLane().down.left)) {
                 	setNeighbor(Movable.LEFT_UP, null);
                 	setNeighbor(Movable.LEFT_DOWN, null);
@@ -350,6 +363,8 @@ public class Vehicle extends Movable implements SimulatedObject {
      */
     public void changeLeft(double newDY) {
         lcDirection = Model.latDirection.LEFT;
+        if (Math.abs(newDY) > 2)
+        	System.out.println("Excessive lateral speed: " + newDY);
         this.dy = newDY;
     }
 
@@ -359,6 +374,8 @@ public class Vehicle extends Movable implements SimulatedObject {
      */
     public void changeRight(double newDY) {
         lcDirection = Model.latDirection.RIGHT;
+        if (Math.abs(newDY) > 2)
+        	System.out.println("Excessive lateral speed: " + newDY);
         this.dy = newDY;
     }
 
@@ -524,6 +541,14 @@ public class Vehicle extends Movable implements SimulatedObject {
      */
     public LCVehicle getLCVehicle_r() {
     	return lcVehicle;
+    }
+    
+    /**
+     * Make the route visible for the ObjectInspector.
+     * @return {@link Route}
+     */
+    public Route getRoute_r() {
+    	return route;
     }
 
 	@Override

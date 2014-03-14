@@ -1036,11 +1036,14 @@ public class Planar {
 			prevParallel = new Line2D.Double(prevVertex1.getX(), prevVertex1.getY(), vertex1.getX(), vertex1.getY());
 			prevDirection = Math.atan2(vertex1.getY() - prevVertex1.getY(), vertex1.getX() - prevVertex1.getX());
     	}
-    	final double tooClose = 0.0001;
+    	final double tooClose = 0.000001;
     	for (Vertex vertex : referenceVertices) {		
     		if (null != prevVertex)	{
-    			if (prevVertex.getPoint().distance(vertex.getPoint()) <= tooClose)
-    				throw new Error("reference Vertices too close in X and Y");
+    			double distance = prevVertex.getPoint().distance(vertex.getPoint());
+    			if (distance <= tooClose) {
+    				System.err.println("reference Vertices too close in X and Y (" + distance + ")");
+    				continue;
+    			}
     			// compute the line parallel to reference line
     			// TODO rewrite this without using atan and friends
     			double direction = Math.atan2(vertex.getY() - prevVertex.getY(), vertex.getX() - prevVertex.getX());

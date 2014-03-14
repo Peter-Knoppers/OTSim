@@ -42,14 +42,13 @@ public class SimplePolygon implements XML_IO {
 	 * @param z Double; the z-value for the vertices
 	 */
 	public SimplePolygon (java.util.ArrayList<java.awt.geom.Point2D.Double> points, Double z) {
-		if ((points.size() >= 2) && (points.get(0).distance(points.get(points.size() - 1)) < tooClose))
-			throw new Error("list of points should not be closed");
-		if (points.size() == 0)
-			return;
-		Point2D.Double prevPoint = points.get(points.size() - 1);
-		for (java.awt.geom.Point2D.Double p : points) {
-			if ((points.size() > 1) && (p.distance(prevPoint) < tooClose))
-				throw new Error("adjacent points are too close");
+		int end = points.size();
+		while ((end >= 2) && (points.get(0).distance(points.get(end - 1)) < tooClose))
+			end--;
+		Point2D.Double prevPoint = points.get(end - 1);
+		for (Point2D.Double p : points) {
+			if ((null != prevPoint) && (prevPoint.distance(p) < tooClose))
+				continue;
 			vertices.add(new Vertex(p.x, p.y, z));
 			prevPoint = p;
 		}

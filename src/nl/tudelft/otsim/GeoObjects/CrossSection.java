@@ -256,8 +256,9 @@ public class CrossSection implements XML_IO {
 			crossSectionEnd = parentList.get(nextCrossSectionIndex).longitudinalPosition;
 		// System.out.format("CrossSection runs from %.3f to %.3f\r\n", longitudinalPosition, crossSectionEnd);
 		ArrayList<Vertex> linkVertices = link.getVertices();
-		if (linkVertices.get(0).distance(linkVertices.get(linkVertices.size() - 1)) < 0.0001)
-			System.err.println("Oops: linkVertices covers zero or extremely short distance: " + linkVertices.toString());
+		double distance = linkVertices.get(0).getPoint().distance(linkVertices.get(linkVertices.size() - 1).getPoint());
+		if (distance < 0.0001)
+			System.err.println("Oops: linkVertices " + linkVertices.toString() + " cover no only " + distance + "m");
 		for (Vertex v : linkVertices) {
 			Point2D.Double p = v.getPoint();
 			if (null != prevVertex) {

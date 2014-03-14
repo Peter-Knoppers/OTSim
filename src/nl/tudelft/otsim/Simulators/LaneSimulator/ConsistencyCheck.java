@@ -150,6 +150,7 @@ public class ConsistencyCheck {
 	 * @throws Exception 
 	 */
 	public static void checkPostInit(Model model) throws Exception {
+		/*
 		for (Lane lane : model.network) {
 			if (null != lane.generator) {
 				System.out.println("Checking routes for generator on lane " + describeLane(lane));
@@ -180,6 +181,7 @@ public class ConsistencyCheck {
 				}
 			}
 		}
+		*/
 	}
 	private static String describeRoute(Route route) {
 		String result = "";
