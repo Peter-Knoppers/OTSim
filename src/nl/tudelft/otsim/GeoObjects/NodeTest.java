@@ -141,6 +141,8 @@ public class NodeTest {
 	 */
 	@Test
 	public void testFixLinkConnections() {
+		// TODO re-write this test to check the result of the new NodeExpander system
+		// That test should probably move into a separate test class for that NodeExpander
 		// TODO check that no unexpected connections were built
 		for (String testJunction : testJunctions) {
 			System.out.println("Running test " + testJunction.split(":")[2]);

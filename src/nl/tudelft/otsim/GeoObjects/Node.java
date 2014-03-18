@@ -479,7 +479,7 @@ public class Node extends Vertex implements XML_IO {
 						//} 
 						else {
 							//System.out.println(String.format("Intersection %s", intersection.toString()));
-							if (intersection.distance(circle.center()) > circle.radius())
+							if ((null != circle) && (intersection.distance(circle.center()) > circle.radius()))
 								System.out.println("Intersection lies outside AOI");
 							//Vertex endPoint = new Vertex(intersection.x, intersection.y, 0);
 							//prevCS.setEndPoint(prevIncoming, true, prevCSEIndex, endPoint);

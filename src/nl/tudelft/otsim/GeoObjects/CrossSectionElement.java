@@ -22,7 +22,7 @@ import nl.tudelft.otsim.Utilities.Sorter;
  * A CrossSectionElement describes the surface of one lateral component in a
  * CrossSection.
  * 
- * @author gtamminga, Peter Knoppers
+ * @author Guus F Tamminga, Peter Knoppers
  */
 public class CrossSectionElement implements XML_IO {
 	/** Label in XML representation of a CrossSectionElement */

@@ -305,14 +305,14 @@ public class Lane {
     	//	endpoints.put(destination, l);
     	// 20140313/PK: changed > into >= in the next line
     	//int depth = 0;
-        if (destination>=0 && !leadsTo(destination)) {
+		if ((destination >= 0) && (!leadsTo(destination))) {
             // find all lanes in cross section with same destination and set initial info
             java.util.ArrayList<Lane> curlanes = new java.util.ArrayList<Lane>();
             curlanes.add(this);
             lanechanges.put(destination, 0);
             endpoints.put(destination, l);
             Lane lane = left;
-            while (lane!=null && lane.destination==destination) {
+			while ((lane != null) && (lane.destination == destination)) {
                 curlanes.add(lane);
                 lane.lanechanges.put(destination, 0);
                 lane.endpoints.put(destination, lane.l);
@@ -326,7 +326,7 @@ public class Lane {
                 lane = lane.right;
             }
             // move through network and set lane change information
-            while (!curlanes.isEmpty()) {
+            while (! curlanes.isEmpty()) {
             	/*
                 if (2 == destination) {
                 	System.out.println("Carving route at depth " + depth + ", destination " + destination + "; curlanes contains");

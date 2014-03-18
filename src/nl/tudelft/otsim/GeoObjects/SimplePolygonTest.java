@@ -76,7 +76,7 @@ public class SimplePolygonTest {
 		assertEquals("Check the first vertex", 0, sp.getVertex(0).distance(new Vertex(123.456, 789.012, 34.56)), 0.00001);
 		assertEquals("Check the second vertex", 0, sp.getVertex(1).distance(new Vertex(1, 2, 3)), 0.00001);
 	}
-	
+
 	/**
 	 * Test the creator that takes a {@link ParsedNode} as argument.
 	 */
@@ -95,12 +95,12 @@ public class SimplePolygonTest {
 		} catch (Exception e) {
 			fail("Caught unexpected exception in creation of the XML text");
 		}
-		//System.out.println(xmlText);
+		// System.out.println(xmlText);
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(xmlText.getBytes());
 		SimplePolygon sp2 = null;
 		try {
 			ParsedNode pn = new ParsedNode(inputStream);
-			//System.out.println(pn.toString("All XML "));
+			// System.out.println(pn.toString("All XML "));
 			ParsedNode spNode = pn.getSubNode(SimplePolygon.XMLTAG, 0);
 			sp2 = new SimplePolygon(spNode);
 		} catch (Exception e) {
@@ -163,26 +163,12 @@ public class SimplePolygonTest {
 		} catch (Exception e) {
 			fail("Caught unexpected exception in creation of the XML text");
 		}
-		//System.out.println(xmlText);
-		assertEquals("Expected XML", "<?xml version=\"1.0\"?>\n"
-				+ "<polygon>\n"
-				+ "  <name>Hello</name>\n"
-				+ "  <vertex rank=\"0\">\n"
-				+ "    <X>12.3456</X>\n"
-				+ "    <Y>23.4567</Y>\n"
-				+ "    <Z>34.5678</Z>\n"
-				+ "  </vertex>\n"
-				+ "  <vertex rank=\"1\">\n"
-				+ "    <X>120.3456</X>\n"
-				+ "    <Y>230.4567</Y>\n"
-				+ "    <Z>340.5678</Z>\n"
-				+ "  </vertex>\n"
-				+ "  <vertex rank=\"2\">\n"
-				+ "    <X>120.3456</X>\n"
-				+ "    <Y>230.4567</Y>\n"
-				+ "    <Z>340.5678</Z>\n"
-				+ "  </vertex>\n"
-				+ "</polygon>\n", xmlText);
+		// System.out.println(xmlText);
+		assertEquals("Expected XML", "<?xml version=\"1.0\"?>\n" + "<polygon>\n" + "  <name>Hello</name>\n"
+				+ "  <vertex rank=\"0\">\n" + "    <X>12.3456</X>\n" + "    <Y>23.4567</Y>\n" + "    <Z>34.5678</Z>\n"
+				+ "  </vertex>\n" + "  <vertex rank=\"1\">\n" + "    <X>120.3456</X>\n" + "    <Y>230.4567</Y>\n"
+				+ "    <Z>340.5678</Z>\n" + "  </vertex>\n" + "  <vertex rank=\"2\">\n" + "    <X>120.3456</X>\n"
+				+ "    <Y>230.4567</Y>\n" + "    <Z>340.5678</Z>\n" + "  </vertex>\n" + "</polygon>\n", xmlText);
 	}
 
 	/**
@@ -204,8 +190,10 @@ public class SimplePolygonTest {
 		sp = new SimplePolygon(vertices);
 		points = sp.getProjection();
 		assertEquals("sp with two vertices has projection with two points", 2, points.length);
-		assertEquals("First point should be projection of the first vertex", 0, points[0].distance(vertices.get(0).getPoint()), 0.000001);
-		assertEquals("Second point should be projection of the second vertex", 0, points[1].distance(vertices.get(1).getPoint()), 0.000001);
+		assertEquals("First point should be projection of the first vertex", 0, points[0].distance(vertices.get(0).getPoint()),
+				0.000001);
+		assertEquals("Second point should be projection of the second vertex", 0, points[1].distance(vertices.get(1).getPoint()),
+				0.000001);
 	}
 
 	/**
@@ -278,12 +266,12 @@ public class SimplePolygonTest {
 				double y = j + 0.2;
 				Vertex proposed = new Vertex(x, y, 123);
 				boolean expect = ((x > 10) && (y > 10)) || (x + y > 30);
-				//System.out.println(String.format("x=%.2f, y=%.2f, expect=%s", x, y, expect ? "true" : " false"));
+				// System.out.println(String.format("x=%.2f, y=%.2f, expect=%s", x, y, expect ? "true" : " false"));
 				if (expect)
 					assertTrue("Should be good", sp.mayUpdateVertex(2, proposed));
 				else
 					assertFalse("Should be bad", sp.mayUpdateVertex(2, proposed));
-			}	
+			}
 	}
 
 	/**
@@ -305,7 +293,7 @@ public class SimplePolygonTest {
 				double y = j + 0.2;
 				Vertex proposed = new Vertex(x, y, 123);
 				boolean expect = (x < 10) || ((x > 10) && (x < 20) && (y > 10) && (y < 20));
-				//System.out.println(String.format("x=%.2f, y=%.2f, expect=%s", x, y, expect ? "true" : " false"));
+				// System.out.println(String.format("x=%.2f, y=%.2f, expect=%s", x, y, expect ? "true" : " false"));
 				if (expect)
 					assertTrue("Should be good", sp.mayAddVertex(proposed));
 				else
@@ -346,14 +334,14 @@ public class SimplePolygonTest {
 				assertTrue("Should be good", sp.mayDeleteVertex(i));
 			else
 				assertFalse("Should be bad", sp.mayDeleteVertex(i));
-			
+
 		}
 		vertices.get(1).setPoint(0, 30, 123);
 		vertices.get(3).setPoint(-10, 100, 543);
 		sp = new SimplePolygon(vertices);
 		for (int i = -10; i < 20; i++) {
 			boolean expect = (i >= 0) && (i < 4) && (i != 2) && (i != 3);
-			//System.out.println(String.format("i=%d, expect=%s", i, expect ? "true" : " false"));
+			// System.out.println(String.format("i=%d, expect=%s", i, expect ? "true" : " false"));
 			if (expect)
 				assertTrue("Should be good", sp.mayDeleteVertex(i));
 			else
@@ -413,7 +401,7 @@ public class SimplePolygonTest {
 		SimplePolygon sp = new SimplePolygon(vertices);
 		assertTrue("name should be null", null == sp.getName_r());
 	}
-	
+
 	/**
 	 * Test the setName_w method.
 	 */
@@ -425,7 +413,7 @@ public class SimplePolygonTest {
 		sp.setName_w("Hello World!");
 		assertEquals("Name should be what was just set", "Hello World!", sp.getName_r());
 		sp.setName_w(null);
-		assertTrue("name should be null", null == sp.getName_r());		
+		assertTrue("name should be null", null == sp.getName_r());
 	}
 
 }
