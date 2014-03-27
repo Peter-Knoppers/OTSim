@@ -11,6 +11,7 @@ import java.util.Random;
 
 import nl.tudelft.otsim.Events.Scheduler;
 import nl.tudelft.otsim.Events.Step;
+import nl.tudelft.otsim.GUI.FakeFundamentalDiagram;
 import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.GUI.ObjectInspector;
@@ -219,6 +220,8 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         		ArrayList<Integer> route = new ArrayList<Integer>(); 
         		for (int i = 3; i < fields.length; i++) {
         			String field = fields[i];
+        			if (field.endsWith("a"))
+        				route.add(Integer.parseInt(field.substring(0, field.length() - 1)));
         			if (! field.endsWith("a"))
         				route.add(Integer.parseInt(field));
         		}
@@ -389,7 +392,11 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         ConsistencyCheck.checkPostInit(model);
         System.out.println(String .format("model created: %d lanes", model.network.length));
         scheduler.enqueueEvent(0d, new Stepper(this));
+        ffdList = new ArrayList<FakeFundamentalDiagram>();
+        //ffdList.add(new FakeFundamentalDiagram("20\t-180\t180\t-180\t180\t-20\t20\t-20", "[0/0:15/0:20/8:25/50:40/90]", scheduler, 5));
 	}
+	
+	ArrayList<FakeFundamentalDiagram> ffdList;
 	
 	private void makeGenerator(ArrayList<Double> routeFlows, int node, ArrayList<Lane> lanes, ArrayList<ArrayList<Integer>> routes, TimeScaleFunction flowGraph, double classProbabilities[]) throws Exception {
 		double numberOfTrips = 0;
@@ -1119,6 +1126,8 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
 			for (RSU rsu : l.getRSUs_r())
 				if (rsu instanceof Conflict.conflictRSU)
 					((Conflict.conflictRSU)rsu).drawLineToUpStreamVehicle(graphicsPanel);
+		for (FakeFundamentalDiagram ffd : ffdList)
+			ffd.paint(scheduler.getSimulatedTime(), graphicsPanel);
 	}
 
 	@Override

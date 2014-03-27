@@ -122,6 +122,12 @@ public class RoadMarkerAlong extends CrossSectionObject implements XML_IO {
 		double ratio = getLateralPosition() / crossSectionElement.getCrossSectionElementWidth();
 		for (int i = 0; i < innerVertices.size(); i++)
 			vertices.add(Vertex.weightedVertex(ratio, innerVertices.get(i), outerVertices.get(i)));
+		if (vertices.size() < 2) {
+			System.err.println("Too few vertices");
+			crossSectionElement.getCrossSection().getVertices_r();
+			crossSectionElement.createAndCleanLinkPointListInner(false, true, false);
+			
+		}
 	}
 	
 	/**

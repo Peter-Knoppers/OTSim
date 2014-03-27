@@ -958,8 +958,9 @@ public class Main extends JPanel implements ActionListener {
 		Storable storable = identifyStorableExtension(extension);
 		if (null == storable)
 			WED.showProblem(WED.ENVIRONMENTERROR, "Cannot identify file type (\"%s\") of \"%s\"", extension, fileName);
-		else
+		else {
 			loadStorable(storable, fileName);
+		}
 	}
 		
 	private void saveStorable(Storable storable) {

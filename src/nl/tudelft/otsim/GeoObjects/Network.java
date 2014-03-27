@@ -28,6 +28,7 @@ import nl.tudelft.otsim.GUI.GraphicsPanelClient;
 import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.GUI.ObjectInspector;
 import nl.tudelft.otsim.GUI.Storable;
+import nl.tudelft.otsim.GUI.WED;
 import nl.tudelft.otsim.SpatialTools.Planar;
 
 /**
@@ -163,7 +164,9 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 		*/
 		this.parentNode = parentNode;  
 		dirty = true;
-		rebuild();
+		RebuildResult result = rebuild();
+		if (RebuildResult.FAIL == result)
+			WED.showProblem(WED.ENVIRONMENTERROR, "Error loading Network");
 		for (TrafficLightController tlc : trafficLightControllerList())
 			tlc.fix();
 		modified = false;
@@ -949,9 +952,15 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 					System.err.println("fixLinkConnections: skipping null lane");
 				else if (null == laneA.getUp())
 					System.err.println("getUp returned null for lane " + ((Lane) csoA).getID());
+				else if (null == laneA.getDown())
+					System.err.println("getDown returned null for lane " + ((Lane) csoA).getID());
 				else {
 					Lane upA = laneA.getUp().get(0);
 					int size = upA.getLaneVerticesInner().size();
+					if (size < 1) {
+						System.err.println("Lane has too few vertices");
+						continue;
+					}
 					laneA.getLaneVerticesInner().get(0).setPoint(upA.getLaneVerticesOuter().get(size-1));			
 					size = upA.getLaneVerticesOuter().size();
 					laneA.getLaneVerticesOuter().get(0).setPoint(upA.getLaneVerticesInner().get(size-1));	

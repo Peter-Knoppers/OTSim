@@ -438,8 +438,11 @@ public class CrossSectionElement implements XML_IO {
 		if (referenceVertices.size() < 2)
 			throw new Error("Malformed reference vertices");
         ArrayList<Vertex> result = Planar.createParallelVertices(referenceVertices, prevReferenceVertices, previousLateralPosition, myLateralPosition);
-		if (result.size() < 2)
-			throw new Error("Malformed parallel vertices");
+		if (result.size() < 2) {
+			System.err.println("Malformed parallel vertices");
+			return result;
+			//throw new Error("Malformed parallel vertices");
+		}
         ArrayList<CrossSection> csList = crossSection.getLink().getCrossSections_r();
         if (crossSection == csList.get(0) && this.connectedFrom == null)
         	result = crossSection.getLink().getFromNode_r().truncateAtConflictArea(result);
@@ -453,7 +456,7 @@ public class CrossSectionElement implements XML_IO {
         }
         if (result.size() < 2)
         	System.err.println("too short");
-        final double huge = 300;	// [m]
+        final double huge = 2000;	// [m]
         Vertex prevVertex = null;
         for (Vertex v : result) {
         	if (null != prevVertex)
@@ -803,6 +806,8 @@ public class CrossSectionElement implements XML_IO {
 		// 		prevLane(0) with curLane(0)
 		// 		prevLane(1) with curLane(1)  ... etc.
 		System.out.println("Connecting lane " + upLane.getID() + " to " + downLane.getID());
+		 if ((49 == downLane.getID()) || (49 == upLane.getID()))
+			System.out.println("Connecting lane 49");
 		upLane.addDownLane(downLane);
 		downLane.addUpLane(upLane);
     }
@@ -1019,7 +1024,7 @@ public class CrossSectionElement implements XML_IO {
     	// FIXME This code assumes that adjacent drive-able CrossSectionElements can not occur
     	for (CrossSectionObject cso : getCrossSectionObjects(RoadMarkerAlong.class)) {
     		RoadMarkerAlong rma = (RoadMarkerAlong) cso;
-    		if (null != rmaPrev)  {
+    		if (null != rmaPrev) {
     			TurnArrow turn = new TurnArrow(null, null, 0, -10);
     			for (CrossSectionObject cso2 : getCrossSectionObjects(TurnArrow.class)) {
     				TurnArrow turnArrow = (TurnArrow) cso2;
@@ -1053,16 +1058,16 @@ public class CrossSectionElement implements XML_IO {
     			if (crossSection.getLink().getCrossSections_r().size() - 1 == myIndex)
     				destination = crossSection.getLink().getToNode_r().getNodeID();
     			Lane lane = createLane(rmaPrev, rma, turn, stopLineLane, origin, destination);
-    			if (59 == lane.getID())
-    				System.out.println("Created Lane " + lane.getID());
     			
     			if (prevLane != null)
     				prevLane.connectLateralRight(lane);	            				
-    			// add an initial centreline for every lane
+    			// add an initial centerline for every lane
 				ArrayList<Vertex> lineVertices = new ArrayList<Vertex>();
 				ArrayList<Vertex> rmaPoints = rma.getVertices();
 				if (null == rmaPoints)
 					System.err.println("fixLanePoints: rmaPoints is null");
+				else if (rmaPoints.size() < 2)
+					System.err.println("fixLanePoints: rmaPoints is too shorts");
 				else {
 					if (rma.getVertices().size() != rmaPrev.getVertices().size())
 						System.err.println("rma and prevRMA have different sizes");
@@ -1098,7 +1103,7 @@ public class CrossSectionElement implements XML_IO {
 		int j = 0;
 		for (CrossSectionObject cso : RMAList) {
 			RoadMarkerAlong RMA = (RoadMarkerAlong) cso;
-			// add an initial centreline for every lane
+			// add an initial centerline for every lane
 			if (rmaPrev != null)  {
 				ArrayList<Vertex> lineVertices = new ArrayList<Vertex>();
 				ArrayList<Vertex> rmaPoints = RMA.getVertices();
@@ -1110,17 +1115,17 @@ public class CrossSectionElement implements XML_IO {
 					if (RMA.getVertices().size() != rmaPrev.getVertices().size())
 						System.err.println("rma and prevRMA have different sizes");
 
-					for (int i = 0; i < RMA.getVertices().size(); i++)  {
+					for (int i = 0; i < RMA.getVertices().size(); i++) {
 						lineVertices.add(Vertex.weightedVertex(0.5,  RMA.getVertices().get(i), rmaPrev.getVertices().get(i)));
 					}
 					lane.setDesignLine(lineVertices);
 					lineVertices = new ArrayList<Vertex>();
-					for (int i = 0; i < RMA.getVertices().size(); i++)  {
+					for (int i = 0; i < RMA.getVertices().size(); i++) {
 						lineVertices.add(Vertex.weightedVertex(0.0,  RMA.getVertices().get(i), rmaPrev.getVertices().get(i)));
 					}
 					lane.setLaneVerticesInner(lineVertices);
 					lineVertices = new ArrayList<Vertex>();
-					for (int i = 0; i < RMA.getVertices().size(); i++)  {
+					for (int i = 0; i < RMA.getVertices().size(); i++) {
 						lineVertices.add(Vertex.weightedVertex(1.0,  RMA.getVertices().get(i), rmaPrev.getVertices().get(i)));
 					}
 					lane.setLaneVerticesOuter(lineVertices);

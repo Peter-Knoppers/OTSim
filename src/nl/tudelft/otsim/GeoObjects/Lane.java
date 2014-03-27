@@ -95,7 +95,7 @@ public class Lane extends CrossSectionObject {
      */
     public Lane() {
     	this.id = laneCount;
-    	if (laneCount == 48)
+    	if (laneCount == 49)
     		System.out.println("Creating lane " + laneCount);
     	laneCount++;
 	}
@@ -433,7 +433,8 @@ public class Lane extends CrossSectionObject {
 		}
 		for (Vertex v : Reversed.reversed(v2))	// reverse the outer point list
 			 polygon.lineTo(v.getX(), v.getY());
-		polygon.closePath();
+		if (! firstPoint)
+			polygon.closePath();
 		return polygon;
 	}
 	
@@ -484,6 +485,10 @@ public class Lane extends CrossSectionObject {
 	
 	public String getDestination_r () {
 		return "" + destination;
+	}
+	
+	public Link getLink_r() {
+		return getCse().getCrossSection().getLink();
 	}
 	
 	@Override

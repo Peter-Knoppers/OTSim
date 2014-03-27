@@ -64,7 +64,7 @@ public class StandAlone extends JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
 			public void run() {
-            	Main.main(args);
+				Main.main(args);
             }
         });
     }

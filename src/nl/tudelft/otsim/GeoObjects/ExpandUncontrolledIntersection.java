@@ -88,10 +88,6 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 		unlinkSubNetwork();
 		if (!expansionNeeded())
 			return null;
-		ArrayList<DirectionalLink> dlList = node.getLinksFromJunction(null);
-		for (DirectionalLink dl : dlList)
-			System.out.println(dl.toString());
-		int entranceCount = node.incomingCount();
 
 		// Expand junction by creating a sub-Network.
 		// Create a Node for every entering link and every exiting link.
@@ -102,13 +98,18 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 		// These links receive a new crossSection, and one crossSection element: the road with road markings and
 		// finally driving lanes
 
-		System.out.println("Creating sub-Network for node " + node.getName_r());
+		System.out.println("Creating sub-Network for node " + node.getName_r() + " links:");
+		ArrayList<DirectionalLink> dlList = node.getLinksFromJunction(null);
+		for (DirectionalLink dl : dlList)
+			System.out.println("  " + dl.toString());
+		int entranceCount = node.incomingCount();
 		Network result = new Network(node);
 		final boolean uTurnAllowed = false;
 		int nextNodeID = 0;
 		ArrayList<Node> allNodes = node.getParentNetwork_r().getAllNodeList(false);
 		if (allNodes.size() > 0)
 			nextNodeID = allNodes.get(allNodes.size() - 1).getNodeID() + 1;
+		int initialNodeID = nextNodeID;
 		// Create one Node in the sub-Network for each DirectionalLink and set
 		// it as fromNodeExpand c.q. toNodeExpand in that DirectionalLink
 		for (DirectionalLink dl : dlList) {
@@ -119,7 +120,7 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 			else
 				dl.link.setFromNodeExpand(result.addNode(dl.link.getName_r() + "_o", nextNodeID++, location.x, location.y, node.z));
 		}
-		System.out.println("Created " + nextNodeID + " sub-Nodes in the sub-Network of Node " + node.getName_r());
+		System.out.println("Created " + (nextNodeID - initialNodeID) + " sub-Nodes in the sub-Network of Node " + node.getName_r());
 
 		// for every incoming arm
 		for (DirectionalLink incomingLink : node.getLinksFromJunction(true)) {
@@ -410,7 +411,7 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 			for (DirectionalLink toLink : n.getLinksFromJunction(false))
 				linkLanes(fromLink, toLink.link);
 		}
-		// Block B check all conflicts and figure out who yields to whom on each conflict
+		// Block B Create the conflicts. Check all conflicts and figure out who yields to whom on each conflict
 		// revisit all new Turning Links at this node (junction) to investigate conflicting lanes (merge, split, cross)
 		for (Link link : result.getLinks()) {
 			System.out.println("Checking link " + link);
@@ -440,7 +441,9 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 							System.err.println("" + laneB + " has no Up " + Planar.verticesToString(laneB.getLaneVerticesCenter()));
 							continue;
 						}
-						System.out.println("Checking conflict between lanes " + laneA.getID() + " and " + laneB.getID());
+						System.out.println("Checking conflict between lanes " + laneA.getID() + " and " + laneB.getID() + " at expanding node " + node.getNodeID());
+						if ((48 == laneA.getID()) || (49 == laneB.getID()))
+							System.out.println("pasop");
 
 						conflictType cType = null;
 						Lane priorityLane;
@@ -474,17 +477,17 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 							double angleIncomingB = Double.NaN;
 							double angleLeavingA = Double.NaN;
 							double angleLeavingB = Double.NaN;
-							for (DirectionalLink incoming : dlList) {
-								if (incoming.incoming) {
-									if (incoming.link.equals(linkUpA))
-										angleIncomingA = incoming.angle;
-									else if (incoming.link.equals(linkUpB))
-										angleIncomingB = incoming.angle;
+							for (DirectionalLink dl : dlList) {
+								if (dl.incoming) {
+									if (dl.link.equals(linkUpA))
+										angleIncomingA = dl.angle;
+									if (dl.link.equals(linkUpB))
+										angleIncomingB = dl.angle;
 								} else {
-									if (incoming.link.equals(linkDownA))
-										angleLeavingA = incoming.angle;
-									else if (incoming.link.equals(linkDownB))
-										angleLeavingB = incoming.angle;
+									if (dl.link.equals(linkDownA))
+										angleLeavingA = dl.angle;
+									if (dl.link.equals(linkDownB))
+										angleLeavingB = dl.angle;
 								}
 							}
 							double angleDif;
@@ -560,7 +563,7 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 							else
 								stopLine.addConflicts(priorityConflict);
 						} else
-							System.out.println(String.format("Conflict of y%s and p%s at node %d has no intersection...",
+							System.err.println(String.format("Conflict of y%s and p%s at node %d has no intersection...",
 									yieldLane.toString(), priorityLane.toString(), node.getNodeID()));
 					}
 				}
@@ -578,21 +581,27 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 		for (CrossSectionElement fromCSE : fromCS.getCrossSectionElementList_r()) {
 			for (CrossSectionObject fromCSO : fromCSE.getCrossSectionObjects(Lane.class)) {
 				Lane fromLane = (Lane) fromCSO;
-				double fromLateralPosition = fromLane.lateralPosition;
+				//if (49 == fromLane.getID())
+				//	System.out.println("Linking from lane " + fromLane.getID());
+				ArrayList<Vertex> fromVertices = fromLane.getLaneVerticesCenter();
+				Point2D.Double fromPosition = fromVertices.get(fromVertices.size() - 1).getPoint();
 				for (CrossSectionElement toCSE : toCS.getCrossSectionElementList_r()) {
 					for (CrossSectionObject toCSO : toCSE.getCrossSectionObjects(Lane.class)) {
 						Lane toLane = (Lane) toCSO;
-						double toLateralPosition = toLane.lateralPosition;
 						Vertex inner = toLane.getLaneVerticesInner().get(0);
 						Vertex outer = toLane.getLaneVerticesOuter().get(0);
+						Point2D.Double center = toLane.getLaneVerticesCenter().get(0).getPoint();
+						Line2D.Double centerLine = new Line2D.Double(toLane.getLaneVerticesCenter().get(0).getPoint(), toLane.getLaneVerticesCenter().get(1).getPoint());
 						double width = inner.distance(outer);
-						if (Math.abs(toLateralPosition - fromLateralPosition) < width / 2) {
+						double distance = center.distance(fromPosition);
+						distance = Planar.distanceLineSegmentToPoint(centerLine, fromPosition);
+						if (distance < width * 0.6) {
 							System.out.println("Linking " + fromLane.getID() + " to " + toLane.getID());
 							fromLane.addDownLane(toLane);
 							toLane.addUpLane(fromLane);
 							System.out.println("  fromLane " + fromLane.getID() + " has lateralPosition "
 									+ fromLane.lateralPosition);
-							System.out.println("    toLane " + fromLane.getID() + " has lateralPosition " + toLane.lateralPosition);
+							System.out.println("    toLane " + toLane.getID() + " has lateralPosition " + toLane.lateralPosition);
 							break;
 						}
 					}
@@ -613,16 +622,13 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 	 * Links.
 	 */
 
-	private static CrossSection buildCrossSection(Lane firstLane, Lane lastLane, ArrayList<NeededConnectingLane> connectingLanes,
+	private static CrossSection buildCrossSection(double leftEdge, double rightEdge, ArrayList<NeededConnectingLane> connectingLanes,
 			double longitudinalPosition) {
-		double startOffset = firstLane.lateralPosition;
+		double startOffset = leftEdge;
 		ArrayList<CrossSectionElement> cseList = new ArrayList<CrossSectionElement>();
 		CrossSection cs = new CrossSection(longitudinalPosition, startOffset, cseList);
 		ArrayList<RoadMarkerAlong> rmaList = new ArrayList<RoadMarkerAlong>();
-		firstLane = connectingLanes.get(0).outLane;
-		lastLane = connectingLanes.get(connectingLanes.size() - 1).outLane;
-		double averageLaneWidth = (lastLane.lateralPosition + lastLane.lateralWidth - firstLane.lateralPosition)
-				/ connectingLanes.size();
+		double averageLaneWidth = (rightEdge - leftEdge) / connectingLanes.size();
 		System.out.println("average lane width " + averageLaneWidth);
 		double lateralPosition = 0;
 		for (NeededConnectingLane ncl : connectingLanes) {
@@ -633,8 +639,6 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 		rmaList.add(new RoadMarkerAlong(RoadMarkerAlongTemplate.ALONG_CONTINUOUS, lateralPosition));
 		CrossSectionElement cse = new CrossSectionElement(cs, "road", lateralPosition, rmaList, null);
 		cseList.add(cse);
-		ArrayList<CrossSection> csList = new ArrayList<CrossSection>();
-		csList.add(cs);
 		return cs;
 	}
 
@@ -671,14 +675,22 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 		for (Point2D.Double p : designLine)
 			designVertices.add(new Vertex(p, node.z));
 		ArrayList<CrossSection> csList = new ArrayList<CrossSection>(2);
-		csList.add(buildCrossSection(connectingLanes.get(0).inLane, connectingLanes.get(connectingLanes.size() - 1).inLane,
+		//if ((10107 == fromNode.getNodeID()) && (10104 == toNode.getNodeID()))
+		//	System.out.println("Creating link from " + fromNode.getNodeID() + " to " + toNode.getNodeID());
+		csList.add(buildCrossSection(connectingLanes.get(0).inLane.lateralPosition, 
+				connectingLanes.get(connectingLanes.size() - 1).inLane.lateralPosition
+				+ connectingLanes.get(connectingLanes.size() - 1).inLane.lateralWidth,
 				connectingLanes, 0));
-		csList.add(buildCrossSection(connectingLanes.get(0).outLane, connectingLanes.get(connectingLanes.size() - 1).outLane,
-				connectingLanes, fromNode.distance(toNode)));
 		// Generate a unique sensible name for the new link
 		String linkName = "from_" + fromNode.getNodeID() + "_to_" + toNode.getNodeID();
 		Link newLink = network.addLink(linkName, fromNode.getNodeID(), toNode.getNodeID(), 0, false, csList, designVertices);
-		System.out.println("Intermediate vertices of autogenerated link: " + Planar.verticesToString(designVertices));
+		newLink.calculateLength();
+		try {
+			csList.get(0).setEndLateralOffset_w(connectingLanes.get(0).outLane.lateralPosition);
+		} catch (Exception e) {
+			throw new Error("Cannot happen");
+		}
+		System.out.println("Vertices of autogenerated link: [" + Planar.verticesToString(newLink.getVertices()) + "]");
 		for (CrossSection cs : csList)
 			cs.setLink(newLink);
 		newLink.setFromNodeExpand(fromNode);

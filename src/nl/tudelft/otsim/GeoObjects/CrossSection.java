@@ -33,10 +33,13 @@ public class CrossSection implements XML_IO {
 	private static final String XML_LONGITUDALPOSITION= "crossSectionPositionLongitudinal";
 	/** Label of lateral offset in XML representation of a CrossSection */
 	private static final String XML_LATERALOFFSET= "elementOffsetLateral";
+	/** Label of lateral offset in XML representation at end of a CrossSection */
+	private static final String XML_ENDLATERALOFFSET= "elementEndOffsetLateral";
 
     private Link link;
     private double longitudinalPosition;
     private double lateralOffset;
+    private double endLateralOffset = 0;
     private ArrayList<CrossSectionElement> crossSectionElementList;
 
     /**
@@ -53,6 +56,22 @@ public class CrossSection implements XML_IO {
 	      setCrossSectionElementList_w(sectionElementList);
 		this.longitudinalPosition = longitudalPosition; 
 		this.lateralOffset = lateralOffset;
+	}
+	
+	public void setEndLateralOffset_w(double newOffset) throws Exception {
+		ArrayList<CrossSection> parentList = link.getCrossSections_r();
+		int myIndex = parentList.indexOf(this);
+		if (myIndex != parentList.size() - 1)
+			throw new Exception("Cannot set lateral offset of non-last CrossSection");
+		endLateralOffset = newOffset;
+	}
+	
+	public double getEndLateralOffset_r() {
+		ArrayList<CrossSection> parentList = link.getCrossSections_r();
+		int myIndex = parentList.indexOf(this);
+		if (myIndex == parentList.size() - 1)
+			return endLateralOffset;
+		return (parentList.get(myIndex + 1).getLateralOffset_r());
 	}
 	
 	/**
@@ -254,6 +273,8 @@ public class CrossSection implements XML_IO {
 		int nextCrossSectionIndex = parentList.indexOf(this) + 1;
 		if (nextCrossSectionIndex < parentList.size())
 			crossSectionEnd = parentList.get(nextCrossSectionIndex).longitudinalPosition;
+		if (crossSectionEnd == longitudinalPosition)
+			System.err.println("Zero length crossSection");
 		// System.out.format("CrossSection runs from %.3f to %.3f\r\n", longitudinalPosition, crossSectionEnd);
 		ArrayList<Vertex> linkVertices = link.getVertices();
 		double distance = linkVertices.get(0).getPoint().distance(linkVertices.get(linkVertices.size() - 1).getPoint());
@@ -282,15 +303,13 @@ public class CrossSection implements XML_IO {
 			vertices.add(linkVertices.get(linkVertices.size() - 1));
 		}
 		if (vertices.get(0).distance(vertices.get(vertices.size() - 1)) < 0.0001)
-			System.err.println("Vertices cover very short distance " + vertices.toString() + " linkVertices is " + linkVertices.toString());
-		if (parentList.indexOf(this) < parentList.size() - 1) {
-			double lateralOffsetChange = parentList.get(parentList.indexOf(this) + 1).lateralOffset - this.lateralOffset;
-			ArrayList<Vertex> endList = Planar.createParallelVertices(vertices, lateralOffsetChange);
-			ArrayList<Vertex> weightedList = new ArrayList<Vertex>(vertices.size());
-			for (int i = 0; i < vertices.size(); i++)
-				weightedList.add(Vertex.weightedVertex(1.0 * i / vertices.size(), vertices.get(i), endList.get(i)));
-			vertices = weightedList;
-		}
+			System.err.println("Vertices cover very short distance " + vertices.toString() + " linkVertices is " + vertices.toString());
+		double lateralOffsetChange = getEndLateralOffset_r() - this.lateralOffset;
+		ArrayList<Vertex> endList = Planar.createParallelVertices(vertices, lateralOffsetChange);
+		ArrayList<Vertex> weightedList = new ArrayList<Vertex>(vertices.size());
+		for (int i = 0; i < vertices.size(); i++)
+			weightedList.add(Vertex.weightedVertex(1.0 * i / vertices.size(), vertices.get(i), endList.get(i)));
+		vertices = weightedList;
 		return vertices;
 	}
 
