@@ -735,7 +735,7 @@ public class Conflict {
         }
         
         private Movable findVehicleUpOfConflict (double maxDistance) {
-        	Movable result = lane.findVehicle(x, Model.longDirection.UP);
+        	Movable result = lane.findVehicle(x, Model.longDirection.UP, maxDistance);
         	if ((null != result) && (result.getDistanceToRSU(this) <= maxDistance))
         		return result;	// this Movable is in range and the first on this branch
         	else if (null != result)

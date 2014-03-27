@@ -223,6 +223,8 @@ public class Driver {
         return out;
     }
     
+    public final static double maximumSearchDistance = 300;	// [m]
+
     /**
      * Driver behavior for acceleration and lane changes. This is the main
      * function that sets <code>a</code> (acceleration) and <code>dy</code>
@@ -469,7 +471,7 @@ public class Driver {
                     else {
                     	Lane otherLane = Movable.LEFT_DOWN == direction ? vehicle.getLane().left : vehicle.getLane().right;
                     	if ((null != otherLane) && (null != otherLane.downSplit)) {
-                    		java.util.ArrayList<Movable> leaders = vehicle.findVehiclesDownstreamOfSplit(otherLane);
+                    		java.util.ArrayList<Movable> leaders = vehicle.findVehiclesDownstreamOfSplit(otherLane, maximumSearchDistance);
                     		double ttc = Double.POSITIVE_INFINITY;
                     		for (Movable l : leaders) {
                     			if (vehicle == l)
@@ -762,7 +764,7 @@ public class Driver {
         double vCur = desiredVelocity();
         double vRight = desiredVelocity();
         // Find first leader
-        Movable down = lane.findVehicle(x, Model.longDirection.DOWN);
+        Movable down = lane.findVehicle(x, Model.longDirection.DOWN, maximumSearchDistance);
         //Movable firstDown = down;
         double s = 0;
         double v = 0;
@@ -973,7 +975,7 @@ public class Driver {
             // lane may be null if not appropriate for the route (will change lane before)
             if (lane!=null) {
                 // follow downstream vehicle
-                Movable down = lane.findVehicle(0, Model.longDirection.DOWN);
+                Movable down = lane.findVehicle(0, Model.longDirection.DOWN, Driver.maximumSearchDistance);
                 if (down != null)
                     lowerAcceleration(calculateAcceleration(down));
             }
@@ -1059,7 +1061,7 @@ public class Driver {
                         // At a merge, the first vehicle may be partially past the 
                         // conflict and not have an upstream vehicle connected.
                         Movable up2 = conflict.otherRSU().lane.findVehicle(
-                                conflict.otherRSU().lane.l, Model.longDirection.UP);
+                                conflict.otherRSU().lane.l, Model.longDirection.UP, maximumSearchDistance);
                         // Nullify if same vehicle (i.e. it was not partially past the conflict)
                         up = up2 != up ? up2 : null;
                     } else

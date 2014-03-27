@@ -429,26 +429,26 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 				for (CrossSectionObject csoA : link.getCrossSections_r().get(link.getCrossSections_r().size() - 1)
 						.getCrossSectionElementList_r().get(0).getCrossSectionObjects(Lane.class)) {
 					Lane laneA = (Lane) csoA;
-					if (null == laneA.getUp()) {
-						System.err.println("" + laneA + " has no Up " + Planar.verticesToString(laneA.getLaneVerticesCenter()));
-						continue;
-					}
 					for (CrossSectionObject csoB : compareToLink.getCrossSections_r()
 							.get(compareToLink.getCrossSections_r().size() - 1).getCrossSectionElementList_r().get(0)
 							.getCrossSectionObjects(Lane.class)) {
 						Lane laneB = (Lane) csoB;
-						if (null == laneB.getUp()) {
-							System.err.println("" + laneB + " has no Up " + Planar.verticesToString(laneB.getLaneVerticesCenter()));
-							continue;
-						}
 						System.out.println("Checking conflict between lanes " + laneA.getID() + " and " + laneB.getID() + " at expanding node " + node.getNodeID());
-						if ((48 == laneA.getID()) || (49 == laneB.getID()))
+						if ((870 == laneA.getID()) || (870 == laneB.getID()))
 							System.out.println("pasop");
 
 						conflictType cType = null;
 						Lane priorityLane;
 						Lane yieldLane;
 
+						if (null == laneA.getUp())
+							System.err.println("null up on A: " + laneA.toString());
+						if (null == laneB.getUp())
+							System.err.println("null up on B: " + laneB.toString());
+						if (null == laneA.getDown())
+							System.err.println("null down on A: " + laneA.toString());
+						if (null == laneB.getDown())
+							System.err.println("null down on B: " + laneA.toString());
 						Lane upA = laneA.getUp().get(0);
 						Lane upB = laneB.getUp().get(0);
 						Lane downA = laneA.getDown().get(0);
@@ -581,13 +581,15 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 		for (CrossSectionElement fromCSE : fromCS.getCrossSectionElementList_r()) {
 			for (CrossSectionObject fromCSO : fromCSE.getCrossSectionObjects(Lane.class)) {
 				Lane fromLane = (Lane) fromCSO;
-				//if (49 == fromLane.getID())
-				//	System.out.println("Linking from lane " + fromLane.getID());
+				//if (802 == fromLane.getID())
+				//	System.out.println("Linking from lane " + fromLane);
 				ArrayList<Vertex> fromVertices = fromLane.getLaneVerticesCenter();
 				Point2D.Double fromPosition = fromVertices.get(fromVertices.size() - 1).getPoint();
 				for (CrossSectionElement toCSE : toCS.getCrossSectionElementList_r()) {
 					for (CrossSectionObject toCSO : toCSE.getCrossSectionObjects(Lane.class)) {
 						Lane toLane = (Lane) toCSO;
+						//if (802 == toLane.getID())
+						//	System.out.println("Linking to lane " + fromLane);
 						Vertex inner = toLane.getLaneVerticesInner().get(0);
 						Vertex outer = toLane.getLaneVerticesOuter().get(0);
 						Point2D.Double center = toLane.getLaneVerticesCenter().get(0).getPoint();
@@ -595,6 +597,10 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 						double width = inner.distance(outer);
 						double distance = center.distance(fromPosition);
 						distance = Planar.distanceLineSegmentToPoint(centerLine, fromPosition);
+						centerLine = new Line2D.Double(fromVertices.get(fromVertices.size() - 1).getPoint(), fromVertices.get(fromVertices.size() - 2).getPoint());
+						double otherDistance = Planar.distanceLineSegmentToPoint(centerLine, center);
+						if (otherDistance < distance)
+							distance = otherDistance;
 						if (distance < width * 0.6) {
 							System.out.println("Linking " + fromLane.getID() + " to " + toLane.getID());
 							fromLane.addDownLane(toLane);

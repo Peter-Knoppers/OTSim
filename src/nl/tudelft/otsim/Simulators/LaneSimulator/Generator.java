@@ -208,7 +208,7 @@ public class Generator extends Controller {
         boolean success = false;
         while (!success && (genLane != null)) {
             // set speed of downstream vehicle, if any
-            Movable down = genLane.findVehicle(0, Model.longDirection.DOWN);
+            Movable down = genLane.findVehicle(0, Model.longDirection.DOWN, Driver.maximumSearchDistance);
             double downX;
             if (down != null) {
                 nextVehicle.v = Math.min(down.v, nextVehicle.getDriver().desiredVelocity(genLane));
@@ -273,7 +273,7 @@ public class Generator extends Controller {
         Lane vehLane = lane;
         boolean success = false;
         while (!success && (genLane != null)) {
-            Movable down = genLane.findVehicle(0, Model.longDirection.DOWN);
+            Movable down = genLane.findVehicle(0, Model.longDirection.DOWN, Driver.maximumSearchDistance);
             nextVehicle.paste(genLane, 0);
             double downX=0;
             double downL=0;

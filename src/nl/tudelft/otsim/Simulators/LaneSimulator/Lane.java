@@ -487,16 +487,20 @@ public class Lane {
      * @param updown Whether to search up or downstream.
      * @return Found movable, <tt>null</tt> if none found.
      */
-    public Movable findVehicle(double startX, Model.longDirection updown) {
-    	if (startX > l + 0.002)		// UGLY! This margin must be bigger than margin used in Driver.anticipatedSpeed
-    		throw new Error("StartX is out of range"); // FIXME
+    public Movable findVehicle(double startX, Model.longDirection updown, double maxDistance) {
+    	if (maxDistance < 0)
+    		return null;
+    	if (startX > l + 0.002) {		// UGLY! This margin must be bigger than margin used in Driver.anticipatedSpeed
+    		System.err.println("StartX is out of range"); // FIXME
+    		return null;	// STUB
+    	}
     	int index = findVehicleIndex(startX);
         if (updown == Model.longDirection.UP) {
         	if (index > 0)
         		return vehicles.get(--index);
         	if (null != up) {
         		markedForXadj = true;
-        		Movable result = up.lastVehicle();
+        		Movable result = up.lastVehicle(maxDistance - l);
         		markedForXadj = false;
         		return result;
         	}
@@ -505,7 +509,7 @@ public class Lane {
         		return vehicles.get(index);
         	if (null != down) {
         		markedForXadj = true;
-        		Movable result = down.firstVehicle();
+        		Movable result = down.firstVehicle(maxDistance - l);
         		markedForXadj = false;
         		return result;
         	}
@@ -513,24 +517,26 @@ public class Lane {
     	return null;
     }
     
-    private Movable lastVehicle () {
+    private Movable lastVehicle (double maxDistance) {
     	if (! isEmpty())
     		return vehicles.get(vehicles.size() - 1);
     	if ((null == up) || up.markedForXadj)
     		return null;
     	markedForXadj = true;
-    	Movable result = up.lastVehicle();
+    	Movable result = up.lastVehicle(maxDistance - l);
     	markedForXadj = false;
     	return result;
     }
     
-    private Movable firstVehicle () {
+    private Movable firstVehicle (double maxDistance) {
+    	if (maxDistance < 0)
+    		return null;
     	if (! isEmpty())
     		return vehicles.get(0);
     	if ((null == down) || down.markedForXadj)
     		return null;
     	markedForXadj = true;
-    	Movable result = down.firstVehicle();
+    	Movable result = down.firstVehicle(maxDistance - l);
     	markedForXadj = false;
     	return result;
     }
@@ -1020,9 +1026,9 @@ public class Lane {
     			if (downLane.leadsTo(whichDestination))
     				return true;
     		// 20140314/PK also check down (if non-null)
-    		if (null != down)
-    			if (down.leadsTo(whichDestination))
-    				return true;
+    		//if (null != down)
+    		//	if (down.leadsTo(whichDestination))
+    		//		return true;
     	}
         return lanechanges.containsKey(whichDestination);
     }

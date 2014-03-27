@@ -806,8 +806,8 @@ public class CrossSectionElement implements XML_IO {
 		// 		prevLane(0) with curLane(0)
 		// 		prevLane(1) with curLane(1)  ... etc.
 		System.out.println("Connecting lane " + upLane.getID() + " to " + downLane.getID());
-		 if ((49 == downLane.getID()) || (49 == upLane.getID()))
-			System.out.println("Connecting lane 49");
+		 if ((802 == downLane.getID()) || (802 == upLane.getID()))
+			System.out.println("Connecting lane 802");
 		upLane.addDownLane(downLane);
 		downLane.addUpLane(upLane);
     }
@@ -826,7 +826,7 @@ public class CrossSectionElement implements XML_IO {
     	}
     }
     
-    private static void connectUnequalSections(CrossSectionElement prevCSE, List<CrossSectionObject> prevCSECSO, List<CrossSectionObject> curCSO, int increaseOfLanes)   {
+    private static void connectUnequalSections(CrossSectionElement prevCSE, List<CrossSectionObject> prevCSECSO, List<CrossSectionObject> curCSO, int increaseOfLanes) {
     	List<CrossSectionObject> wide;
     	List<CrossSectionObject> narrow;
     	if (increaseOfLanes <= 0) {

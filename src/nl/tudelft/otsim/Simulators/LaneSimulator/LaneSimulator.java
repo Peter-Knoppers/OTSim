@@ -394,6 +394,8 @@ public class LaneSimulator extends Simulator implements ShutDownAble {
         scheduler.enqueueEvent(0d, new Stepper(this));
         ffdList = new ArrayList<FakeFundamentalDiagram>();
         //ffdList.add(new FakeFundamentalDiagram("20\t-180\t180\t-180\t180\t-20\t20\t-20", "[0/0:15/0:20/8:25/50:40/90]", scheduler, 5));
+        ffdList.add(new FakeFundamentalDiagram("200\t200\t1600\t200\t1600\t1700\t200\t1700", "[0/0:15/0:20/8:25/50:40/90]", scheduler, 5));
+        ffdList.add(new FakeFundamentalDiagram("1900\t200\t3300\t200\t3300\t1700\t1900\t1700", "[0/0:15/0:20/8:25/50:40/90]", scheduler, 5));
 	}
 	
 	ArrayList<FakeFundamentalDiagram> ffdList;

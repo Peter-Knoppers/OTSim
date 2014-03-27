@@ -98,7 +98,7 @@ public abstract class Movable  {
     	Lane neighborLane = ((LEFT_UP == direction) || (LEFT_DOWN == direction)) ? lane.left : lane.right;
     	if (null != neighborLane) {
     		double xNeighborLane = lane.getAdjacentX(x, ((LEFT_UP == direction) || (LEFT_DOWN == direction)) ? Model.latDirection.LEFT : Model.latDirection.RIGHT);
-    		setNeighbor(direction, neighborLane.findVehicle(xNeighborLane, alignDirection(direction) == UP ? Model.longDirection.UP : Model.longDirection.DOWN));
+    		setNeighbor(direction, neighborLane.findVehicle(xNeighborLane, alignDirection(direction) == UP ? Model.longDirection.UP : Model.longDirection.DOWN, Driver.maximumSearchDistance));
     	} else {
     		setNeighbor(direction, null);
     		setNeighbor(flipDirection(direction, FLIP_UD), null);
@@ -496,17 +496,19 @@ public abstract class Movable  {
      * @param merge Lane to look for vehicles upstream of.
      * @return Set of vehicles that is upstream of this, or an upstream merge.
      */
-    protected java.util.ArrayList<Movable> findVehiclesUpstreamOfMerge(Lane merge) {
+    protected java.util.ArrayList<Movable> findVehiclesUpstreamOfMerge(Lane merge, double maximumDistance) {
         java.util.ArrayList<Movable> out = new java.util.ArrayList<Movable>();
+        if (maximumDistance < 0)
+        	return out;
         for (Lane j : merge.upMerge.ups) {
         	if (j.marked)
         		continue;
         	j.marked = true;
-            Movable d = j.findVehicle(j.l, Model.longDirection.UP);
+            Movable d = j.findVehicle(j.l, Model.longDirection.UP, maximumDistance - merge.l);
             if (d != null)
                 out.add(d);
             else if (j.upMerge != null)
-                out.addAll(findVehiclesUpstreamOfMerge(j));
+                out.addAll(findVehiclesUpstreamOfMerge(j, maximumDistance - merge.l - j.upMerge.l));
             j.marked = false;
         }
         return out;
@@ -519,17 +521,19 @@ public abstract class Movable  {
      * @param split Lane to look for vehicles upstream of.
      * @return Set of vehicles that is downstream of this, or a downstream split.
      */
-    protected java.util.ArrayList<Movable> findVehiclesDownstreamOfSplit(Lane split) {
+    protected java.util.ArrayList<Movable> findVehiclesDownstreamOfSplit(Lane split, double maxDistance) {
         java.util.ArrayList<Movable> out = new java.util.ArrayList<Movable>();
+        if (maxDistance < 0)
+        	return out;
         for (Lane j : split.downSplit.downs) {
         	if (j.marked)
         		continue;
         	j.marked = true;
-            Movable d = j.findVehicle(0, Model.longDirection.DOWN);
+            Movable d = j.findVehicle(0, Model.longDirection.DOWN, maxDistance - split.l);
             if (d != null)
                 out.add(d);
             else if (j.downSplit!=null)
-                out.addAll(findVehiclesDownstreamOfSplit(j));
+                out.addAll(findVehiclesDownstreamOfSplit(j, maxDistance - split.l - j.downSplit.l));
             j.marked = false;
         }
         return out;
@@ -550,15 +554,15 @@ public abstract class Movable  {
             return;
         }
         // find up/down neighbors
-        setNeighbor(UP, atLane.findVehicle(atX, Model.longDirection.UP));
+        setNeighbor(UP, atLane.findVehicle(atX, Model.longDirection.UP, Driver.maximumSearchDistance));
         if (null != getNeighbor(UP)) {
         	setNeighbor(DOWN, getNeighbor(UP).getNeighbor(DOWN));	// put this Movable in between
         	if ((null == getNeighbor(UP).getNeighbor(DOWN)) && (getNeighbor(UP).lane.downSplit != atLane.downSplit))
-        		setNeighbor(DOWN, atLane.findVehicle(atX, Model.longDirection.DOWN)); // just passed split, so up has no down (as this was cut)
+        		setNeighbor(DOWN, atLane.findVehicle(atX, Model.longDirection.DOWN, Driver.maximumSearchDistance)); // just passed split, so up has no down (as this was cut)
         	else
         		getNeighbor(UP).setNeighbor(DOWN, this);
         } else
-        	setNeighbor(DOWN, atLane.findVehicle(atX, Model.longDirection.DOWN));
+        	setNeighbor(DOWN, atLane.findVehicle(atX, Model.longDirection.DOWN, Driver.maximumSearchDistance));
         if ((null != getNeighbor(DOWN)) && (getNeighbor(DOWN).lane.upMerge == atLane.upMerge))
         	getNeighbor(DOWN).setNeighbor(UP, this);	// same lane, down has this as up
         // Reset the neighborUpdated flags XXX DOES NOT HELP
@@ -571,14 +575,14 @@ public abstract class Movable  {
         x = atX;
         // Set pointers to this of vehicles at other side of split or merge.
         if ((null != lane.upMerge) && (null == getNeighbor(UP))) {
-            java.util.ArrayList<Movable> ups = findVehiclesUpstreamOfMerge(lane);
+            java.util.ArrayList<Movable> ups = findVehiclesUpstreamOfMerge(lane, Driver.maximumSearchDistance);
             for (Movable d : ups)
             	if (((null == d.getNeighbor(DOWN)) || (d.getNeighbor(DOWN) == getNeighbor(DOWN))) 
             			&& ((null == d.lane.downSplit) || ((d.lane.downSplit == lane.downSplit) && (d.lane.xAdj(lane.downSplit) > lane.xAdj(lane.downSplit)))))
             		d.setNeighbor(DOWN, this);
         }
         if ((lane.downSplit != null) && (null == getNeighbor(DOWN))) {
-            java.util.ArrayList<Movable> downs = findVehiclesDownstreamOfSplit(lane);
+            java.util.ArrayList<Movable> downs = findVehiclesDownstreamOfSplit(lane, Driver.maximumSearchDistance);
             for (Movable d : downs)
             	if (((null == d.getNeighbor(UP)) || (d.getNeighbor(UP) == getNeighbor(UP)))
             			&& ((null == d.lane.upMerge) || ((d.lane.upMerge == lane.upMerge) && (lane.upMerge.xAdj(d.lane) > lane.upMerge.xAdj(lane)))))
