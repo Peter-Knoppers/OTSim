@@ -23,10 +23,14 @@ public class FakeFundamentalDiagram implements SimulatedObject, Step {
 	final TimeScaleFunction densities;
 	final Scheduler scheduler;
 	final double intervalTime;
-	/** Determines whether a graph or a disc is drawn */
+	/** Determines how the current value is shown */
 	public graphStyle drawGraph = graphStyle.Full;
-	/** Values for the visualization method */
-	public enum graphStyle { Ball, Diagram, Full };
+	/** Possible visualization methods for the FakeFundamentalDiagram */
+	public enum graphStyle { 
+		/** Draw a Ball in the computed color */				Ball, 
+		/** Draw a bar on a fundamental diagram */				Diagram, 
+		/** Fill the entire area with the computed color */		Full,
+		};
 	
 	/**
 	 * Create a FakeFundamentalDiagram
