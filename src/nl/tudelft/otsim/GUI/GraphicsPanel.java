@@ -498,16 +498,30 @@ public class GraphicsPanel extends JPanel implements MouseListener, MouseMotionL
      * Draw a circle.
      * @param p Point2D.Double; position of the circle
      * @param color Color; color used to draw the circle
-     * @param diameter Integer diameter (in pixels) of the circle
+     * @param diameter Integer diameter (in pixels) of the circle (the 
+     * diameter is <b>not</b> scaled by the zoom factor).
      */
     public void drawCircle(Point2D.Double p, Color color, int diameter) {
     	if (null == g2)
     		throw new Error("not painting");
-    	if (p.distance(new Point2D.Double(133,-115)) < 1)
-    		System.out.println("strange form point");
     	g2.setColor(color);
     	p = translate(p);
-    	g2.drawOval((int) (p.x - diameter / 2),(int) (p.y - diameter / 2), diameter, diameter);
+    	g2.drawOval((int) (p.x - diameter / 2), (int) (p.y - diameter / 2), diameter, diameter);
+    }
+    
+    /**
+     * Draw a filled circle.
+     * @param p Point2D.Double; center of the circle
+     * @param color Color; color of the filled circle
+     * @param diameter Integer; diameter of the filled circle (the diameter is
+     * <b>not</b> scaled by the zoom factor).
+     */
+    public void drawDisc(Point2D.Double p, Color color, int diameter) {
+    	if (null == g2)
+    		throw new Error("not painting");
+    	g2.setColor(color);
+    	p = translate(p);
+    	g2.fillOval((int) (p.x - diameter / 2), (int) (p.y - diameter / 2), diameter, diameter);
     }
    
     enum Anchor {
