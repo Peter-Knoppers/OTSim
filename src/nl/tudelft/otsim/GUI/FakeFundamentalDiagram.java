@@ -24,7 +24,9 @@ public class FakeFundamentalDiagram implements SimulatedObject, Step {
 	final Scheduler scheduler;
 	final double intervalTime;
 	/** Determines whether a graph or a disc is drawn */
-	public boolean drawGraph = false;
+	public graphStyle drawGraph = graphStyle.Full;
+	/** Values for the visualization method */
+	public enum graphStyle { Ball, Diagram, Full };
 	
 	/**
 	 * Create a FakeFundamentalDiagram
@@ -118,8 +120,15 @@ public class FakeFundamentalDiagram implements SimulatedObject, Step {
 	
 	private void drawDisc(double when, GraphicsPanel graphicsPanel) {
 		double flow = densities.getFactor((Math.floor(when / intervalTime)) * intervalTime);
-		Color color = ratioToColor(flow / maxX * 1.2);
+		Color color = ratioToColor(flow / maxX);
 		graphicsPanel.drawDisc(circle.center(), color, (int) (circle.radius() * graphicsPanel.getZoom()));		
+	}
+	
+	private void paintFull(double when, GraphicsPanel graphicsPanel) {
+		double flow = densities.getFactor((Math.floor(when / intervalTime)) * intervalTime);
+		Color color = ratioToColor(flow / maxX);
+		graphicsPanel.setColor(color);
+		graphicsPanel.drawPolygon(areaCovered.getProjection());
 	}
 	
 	@Override
@@ -127,10 +136,11 @@ public class FakeFundamentalDiagram implements SimulatedObject, Step {
 		initScaling();
 		graphicsPanel.setColor(Color.LIGHT_GRAY);
 		graphicsPanel.drawPolygon(areaCovered.getProjection());
-		if (drawGraph)
-			paintGraph(when, graphicsPanel);
-		else
-			drawDisc(when, graphicsPanel);
+		switch (drawGraph) {
+		case Ball: drawDisc(when, graphicsPanel); break;
+		case Diagram: paintGraph(when, graphicsPanel); break;
+		case Full: paintFull(when, graphicsPanel); break;
+		}
 	}
 
 	@Override
