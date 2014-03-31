@@ -23,6 +23,8 @@ public class FakeFundamentalDiagram implements SimulatedObject, Step {
 	final TimeScaleFunction densities;
 	final Scheduler scheduler;
 	final double intervalTime;
+	/** Determines whether a graph or a disc is drawn */
+	public boolean drawGraph = false;
 	
 	/**
 	 * Create a FakeFundamentalDiagram
@@ -69,11 +71,7 @@ public class FakeFundamentalDiagram implements SimulatedObject, Step {
 		return new Point2D.Double (scaleX(x), scaleY(y));
 	}
 	
-	@Override
-	public void paint(double when, GraphicsPanel graphicsPanel) {
-		initScaling();
-		graphicsPanel.setColor(Color.LIGHT_GRAY);
-		graphicsPanel.drawPolygon(areaCovered.getProjection());
+	private void paintGraph(double when, GraphicsPanel graphicsPanel) {
 		// Draw the graph centered in the circle
 		graphicsPanel.setStroke((float) (circle.radius() / 10));
 		graphicsPanel.setColor(Color.RED);
@@ -96,7 +94,43 @@ public class FakeFundamentalDiagram implements SimulatedObject, Step {
 		graphicsPanel.drawPolyLine(points, false);
 		graphicsPanel.setColor(Color.WHITE);
 		graphicsPanel.drawLine(scaleXY(0, maxY), scaleXY(0, 0));
-		graphicsPanel.drawLine(scaleXY(0, 0), scaleXY(maxX - 4, 0));
+		graphicsPanel.drawLine(scaleXY(0, 0), scaleXY(maxX - 4, 0));		
+	}
+	
+	static private Color ratioToColor(double ratio) {
+		int red = 255;
+		int green = 255;
+		if (ratio > 0.5)
+			green = (int) (510 * (1d - ratio));
+		else
+			red = (int) (510 * ratio);
+		// make sure
+		if (red < 0)
+			red = 0;
+		if (red > 255)
+			red = 255;
+		if (green < 0)
+			green = 0;
+		if (green > 255)
+			green = 255;
+		return new Color(red, green, 0);
+	}
+	
+	private void drawDisc(double when, GraphicsPanel graphicsPanel) {
+		double flow = densities.getFactor((Math.floor(when / intervalTime)) * intervalTime);
+		Color color = ratioToColor(flow / maxX * 1.2);
+		graphicsPanel.drawDisc(circle.center(), color, (int) (circle.radius() * graphicsPanel.getZoom()));		
+	}
+	
+	@Override
+	public void paint(double when, GraphicsPanel graphicsPanel) {
+		initScaling();
+		graphicsPanel.setColor(Color.LIGHT_GRAY);
+		graphicsPanel.drawPolygon(areaCovered.getProjection());
+		if (drawGraph)
+			paintGraph(when, graphicsPanel);
+		else
+			drawDisc(when, graphicsPanel);
 	}
 
 	@Override
