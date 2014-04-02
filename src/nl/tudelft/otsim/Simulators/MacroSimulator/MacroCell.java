@@ -1,5 +1,7 @@
 package nl.tudelft.otsim.Simulators.MacroSimulator;
 
+import nl.tudelft.otsim.Simulators.LaneSimulator.Model;
+
 /**
  * A single cell of road. Different cells are connected in the
  * longitudinal or lateral direction. The <tt>jMacroCell</tt> object also provides a
@@ -9,57 +11,33 @@ package nl.tudelft.otsim.Simulators.MacroSimulator;
  */
 public class MacroCell {
 	
-	boolean marked;
-	boolean markedForXadj;
-	
-	//Geo info
+	// Geographical info
     /** Array of x-coordinates defining the lane curvature. */
-    public double[] x;
+    final public double[] x;
 
     /** Array of y-coordinates defining the lane curvature. */
-    public double[] y;
+    final public double[] y;
 
     /** Length of the lane [m]. */
-    public double l;
+    final public double l;
 
     /** Main model. */
-    public Model model;
+    final public Model model;
 
-	/** ID of lane for user recognition. */
-    protected int id;
+	/** ID of cell for user recognition. */
+    final int id;
 
-    /** Downstream cell that is a taper (if any). */
-    public MacroCell taper;
-
-    /** Upstream cell (if any). */
-    public MacroCell up;
-    
     /** Set of upstream cells in case of a merge. */
     public java.util.ArrayList<MacroCell> ups = new java.util.ArrayList<MacroCell>();
 
-    /** Downstream cell (if any). */
-    public MacroCell down;
-    
     /** Set of downstream cells in case of a split. */
     public java.util.ArrayList<MacroCell> downs = new java.util.ArrayList<MacroCell>();
 
-    /** Left cell (if any). for multi-lane modelling */
+    /** Left cell (if any). for multi-lane modeling */
     public MacroCell left;
 
     /** Right cell (if any). */
     public MacroCell right;
-
-    /** Whether one can change to the left lane. */
-    public boolean goLeft;
-
-    /** Whether one can change to the right lane. */
-    public boolean goRight;
-
-    //** Set of RSUs, ordered by position. */
-    //protected java.util.ArrayList<RSU> RSUs = new java.util.ArrayList<RSU>();
-
-    //** All Movables on this lane, in order of increasing x. */
-    //private java.util.ArrayList<Movable> vehicles = new java.util.ArrayList<Movable>(0);
 
     /** Destination number, NODESTINATION if no destination. */
     public int destination;
@@ -99,29 +77,6 @@ public class MacroCell {
     /** Legal flow capacity [veh/h/lane]. */
     public double qCap = 2000;
     
-    
-    /**
-     * First downstream splitting lane. This is used for neighbor bookkeeping 
-     * where pointers past a split from downstream are invalid (and thus removed).
-     */
-    //public Lane downSplit;
-    
-    /**
-     * First upstream merging lane. This is used for neighbor bookkeeping 
-     * where pointers past a merge from upstream are invalid (and thus removed).
-     */
-    //public Lane upMerge;
-    
-    /** 
-     * Lane from which a vehicle entered the upstream side of a merge lane. This
-     * is used to determine whether a vehicle upstream of a merge should follow
-     * its leader downstream of a merge. If that vehicle came from the other
-     * direction of the merge, it should not be followed.
-     */
-    //public Lane mergeOrigin;
-
-	private boolean visible = true;	// Default is to paint the lane
-    
     /**
      * Constructor that will calculate the lane length from the x and y
      * coordinates.
@@ -135,25 +90,17 @@ public class MacroCell {
         this.x = x;
         this.y = y;
         this.id = id;
-        calculateLength();
+        l = calculateLength();
     }
-    
-    /* Never used
-    public Lane(double[] x, double[] y, int id) {
-        this.x = x;
-        this.y = y;
-        this.id = id;
-        calculateLength();
-    } 
-    */
     
     /**
      * Sets the lane length based on the x and y coordinates. This method is 
      * called within the constructor and should only be used if coordinates are
      * changed afterwards (for instance to nicely connect lanes at the same 
      * point).
+     * @return double; Total length
      */
-    public void calculateLength() {
+    public double calculateLength() {
         // compute and set length
         double cumLength = 0;
         double dx;
@@ -163,7 +110,7 @@ public class MacroCell {
             dy = this.y[i]-this.y[i-1];
             cumLength = cumLength + Math.sqrt(dx*dx + dy*dy);
         }
-        l = cumLength;
+        return cumLength;
     }
     
     
@@ -172,16 +119,16 @@ public class MacroCell {
      * Retrieve the upstream connected MacroCell of this MacroCell.
      * @return MacroCell; the upstream connected MacroCell of this MacroCell
      */
-    public MacroCell getUp_r() {
-    	return up;
+    public java.util.ArrayList<MacroCell> getUps_r() {
+    	return ups;
     }
     
     /**
      * Retrieve the downstream connected MacroCell of this MacroCell.
      * @return MacroCell; the downstream connected MacroCell of this MacroCell
      */
-    public MacroCell getDown_r() {
-    	return down;
+    public java.util.ArrayList<MacroCell> getDowns_r() {
+    	return downs;
     }
     
     /**
@@ -274,24 +221,6 @@ public class MacroCell {
     public void setV(double speed) {
         this.VCell = speed;
     }
-
-    
-    /* Never used junk
-    public int getDestination() {
-		return destination;
-	}
-    
-	public void setDestination(int destination) {
-		this.destination = destination;
-	}
-	
-	public int getOrigin() {
-		return origin;
-	}
-	
-	public void setOrigin(int origin) {
-		this.origin = origin;
-	}*/
     
 	/**
      * Returns the ID of the lane.
@@ -303,45 +232,11 @@ public class MacroCell {
 
 
     /**
-     * Returns the speed limit as m/s.
+     * Returns the speed limit in m/s.
      * @return Speed limit [m/s]
      */
     public double getVLim() {
         return vLim/3.6;
     }
 
-
-    /**
-     * Returns whether this lane splits, i.e. whether there are split lanes.
-     * @return Whether this lane splits.
-     */
-    public boolean isSplit() {
-        return !downs.isEmpty();
-    }
-    
-    /**
-     * Return whether this lane merges, i.e. whether there are merge lanes.
-     * @return Whether this lane merges.
-     */
-    public boolean isMerge() {
-        return !ups.isEmpty();
-    }
-    
-
-
-	/**
-	 * @param visible Boolean; true if this Lane is to be painted (default);
-	 * false if this Lane must not be painted
-	 */
-	public void setVisible(boolean visible) {
-		this.visible = visible;
-	}
-
-	/**
-	 * @return Boolean; true if this lane is visible (this is the default);
-	 * false if this lane is invisible (hidden)
-	 */
-	public boolean isVisible() {
-		return visible;
-	}
 }
