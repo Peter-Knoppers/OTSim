@@ -2,7 +2,7 @@ package nl.tudelft.otsim.GeoObjects;
 
 /**
  * A NodeExpander is used generate the internals of a {@link Node}.
- * <br /> Nodes with several incoming and outgoing {@link Line Links} must be
+ * <br /> Nodes with several incoming and outgoing {@link Link Links} must be
  * expanded into a more detailed description for use by micro simulators.
  * <br /> Some nodes are so simple that no expansion is needed. Others may
  * require the creation of a sub-Network with its own {@link Node Nodes} and

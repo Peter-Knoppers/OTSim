@@ -58,6 +58,7 @@ import nl.tudelft.otsim.ModelIO.SaveModel;
 import nl.tudelft.otsim.Simulators.Simulator;
 import nl.tudelft.otsim.Simulators.LaneSimulator.LaneSimulator;
 import nl.tudelft.otsim.Simulators.LaneSimulator.Movable;
+import nl.tudelft.otsim.Simulators.MacroSimulator.MacroSimulator;
 import nl.tudelft.otsim.Simulators.RoadwaySimulator.RoadwaySimulator;
 import nl.tudelft.otsim.SpatialTools.Planar;
 import nl.tudelft.otsim.TrafficDemand.TrafficDemand;
@@ -394,6 +395,11 @@ public class Main extends JPanel implements ActionListener {
         tabbedPaneProperties.add("Lane Simulator", scrollPaneLaneSimulator);
         laneSimulatorIndex = tabbedPaneProperties.indexOfComponent(scrollPaneLaneSimulator);
         
+        JScrollPane scrollPaneMacroSimulator = new JScrollPane();
+        scrollPaneMacroSimulator.setViewportView(macroSimulatorControlPanel = new JPanel());
+        tabbedPaneProperties.add("Macro Simulator", scrollPaneMacroSimulator);
+        macroSimulatorIndex = tabbedPaneProperties.indexOfComponent(scrollPaneMacroSimulator);
+        
         try {
 			initialDirectory = workingDir = System.getProperty("user.dir");	// fails when running as Applet
 		} catch (Exception e1) {
@@ -646,6 +652,7 @@ public class Main extends JPanel implements ActionListener {
     
     private JPanel laneSimulatorControlPanel;
     private JPanel roadwaySimulatorControlPanel;
+    private JPanel macroSimulatorControlPanel;
     /** Simulators must show the leader of a vehicle. */
     public JCheckBox checkBoxShowLeader;
     /** Simulators must show the follower of a vehicle. */
@@ -656,6 +663,7 @@ public class Main extends JPanel implements ActionListener {
 	private JProgressBar mainStatusLabel;
 	private final int roadWaySimulatorIndex;
 	private final int laneSimulatorIndex;
+	private final int macroSimulatorIndex;
 	private javax.swing.JMenu saveMeasurementPlan; 
 	private JComboBox<MeasurementPlan> comboBoxMeasurementPlans;
 	private JTextField editMeasurementPlanName;
@@ -722,6 +730,8 @@ public class Main extends JPanel implements ActionListener {
 			return config + model.exportToMicroSimulation();
 		if (type.equals(RoadwaySimulator.simulatorType))
 			return config + model.exportToSubMicroSimulation();
+		if (type.equals(MacroSimulator.simulatorType))
+			return config + model.exportToMacroSimulation();
 		throw new Error("Do not know how to create configuration of type " + type);
 	}
 	
@@ -739,6 +749,9 @@ public class Main extends JPanel implements ActionListener {
 		}
 		if (type.equals(RoadwaySimulator.simulatorType)) {
 			return new RoadwaySimulator(configuration, scheduler.getGraphicsPanel(), scheduler);
+		}
+		if (type.equals(MacroSimulator.simulatorType)) {
+			return new MacroSimulator(configuration, scheduler.getGraphicsPanel(), scheduler);
 		}
 		throw new Error("Do not know how to create a simulator of type " + type);
 	}
@@ -767,6 +780,14 @@ public class Main extends JPanel implements ActionListener {
     			return;
     		}
     		graphicsPanel.setClient(((Scheduler)(laneSimulatorControlPanel.getComponent(0))).getSimulator());
+    	} else if (macroSimulatorIndex == index) {
+    		if (0 == macroSimulatorControlPanel.getComponentCount())
+    			macroSimulatorControlPanel.add(new Scheduler(MacroSimulator.simulatorType, graphicsPanel));
+    		if (0 == macroSimulatorControlPanel.getComponentCount()) {
+    			WED.showProblem(WED.INFORMATION, "Could not load lane simulator");
+    			return;
+    		}
+    		graphicsPanel.setClient(((Scheduler)(macroSimulatorControlPanel.getComponent(0))).getSimulator());    		
     	} else if ((measurementPlanIndex == index) && (comboBoxMeasurementPlans.getSelectedIndex() >= 0))
     		graphicsPanel.setClient((GraphicsPanelClient) comboBoxMeasurementPlans.getSelectedItem());
     	else if (null != model)

@@ -706,13 +706,14 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 	}
 
 	private static Point2D.Double getConflictIntersectionPoint(ArrayList<Vertex> verticesA, ArrayList<Vertex> verticesB) {
+		// TODO: rewrite using Planar.polyLineIntersectsPolyLine
 		Vertex prevA = null;
 		for (Vertex vA : verticesA) {
-			if (!(prevA == null)) {
+			if (null != prevA) {
 				Line2D.Double lineA = new Line2D.Double(prevA.getX(), prevA.getY(), vA.getX(), vA.getY());
 				Vertex prevB = null;
 				for (Vertex vB : verticesB) {
-					if (!(prevB == null)) {
+					if (null != prevB) {
 						Line2D.Double lineB = new Line2D.Double(prevB.getX(), prevB.getY(), vB.getX(), vB.getY());
 						if (Planar.lineSegmentIntersectsLineSegment(lineA, lineB))
 							return Planar.intersection(lineA, lineB);

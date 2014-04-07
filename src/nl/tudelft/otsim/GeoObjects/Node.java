@@ -307,7 +307,6 @@ public class Node extends Vertex implements XML_IO {
 	 * Compute the boundary of the area that all connections for this Node
 	 * occupy. Both the circle and the convex hull of the conflictArea are
 	 * computed.
-	 * @param drivable Boolean; if true only drive-able CrossSectionElements
 	 * are taken into account; if false, all CrossSectionElements are used.
 	 */
 	public void determineNodeBoundary() {

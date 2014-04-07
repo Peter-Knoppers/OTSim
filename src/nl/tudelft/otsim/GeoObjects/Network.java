@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+
 import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -479,7 +480,7 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 		return allNodeList;
 	}
 	
-	public ArrayList<Node> getAllVisitableNodes(boolean mayRebuild) {
+	public ArrayList<Node> getAllVisitableNodes(boolean mayRebuild, boolean removeExpandedNodes) {
 		class CompareByNodeNumber implements Comparator<Node> {
 		    @Override
 			public int compare(Node node1, Node node2) {
@@ -491,13 +492,30 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 		for (Node n : nodes.values()) {
 			Network subNetwork = n.getSubNetwork();
 			if (null != subNetwork) {
-				result.remove(n);
-				result.addAll(subNetwork.getAllNodeList(mayRebuild));
+				if (removeExpandedNodes)
+					result.remove(n);
+				result.addAll(subNetwork.getAllVisitableNodes(mayRebuild, removeExpandedNodes));
 			}
 		}
 		Collections.sort(result, new CompareByNodeNumber());
 		return result;
 		
+	}
+	
+	/**
+	 * Recursively visit all {@link Node Nodes} and build a list of all {@link Link Links}.
+	 * @param mayRebuild Boolean; if true the Network may be rebuilt
+	 * @return Collection&lt;{@link Link}&gt; all links in this Network
+	 */
+	public Collection<Link> getAllLinks(boolean mayRebuild) {
+		Collection<Link> result = new ArrayList<Link>();
+		for (Node n : getAllVisitableNodes(mayRebuild, false))
+			for (Node.DirectionalLink dl : n.getDirectionalLinks()) {
+				//System.out.println("node " + n.toString() + " processing link " + dl.toString());
+				if (dl.incoming)
+					result.add(dl.link);
+			}
+		return result;
 	}
 
 	/**
@@ -1838,5 +1856,63 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 		}
 		return result;
 	}
+	
+	private void collectRoadways (ArrayList<Lane> lanes, HashMap<CrossSectionElement, Integer> map, ArrayList<Integer> IDs) {
+		if (null == lanes)
+			return;
+		for (Lane l : lanes) {
+			CrossSectionElement cse = l.crossSectionElement;
+			Integer id = map.get(cse);
+			if (null == id)
+				throw new Error("Cannot find id " + id + " in map");
+			if (IDs.contains(id))
+				continue;
+			IDs.add(id);
+		}
+	}
+
+	/**
+	 * Export all drivable roadways for macro simulation.
+	 * @return String; textual description of all drivable roadways
+	 * @throws Exception
+	 */
+	public String exportRoadways() {
+		String result = "";
+		Integer nextRoadwayID = 0;
+		Collection<Link> allLinks = getAllLinks(true);
+		HashMap<CrossSectionElement, Integer> map = new HashMap<CrossSectionElement, Integer>();
+		for (Link link : allLinks)
+			for (CrossSection cs : link.getCrossSections_r())
+				for (CrossSectionElement cse : cs.getCrossSectionElementList_r())
+					if (cse.getCrossSectionElementTypology().getDrivable()) {
+						map.put(cse, nextRoadwayID++);
+						//System.out.println(String.format("mapping %s (on link %s) to %d", cse.toString(), cse.getCrossSection().getLink().toString(), map.get(cse)));
+					}
+		for (Link link : allLinks)
+			for (CrossSection cs : link.getCrossSections_r())
+				for (CrossSectionElement cse : cs.getCrossSectionElementList_r())
+					if (cse.getCrossSectionElementTypology().getDrivable()) {
+						int numberOfLanes = 0;
+						ArrayList<Integer> inputIDs = new ArrayList<Integer>();
+						ArrayList<Integer> outputIDs = new ArrayList<Integer>();
+						for (CrossSectionObject cso : cse.getCrossSectionObjects(Lane.class)) {
+							Lane lane = (Lane) cso;
+							//System.out.println(String.format("processing %s on link %s", lane.toString(), lane.crossSectionElement.getCrossSection().getLink().toString()));
+							numberOfLanes++;
+							collectRoadways(lane.getUpLanes_r(), map, inputIDs);
+							collectRoadways(lane.getDownLanes_r(), map, outputIDs);
+						}
+						result += String.format(Locale.US, "Roadway:\t%d\tspeedlimit\t%s\tlanes\t%d\tins", map.get(cse), cse.getSpeedLimit_r(), numberOfLanes);
+						for (Integer id : inputIDs)
+							result += "\t" + id;
+						result += "\touts";
+						for (Integer id : outputIDs)
+							result += "\t" + id;
+						result += "\n";
+					}
+		// TODO add some coordinates to the macrosimulator can draw something
+		return result;
+	}
+	
 
 }

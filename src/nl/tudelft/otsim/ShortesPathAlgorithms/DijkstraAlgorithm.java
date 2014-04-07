@@ -47,7 +47,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 	 */
 	public DijkstraAlgorithm(Network network, double maximumTotalCostRatio) {
 		super (network);
-		totalNodes = network.getAllVisitableNodes(true).size();
+		totalNodes = network.getAllVisitableNodes(true, true).size();
 		edges = network.getAllLinks();
 		this.maximumTotalCostRatio = maximumTotalCostRatio;
 	}

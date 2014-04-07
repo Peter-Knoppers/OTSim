@@ -201,6 +201,15 @@ public class Model implements Storable {
 				+ exportMeasurementPlans();
     }
     
+    /**
+     * Create a textual description of those aspects of this Model that are
+     * relevant to a Macro-simulator
+     * @return String; textual description of this Model
+     */
+	public String exportToMacroSimulation() {
+		return network.exportRoadways();
+	}
+    
     private String exportMeasurementPlans() {
     	String result = "";
     	int exceptionCount = 0;

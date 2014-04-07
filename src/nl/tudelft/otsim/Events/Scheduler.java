@@ -473,7 +473,7 @@ public class Scheduler extends JPanel implements ActionListener, PropertyChangeL
 		}
         simulatedTime = 0;
         buttonStop.setEnabled(false);
-        graphicsPanel.setClient(runningSimulation);	// don't your forget it!
+        graphicsPanel.setClient(runningSimulation);	// don't you forget it!
         graphicsPanel.repaint();
         clock.repaint();
 	}
