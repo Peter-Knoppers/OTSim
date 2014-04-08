@@ -55,7 +55,8 @@ public class Vertex {
 	 */
 	public Vertex (String text) {
 		super();
-		if ((text.length() < 7) || (! text.substring(0, 1).equals('(')) || (! text.substring(text.length() - 1, 1).equals(')')))
+		int length = text.length();
+		if ((length < 7) || (! text.substring(0, 1).equals("(")) || (! text.substring(length - 1).equals(")")))
 			throw new Error ("Bad format (" + text + ")");
 		String[] fields = text.substring(1, text.length() - 1).split(",");
 		if (fields.length != 3)

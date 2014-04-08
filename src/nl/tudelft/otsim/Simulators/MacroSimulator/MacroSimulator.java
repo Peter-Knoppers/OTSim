@@ -1,11 +1,13 @@
 package nl.tudelft.otsim.Simulators.MacroSimulator;
 
+import java.awt.Color;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 import nl.tudelft.otsim.Events.Scheduler;
 import nl.tudelft.otsim.Events.Step;
 import nl.tudelft.otsim.GUI.GraphicsPanel;
+import nl.tudelft.otsim.GeoObjects.Vertex;
 import nl.tudelft.otsim.Simulators.ShutDownAble;
 import nl.tudelft.otsim.Simulators.SimulatedObject;
 import nl.tudelft.otsim.Simulators.Simulator;
@@ -20,9 +22,9 @@ public class MacroSimulator extends Simulator implements ShutDownAble, Step {
 	public static final String simulatorType = "Macro simulator";
 	
 	private final Scheduler scheduler;
-	private final GraphicsPanel graphicsPanel;
 	private double endTime = 1000;	// should be overridden in the configuration
 	private double randomSeed = 0;	// idem
+	private ArrayList<SimulatedPath> simulatedPaths = new ArrayList<SimulatedPath>();
 
 	/**
 	 * Create a MacroSimulator.
@@ -35,7 +37,6 @@ public class MacroSimulator extends Simulator implements ShutDownAble, Step {
 	public MacroSimulator(String configuration, GraphicsPanel graphicsPanel, Scheduler scheduler) throws Exception {
 		System.out.println("Creating a new MacroSimulator based on description:\n" + configuration);
 		this.scheduler = scheduler;
-		this.graphicsPanel = graphicsPanel;
 		scheduler.enqueueEvent(0, this);	// Set up my first evaluation
 		/*
 		 * It does make sense to first join successive roadway sections that
@@ -51,9 +52,17 @@ public class MacroSimulator extends Simulator implements ShutDownAble, Step {
 			else if (fields[0].equals("Seed:"))
 				this.randomSeed = Double.parseDouble(fields[1]);
 			else if (fields[0].equals("Roadway:")) {
-				// TODO: store the info so we can simulate it and draw it 
+				SimulatedPath sp = new SimulatedPath();
+				for (int i = 1; i < fields.length; i++) {
+					if (fields[i].equals("lanes"))
+						sp.setWidth(3.5 * Double.parseDouble(fields[++i]));
+					else if (fields[i].equals("vertices"))
+						while (fields[++i].startsWith("("))
+							sp.addVertex(new Vertex(fields[i]));
+				}
+				simulatedPaths.add(sp);
 			} else
-				throw new Exception("Don't know how to parse " + line);
+				;//throw new Exception("Don't know how to parse " + line);
 			// TODO: write code to handle the not-yet-handled lines in the configuration
 		}
 	}
@@ -66,8 +75,8 @@ public class MacroSimulator extends Simulator implements ShutDownAble, Step {
 
 	@Override
 	public void repaintGraph(GraphicsPanel graphicsPanel) {
-		// TODO Auto-generated method stub
-		
+		for (SimulatedPath sp : simulatedPaths)
+			sp.draw(Color.GREEN, graphicsPanel);
 	}
 
 	@Override
@@ -130,4 +139,23 @@ public class MacroSimulator extends Simulator implements ShutDownAble, Step {
 		return false;
 	}
 
+	class SimulatedPath {
+		private double width = Double.NaN;
+		private ArrayList<Vertex> vertices = new ArrayList<Vertex>();
+
+		public void setWidth(double w) {
+			this.width = w;
+		}
+
+		public void addVertex(Vertex vertex) {
+			vertices.add(vertex);
+		}
+		
+		public void draw(Color color, GraphicsPanel graphicsPanel) {
+			graphicsPanel.setStroke((float) width);
+			graphicsPanel.setColor(color);
+			graphicsPanel.drawPolyLine(vertices);
+		}
+		
+	}
 }
