@@ -207,7 +207,9 @@ public class Model implements Storable {
      * @return String; textual description of this Model
      */
 	public String exportToMacroSimulation() {
-		return network.exportRoadways();
+		return network.exportRoadways()
+				+ trafficDemand.exportTripPattern()
+				+ exportMeasurementPlans();
 	}
     
     private String exportMeasurementPlans() {

@@ -1888,8 +1888,9 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 						map.put(cse, nextRoadwayID++);
 						//System.out.println(String.format("mapping %s (on link %s) to %d", cse.toString(), cse.getCrossSection().getLink().toString(), map.get(cse)));
 					}
-		for (Link link : allLinks)
-			for (CrossSection cs : link.getCrossSections_r())
+		for (Link link : allLinks) {
+			ArrayList<CrossSection> crossSections = link.getCrossSections_r();
+			for (CrossSection cs : crossSections)
 				for (CrossSectionElement cse : cs.getCrossSectionElementList_r())
 					if (cse.getCrossSectionElementTypology().getDrivable()) {
 						int numberOfLanes = 0;
@@ -1897,12 +1898,23 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 						ArrayList<Integer> outputIDs = new ArrayList<Integer>();
 						for (CrossSectionObject cso : cse.getCrossSectionObjects(Lane.class)) {
 							Lane lane = (Lane) cso;
-							//System.out.println(String.format("processing %s on link %s", lane.toString(), lane.crossSectionElement.getCrossSection().getLink().toString()));
 							numberOfLanes++;
 							collectRoadways(lane.getUpLanes_r(), map, inputIDs);
 							collectRoadways(lane.getDownLanes_r(), map, outputIDs);
 						}
-						result += String.format(Locale.US, "Roadway:\t%d\tspeedlimit\t%s\tlanes\t%d\tins", map.get(cse), cse.getSpeedLimit_r(), numberOfLanes);
+						result += String.format(Locale.US, "Roadway:\t%d",
+								map.get(cse));
+						if (crossSections.indexOf(cs) == 0)
+							result += String.format(Locale.US, "\tfrom\t%d",
+									link.getFromNodeExpand().getNodeID());
+						if (crossSections.indexOf(cs) == crossSections.size() - 1)
+							result += String.format(Locale.US, "\tto\t%d",
+									link.getToNodeExpand().getNodeID()); 
+						result += String.format(Locale.US, "\tspeedlimit\t%s\tlanes\t%d\tvertices", 
+								cse.getSpeedLimit_r(), numberOfLanes);
+						for (Vertex v : cse.getLinkPointList(CrossSectionElement.LateralReferenceCenter, true, true))
+							result += "\t" + v.export();
+						result += "\tins";
 						for (Integer id : inputIDs)
 							result += "\t" + id;
 						result += "\touts";
@@ -1910,7 +1922,7 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 							result += "\t" + id;
 						result += "\n";
 					}
-		// TODO add some coordinates to the macrosimulator can draw something
+		}
 		return result;
 	}
 	

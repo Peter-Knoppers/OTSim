@@ -50,6 +50,20 @@ public class Vertex {
     }
 	
 	/**
+	 * (Re-)create a Vertex from an exported textual description;
+	 * @param text String; the textual description
+	 */
+	public Vertex (String text) {
+		super();
+		if ((text.length() < 7) || (! text.substring(0, 1).equals('(')) || (! text.substring(text.length() - 1, 1).equals(')')))
+			throw new Error ("Bad format (" + text + ")");
+		String[] fields = text.substring(1, text.length() - 1).split(",");
+		if (fields.length != 3)
+			throw new Error ("Bad format (" + text + ")");
+		setValues(Double.parseDouble(fields[0]), Double.parseDouble(fields[1]), Double.parseDouble(fields[2]));
+	}
+	
+	/**
 	 * Duplicate a Vertex
 	 * @param v Vertex to copy
 	 */
@@ -66,7 +80,6 @@ public class Vertex {
 	public Vertex (Point2D.Double p, double Z) {
 		super();
 		setValues(p.getX(), p.getY(), Z);
-
 	}
 	
 	/**
@@ -231,6 +244,14 @@ public class Vertex {
 	@Override
 	public String toString() {
 		return String.format(nl.tudelft.otsim.GUI.Main.locale, "(%.3fm,%.3fm,%.3fm)", x, y, z);
+	}
+	
+	/**
+	 * Produce a String representation of this Vertex suitable for import
+	 * @return String; textual representation of this Vertex.
+	 */
+	public String export() {
+		return String.format(Locale.US, "(%.3f,%.3f,%.3f)", x, y, z);
 	}
 	
 	/**
