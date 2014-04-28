@@ -30,7 +30,12 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 	private final Scheduler scheduler;
 	private double endTime = 1000;	// should be overridden in the configuration
 	private double randomSeed = 0;	// idem
+	
+	
+	
+	
 	private ArrayList<MacroCell> macroCells = new ArrayList<MacroCell>();
+	private ArrayList<Node> nodes = new ArrayList<Node>();
 
 	/**
 	 * Create a MacroSimulator.
@@ -46,6 +51,16 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 		scheduler.enqueueEvent(0, new Stepper(this));	// Set up my first evaluation
 		model.period = 1800;
 		model.dt = 0.2;
+		
+		// Set minimum length of cells to be generated (in [m])
+		double minLengthCells = 30;
+		
+		// Set used fundamental diagram
+		FD fd = new FDSmulders();
+		
+		// Set inflow at boundaries in (in vehicles per hour per lane)
+		double inflowBoundary = 2000;
+		
 		//ArrayList<MacroCell> cells = new ArrayList<MacroCell>();
 		ArrayList<MacroCell> copySimPaths = new ArrayList<MacroCell>();
 		
@@ -66,9 +81,10 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 				MacroCell sp = new MacroCell(model);
 				// set ID of MacroCell
 				sp.setId(Integer.parseInt(fields[1]));
+				
 				for (int i = 2; i < fields.length; i++) {
 					if (fields[i].equals("speedlimit"))
-						sp.setSpeedLimit(Double.parseDouble(fields[++i]));
+						sp.setVLim(Double.parseDouble(fields[++i]));
 					if (fields[i].equals("lanes"))
 						sp.setWidth(3.5 * Double.parseDouble(fields[++i]));
 					else if (fields[i].equals("vertices")) {
@@ -146,7 +162,7 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 				c.ups.add(snew);
 			}
 			snew.setWidth(sbegin.getWidth());
-			snew.setSpeedLimit(sbegin.getSpeedLimit());
+			snew.setVLim(sbegin.getVLim());
 			
 			// if there is only one cell upstream of considered cell
 			while((snew.ups.size() == 1)) {
@@ -154,7 +170,7 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 				MacroCell sp = snew.ups.get(0);
 				
 				// test if cell upstream has the right nr of lanes and speedlimit
-				if (!(sp.downs.size() == 1) || (!(sp.getWidth() == snew.getWidth())) || (!(sp.getSpeedLimit() == snew.getSpeedLimit()))) {
+				if (!(sp.downs.size() == 1) || (!(sp.getWidth() == snew.getWidth())) || (!(sp.getVLim() == snew.getVLim()))) {
 					
 					break;
 				} else {
@@ -177,7 +193,7 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 			// test if cell downstream has the right nr of lanes and speedlimit
 			while((snew.downs.size() == 1)) {
 				MacroCell sp = snew.downs.get(0);
-				if (!(sp.ups.size() == 1) || (!(sp.getWidth() == snew.getWidth())) || (!(sp.getSpeedLimit() == snew.getSpeedLimit()))) {
+				if (!(sp.ups.size() == 1) || (!(sp.getWidth() == snew.getWidth())) || (!(sp.getVLim() == snew.getVLim()))) {
 					
 					break;
 				} else {
@@ -208,7 +224,7 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 		ArrayList<MacroCell> copyCells = new ArrayList<MacroCell>();
 		for (MacroCell m: macroCells) {
 			// determine number of parts in which the cell must be split
-			int nrParts = (int) m.calcLength()/30;
+			int nrParts = (int) (m.calcLength()/minLengthCells);
 			if (nrParts == 0)
 				nrParts = 1;
 			// add the cells that are split to the list
@@ -223,10 +239,66 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 			tel++;
 		}
 		
+		for (MacroCell m: macroCells) {
+			if (m.nodeIn == null) {
+				
+				if (m.ups.size() > 0) {
+					NodeInterior n = new NodeInterior(m.vertices.get(0));
+					for (MacroCell c: m.ups.get(0).downs) {
+						n.cellsOut.add(c);
+						c.nodeIn = n;
+					}
+					for (MacroCell c: m.ups) {
+						n.cellsIn.add(c);
+						c.nodeOut = n;
+					}
+					nodes.add(n);
+				} else {
+					
+					NodeBoundaryIn n = new NodeBoundaryIn(m.vertices.get(0),inflowBoundary);
+					n.cellsOut.add(m);
+					m.nodeIn = n;
+					nodes.add(n);
+				}
+				
+				
+			}
+			if (m.nodeOut == null) {
+				
+				if (m.downs.size() > 0) {
+					NodeInterior n = new NodeInterior(m.vertices.get(m.vertices.size()-1));
+					for (MacroCell c: m.downs.get(0).ups) {
+						n.cellsIn.add(c);
+						c.nodeOut = n;
+					}
+				
+					for (MacroCell c: m.downs) {
+						n.cellsOut.add(c);
+						c.nodeIn = n;
+					}
+					nodes.add(n);
+				} else {
+					NodeBoundaryOut n = new NodeBoundaryOut(m.vertices.get(0));
+					n.cellsIn.add(m);
+					m.nodeOut = n;
+					nodes.add(n);
+				}
+				
+			}
+		}
 		
 		// initialize all cells (e.g. determine parameters needed for simulation) and add to the model
-		for (MacroCell m: macroCells) {
 		
+		for (Node n: nodes) {
+			
+			n.init();
+			model.addNode(n);
+			
+			
+		}
+		for (MacroCell m: macroCells) {
+			
+			m.fd = fd;
 			m.init();
 			model.addMacroCell(m);
 			
@@ -248,6 +320,9 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 	public void repaintGraph(GraphicsPanel graphicsPanel) {
 		for (MacroCell sp : macroCells) {
 			sp.draw(graphicsPanel);
+		}
+		for (Node n: nodes) {
+			n.draw(graphicsPanel);
 		}
 	}
 

@@ -36,7 +36,7 @@ public class MacroCell {
 	private double width = 0;
 	public ArrayList<Vertex> vertices = new ArrayList<Vertex>();
 	//private int id;
-	private double speedLimit;
+	//private double speedLimit;
 	public ArrayList<Integer> ins = new ArrayList<Integer>();
 	public ArrayList<Integer> outs = new ArrayList<Integer>();
 	
@@ -73,6 +73,13 @@ public class MacroCell {
 
     /** Right cell (if any). */
     public MacroCell right;
+    
+    public Node nodeIn;
+    
+    public Node nodeOut;
+    
+    public int indexNodeIn;
+    public int indexNodeOut;
 
     /** Destination number, NODESTINATION if no destination. */
     public int destination;
@@ -104,6 +111,7 @@ public class MacroCell {
     
     /** Demand out from this cell. [veh/h or veh/s] */
     public double Demand;
+    public FD fd;
     
     // Parameters    
     /** Legal speed limit [km/h]. */
@@ -116,10 +124,13 @@ public class MacroCell {
     public double kJam = 125;
     
     /** Legal flow capacity [veh/h/lane]. */
-    public double qCap = vLim*kCri;
+    public double qCap;
     
     public double[] FluxIn2;
 	public double[] FluxOut2;
+	public int lanes;
+	
+	
     
     /**
      * Constructor that will calculate the lane length from the x and y
@@ -150,18 +161,19 @@ public class MacroCell {
     	this.l = calcLength();
     }
     public void init() {
-    	KCell = 5;
+    	lanes = (int) (width/3.5);
+    	kCri = 18*lanes;
+    	kJam = 125*lanes;
+    	qCap = fd.calcQcap(this);
+    	KCell = 0;
     	QCell = calcQ(KCell);
     	VCell = calcV(KCell);
     	l = calcLength();
-    	if (ups.size()>0) 
-    		FluxIn2 = new double[ups.size()];
-    	else
-    		FluxIn2 = new double[1];
-    	if (downs.size()>0) 
-    		FluxOut2 = new double[downs.size()];
-    	else
-    		FluxOut2 = new double[1];
+    	
+    	
+    	indexNodeIn = nodeIn.cellsOut.indexOf(this);
+    	indexNodeOut = nodeOut.cellsIn.indexOf(this);
+    	
     }
     
     public void setWidth(double w) {
@@ -170,11 +182,11 @@ public class MacroCell {
 	public double getWidth() {
 		return width;
 	}
-	public void setSpeedLimit(double sl) {
-		this.speedLimit = sl;
+	public void setVLim(double sl) {
+		this.vLim = sl;
 	}
-	public double getSpeedLimit() {
-		return speedLimit;
+	public double getVLim() {
+		return vLim;
 	}
 
 	public void addVertex(Vertex vertex) {
@@ -200,7 +212,7 @@ public class MacroCell {
 		
 		double arc = 0;
 		double cumlength = 0;
-		System.out.println(p);
+		//System.out.println(p);
 		while (cumlength <= p) {
 			//System.out.println(cumlength);
 			arc = vertices.get(i).distance(vertices.get(i+1));
@@ -240,7 +252,7 @@ public class MacroCell {
 			MacroCell m = new MacroCell(this.model);
 			
 			m.setWidth(this.width);
-			m.setSpeedLimit(this.speedLimit);
+			m.setVLim(this.vLim);
 			m.setId(new Random().nextInt());
 			
 			double res[] = this.calcPointAtDistance((i+1)*(this.l)/(nrParts));
@@ -285,7 +297,7 @@ public class MacroCell {
 	public String toString() {
 		
 		
-		return "("+this.id+ ")";
+		return "("+this.id+ ", in: "+ this.ups.size()+", out: "+ this.downs.size()+ ")";
 	}
 
 
@@ -300,20 +312,21 @@ public class MacroCell {
 
     /** calculate using q given fundamental diagram **/
     public double calcQ(double k) {
-    	if (k<0 || k > kJam)
+    	return fd.calcQ(this);
+    	/*if (k<0 || k > kJam)
     		throw new Error ("density is not correct" + Double.toString(k));
     	else if (k<kCri) 
-    		/** triangular FD **/
+    		*//** triangular FD **//*
     		return k*vLim;
     	else
-    		/** triangular FD **/
-    		return (kJam - k)/(kJam - kCri)*(kCri*vLim);
+    		*//** triangular FD **//*
+    		return (kJam - k)/(kJam - kCri)*(kCri*vLim);*/
     }
     public double calcV(double k) {
     	return calcQ(k)/k;
     }
     public void updateV() {
-    	VCell = calcQ(KCell);
+    	VCell = calcV(KCell);
     }
     
     public void calcDemand() {
@@ -330,12 +343,12 @@ public class MacroCell {
     		Supply = calcQ(KCell);
     }
     public void calcFluxOut() {
-    	if (downs.size() == 1) {
+    	/*if (downs.size() == 1) {
     		FluxOut = Math.min(downs.get(0).Supply,Demand);
     		FluxOut2[0] = Math.min(downs.get(0).Supply,Demand);
     	} else if (downs.size() == 0) {
     		FluxOut = Math.min(2000,Demand);
-    		FluxOut2[0] = Math.min(2000,Demand);
+    		FluxOut2[0] = Math.min(qCap,Demand);
     	} else if (downs.size() >= 2){
     		for (int i=0; i<FluxOut2.length; i++) {
     			FluxOut2[i]=Math.min(Demand/FluxOut2.length,downs.get(i).Supply);
@@ -345,16 +358,18 @@ public class MacroCell {
     		FluxOut = Math.min(downs.get(0).Supply,0.5*Demand);
     	} else {
     		throw new Error ("not yet implemented");
-    	}
+    	}*/
+    	FluxOut = nodeOut.fluxesIn[indexNodeOut];
+    	
     			
     }
     public void calcFluxIn() {
-    	if (ups.size() == 1) {
-    		FluxIn = Math.min(ups.get(0).Demand,Supply);
+    	/*if (ups.size() == 1) {
+    		//FluxIn = Math.min(ups.get(0).Demand,Supply);
     		FluxIn2[0] = Math.min(ups.get(0).Demand,Supply);
     	} else if (ups.size() == 0) {
-    		FluxIn = Math.min(2000,Supply);
-    		FluxIn2[0] = Math.min(2000,Supply);
+    		//FluxIn = Math.min(2000,Supply);
+    		FluxIn2[0] = Math.min(3000,Supply);
     	} else if (ups.size() >= 2) {
     		FluxIn = Math.min(ups.get(0).Demand,Supply);
     		//System.out.println("Merge Flux In");
@@ -369,13 +384,14 @@ public class MacroCell {
     		
     	} else {
     		throw new Error ("not yet implemented");
-    	}
+    	}*/
+    	FluxIn = nodeIn.fluxesOut[indexNodeIn];
     			
     }
     public void updateDensity() {
     	//System.out.println("voor"+Double.toString(KCell));
     	//KCell = KCell + model.dt/l*(FluxIn - FluxOut);
-    	double sumIn = 0;
+    	/*double sumIn = 0;
     	for (double i: FluxIn2) {
     		sumIn += i;
     	}
@@ -385,11 +401,14 @@ public class MacroCell {
     	for (double j: FluxOut2) {
     		sumOut += j;
     	}
-    	double FluxOutTot = sumOut;
-    	System.out.println("Fluxes");
+    	double FluxOutTot = sumOut;*/
+    	/*System.out.println("Fluxes");
     	System.out.println(FluxInTot);
-    	System.out.println(FluxOutTot);
-    	KCell = KCell + model.dt/l*(FluxInTot - FluxOutTot);
+    	System.out.println(FluxOutTot);*/
+    	//System.out.println("Fluxes");
+    //System.out.println(FluxIn);
+    	//System.out.println(FluxOut);
+    	KCell = KCell + model.dt/l*(FluxIn - FluxOut);
     	//System.out.println("na"+Double.toString(KCell));
     	QCell = calcQ(KCell);
     	VCell = calcV(KCell);
@@ -407,8 +426,8 @@ public class MacroCell {
     public void draw(GraphicsPanel graphicsPanel) {
     	//Color color = getDensColor(KCell); 
     	//Color color = getDensColor(new Random().nextInt()); 
-    	Color color = getDensColor(KCell); 
-    	graphicsPanel.setStroke((float) width);
+    	Color color = getVelocityColor(VCell); 
+    	graphicsPanel.setStroke((float) (5+(KCell/125)*15));
 		graphicsPanel.setColor(color);
 		graphicsPanel.drawPolyLine(vertices);
    	
@@ -417,7 +436,7 @@ public class MacroCell {
     {
     	double H = 0;
     	if (k<kCri) {
-    		H = (kCri-k)/kCri * 0.3+0.1 ;
+    		H = (kCri-k)/kCri * 0.2+0.1 ;
     	}// Hue (note 0.4 = Green, see huge chart below)
     	else {
     		H = ((kJam-kCri)-(k-kCri))/(kJam-kCri) * 0.1;
@@ -426,6 +445,18 @@ public class MacroCell {
         double B = 0.9; // Brightness
 
         return Color.getHSBColor((float) H, (float)S, (float)B);
+    }
+    public Color getVelocityColor(double v)
+    {
+    	if (Double.isNaN(v))
+    		return Color.black;
+    	else {
+	    	double H = (v/vLim)*0.4;
+	        double S = 0.9; // Saturation
+	        double B = 0.9; // Brightness
+	
+	        return Color.getHSBColor((float) H, (float)S, (float)B);
+    	}
     }
     
     
@@ -549,9 +580,9 @@ public class MacroCell {
      * Returns the speed limit in m/s.
      * @return Speed limit [m/s]
      */
-    public double getVLim() {
-        return vLim/3.6;
-    }
+    //public double getVLim() {
+    //    return vLim/3.6;
+    //}
     void addIn(MacroCell m) {
     	ups.add(m);
     }

@@ -273,7 +273,7 @@ public class Vertex {
      * @param graphicsPanel GraphicsPanel; graphicsPanel to draw onto
      */
 	public void paint(GraphicsPanel graphicsPanel) {
-        final int nonSelectedNodeDiameter = (int) (0.2 *  graphicsPanel.getZoom());
+        final int nonSelectedNodeDiameter = (int) (1.2 *  graphicsPanel.getZoom());
     	Point2D.Double point = getPoint();            
         final Color color = Color.RED;
         graphicsPanel.setColor(color);

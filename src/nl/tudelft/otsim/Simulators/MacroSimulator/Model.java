@@ -16,12 +16,15 @@ public class Model {
     public double period;
     
     protected java.util.ArrayList<MacroCell> cells = new java.util.ArrayList<MacroCell>();
+    
+    protected java.util.ArrayList<Node> nodes = new java.util.ArrayList<Node>();
 	
     public void init() {
         // Set attributes
         k = 0;
         t = 0;
         cells = new java.util.ArrayList<MacroCell>();
+        nodes = new java.util.ArrayList<Node>();
     }
     
 	public void run(int n) {
@@ -42,6 +45,10 @@ public class Model {
     			 c.calcSupply();
     			
             }
+    		for (Node node: nodes ) {
+    			node.calcFlux();
+    			System.out.println("Flux node:" + node.fluxesIn[0] + " &  " + node.fluxesOut[0]);
+    		}
     		for (MacroCell c2: tmp2) {
     			 c2.calcFluxOut();
     			 c2.calcFluxIn();
@@ -59,5 +66,8 @@ public class Model {
 	 }
 	public void addMacroCell(MacroCell m) {
 		cells.add(m);
+	}
+	public void addNode(Node m) {
+		nodes.add(m);
 	}
 }
