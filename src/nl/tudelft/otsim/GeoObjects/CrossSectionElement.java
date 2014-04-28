@@ -252,6 +252,14 @@ public class CrossSectionElement implements XML_IO {
 	}
 	
 	/**
+	 * Retrieve the speed limit im m/s.
+	 * @return Double; the speed limit in m/s
+	 */
+	public double getSpeedLimit() {
+		return speedLimit;
+	}
+	
+	/**
 	 * Set/Change the speed limit.
 	 * @param newLimit Double; new speed limit in km/h
 	 */

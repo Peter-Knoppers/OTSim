@@ -636,14 +636,22 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 		ArrayList<RoadMarkerAlong> rmaList = new ArrayList<RoadMarkerAlong>();
 		double averageLaneWidth = (rightEdge - leftEdge) / connectingLanes.size();
 		System.out.println("average lane width " + averageLaneWidth);
+		double lowestSpeedLimit = Double.MAX_VALUE;
 		double lateralPosition = 0;
 		for (NeededConnectingLane ncl : connectingLanes) {
 			rmaList.add(new RoadMarkerAlong(connectingLanes.indexOf(ncl) == 0 ? RoadMarkerAlongTemplate.ALONG_CONTINUOUS
 					: RoadMarkerAlongTemplate.ALONG_STRIPED, lateralPosition));
 			lateralPosition += averageLaneWidth;
+			double limit = ncl.inLane.crossSectionElement.getSpeedLimit();
+			if (limit < lowestSpeedLimit)
+				lowestSpeedLimit = limit;
+			limit = ncl.outLane.crossSectionElement.getSpeedLimit();
+			if (limit < lowestSpeedLimit)
+				lowestSpeedLimit = limit;
 		}
 		rmaList.add(new RoadMarkerAlong(RoadMarkerAlongTemplate.ALONG_CONTINUOUS, lateralPosition));
 		CrossSectionElement cse = new CrossSectionElement(cs, "road", lateralPosition, rmaList, null);
+		cse.setSpeedLimit_w(lowestSpeedLimit * 3.6);
 		cseList.add(cse);
 		return cs;
 	}
