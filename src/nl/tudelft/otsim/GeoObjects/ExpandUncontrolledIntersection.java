@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Locale;
 
 import nl.tudelft.otsim.GeoObjects.Node.DirectionalLink;
 import nl.tudelft.otsim.GeoObjects.PriorityConflict.conflictType;
@@ -178,24 +179,6 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 					// "12" (could be shared right/straight or right/right2 or
 					// right/left)
 
-					/*
-					 * int exitLaneIndex = 0; Exit lastExit = null; CrossSection crossSection = null; for (Lane incomingLane :
-					 * incomingLanes) { int[] turns = incomingLane.getTurnArrow().getOutLinkNumbers(); for (int turn : turns) { if
-					 * ((turn < 0) || (turn >= exits.size())) throw new Error("TurnArrow has illegal value"); Exit exit =
-					 * exits.get(turn); if (exit != lastExit) // first to this exit? exitLaneIndex = 0; // connect to the right-most
-					 * lane lastExit = exit; if (exitLaneIndex >= exit.outLanes.size()) throw new Error("Exit has too few lanes");
-					 * Lane exitLane = exit.outLanes.get(exitLaneIndex); if (0 == exitLaneIndex) { // Create a new Link int
-					 * fromNodeID = incomingLink.link.getToNodeExpand().getNodeID(); int toNodeID =
-					 * dlList.get(exit.linkRank).link.getFromNodeExpand().getNodeID(); String linkName = "from_" + fromNodeID +
-					 * "_to_" + toNodeID; ArrayList<CrossSectionElement> sectionElementList = new ArrayList<CrossSectionElement>();
-					 * crossSection = new CrossSection(0, 0, sectionElementList); sectionElementList.add(new
-					 * CrossSectionElement(crossSection, "road", 4.5, rmaList, null)); ArrayList<CrossSection> crossSections = new
-					 * ArrayList<CrossSection>(); crossSections.add(crossSection); result.addLink(linkName, fromNodeID, toNodeID, 0,
-					 * false, crossSections, new ArrayList<Vertex>()); }
-					 * crossSection.getCrossSectionElementList_r().get(0).setWidth_w(4 + exitLaneIndex * 4);
-					 * crossSection.getCrossSectionElementList_r().get(0).addCrossSectionObject(exitLane); exitLaneIndex++; } }
-					 */
-
 					// loop through the lanes of the entering link
 					int turnArrowIndex = 0; // the index of the incoming lane
 					// Handle lanes from outermost to center-most
@@ -329,14 +312,39 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 					for (int exitIndex = 0; exitIndex < exits.size(); exitIndex++) {
 						Exit exit = exits.get(exitIndex);
 						ArrayList<Lane> outLanes = exit.getOutLanes();
+						/* 
+						 * BUG this does not always do what we want ...
+						 * Example: onramp2.otsm
+						 * ___a____X______p____
+						 * ___b____X______q____
+						 *         X______r____
+						 *        /
+						 *       /
+						 *      c
+						 *     /   
+						 * Gets NeededConnectingLanes like this:
+						 * lane a to lane q (wrong; should be p)
+						 * lane b to lane r (wrong; should be q)
+						 * lane c to lane r (OK)
+						 * 
+						 * The lanes that are created later do something different:
+						 * lane a to lane p (OK)
+						 * lane b to NOTHING
+						 * lane c to lane q
+						 * NOTHING to lane r
+						 * 
+						 * What we expect/want to see is
+						 * lane a to lane p
+						 * lane b to lane q
+						 * lane c to lane r
+						 */
 						// Connect the incoming and exiting lanes
 						for (int i = 0; i < exitLanesAssigned[exitIndex]; i++) {
 							currentInLane = incomingLanes.get(incomingLaneIndex);
 							if (null == currentInLane.getStopLine())
-								currentInLane
-										.setStopLine(new StopLine(currentInLane.getCse(), StopLine.NOSTOPLINE, -4.0, 2.0, 0.0));
-							Lane exitLane = exit.isRightOrStraight() ? outLanes.get(i) : outLanes.get(exit.numberOfLanes()
-									- exitLanesAssigned[exitIndex] + i);
+								currentInLane.setStopLine(new StopLine(currentInLane.getCse(), StopLine.NOSTOPLINE, -4.0, 2.0, 0.0));
+							Lane exitLane = exit.isRightOrStraight() ? outLanes.get(i) 
+									: outLanes.get(exit.numberOfLanes() - exitLanesAssigned[exitIndex] + i);
 							System.out.print("creating NeededConnectingLane (1): ");
 							neededConnectingLanes.add(new NeededConnectingLane(currentInLane, exitLane, exitIndex));
 							// if there are more incoming lanes than leaving lanes, connect all extra incoming lanes to
@@ -356,16 +364,6 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 						// i.e. if there are 2 right turning lanes and 3 exit lanes,
 						// the second right lane (counting from outer to inner) here gets
 						// connected to the third exit lane)
-						/*
-						 * for (int i = outLaneIndex; i < exit.numberOfLanes() ; i++) { if (null == currentInLane) throw new
-						 * Error("Cannot happen: currentInlane is null"); if (exit.isRightOrStraight()) {
-						 * System.out.print("creating NeededConnectingLane (3): "); neededConnectingLanes.add(new
-						 * NeededConnectingLane(currentInLane, outLanes.get(i), exitIndex)); } else { currentInLane =
-						 * incomingLanes.get(incomingLaneIndex - exitLanesAssigned[exitIndex]); if (null == currentInLane) throw new
-						 * Error("Cannot happen: currentInlane is null"); System.out.print("creating NeededConnectingLane (4): ");
-						 * neededConnectingLanes.add(new NeededConnectingLane(currentInLane, outLanes.get(exit.numberOfLanes() - 1 -
-						 * i), exitIndex)); } }
-						 */
 						incomingLaneIndex -= fanOut[exitIndex];
 					}
 				} // FINISHED STEP 2B
@@ -397,7 +395,8 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 			if (lane.getDestination() == node.getNodeID())
 				lane.setDestination(0);
 		/*
-		 * Consecutive internal Lanes were connected in rebuild. Connect to the incoming and leaving Lanes to the internal Lanes
+		 * Consecutive Lanes within each Link were connected in rebuild. 
+		 * Now connect to the incoming and leaving Lanes to the internal Lanes.
 		 */
 		for (DirectionalLink dl : node.getLinksFromJunction(false)) {
 			Link toLink = dl.link;
@@ -410,6 +409,14 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 			Node n = fromLink.getToNodeExpand();
 			for (DirectionalLink toLink : n.getLinksFromJunction(false))
 				linkLanes(fromLink, toLink.link);
+		}
+		for (Lane l : result.getLanes()) {
+			System.out.println(String.format(Locale.US, "Lane %s on link %s from %s to %s up: %s, down %s", 
+					l.toString(), l.crossSectionElement.getCrossSection().getLink().toString(),
+					l.crossSectionElement.getCrossSection().getLink().getExpandedFromNode_r().toString(),
+					l.crossSectionElement.getCrossSection().getLink().getExpandedToNode_r().toString(),
+					null == l.getUp() ? "NULL" : l.getUp().toString(), 
+					null == l.getDown() ? "NULL" : l.getDown().toString()));
 		}
 		// Block B Create the conflicts. Check all conflicts and figure out who yields to whom on each conflict
 		// revisit all new Turning Links at this node (junction) to investigate conflicting lanes (merge, split, cross)
@@ -434,8 +441,6 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 							.getCrossSectionObjects(Lane.class)) {
 						Lane laneB = (Lane) csoB;
 						System.out.println("Checking conflict between lanes " + laneA.getID() + " and " + laneB.getID() + " at expanding node " + node.getNodeID());
-						if ((870 == laneA.getID()) || (870 == laneB.getID()))
-							System.out.println("pasop");
 
 						conflictType cType = null;
 						Lane priorityLane;
@@ -581,15 +586,11 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 		for (CrossSectionElement fromCSE : fromCS.getCrossSectionElementList_r()) {
 			for (CrossSectionObject fromCSO : fromCSE.getCrossSectionObjects(Lane.class)) {
 				Lane fromLane = (Lane) fromCSO;
-				//if (802 == fromLane.getID())
-				//	System.out.println("Linking from lane " + fromLane);
 				ArrayList<Vertex> fromVertices = fromLane.getLaneVerticesCenter();
 				Point2D.Double fromPosition = fromVertices.get(fromVertices.size() - 1).getPoint();
 				for (CrossSectionElement toCSE : toCS.getCrossSectionElementList_r()) {
 					for (CrossSectionObject toCSO : toCSE.getCrossSectionObjects(Lane.class)) {
 						Lane toLane = (Lane) toCSO;
-						//if (802 == toLane.getID())
-						//	System.out.println("Linking to lane " + fromLane);
 						Vertex inner = toLane.getLaneVerticesInner().get(0);
 						Vertex outer = toLane.getLaneVerticesOuter().get(0);
 						Point2D.Double center = toLane.getLaneVerticesCenter().get(0).getPoint();
@@ -605,9 +606,10 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 							System.out.println("Linking " + fromLane.getID() + " to " + toLane.getID());
 							fromLane.addDownLane(toLane);
 							toLane.addUpLane(fromLane);
-							System.out.println("  fromLane " + fromLane.getID() + " has lateralPosition "
-									+ fromLane.lateralPosition);
-							System.out.println("    toLane " + toLane.getID() + " has lateralPosition " + toLane.lateralPosition);
+							System.out.println(String.format(Locale.US, "  fromLane %4d has lateralPosition %.3fm", 
+									fromLane.getID(), fromLane.lateralPosition));
+							System.out.println(String.format(Locale.US, "    toLane %4d has lateralPosition %.3fm", 
+									toLane.getID(), toLane.lateralPosition));
 							break;
 						}
 					}

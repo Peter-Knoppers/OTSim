@@ -964,6 +964,10 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
     		}
 		}	
     	for (Link link : getLinkList()) {
+    		if (link.getFromNode_r().isSource())
+    			continue;
+    		if (link.getToNode_r().isSink())
+    			continue;
 			for (CrossSectionObject csoA : link.getCrossSections_r().get(0).getCrossSectionElementList_r().get(0).getCrossSectionObjects(Lane.class)) {
 				Lane laneA = (Lane) csoA;
 				if (null == laneA)

@@ -15,9 +15,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-
 import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.GeoObjects.Vertex;
 
