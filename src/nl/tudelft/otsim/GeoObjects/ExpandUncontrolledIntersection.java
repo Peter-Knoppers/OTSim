@@ -90,7 +90,8 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 		if (!expansionNeeded())
 			return null;
 
-		// Expand junction by creating a sub-Network.
+		// Expand a junction by creating a sub-Network.
+		//
 		// Create a Node for every entering link and every exiting link.
 		// These new Nodes replace the Node that the incoming or outgoing link
 		// was connected to at this Node.
@@ -113,13 +114,18 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 		int initialNodeID = nextNodeID;
 		// Create one Node in the sub-Network for each DirectionalLink and set
 		// it as fromNodeExpand c.q. toNodeExpand in that DirectionalLink
+		int incomingLaneCount = 0;
+		int leavingLaneCount = 0;
 		for (DirectionalLink dl : dlList) {
 			ArrayList<Vertex> vertices = dl.link.getVertices();
 			Vertex location = vertices.get(dl.incoming ? vertices.size() - 2 : 1);
-			if (dl.incoming)
+			if (dl.incoming) {
 				dl.link.setToNodeExpand(result.addNode(dl.link.getName_r() + "_i", nextNodeID++, location.x, location.y, node.z));
-			else
+				incomingLaneCount += dl.link.getCrossSectionAtNode(true).collectLanes().size();
+			} else {
 				dl.link.setFromNodeExpand(result.addNode(dl.link.getName_r() + "_o", nextNodeID++, location.x, location.y, node.z));
+				leavingLaneCount += dl.link.getCrossSectionAtNode(false).collectLanes().size();
+			}
 		}
 		System.out.println("Created " + (nextNodeID - initialNodeID) + " sub-Nodes in the sub-Network of Node " + node.getName_r());
 
@@ -170,7 +176,36 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 				}
 			// STEP 2: determine the turning movements
 			if ((exits.size() > 0) && ((entranceCount + exits.size()) > 2)) {
-				if (useTurnArrows) {
+				if (incomingLaneCount == leavingLaneCount) {
+					// Special (easy) case: simple connect each incoming lane to the next available leaving lane.
+					// There should be no conflicts; turnArrows are ignored.
+					// This happens particularly at on-ramps and off-ramps of highways.
+					for (Lane incomingLane : incomingLanes) {
+						//System.out.println("Connecting incoming lane " + incomingLane.toString());
+						int skip = incomingLanes.size() - 1 - incomingLanes.indexOf(incomingLane);
+						for (int arm = dlList.indexOf(incomingLink) - 1; skip >= 0; arm--) {
+							if (arm < 0)
+								arm += dlList.size();
+							DirectionalLink dl = dlList.get(arm);
+							if (dl.incoming)
+								skip += dl.link.getCrossSectionAtNode(true).collectLanes().size();
+							else {
+								for (Lane leavingLane : dl.link.getCrossSectionAtNode(false).collectLanes()) {
+									if (0 == skip--) {
+										int exitIndex = -1;
+										for (int i = exits.size(); --i >= 0; )
+											if (exits.get(i).link == dl.link)
+												exitIndex = i;
+										if (exitIndex < 0)
+											throw new Error("Cannot find exitIndex");
+										System.out.println("creating NeededConnectingLane (-1) from " + incomingLane.toString() + " to " + leavingLane.toString());
+										neededConnectingLanes.add(new NeededConnectingLane(incomingLane, leavingLane, exitIndex));
+									}
+								}
+							}
+						}
+					}
+				} else if (useTurnArrows) {
 					// STEP 2A
 					// The turning movements are defined by TurnArrows, the new
 					// turning lanes must be constructed accordingly.
@@ -337,6 +372,10 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 						 * lane a to lane p
 						 * lane b to lane q
 						 * lane c to lane r
+						 * 
+						 * This is a special case because the total number of incoming lanes equals 
+						 * the total number of outgoing lanes and assignment should be straightforward.
+						 * Maybe we should handle this as a separate case?
 						 */
 						// Connect the incoming and exiting lanes
 						for (int i = 0; i < exitLanesAssigned[exitIndex]; i++) {
@@ -602,7 +641,7 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 						double otherDistance = Planar.distanceLineSegmentToPoint(centerLine, center);
 						if (otherDistance < distance)
 							distance = otherDistance;
-						if (distance < width * 0.6) {
+						if (distance < width * 0.55) {
 							System.out.println("Linking " + fromLane.getID() + " to " + toLane.getID());
 							fromLane.addDownLane(toLane);
 							toLane.addUpLane(fromLane);

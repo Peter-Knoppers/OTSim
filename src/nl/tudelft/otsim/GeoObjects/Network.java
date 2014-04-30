@@ -1861,7 +1861,7 @@ public class Network implements GraphicsPanelClient, ActionListener, XML_IO, Sto
 		return result;
 	}
 	
-	private void collectRoadways (ArrayList<Lane> lanes, HashMap<CrossSectionElement, Integer> map, ArrayList<Integer> IDs) {
+	private static void collectRoadways (ArrayList<Lane> lanes, HashMap<CrossSectionElement, Integer> map, ArrayList<Integer> IDs) {
 		if (null == lanes)
 			return;
 		for (Lane l : lanes) {

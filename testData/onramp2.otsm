@@ -101,7 +101,7 @@
 				<elementOffsetLateral>0.0</elementOffsetLateral>
 				<element>
 					<name>road</name>
-					<width>7</width>
+					<width>10.5</width>
 					<speedLimit>130</speedLimit>
 					<roadMarkerAlong>
 						<type>|</type>
