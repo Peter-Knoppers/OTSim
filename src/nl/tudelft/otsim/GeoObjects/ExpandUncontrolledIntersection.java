@@ -347,36 +347,6 @@ public class ExpandUncontrolledIntersection implements NodeExpander {
 					for (int exitIndex = 0; exitIndex < exits.size(); exitIndex++) {
 						Exit exit = exits.get(exitIndex);
 						ArrayList<Lane> outLanes = exit.getOutLanes();
-						/* 
-						 * BUG this does not always do what we want ...
-						 * Example: onramp2.otsm
-						 * ___a____X______p____
-						 * ___b____X______q____
-						 *         X______r____
-						 *        /
-						 *       /
-						 *      c
-						 *     /   
-						 * Gets NeededConnectingLanes like this:
-						 * lane a to lane q (wrong; should be p)
-						 * lane b to lane r (wrong; should be q)
-						 * lane c to lane r (OK)
-						 * 
-						 * The lanes that are created later do something different:
-						 * lane a to lane p (OK)
-						 * lane b to NOTHING
-						 * lane c to lane q
-						 * NOTHING to lane r
-						 * 
-						 * What we expect/want to see is
-						 * lane a to lane p
-						 * lane b to lane q
-						 * lane c to lane r
-						 * 
-						 * This is a special case because the total number of incoming lanes equals 
-						 * the total number of outgoing lanes and assignment should be straightforward.
-						 * Maybe we should handle this as a separate case?
-						 */
 						// Connect the incoming and exiting lanes
 						for (int i = 0; i < exitLanesAssigned[exitIndex]; i++) {
 							currentInLane = incomingLanes.get(incomingLaneIndex);
