@@ -1,7 +1,5 @@
 package nl.tudelft.otsim.SpatialTools;
 
-import java.awt.geom.Point2D.Double;
-
 /**
  * Convert WGS84 coordinates to the Dutch RD (RijksDriehoek) system.
  * 
@@ -15,7 +13,7 @@ public class DutchRD implements WGS84Converter {
 	}
 
 	@Override
-	public Double meters(java.awt.geom.Point2D.Double wgs84) {
+	public java.awt.geom.Point2D.Double meters(java.awt.geom.Point2D.Double wgs84) {
 		// Uses the ellipsoidal transforms described in
 		// http://www.dekoepel.nl/pdf/Transformatieformules.pdf
 		if (! accurateAt(wgs84))
