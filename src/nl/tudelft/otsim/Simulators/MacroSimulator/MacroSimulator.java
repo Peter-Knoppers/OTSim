@@ -20,7 +20,7 @@ import nl.tudelft.otsim.Simulators.MacroSimulator.Model;
 /**
  * Macro Simulator for OpenTraffic
  * 
- * @author Peter Knoppers
+ * @author Friso Scholten
  */
 public class MacroSimulator extends Simulator implements ShutDownAble{
 	/** Type of this Simulator */
@@ -28,7 +28,7 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 	
 	private final Model model = new Model();
 	private final Scheduler scheduler;
-	private double endTime = 1000;	// should be overridden in the configuration
+	//private double endTime = 1000;	// should be overridden in the configuration
 	private double randomSeed = 0;	// idem
 	
 	
@@ -74,7 +74,7 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 			if (fields.length == 0)
 				continue;	// Ignore empty lines in configuration
 			else if (fields[0].equals("EndTime:"))
-				this.endTime = Double.parseDouble(fields[1]);
+				model.period = Double.parseDouble(fields[1]);
 			else if (fields[0].equals("Seed:"))
 				this.randomSeed = Double.parseDouble(fields[1]);
 			else if (fields[0].equals("Roadway:")) {
@@ -114,8 +114,11 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 			
 				} 
 				copySimPaths.add(sp.getId(),sp); 
-			} else
-				throw new Exception("Don't know how to parse " + line);
+
+			} else {
+				//throw new Exception("Don't know how to parse " + line);
+			}
+			
 			// TODO: write code to handle the not-yet-handled lines in the configuration
 		}
 		// Now all macrocells are generated, link upstream and downstream macrocells together. 
@@ -199,7 +202,8 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 				} else {
 					// cell downstream has the right nr of lanes and speed limit
 					
-					// add vertices of cell at the end of vertices of current cell 
+					// add vertices of cell at the end of vertices of current cell
+					snew.vertices.remove(snew.vertices.size() -1);
 					snew.vertices.addAll(sp.vertices);
 					
 					// new cell to be considered is the downstream cell
@@ -217,6 +221,11 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 			// add new (joined) cell to the list of cells
 			macroCells.add(snew);
 			
+			
+		}
+		//System.out.println("joined cells: "+macroCells.toString());
+		for (MacroCell m: macroCells) {
+			//System.out.println("Vertices pre-split: "+m.vertices.toString());
 			
 		}
 		
@@ -247,10 +256,12 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 					for (MacroCell c: m.ups.get(0).downs) {
 						n.cellsOut.add(c);
 						c.nodeIn = n;
+						
 					}
 					for (MacroCell c: m.ups) {
 						n.cellsIn.add(c);
 						c.nodeOut = n;
+						c.vertices.add(m.vertices.get(0));
 					}
 					nodes.add(n);
 				} else {
@@ -266,7 +277,7 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 			if (m.nodeOut == null) {
 				
 				if (m.downs.size() > 0) {
-					NodeInterior n = new NodeInterior(m.vertices.get(m.vertices.size()-1));
+					NodeInteriorTampere n = new NodeInteriorTampere(m.vertices.get(m.vertices.size()-1));
 					for (MacroCell c: m.downs.get(0).ups) {
 						n.cellsIn.add(c);
 						c.nodeOut = n;
@@ -275,6 +286,7 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 					for (MacroCell c: m.downs) {
 						n.cellsOut.add(c);
 						c.nodeIn = n;
+						c.vertices.add(0,m.vertices.get(m.vertices.size()-1));
 					}
 					nodes.add(n);
 				} else {
@@ -292,16 +304,30 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 		for (Node n: nodes) {
 			
 			n.init();
+			n.setDefaultTurningRatio();
 			model.addNode(n);
 			
 			
 		}
+for (MacroCell m: macroCells) {
+			//System.out.println("Vertices1: "+m.vertices.toString());
+			m.smoothVertices(0.8);
+			//System.out.println("Vertices2: "+m.vertices.toString());
+			
+		}
+
+
 		for (MacroCell m: macroCells) {
 			
 			m.fd = fd;
 			m.init();
 			model.addMacroCell(m);
 			
+		}
+		for (MacroCell m: macroCells) {
+			//System.out.println("length:"+m.l);
+			//System.out.println("NodeIn: "+m.indexNodeIn);
+			//System.out.println("NodeOut: "+m.indexNodeOut);
 		}
 			
 	}
@@ -389,9 +415,9 @@ class Stepper implements Step {
 	public boolean step(double now) {
     	System.out.println("step entered");
     	Model model = macroSimulator.getModel();
-    	System.out.println(Double.toString(model.period));
-    	System.out.println(Double.toString(now));
-    	System.out.println(Double.toString(model.t()));
+    	//System.out.println(Double.toString(model.period));
+    	//System.out.println(Double.toString(now));
+    	//System.out.println(Double.toString(model.t()));
     	if (now >= model.period)
     		return false;
     	while (model.t() < now) {
@@ -400,13 +426,13 @@ class Stepper implements Step {
     			//System.out.format(Main.locale, "Time is %.3f\r\n", now);
     			model.run(1);
     		} catch (RuntimeException e) {
-    			WED.showProblem(WED.ENVIRONMENTERROR, "Error in LaneSimulator:\r\n%s", WED.exeptionStackTraceToString(e));
+    			WED.showProblem(WED.ENVIRONMENTERROR, "Error in MacroSimulator:\r\n%s", WED.exeptionStackTraceToString(e));
     			return false;
     		}
     	}
     	// re-schedule myself
     	macroSimulator.getScheduler().enqueueEvent(model.t() + model.dt, this);
-    	System.out.println("step returning true");
+    	//System.out.println("step returning true");
 		return true;
 	}
 }

@@ -111,6 +111,9 @@ public class MacroCell {
     
     /** Demand out from this cell. [veh/h or veh/s] */
     public double Demand;
+    
+    public double[] DemandTest;
+    public double[] SupplyTest;
     public FD fd;
     
     // Parameters    
@@ -230,6 +233,9 @@ public class MacroCell {
 		return result;
 		
 	}
+	public void sortVertices() {
+		//vertices.
+	}
 	public void addIn(Integer i) {
 		ins.add(i);
 	}
@@ -239,8 +245,8 @@ public class MacroCell {
 	@SuppressWarnings("unchecked")
 	public ArrayList<MacroCell> splitInParts(int nrParts) {
 		ArrayList<MacroCell> result = new ArrayList<MacroCell>();
-		System.out.println("splitCells");
-		System.out.println(nrParts);
+		System.out.println("Joined link " + id + " is splitted into " + nrParts + " parts");
+		//System.out.println(nrParts);
 		if (nrParts == 1 || nrParts == 0) {
 			result.add(this);
 		} else {
@@ -291,7 +297,7 @@ public class MacroCell {
 		
 		result.add(this);
 		}
-		System.out.println(result.toString());
+		//System.out.println(result.toString());
 		return result;
 	}
 	public String toString() {
@@ -343,73 +349,20 @@ public class MacroCell {
     		Supply = calcQ(KCell);
     }
     public void calcFluxOut() {
-    	/*if (downs.size() == 1) {
-    		FluxOut = Math.min(downs.get(0).Supply,Demand);
-    		FluxOut2[0] = Math.min(downs.get(0).Supply,Demand);
-    	} else if (downs.size() == 0) {
-    		FluxOut = Math.min(2000,Demand);
-    		FluxOut2[0] = Math.min(qCap,Demand);
-    	} else if (downs.size() >= 2){
-    		for (int i=0; i<FluxOut2.length; i++) {
-    			FluxOut2[i]=Math.min(Demand/FluxOut2.length,downs.get(i).Supply);
-    		}
     	
-    		
-    		FluxOut = Math.min(downs.get(0).Supply,0.5*Demand);
-    	} else {
-    		throw new Error ("not yet implemented");
-    	}*/
     	FluxOut = nodeOut.fluxesIn[indexNodeOut];
     	
     			
     }
     public void calcFluxIn() {
-    	/*if (ups.size() == 1) {
-    		//FluxIn = Math.min(ups.get(0).Demand,Supply);
-    		FluxIn2[0] = Math.min(ups.get(0).Demand,Supply);
-    	} else if (ups.size() == 0) {
-    		//FluxIn = Math.min(2000,Supply);
-    		FluxIn2[0] = Math.min(3000,Supply);
-    	} else if (ups.size() >= 2) {
-    		FluxIn = Math.min(ups.get(0).Demand,Supply);
-    		//System.out.println("Merge Flux In");
-    		for (int i=0; i<FluxIn2.length; i++) {
-    			//System.out.println(FluxIn2.length);
-    			//System.out.println(Supply);
-    			double Sstar = (Supply/FluxIn2.length);
-    			//System.out.println(Sstar);
-    			double S = Sstar;
-    			FluxIn2[i] = Math.min(ups.get(i).Demand,S);
-    		}
-    		
-    	} else {
-    		throw new Error ("not yet implemented");
-    	}*/
+    	
     	FluxIn = nodeIn.fluxesOut[indexNodeIn];
     			
     }
     public void updateDensity() {
-    	//System.out.println("voor"+Double.toString(KCell));
-    	//KCell = KCell + model.dt/l*(FluxIn - FluxOut);
-    	/*double sumIn = 0;
-    	for (double i: FluxIn2) {
-    		sumIn += i;
-    	}
-    	double FluxInTot = sumIn;
     	
-    	double sumOut = 0;
-    	for (double j: FluxOut2) {
-    		sumOut += j;
-    	}
-    	double FluxOutTot = sumOut;*/
-    	/*System.out.println("Fluxes");
-    	System.out.println(FluxInTot);
-    	System.out.println(FluxOutTot);*/
-    	//System.out.println("Fluxes");
-    //System.out.println(FluxIn);
-    	//System.out.println(FluxOut);
     	KCell = KCell + model.dt/l*(FluxIn - FluxOut);
-    	//System.out.println("na"+Double.toString(KCell));
+    	
     	QCell = calcQ(KCell);
     	VCell = calcV(KCell);
     }
@@ -622,5 +575,25 @@ public class MacroCell {
     	}
     	return output;
     	
+    }
+    public void smoothVertices(double smoothingFraction) {
+    	if (vertices.size() <3) {
+    		//System.out.println("path is too small to be smoothed");
+    	} else {
+    		ArrayList<Vertex> copyVertices = new ArrayList<Vertex>(); 
+    		Vertex origin = vertices.get(0);
+    		Vertex destination = vertices.get(vertices.size()-1);
+    		copyVertices.add(origin);
+    		//copyVertices.add(destinatio)
+    		
+    		for (Vertex v: vertices.subList(1,vertices.size()-1)) {
+    			if (v.distance(destination) < smoothingFraction*copyVertices.get(copyVertices.size()-1).distance(destination)) {
+    				copyVertices.add(v);
+    			}
+    			
+    		}
+    		copyVertices.add(destination);
+    		vertices = copyVertices;
+    	}
     }
 }

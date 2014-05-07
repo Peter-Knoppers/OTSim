@@ -1242,5 +1242,4 @@ public class Main extends JPanel implements ActionListener {
 			panelMeasurementPlan.add(model.getMeasurementPlan(index));
 	}
 
-
 }

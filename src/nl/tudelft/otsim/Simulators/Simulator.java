@@ -50,6 +50,8 @@ public abstract class Simulator implements GraphicsPanelClient {
 	 */
 	abstract public Scheduler getScheduler();
 	
+	//abstract public Model getModel();
+	
 	/**
 	 * Retrieve a list of all movable objects.
 	 * 

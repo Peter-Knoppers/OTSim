@@ -2,6 +2,7 @@ package nl.tudelft.otsim.Simulators.MacroSimulator;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GeoObjects.Vertex;
@@ -16,7 +17,7 @@ abstract public class Node {
 	protected int nrOut;
 	public double[] fluxesIn;
 	public double[] fluxesOut;
-	public double[] turningRatio;
+	public double[][] turningRatio;
 	
 	
 	public Node(Vertex loc) {
@@ -37,13 +38,42 @@ abstract public class Node {
 		else
 			fluxesOut = new double[1];
 		
-		turningRatio = new double[nrOut];
+		turningRatio = new double[nrIn][nrOut];
+		setDefaultTurningRatio();
 		
 	}
 	public void draw(GraphicsPanel graphicsPanel) {
 		
     	location.paint(graphicsPanel);
    	
+	}
+	public void setDefaultTurningRatio() {
+		
+		double[][] arr1 = new double[nrIn][nrOut];
+		for (int i =0; i<nrIn; i++) {
+			for (int j =0; j<nrOut; j++) {
+				arr1[i][j]=1;
+			}
+		}
+		setTurningRatio(arr1);
+	}
+	public void setTurningRatio(double[][] array) {
+		double[] totali = new double[nrIn];
+		for (int i = 0; i <nrIn; i++) {
+			totali[i] = 0;
+			for (int j = 0; j<nrOut; j++) {
+				totali[i] += array[i][j];
+			}
+			//totali[i]
+		}
+		//System.out.println(totali[0]);
+		for (int i = 0; i <nrIn; i++) {
+			
+			for (int j = 0; j<nrOut; j++) {
+				turningRatio[i][j] = array[i][j]/totali[i];
+			}
+			//totali[i]
+		}
 	}
 	abstract public void calcFlux();
 	
