@@ -2,13 +2,14 @@ package nl.tudelft.otsim.Simulators.LaneSimulator;
 
 import nl.tudelft.otsim.GUI.Log;
 import nl.tudelft.otsim.GUI.Main;
+import nl.tudelft.otsim.Simulators.SimulatedModel;
 
 /**
  * Main model object. This functions as the main interface with the model. It
  * contains general settings, the network, all vehicles etc. Furthermore, it
  * represents the world.
  */
-public class Model {
+public class Model implements SimulatedModel {
     /** Time step number. Always starts as 0. */
     protected int k;
     
@@ -21,7 +22,17 @@ public class Model {
     /** Maximum simulation period [s]. */
     public double period;
     
-    /** Absolute start time of simulation. */
+    public double getPeriod() {
+		return period;
+	}
+
+	public void setPeriod(double period) {
+		this.period = period;
+	}
+
+
+
+	/** Absolute start time of simulation. */
     public java.util.Date startTime;
     
     /** Total movables generated */
@@ -130,12 +141,11 @@ public class Model {
         	c.init();
     }
 
-    /**
-     * Performs the main model loop. This entails the RSUs, OBUs, controllers, 
-     * vehicle generators and drivers (in this order).
-     * @param n Number of steps to be run before returning.
-     */
-    public void run(int n) {
+    /* (non-Javadoc)
+	 * @see nl.tudelft.otsim.Simulators.LaneSimulator.Model#run(int)
+	 */
+   
+	public void run(int n) {
         // Simulate n steps
         //int i = 0;
     	for (int nn = 0; (nn < n) && (t < period); nn++) {

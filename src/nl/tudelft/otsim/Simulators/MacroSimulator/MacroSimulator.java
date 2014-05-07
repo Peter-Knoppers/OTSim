@@ -15,7 +15,7 @@ import nl.tudelft.otsim.Simulators.SimulatedObject;
 import nl.tudelft.otsim.Simulators.Simulator;
 
 import nl.tudelft.otsim.Simulators.MacroSimulator.MacroSimulator;
-import nl.tudelft.otsim.Simulators.MacroSimulator.Model;
+//import nl.tudelft.otsim.Simulators.MacroSimulator.MacroModel;
 
 /**
  * Macro Simulator for OpenTraffic
@@ -331,6 +331,7 @@ for (MacroCell m: macroCells) {
 		}
 			
 	}
+	
 	
 	public final Model getModel() {
 		return model;

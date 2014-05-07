@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.swing.JCheckBox;
 
 import nl.tudelft.otsim.Events.Scheduler;
@@ -17,6 +18,7 @@ import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.GUI.ObjectInspector;
 import nl.tudelft.otsim.Simulators.Measurement;
+import nl.tudelft.otsim.Simulators.SimulatedModel;
 import nl.tudelft.otsim.Simulators.SimulatedDetector;
 import nl.tudelft.otsim.Simulators.SimulatedObject;
 import nl.tudelft.otsim.Simulators.SimulatedTrafficLight;
@@ -266,6 +268,11 @@ public class RoadwaySimulator extends Simulator implements ActionListener {
 	@Override
 	public Scheduler getScheduler() {
 		return scheduler;
+	}
+	
+	@Override
+	public SimulatedModel getModel() {
+		return null;
 	}
 
 	/**

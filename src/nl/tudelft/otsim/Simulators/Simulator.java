@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import nl.tudelft.otsim.Events.Scheduler;
 import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GUI.GraphicsPanelClient;
+import nl.tudelft.otsim.Simulators.MacroSimulator.Model;
 
 
 /**
@@ -50,7 +51,7 @@ public abstract class Simulator implements GraphicsPanelClient {
 	 */
 	abstract public Scheduler getScheduler();
 	
-	//abstract public Model getModel();
+	abstract public SimulatedModel getModel();
 	
 	/**
 	 * Retrieve a list of all movable objects.
