@@ -736,27 +736,6 @@ public class Main extends JPanel implements ActionListener {
 	}
 	
 	/**
-	 * Create a new Simulator on request of the Scheduler.
-	 * @param type String; type of Simulator to create
-	 * @param configuration String; configuration text for the Simulator
-	 * @param scheduler
-	 * @return Simulator; the newly created Simulator
-	 * @throws Exception
-	 */
-	public static Simulator createSimulator(String type, String configuration, Scheduler scheduler) throws Exception {
-		if (type.equals(LaneSimulator.simulatorType)) {
-			return new LaneSimulator(configuration, scheduler.getGraphicsPanel(), scheduler);
-		}
-		if (type.equals(RoadwaySimulator.simulatorType)) {
-			return new RoadwaySimulator(configuration, scheduler.getGraphicsPanel(), scheduler);
-		}
-		if (type.equals(MacroSimulator.simulatorType)) {
-			return new MacroSimulator(configuration, scheduler.getGraphicsPanel(), scheduler);
-		}
-		throw new Error("Do not know how to create a simulator of type " + type);
-	}
-
-	/**
 	 * Schedule a re-paint for the map display 
 	 */
 	public void setActiveGraph() {

@@ -16,12 +16,10 @@ import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.Locale;
 
 import javax.swing.JPanel;
 
 import nl.tudelft.otsim.GeoObjects.Vertex;
-import nl.tudelft.otsim.SpatialTools.Planar;
 
 /**
  * This class implements the minimum drawing primitives that allow a

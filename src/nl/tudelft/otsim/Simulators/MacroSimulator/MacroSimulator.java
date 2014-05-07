@@ -115,7 +115,7 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 				} 
 				copySimPaths.add(sp.getId(),sp); 
 			} else
-				;//throw new Exception("Don't know how to parse " + line);
+				throw new Exception("Don't know how to parse " + line);
 			// TODO: write code to handle the not-yet-handled lines in the configuration
 		}
 		// Now all macrocells are generated, link upstream and downstream macrocells together. 

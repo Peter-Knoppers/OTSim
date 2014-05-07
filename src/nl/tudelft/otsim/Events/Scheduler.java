@@ -20,6 +20,7 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -37,6 +38,9 @@ import nl.tudelft.otsim.GUI.Main;
 import nl.tudelft.otsim.GUI.WED;
 import nl.tudelft.otsim.Simulators.ShutDownAble;
 import nl.tudelft.otsim.Simulators.Simulator;
+import nl.tudelft.otsim.Simulators.LaneSimulator.LaneSimulator;
+import nl.tudelft.otsim.Simulators.MacroSimulator.MacroSimulator;
+import nl.tudelft.otsim.Simulators.RoadwaySimulator.RoadwaySimulator;
 
 /**
  * @author Peter Knoppers
@@ -60,7 +64,7 @@ public class Scheduler extends JPanel implements ActionListener, PropertyChangeL
 	Simulator runningSimulation;
 	final String simulatorType;
 	private String configuration;
-	final GraphicsPanel graphicsPanel;
+	GraphicsPanel graphicsPanel;
 	private double simulatedTime = 0;
 	private JButton buttonRealTime;
 	private JButton buttonFast;
@@ -77,8 +81,21 @@ public class Scheduler extends JPanel implements ActionListener, PropertyChangeL
 	 * to update the image of the simulation.
 	 */
 	public Scheduler(String simulatorType, GraphicsPanel graphicsPanel) {
+		this(simulatorType, graphicsPanel, null);
+        reloadSimulator();
+	}
+	
+	/**
+	 * Create a Scheduler with specified configuration (do not attempt to load
+	 * the configuration using Main.configuration).
+	 * @param simulatorType String that identifies the type of Simulator to run
+	 * @param graphicsPanel GraphicsPanel whose repaint method will be called
+	 * to update the image of the simulation.
+	 * @param configuration String; the initial configuration for the Simulator
+	 */
+	public Scheduler(String simulatorType, GraphicsPanel graphicsPanel, String configuration) {
 		this.simulatorType = simulatorType;
-		this.configuration = null;
+		this.configuration = configuration;
 		this.graphicsPanel = graphicsPanel;
 		setLayout(new GridBagLayout());
 		GridBagConstraints gbc = new GridBagConstraints();
@@ -118,7 +135,8 @@ public class Scheduler extends JPanel implements ActionListener, PropertyChangeL
 		subPanel.add(endTime);
         add(subPanel, gbc);
         endTime.addPropertyChangeListener(this);
-        reloadSimulator();
+        if (null != configuration)
+        	restartSimulator();
 	}
 	
 	/**
@@ -144,6 +162,16 @@ public class Scheduler extends JPanel implements ActionListener, PropertyChangeL
 	 */
 	public GraphicsPanel getGraphicsPanel() {
 		return graphicsPanel;
+	}
+	
+	/**
+	 * Transfer this simulation to another GraphicsPanel.
+	 * @param newGraphicsPanel GraphicsPanel; the new output device
+	 */
+	public void setGraphicsPanel (GraphicsPanel newGraphicsPanel) {
+		if (null == newGraphicsPanel)
+			throw new Error("The GraphicsPanel may not be null");
+		this.graphicsPanel = newGraphicsPanel;
 	}
 	
 	class QueuedEvent implements Comparable<QueuedEvent> {
@@ -193,7 +221,7 @@ public class Scheduler extends JPanel implements ActionListener, PropertyChangeL
     	}
         // Try to load the image from the resources
         String imgLocation = "/nl/tudelft/otsim/Resources/" + iconName;
-        java.net.URL imageURL = Main.mainFrame.getClass().getResource(imgLocation);
+        java.net.URL imageURL = getClass().getResource(imgLocation);
         if (imageURL != null)
             button.setIcon(new ImageIcon(imageURL, caption));
         button.setHorizontalAlignment(SwingConstants.LEFT);
@@ -350,7 +378,13 @@ public class Scheduler extends JPanel implements ActionListener, PropertyChangeL
         graphicsPanel.repaint();
 	}
 	
-	private boolean stepUpTo(double timeLimit) {
+	/**
+	 * Run the simulation until the indicated time.
+	 * @param timeLimit Double; time where simulation must stop
+	 * @return Boolean; true if no errors occurred in the simulator; false if
+	 * the simulator reported a fatal error (simulation could not continue)
+	 */
+	public boolean stepUpTo(double timeLimit) {
 		runningSimulation.preStep();
 		boolean result = true;
 		while (result && eventDue(timeLimit))
@@ -463,11 +497,32 @@ public class Scheduler extends JPanel implements ActionListener, PropertyChangeL
 		}
 	}
 	
+	/**
+	 * Create a new Simulator.
+	 * @param type String; type of Simulator to create
+	 * @param configuration String; configuration text for the Simulator
+	 * @param scheduler
+	 * @return Simulator; the newly created Simulator
+	 * @throws Exception
+	 */
+	private static Simulator createSimulator(String type, String configuration, Scheduler scheduler) throws Exception {
+		if (type.equals(LaneSimulator.simulatorType)) {
+			return new LaneSimulator(configuration, scheduler.getGraphicsPanel(), scheduler);
+		}
+		if (type.equals(RoadwaySimulator.simulatorType)) {
+			return new RoadwaySimulator(configuration, scheduler.getGraphicsPanel(), scheduler);
+		}
+		if (type.equals(MacroSimulator.simulatorType)) {
+			return new MacroSimulator(configuration, scheduler.getGraphicsPanel(), scheduler);
+		}
+		throw new Error("Do not know how to create a simulator of type " + type);
+	}
+
 	private void restartSimulator() {
 		killSimulator();
 		clear();
         try {
-			runningSimulation = Main.createSimulator(simulatorType, configuration, this);
+			runningSimulation = createSimulator(simulatorType, configuration, this);
 		} catch (Exception e) {
 			WED.showProblem(WED.ENVIRONMENTERROR, "Could not start simulator:\r\n%s", WED.exeptionStackTraceToString(e));
 		}
@@ -502,7 +557,7 @@ public class Scheduler extends JPanel implements ActionListener, PropertyChangeL
 		public Clock(Scheduler scheduler) {
 			this.scheduler = scheduler;
 	        String imgLocation = "/resources/" + "Clock.png";
-	        java.net.URL imageURL = Main.mainFrame.getClass().getResource(imgLocation);
+	        java.net.URL imageURL = getClass().getResource(imgLocation);
 	        if (imageURL != null)
 	            icon = new ImageIcon(imageURL);
 		}
