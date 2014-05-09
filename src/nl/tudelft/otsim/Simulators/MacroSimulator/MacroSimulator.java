@@ -5,6 +5,10 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 
+
+
+import java.util.HashSet;
+
 import nl.tudelft.otsim.Events.Scheduler;
 import nl.tudelft.otsim.Events.Step;
 import nl.tudelft.otsim.GUI.GraphicsPanel;
@@ -13,9 +17,9 @@ import nl.tudelft.otsim.GeoObjects.Vertex;
 import nl.tudelft.otsim.Simulators.ShutDownAble;
 import nl.tudelft.otsim.Simulators.SimulatedObject;
 import nl.tudelft.otsim.Simulators.Simulator;
-
 import nl.tudelft.otsim.Simulators.MacroSimulator.MacroSimulator;
 //import nl.tudelft.otsim.Simulators.MacroSimulator.MacroModel;
+import nl.tudelft.otsim.Utilities.TimeScaleFunction;
 
 /**
  * Macro Simulator for OpenTraffic
@@ -58,11 +62,14 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 		// Set used fundamental diagram
 		FD fd = new FDSmulders();
 		
-		// Set inflow at boundaries in (in vehicles per hour per lane)
-		double inflowBoundary = 2000;
+		// Set inflow at boundaries in (in vehicles per sec per lane)
+		double inflowBoundary = (2000.0/3600.0);
 		
 		//ArrayList<MacroCell> cells = new ArrayList<MacroCell>();
 		ArrayList<MacroCell> copySimPaths = new ArrayList<MacroCell>();
+		
+		Routes routes = new Routes();
+		TimeScaleFunction nrTripsPattern = new TimeScaleFunction();
 		
 		/*
 		 * It does make sense to first join successive roadway sections that
@@ -83,8 +90,12 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 				sp.setId(Integer.parseInt(fields[1]));
 				
 				for (int i = 2; i < fields.length; i++) {
+					if (fields[i].equals("from"))
+						sp.setConfigNodeIn(Integer.parseInt(fields[++i]));
+					if (fields[i].equals("to"))
+						sp.setConfigNodeOut(Integer.parseInt(fields[++i]));
 					if (fields[i].equals("speedlimit"))
-						sp.setVLim(Double.parseDouble(fields[++i]));
+						sp.setVLim(Double.parseDouble(fields[++i])/3.6);
 					if (fields[i].equals("lanes"))
 						sp.setWidth(3.5 * Double.parseDouble(fields[++i]));
 					else if (fields[i].equals("vertices")) {
@@ -115,12 +126,32 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 				} 
 				copySimPaths.add(sp.getId(),sp); 
 
+			} else if (fields[0].equals("TripPatternPath")) { 
+				nrTripsPattern = new TimeScaleFunction(fields[2]);
+			}
+			else if (fields[0].equals("Path:")) {
+    			//if (null != exportTripPattern)
+    			//	tripList.add(exportTripPattern);
+    			//exportTripPattern = new ExportTripPattern(flowGraph, classProbabilities);
+				
+        		ArrayList<Integer> route = new ArrayList<Integer>(); 
+        		for (int i = 3; i < fields.length; i++) {
+        			String field = fields[i];
+        			if (field.endsWith("a"))
+        				route.add(Integer.parseInt(field.substring(0, field.length() - 1)));
+        			if (! field.endsWith("a"))
+        				route.add(Integer.parseInt(field));
+        		}
+        		double routeProbability = Double.parseDouble(fields[1]);
+        		routes.addRoute(route, nrTripsPattern.getFactor(0)*routeProbability);
+        		//exportTripPattern.addRoute(route, routeProbability);
 			} else {
 				//throw new Exception("Don't know how to parse " + line);
 			}
 			
 			// TODO: write code to handle the not-yet-handled lines in the configuration
 		}
+		
 		// Now all macrocells are generated, link upstream and downstream macrocells together. 
 		for (MacroCell mc: copySimPaths) {
 			
@@ -166,12 +197,16 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 			}
 			snew.setWidth(sbegin.getWidth());
 			snew.setVLim(sbegin.getVLim());
-			
+			snew.setConfigNodeIn(sbegin.getConfigNodeIn());
+			snew.setConfigNodeOut(sbegin.getConfigNodeOut());
 			// if there is only one cell upstream of considered cell
 			while((snew.ups.size() == 1)) {
 				
 				MacroCell sp = snew.ups.get(0);
-				
+				if (sp.getConfigNodeOut() == 0 && snew.getConfigNodeIn() == 0) {
+					snew.setConfigNodeIn(sp.getConfigNodeIn());
+					sp.setConfigNodeOut(snew.getConfigNodeOut());
+				}
 				// test if cell upstream has the right nr of lanes and speedlimit
 				if (!(sp.downs.size() == 1) || (!(sp.getWidth() == snew.getWidth())) || (!(sp.getVLim() == snew.getVLim()))) {
 					
@@ -189,6 +224,11 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 						c.downs.remove(sp);
 						c.downs.add(snew);
 					}
+					int configNodeIn = sp.getConfigNodeIn();
+					if (configNodeIn != 0) {
+					snew.setConfigNodeIn(configNodeIn);
+					}
+					
 					// remove the upstream cell from to do list
 					todo.remove(new Integer(sp.getId()));
 				}
@@ -196,6 +236,10 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 			// test if cell downstream has the right nr of lanes and speedlimit
 			while((snew.downs.size() == 1)) {
 				MacroCell sp = snew.downs.get(0);
+				if (sp.getConfigNodeIn() == 0 && snew.getConfigNodeOut() == 0) {
+					snew.setConfigNodeOut(sp.getConfigNodeOut());
+					sp.setConfigNodeIn(snew.getConfigNodeIn());
+				}
 				if (!(sp.ups.size() == 1) || (!(sp.getWidth() == snew.getWidth())) || (!(sp.getVLim() == snew.getVLim()))) {
 					
 					break;
@@ -213,6 +257,9 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 						c.ups.remove(sp);
 						c.ups.add(snew);
 					}
+					if (sp.getConfigNodeOut() != 0) {
+					snew.setConfigNodeOut(sp.getConfigNodeOut());
+					}
 					// remove the downstream cell from todo list
 					todo.remove(new Integer(sp.getId()));
 				}
@@ -223,12 +270,19 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 			
 			
 		}
-		//System.out.println("joined cells: "+macroCells.toString());
+		System.out.println(routes.routes);
+		HashSet<Integer> nodesUsed = new HashSet<Integer>();
 		for (MacroCell m: macroCells) {
 			//System.out.println("Vertices pre-split: "+m.vertices.toString());
-			
+			System.out.println("Node at In: "+m.getConfigNodeIn());
+			System.out.println("Node at Out: "+m.getConfigNodeOut());
+			nodesUsed.add(m.getConfigNodeIn());
+			nodesUsed.add(m.getConfigNodeOut());
 		}
-		
+		System.out.println(nodesUsed);
+		routes.cleanRoutes(nodesUsed);
+		System.out.println(routes.routes);
+		System.out.println(routes.flows);
 		// Next step: split the joined cells into smaller cells of similar size
 		ArrayList<MacroCell> copyCells = new ArrayList<MacroCell>();
 		for (MacroCell m: macroCells) {
@@ -252,7 +306,7 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 			if (m.nodeIn == null) {
 				
 				if (m.ups.size() > 0) {
-					NodeInterior n = new NodeInterior(m.vertices.get(0));
+					NodeInteriorTampere n = new NodeInteriorTampere(m.vertices.get(0));
 					for (MacroCell c: m.ups.get(0).downs) {
 						n.cellsOut.add(c);
 						c.nodeIn = n;
@@ -266,7 +320,7 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 					nodes.add(n);
 				} else {
 					
-					NodeBoundaryIn n = new NodeBoundaryIn(m.vertices.get(0),inflowBoundary);
+					NodeBoundaryIn n = new NodeBoundaryIn(m.vertices.get(0),0);
 					n.cellsOut.add(m);
 					m.nodeIn = n;
 					nodes.add(n);
@@ -298,7 +352,40 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 				
 			}
 		}
-		
+		ArrayList<NodeInterior> junctionNodes = new ArrayList<NodeInterior>();
+		ArrayList<NodeBoundaryIn> inflowNodes = new ArrayList<NodeBoundaryIn>();
+		ArrayList<NodeBoundaryOut> outflowNodes = new ArrayList<NodeBoundaryOut>();
+		for (Node n: nodes) {
+			if ((n.cellsIn.size() != 1 || n.cellsOut.size() != 1) && (n.cellsOut.size()+n.cellsIn.size() != 0)) {
+			HashSet<Integer> nodeIds = new HashSet<Integer>();
+			
+			for(MacroCell up: n.cellsIn) {
+				nodeIds.add(up.getConfigNodeOut());
+			}
+			for(MacroCell down: n.cellsOut) {
+				nodeIds.add(down.getConfigNodeIn());
+			}
+			System.out.println(nodeIds);
+			if (nodeIds.size() == 1) {
+				if (n.cellsIn.size() != 0) {
+					n.setId(n.cellsIn.get(0).getConfigNodeOut());
+				} else { 
+					n.setId(n.cellsOut.get(0).getConfigNodeIn());
+				}
+				
+				if ((n.cellsIn.size() != 0 && n.cellsOut.size() != 0)) {
+					junctionNodes.add((NodeInterior) n);
+				} else if (n.cellsIn.size() == 0) {
+					inflowNodes.add((NodeBoundaryIn) n);
+				} else if (n.cellsIn.size() == 0) {
+					outflowNodes.add((NodeBoundaryOut) n);
+				}
+			} else {
+				throw new Error("Wrong references to nodes in adjacent cells");
+			}
+			}
+		}
+		System.out.println(junctionNodes);
 		// initialize all cells (e.g. determine parameters needed for simulation) and add to the model
 		
 		for (Node n: nodes) {
@@ -309,6 +396,7 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 			
 			
 		}
+		
 for (MacroCell m: macroCells) {
 			//System.out.println("Vertices1: "+m.vertices.toString());
 			m.smoothVertices(0.8);
@@ -324,6 +412,9 @@ for (MacroCell m: macroCells) {
 			model.addMacroCell(m);
 			
 		}
+		routes.setTurnFractions(junctionNodes);
+		routes.setInflowBoundaries(inflowNodes);
+		
 		for (MacroCell m: macroCells) {
 			//System.out.println("length:"+m.l);
 			//System.out.println("NodeIn: "+m.indexNodeIn);
@@ -412,9 +503,9 @@ class Stepper implements Step {
 			this.macroSimulator = macroSimulator;
 		}
 		
-	@Override
+	
 	public boolean step(double now) {
-    	System.out.println("step entered");
+    	//System.out.println("step entered");
     	Model model = macroSimulator.getModel();
     	//System.out.println(Double.toString(model.period));
     	//System.out.println(Double.toString(now));
@@ -422,7 +513,7 @@ class Stepper implements Step {
     	if (now >= model.period)
     		return false;
     	while (model.t() < now) {
-    		System.out.println("step calling run(1)");
+    		//System.out.println("step calling run(1)");
     		try {
     			//System.out.format(Main.locale, "Time is %.3f\r\n", now);
     			model.run(1);
@@ -436,5 +527,7 @@ class Stepper implements Step {
     	//System.out.println("step returning true");
 		return true;
 	}
+	
+	
 }
 }

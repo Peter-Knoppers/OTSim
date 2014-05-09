@@ -1,5 +1,6 @@
 package nl.tudelft.otsim.Simulators.MacroSimulator;
 
+
 import nl.tudelft.otsim.Simulators.SimulatedModel;
 
 
@@ -18,6 +19,10 @@ public class Model implements SimulatedModel {
     /** Maximum simulation period [s]. */
     public double period;
     
+    protected int nrStateVariables;
+    
+
+    
     public double getPeriod() {
 		return period;
 	}
@@ -29,15 +34,22 @@ public class Model implements SimulatedModel {
     protected java.util.ArrayList<MacroCell> cells = new java.util.ArrayList<MacroCell>();
     
     protected java.util.ArrayList<Node> nodes = new java.util.ArrayList<Node>();
+    
+    protected double[] state;
 	
-    public void init() {
+   public void init() {
         // Set attributes
-        k = 0;
+       /* k = 0;
         t = 0;
         cells = new java.util.ArrayList<MacroCell>();
-        nodes = new java.util.ArrayList<Node>();
+        nodes = new java.util.ArrayList<Node>();*/
+        
+	   nrStateVariables = cells.size();
+       state = new double[nrStateVariables];
+        
     }
-    
+  
+ 
 	public void run(int n) {
         // Simulate n steps
         //int i = 0;
@@ -59,7 +71,7 @@ public class Model implements SimulatedModel {
     		for (Node node: nodes ) {
     			node.calcFlux();
     			//
-    			/*if (node.nrIn + node.nrOut > 2) {
+    			/*if (node.nrIn + node.nrOut != 2) {
     				for (double v: node.fluxesIn) {
     					System.out.println("FluxIn node:" + v);
     				}
@@ -90,7 +102,27 @@ public class Model implements SimulatedModel {
 	public void addNode(Node m) {
 		nodes.add(m);
 	}
-	public String saveState() {
-		return null;
+	public String saveStateToString() {
+		String res = "[";
+		for (MacroCell c: cells) {
+			res = res + Double.toString(c.KCell) + ",";
+		}
+		res = res.substring(0, res.length()-1) + "]";
+		return res;
+	}
+	public double[] saveStateToArray() {
+		for (int i=0; i<cells.size(); i++) {
+			state[i] = cells.get(i).KCell;
+		}
+		return state;
+	}
+	public void restoreState(double[] array) {
+		if (array.length != nrStateVariables) {
+			throw new Error("Wrong number of state variables");
+		} else {
+		for (int i=0; i<cells.size(); i++) {
+			cells.get(i).KCell = array[i];
+		}
+		}
 	}
 }

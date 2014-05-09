@@ -18,6 +18,7 @@ abstract public class Node {
 	public double[] fluxesIn;
 	public double[] fluxesOut;
 	public double[][] turningRatio;
+	private int id;
 	
 	
 	public Node(Vertex loc) {
@@ -41,6 +42,18 @@ abstract public class Node {
 		turningRatio = new double[nrIn][nrOut];
 		setDefaultTurningRatio();
 		
+	}
+	/**
+	 * @return the id
+	 */
+	public int getId() {
+		return id;
+	}
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(int id) {
+		this.id = id;
 	}
 	public void draw(GraphicsPanel graphicsPanel) {
 		

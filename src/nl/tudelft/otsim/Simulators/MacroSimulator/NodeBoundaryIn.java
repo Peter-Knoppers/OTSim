@@ -16,6 +16,12 @@ public class NodeBoundaryIn extends Node {
 	public void setInflowPerLane(double in) {
 		inflowPerLane = in;
 	}
+	public void setInflow(double in) {
+		inflowPerLane = in/cellsOut.get(0).lanes;
+	}
+	public double  getInflow() {
+		return inflowPerLane/cellsOut.get(0).lanes;
+	}
 	public void calcFlux() {
 		
 		if (nrIn == 0 && nrOut == 1) {

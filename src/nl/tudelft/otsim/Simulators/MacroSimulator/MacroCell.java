@@ -80,6 +80,9 @@ public class MacroCell {
     
     public int indexNodeIn;
     public int indexNodeOut;
+    
+    private int configNodeIn;
+    private int configNodeOut;
 
     /** Destination number, NODESTINATION if no destination. */
     public int destination;
@@ -88,28 +91,28 @@ public class MacroCell {
     public int origin;
 
     //Traffic states
-    /** Flow in this cell. [veh/h or veh/s] */
+    /** Flow in this cell. [veh/s] */
     public double QCell;
     
-    /** Density in this cell. [veh/km or veh/m] */
-    public double KCell = 5;
+    /** Density in this cell. [veh/m] */
+    public double KCell;
     
     /** Average spacing in this cell. [km or m] */
-    public double SCell;
+    //public double SCell;
     
-    /** Average speed in this cell. [km/h or m/s] */
+    /** Average speed in this cell. [m/s] */
     public double VCell;
     
-    /** Flux into this cell. [veh/h or veh/s] */
+    /** Flux into this cell. [ veh/s] */
     public double FluxIn;
     
-    /** Flux out from this cell. [veh/h or veh/s] */
+    /** Flux out from this cell. [veh/s] */
     public double FluxOut;
     
-    /** Supply from this cell. [veh/h or veh/s] */
+    /** Supply from this cell. [veh/s] */
     public double Supply;
     
-    /** Demand out from this cell. [veh/h or veh/s] */
+    /** Demand out from this cell. [veh/s] */
     public double Demand;
     
     public double[] DemandTest;
@@ -117,16 +120,16 @@ public class MacroCell {
     public FD fd;
     
     // Parameters    
-    /** Legal speed limit [km/h]. */
-    public double vLim = 120;
+    /** Legal speed limit [m/s]. */
+    public double vLim = 120/3.6;
     
-    /** Legal critical density [veh/km]. */
-    public double kCri = 18;
+    /** Legal critical density [veh/m]. */
+    public double kCri = 0.018;
     
-    /** Legal jam density [veh/km]. */
-    public double kJam = 125;
+    /** Legal jam density [veh/m]. */
+    public double kJam = 0.125;
     
-    /** Legal flow capacity [veh/h/lane]. */
+    /** Legal flow capacity [veh/m/lane]. */
     public double qCap;
     
     public double[] FluxIn2;
@@ -165,8 +168,8 @@ public class MacroCell {
     }
     public void init() {
     	lanes = (int) (width/3.5);
-    	kCri = 18*lanes;
-    	kJam = 125*lanes;
+    	kCri = 0.018*lanes;
+    	kJam = 0.125*lanes;
     	qCap = fd.calcQcap(this);
     	KCell = 0;
     	QCell = calcQ(KCell);
@@ -260,6 +263,8 @@ public class MacroCell {
 			m.setWidth(this.width);
 			m.setVLim(this.vLim);
 			m.setId(new Random().nextInt());
+			m.setConfigNodeIn(this.configNodeIn);
+			m.setConfigNodeOut(this.configNodeOut);
 			
 			double res[] = this.calcPointAtDistance((i+1)*(this.l)/(nrParts));
 			//System.out.println(Arrays.toString(res));
@@ -380,7 +385,7 @@ public class MacroCell {
     	//Color color = getDensColor(KCell); 
     	//Color color = getDensColor(new Random().nextInt()); 
     	Color color = getVelocityColor(VCell); 
-    	graphicsPanel.setStroke((float) (5+(KCell/125)*15));
+    	graphicsPanel.setStroke((float) (5+(KCell/(kJam/lanes))*15));
 		graphicsPanel.setColor(color);
 		graphicsPanel.drawPolyLine(vertices);
    	
@@ -596,4 +601,28 @@ public class MacroCell {
     		vertices = copyVertices;
     	}
     }
+	/**
+	 * @return the configNodeIn
+	 */
+	public int getConfigNodeIn() {
+		return configNodeIn;
+	}
+	/**
+	 * @param configNodeIn the configNodeIn to set
+	 */
+	public void setConfigNodeIn(int configNodeIn) {
+		this.configNodeIn = configNodeIn;
+	}
+	/**
+	 * @return the configNodeOut
+	 */
+	public int getConfigNodeOut() {
+		return configNodeOut;
+	}
+	/**
+	 * @param configNodeOut the configNodeOut to set
+	 */
+	public void setConfigNodeOut(int configNodeOut) {
+		this.configNodeOut = configNodeOut;
+	}
 }

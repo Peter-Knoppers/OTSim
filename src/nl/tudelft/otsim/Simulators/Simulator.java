@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import nl.tudelft.otsim.Events.Scheduler;
 import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GUI.GraphicsPanelClient;
-import nl.tudelft.otsim.Simulators.MacroSimulator.Model;
+import nl.tudelft.otsim.Simulators.SimulatedModel;
 
 
 /**
@@ -51,6 +51,10 @@ public abstract class Simulator implements GraphicsPanelClient {
 	 */
 	abstract public Scheduler getScheduler();
 	
+	/**
+	 * This method shall return the {@link SimulatedModel} associated to this Simulator.
+	 * @return {@link SimulatedModel}; the Model of this Simulator
+	 */
 	abstract public SimulatedModel getModel();
 	
 	/**

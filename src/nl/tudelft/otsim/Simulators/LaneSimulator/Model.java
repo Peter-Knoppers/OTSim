@@ -651,4 +651,10 @@ public class Model implements SimulatedModel {
         /** Right direction. */
         RIGHT
     }
+
+	@Override
+	public String saveStateToString() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
