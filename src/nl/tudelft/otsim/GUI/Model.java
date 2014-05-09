@@ -288,26 +288,4 @@ public class Model implements Storable {
 		modified = true;
 	}
 
-    /**
-     * Create a string representation of the lanes and the connectivity between
-     * the lanes in the Network and the traffic demand
-     * @param trafficDemand BLABLA
-     * @return String; Description of the Network and the traffic demand
-     *//*
-    public static HashMap<Node, Double> createTripsByNode(TrafficDemand trafficDemand) {
-    	HashMap<Node, Double> tripsByNode = new HashMap<Node, Double> ();
-    	for (TripPattern tripPattern : trafficDemand.getTripPatternList())   {
-            for (TripPatternPath tripPatternPath : tripPattern.getTripPatternPathList())   {
-            	double oldTrips = 0;
-            	Double trips = tripPatternPath.getNumberOfTrips();
-				Node start = tripPatternPath.getPathList().get(0).getNodeList().get(0);
-				if (!(tripsByNode.get(start) == null))  {
-					oldTrips = tripsByNode.get(start);
-				}
-	            tripsByNode.put(start, oldTrips + trips);
-			}
-		}
-		return tripsByNode;
-	}*/
-    
 }

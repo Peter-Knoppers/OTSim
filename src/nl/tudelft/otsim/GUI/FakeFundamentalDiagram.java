@@ -52,9 +52,9 @@ public class FakeFundamentalDiagram implements SimulatedObject, Step {
 	}
 
 	@Override
-	public boolean step(double now) {
+	public Scheduler.SchedulerState step(double now) {
 		scheduler.enqueueEvent(now + intervalTime, this);
-		return true;
+		return null;
 	}
 
 	Circle circle = null;

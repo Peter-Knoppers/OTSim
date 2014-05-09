@@ -139,11 +139,10 @@ public class SimulatedTrafficLightController implements Step, ShutDownAble {
 	/**
 	 * Execute one simulation step of this SimulatedTrafficLightController.
 	 * @param now double; the current simulation time.
-	 * @return Boolean; true if no serious problems occurred; false if serious
-	 * problems occurred an simulation should be stopped
+	 * @return Scheduler.SchedulerState; indication whether simulation can continue
 	 */
 	@Override
-	public boolean step(double now) {
+	public Scheduler.SchedulerState step(double now) {
 		String newColors = "";
 		TreeSet<String> trafficLightNames = new TreeSet<String>();
 		for (SimulatedTrafficLight stl : trafficLights)
@@ -197,7 +196,7 @@ public class SimulatedTrafficLightController implements Step, ShutDownAble {
 					newColors += "y";
 				else {
 					WED.showProblem(WED.ENVIRONMENTERROR, "Cannot determine color for light %s", subFields[0]);
-					return false;
+					return Scheduler.SchedulerState.SimulatorError;
 				}
 			}
 		} else {	// Communicate with external control program
@@ -251,10 +250,10 @@ public class SimulatedTrafficLightController implements Step, ShutDownAble {
 			pos++;
 		}
 		scheduler.enqueueEvent(now + 0.1, this);
-		return true;
+		return null;
 	}
 	
-	private boolean killConnection() {
+	private Scheduler.SchedulerState killConnection() {
 		try {
 			if (null != serverReader)
 				serverReader.close();
@@ -268,7 +267,7 @@ public class SimulatedTrafficLightController implements Step, ShutDownAble {
 		serverReader = null;
 		serverWriter = null;
 		clientSocket = null;
-		return false;
+		return Scheduler.SchedulerState.SimulatorError;
 	}
 
 	@Override

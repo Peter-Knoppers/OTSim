@@ -35,6 +35,7 @@ import javax.swing.text.MaskFormatter;
 
 import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GUI.Main;
+import nl.tudelft.otsim.GUI.SchedulerController;
 import nl.tudelft.otsim.GUI.WED;
 import nl.tudelft.otsim.Simulators.ShutDownAble;
 import nl.tudelft.otsim.Simulators.Simulator;
@@ -43,7 +44,7 @@ import nl.tudelft.otsim.Simulators.MacroSimulator.MacroSimulator;
 import nl.tudelft.otsim.Simulators.RoadwaySimulator.RoadwaySimulator;
 
 /**
- * @author Peter Knoppers
+ * Scheduler for OTSim.
  * <br />
  * Maintain a queue of time-scheduled events and call the {@link Step#step}
  * method when execution is due.
@@ -54,9 +55,10 @@ import nl.tudelft.otsim.Simulators.RoadwaySimulator.RoadwaySimulator;
  * of execution is deterministic; (determined by the hashCode of the
  * scheduled object). Simulators should (aim to) not depend on the execution
  * order of simultaneously scheduled events.
+ * 
+ * @author Peter Knoppers
  */
-public class Scheduler extends JPanel implements ActionListener, PropertyChangeListener {
-	private static final long serialVersionUID = 1L;
+public class Scheduler implements ActionListener {
 	private static final int timerMillis = 100;
 	private TreeSet<QueuedEvent> queue = new TreeSet<QueuedEvent>();
 	Timer timer = new Timer(timerMillis, this);
@@ -66,13 +68,36 @@ public class Scheduler extends JPanel implements ActionListener, PropertyChangeL
 	private String configuration;
 	GraphicsPanel graphicsPanel;
 	private double simulatedTime = 0;
-	private JButton buttonRealTime;
-	private JButton buttonFast;
-	private JButton buttonStop;
 	private FastRun fastRun = null;
-	private Clock clock;
-	private JFormattedTextField endTime;
 	private double stopTime = 0;
+	private SchedulerController schedulerController = null;
+	private SchedulerState schedulerState = SchedulerState.Stopped;
+	
+	/**
+	 * Possible states of a Scheduler
+	 * 
+	 * @author Peter Knoppers
+	 */
+	public enum SchedulerState {
+		/** Idle */
+		Stopped,
+		/** Fast running */
+		FastRunning,
+		/** Running at real-time speed (if available CPU power allows) */
+		RealTimeRunning,
+		/** Execute one event from the queue */
+		ExecuteSingleEvent,
+		/** Restarting using previously obtained simulation configuration (if there is one) */
+		Restart,
+		/** Reloading (re-)obtain the simulation configuration */
+		Reload,
+		/** Simulation end time reached */
+		EndTimeReached,
+		/** Simulation stop at time reached */
+		StopTimeReached,
+		/** Simulator error prevents simulating further */
+		SimulatorError,
+	};
 		
 	/** 
 	 * Create a scheduler for a simulator.
@@ -97,45 +122,7 @@ public class Scheduler extends JPanel implements ActionListener, PropertyChangeL
 		this.simulatorType = simulatorType;
 		this.configuration = configuration;
 		this.graphicsPanel = graphicsPanel;
-		setLayout(new GridBagLayout());
-		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.gridx = 0;
-		gbc.gridy = 0;
-		gbc.weightx = 0.5;
-		gbc.fill = GridBagConstraints.HORIZONTAL;
-        add(makeButton("Step", "Simulate one step", "Step", "Last_recor.png"), gbc);
-        gbc.gridy++;
-        add(buttonStop = makeButton("Stop", "Stop simulation", "Stop", "Stop.png"), gbc);
-        gbc.gridy++;
-        add(buttonRealTime = makeButton("Real time", "Try to run the simulator at real-time speed", "RealTime", "Play.png"), gbc);
-        gbc.gridy++;
-        add(buttonFast = makeButton("Fast", "Run as fast as possible", "RunFast", "Fast-forward.png"), gbc);
-        gbc.gridy++;
-        add(makeButton("Restart", "Reset the simulator", "Restart", "Rewind.png"), gbc);
-        gbc.gridy++;
-        add(makeButton("Reload", "Reload the configuration and ", "Reload", "Refresh.png"), gbc);
-        gbc.gridy++;
-        add(clock = new Clock(this), gbc);
-        gbc.gridy++;        
-        RegexFormatter df = new RegexFormatter("\\d\\d:[0-5]\\d:[0-5]\\d\\.\\d\\d\\d");
-        endTime = new JFormattedTextField(df);
-        MaskFormatter timeMask;
-		try {
-			timeMask = new MaskFormatter("##:##:##.###");
-			timeMask.setPlaceholderCharacter('0');
-			timeMask.setAllowsInvalid(false);
-	        timeMask.install(endTime);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-		// wrap it with a caption in a sub-panel
-		JLabel caption = new JLabel("Stop at:");
-		JPanel subPanel = new JPanel();
-		subPanel.add(caption);
-		subPanel.add(endTime);
-        add(subPanel, gbc);
-        endTime.addPropertyChangeListener(this);
-        if (null != configuration)
+       if (null != configuration)
         	restartSimulator();
 	}
 	
@@ -201,34 +188,7 @@ public class Scheduler extends JPanel implements ActionListener, PropertyChangeL
 			return String.format("%.3f: %s", timeDue, simObject.toString());
 		}
 	}
-	
-    /**
-     * Create a JButton and initialize some of its properties
-     * @param caption String; caption of the JButton
-     * @param toolTipText String toolTipText of the JButton. If null, no
-     * toolTipText is set
-     * @param actionCommand String; actionCommand of the JButton. If non-null
-     * <code>this</code> is added to the ActionListeners of the JButton
-     * @return JButton; the newly created JButton
-     */
-    private JButton makeButton (String caption, String toolTipText, String actionCommand, String iconName) {
-    	JButton button = new JButton(caption);
-    	if (null != toolTipText)
-    		button.setToolTipText(toolTipText);
-    	if (null != actionCommand) {
-    		button.setActionCommand(actionCommand);
-    		button.addActionListener(this);
-    	}
-        // Try to load the image from the resources
-        String imgLocation = "/nl/tudelft/otsim/Resources/" + iconName;
-        java.net.URL imageURL = getClass().getResource(imgLocation);
-        if (imageURL != null)
-            button.setIcon(new ImageIcon(imageURL, caption));
-        button.setHorizontalAlignment(SwingConstants.LEFT);
-        button.setIconTextGap(30);
-    	return button;
-    }
-  
+	  
 	/**
 	 * Retrieve a list of all scheduled events ordered by time due.
 	 * @return ArrayList&lt;Object&gt; of all scheduled event objects
@@ -309,8 +269,9 @@ public class Scheduler extends JPanel implements ActionListener, PropertyChangeL
 	 * The simulator is expected (but not required) to enqueue events during the
 	 * execution of stepUpTo.
 	 */
-	public void startRealTime() {
+	private void startRealTime() {
 		zeroTime = (new Date()).getTime() - (long) (simulatedTime * 1000);
+		changeState(SchedulerState.RealTimeRunning);
 		timer.start();
 	}
 	
@@ -321,29 +282,60 @@ public class Scheduler extends JPanel implements ActionListener, PropertyChangeL
 		timer.stop();
 	}
 	
+	private volatile boolean singleStepActive = false;
 	/**
 	 * Execute the next scheduled event of the simulator
-	 * @return Boolean; true if simulation may continue; false if an error was
-	 * detected and simulation should be stopped
+	 * @return SchedulerState; null if simulation may continue; SimulatorError if an error was
+	 * detected and simulation should be stopped; EndTimeReached if simulation has ended normally
 	 */
-	public boolean singleStep() {
-		runningSimulation.preStep();
-		boolean result = stepSimulator();
-		runningSimulation.postStep();
-		clock.repaint();
+	private SchedulerState singleStep() {
+		SchedulerState result = null;
+		if (singleStepActive)
+			return null;	// Yes; the caller may try again; later
+		try {
+			singleStepActive = true;
+			changeState (SchedulerState.ExecuteSingleEvent);
+			runningSimulation.preStep();
+			result = stepSimulator();
+			runningSimulation.postStep();
+			changeState (SchedulerState.Stopped);
+			if (null != schedulerController)
+				schedulerController.schedulerClockChanged(simulatedTime);
+		}
+		finally 
+		{
+			singleStepActive = false;
+		}
 		return result;
 	}
 
-	private boolean stepSimulator() {
+	private SchedulerState stepSimulator() {
 		Step stepObject = deQueueEvent();
 		if (null == stepObject)
-			return false;
+			return SchedulerState.EndTimeReached;
 		return stepObject.step(simulatedTime);
 	}
 	
 	/**
-	 * Handle an event.
+	 * Set the state of this Scheduler.
+	 * @param newState SchedulerState; the new state of this Scheduler
 	 */
+	public void setState(SchedulerState newState) {
+		endFastRun();
+		stopRealTime();
+		changeState(SchedulerState.Stopped);
+		switch (newState) {
+		case Stopped: /* already stopped */ break;
+		case FastRunning: fastRun = new FastRun(this, 1); fastRun.start(); break;
+		case RealTimeRunning: startRealTime(); break;
+		case ExecuteSingleEvent: singleStep(); break;
+		case Restart: restartSimulator(); break;
+		case Reload: reloadSimulator(); break;
+		case EndTimeReached: changeState(newState); break;
+		case StopTimeReached: /* already stopped */ break;
+		case SimulatorError: changeState(newState); break;
+		}
+	}
 	@Override
 	public void actionPerformed(ActionEvent actionEvent) {
 		String command = actionEvent.getActionCommand();
@@ -351,31 +343,7 @@ public class Scheduler extends JPanel implements ActionListener, PropertyChangeL
 			timerTick();
 			return;
 		}
-		//System.out.println("actionPerformed: " + command);
-		endFastRun();
-		stopRealTime();
-		buttonRealTime.setEnabled(true);
-		buttonFast.setEnabled(true);
-		buttonStop.setEnabled(true);
-		if (command.equals("Stop"))
-			buttonStop.setEnabled(false);
-		else if (command.equals("RealTime")) {
-			buttonRealTime.setEnabled(false);
-			startRealTime();
-		} else if (command.equals("RunFast")) {
-			buttonFast.setEnabled(false);
-			fastRun = new FastRun(this, 1);
-			fastRun.start();
-		} else if (command.equals("Step")) {
-			singleStep();
-			buttonStop.setEnabled(false);
-		} else if (command.equals("Restart"))
-			restartSimulator();
-		else if (command.equals("Reload"))
-			reloadSimulator();
-		else
-			throw new Error("Unhandled event: " + command);
-        graphicsPanel.repaint();
+		throw new Error("Unhandled event: " + command);
 	}
 	
 	/**
@@ -384,13 +352,14 @@ public class Scheduler extends JPanel implements ActionListener, PropertyChangeL
 	 * @return Boolean; true if no errors occurred in the simulator; false if
 	 * the simulator reported a fatal error (simulation could not continue)
 	 */
-	public boolean stepUpTo(double timeLimit) {
+	public SchedulerState stepUpTo(double timeLimit) {
 		runningSimulation.preStep();
-		boolean result = true;
-		while (result && eventDue(timeLimit))
+		SchedulerState result = null;
+		while ((null == result) && eventDue(timeLimit))
 			result = stepSimulator();
 		runningSimulation.postStep();
-		clock.repaint();
+		if (null != schedulerController)
+			schedulerController.schedulerClockChanged(simulatedTime);
 		return result;
 	}
 	
@@ -400,20 +369,28 @@ public class Scheduler extends JPanel implements ActionListener, PropertyChangeL
 		double stepUpTo = (tickStarted.getTime() - zeroTime) / 1000f;
 		if ((stepUpTo >= stopTime) && (simulatedTime < stopTime))
 			stepUpTo = stopTime;
-		boolean result = stepUpTo(stepUpTo);
-		if (result && (stepUpTo != stopTime)) {
+		SchedulerState result = stepUpTo(stepUpTo);
+		if ((null == result) && (stepUpTo == stopTime))
+			result = SchedulerState.StopTimeReached;
+		if ((null == result) && (stepUpTo != stopTime)) {
 			timer.start();
 			graphicsPanel.repaint();
-		} else
-	        buttonStop.doClick();
+		} else if (null != result)
+			changeState(result);
 	}
 	
 	private void endFastRun() {
 		if (null != fastRun) {
 			//System.out.println("Ending fastRun: thread isAlive: " + (fastRun.isAlive() ? "true" : "false") + "; sending interrupt");
-			fastRun.interrupt();
+			try {
+				fastRun.interrupt();
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+			//System.out.println("Ending fastRun: after sending interrupt thread isAlive: " + (fastRun.isAlive() ? "true" : "false") + "; calling join");
 			try {
 				fastRun.join();
+				//System.out.println("Join returned");
 			} catch (InterruptedException e) {
 				WED.showProblem(WED.ENVIRONMENTERROR, "Caught a problem trying to stop the simulator\r\n%s", WED.exeptionStackTraceToString(e));
 			}
@@ -425,75 +402,63 @@ public class Scheduler extends JPanel implements ActionListener, PropertyChangeL
 	class FastRun extends Thread {
 		private final Scheduler scheduler;
 		private final double refreshInterval;
-		private boolean shutDown = false;
+		private volatile boolean shutDown = false;
 		
 		public FastRun(Scheduler scheduler, double refreshInterval) {
 			this.scheduler = scheduler;
 			this.refreshInterval = refreshInterval;
-			//System.out.println("Created thread");
+			changeState (SchedulerState.FastRunning); 
 		}
 		
 		@Override
 		public void run() {
+			SchedulerState reasonForStopping = null;
 			while (! shutDown) {
 				double startTime = scheduler.simulatedTime;
 				double timeLimit = startTime + refreshInterval;
 				if ((timeLimit >= stopTime) && (simulatedTime < stopTime))
 					timeLimit = stopTime;
 				runningSimulation.preStep();
-				boolean result = true;
-				while (result && eventDue(timeLimit)) {
+				while ((null == reasonForStopping) && eventDue(timeLimit)) {
 					if (interrupted()) {
+						System.out.println("FastRun received interrupt when about to step the simulator)");
 						shutDown = true;
-						//System.out.println("thread detects interrupted (1)");
 						break;
 					}
-					result = stepSimulator();
+					reasonForStopping = stepSimulator();
+					if (null != reasonForStopping)
+						System.out.println("StepSimulator returned " + reasonForStopping);
 				}
 				runningSimulation.postStep();
-				clock.repaint();
+				if (null != schedulerController)
+					schedulerController.schedulerClockChanged(simulatedTime);
 				graphicsPanel.repaint(true);
-				if (! result)
+				if (reasonForStopping != null) {
 					break;
-				// Painting CANNOT complete while the scheduler is waiting for this thread to shut down
+				}
 				while((! shutDown) && (! graphicsPanel.paintComplete())) {
+					// Painting CANNOT complete while the scheduler is waiting for this thread to shut down
 					if (interrupted()) {
+						System.out.println("FastRun received interrupt waiting for paintComplete");
 						shutDown = true;
-						//System.out.println("thread detects interrupted (2)");
 						break;
 					}
 					try {
-						sleep(10);
+						sleep(10);	// 0.01 seconds
 					} catch (InterruptedException e) {
 						shutDown = true;
 					}
 				}
 				if (timeLimit == stopTime) {
-					//System.out.println("Stop time reached; posting \"Stop\" event");
-					/*
-					 * This is not simple!
-					 * We want to simulate a click on the stop button. Calling
-					 * the doClick method of the button directly blocks until
-					 * the actionPerformed in the Scheduler is done. 
-					 * If we call doClick directly this (fastRun) thread will
-					 * be blocked at the time that the GUI thread sends the
-					 * Interrupt to stop this fastRun thread. This results in
-					 * an InterruptedException in the GUI thread and this
-					 * fastRun thread won't be "ready" for join()ing, ever.
-					 * The solution (found after hours of experimenting) is to
-					 * create another thread to perform the click on the stop 
-					 * button, so this fastRun thread is not blocked and will
-					 * continue to run and become ready to be join()ed. 
-					 */
-			        java.awt.EventQueue.invokeLater(new Runnable() {
-			            @Override
-						public void run() {
-			            	buttonStop.doClick();
-			            }});
-					break;
+					changeState (SchedulerState.StopTimeReached);
+					shutDown = true;
 				}
 			}
-			//System.out.println("FastRun thread shutting down; waiting to be join()-ed");
+			if (null != schedulerController) {
+				schedulerController.schedulerClockChanged(simulatedTime);
+				if (null != reasonForStopping)
+					changeState(reasonForStopping);
+			}
 		}
 	}
 	
@@ -521,18 +486,29 @@ public class Scheduler extends JPanel implements ActionListener, PropertyChangeL
 	private void restartSimulator() {
 		killSimulator();
 		clear();
+		changeState(SchedulerState.Stopped);
         try {
 			runningSimulation = createSimulator(simulatorType, configuration, this);
 		} catch (Exception e) {
 			WED.showProblem(WED.ENVIRONMENTERROR, "Could not start simulator:\r\n%s", WED.exeptionStackTraceToString(e));
 		}
         simulatedTime = 0;
-        buttonStop.setEnabled(false);
+        changeState (SchedulerState.Stopped);
         graphicsPanel.setClient(runningSimulation);	// don't you forget it!
         graphicsPanel.repaint();
-        clock.repaint();
+		if (null != schedulerController)
+			schedulerController.schedulerClockChanged(simulatedTime);
 	}
 	
+	private void changeState(SchedulerState newState) {
+		schedulerState = newState;
+		if (null != schedulerController) {
+			schedulerController.schedulerStateChanged();
+		}
+        graphicsPanel.repaint();
+
+	}
+
 	/**
 	 * Stop the running simulation and kill all sub-processes.
 	 */
@@ -547,100 +523,14 @@ public class Scheduler extends JPanel implements ActionListener, PropertyChangeL
 		restartSimulator();
 	}
 	
-	class Clock extends JComponent {
-		private static final long serialVersionUID = 1L;
-		private final Scheduler scheduler;
-		private Dimension preferredSize = new Dimension(150, 36);
-		private Icon icon = null;
-		boolean fontSizeSet = false;
-		
-		public Clock(Scheduler scheduler) {
-			this.scheduler = scheduler;
-	        String imgLocation = "/resources/" + "Clock.png";
-	        java.net.URL imageURL = getClass().getResource(imgLocation);
-	        if (imageURL != null)
-	            icon = new ImageIcon(imageURL);
-		}
-		
-		@Override
-		public void paintComponent (Graphics g) {
-			double time = scheduler.getSimulatedTime() + 0.0005;
-			int seconds = (int) Math.floor(time);
-			int milliSeconds = (int) Math.floor((time - seconds) * 1000);
-			String caption = String.format("%02d:%02d:%02d.%03d", seconds / 3600, seconds / 60 % 60, seconds % 60, milliSeconds);
-			g.setColor(Color.BLACK);
-			int fontSize = Math.min(getWidth() / 8, getHeight() / 2);
-			Font font = new Font("SansSerif", Font.PLAIN, fontSize);
-			g.setFont(font);
-			Graphics2D g2d = (Graphics2D) g;
-			FontMetrics fm = g2d.getFontMetrics();
-			Rectangle2D r = fm.getStringBounds(caption,  g2d);
-			int offset;
-			if (null != icon) {
-				final int separation = 10;	// pixels
-				int totalWidth = icon.getIconWidth() + (int) r.getWidth() + separation;
-				offset = (getWidth() - totalWidth) / 2;
-				icon.paintIcon(this, g, offset, (getHeight() - icon.getIconHeight()) / 2);
-				offset += icon.getIconWidth() + separation;
-			} else
-				offset = (int) ((getWidth() - r.getWidth()) / 2);
-			g.drawString(caption, offset, (int) ((getHeight() - r.getHeight()) / 2) + fm.getAscent());
-			if (! fontSizeSet) {
-				scheduler.endTime.setFont(font);
-				scheduler.revalidate();
-				fontSizeSet = true;
-			}
-		}
-		
-		@Override
-		public Dimension getPreferredSize() {
-			return preferredSize;
-		}
-		
-	}
-
-	@Override
-	public void propertyChange(PropertyChangeEvent arg0) {
-		Object value = endTime.getValue();
-		if (null != value) {
-			//System.out.println("value of endTime is " + value);
-			String valueString = (String) value;
-			String fields[] = valueString.split("[:\\.]");
-			int hours = Integer.parseInt(fields[0]);
-			int minutes = Integer.parseInt(fields[1]);
-			int seconds = Integer.parseInt(fields[2]);
-			int millis = Integer.parseInt(fields[3]);
-			stopTime = millis / 1000d + seconds + minutes * 60 + hours * 3600; 
-		}
+	/**
+	 * Set/Change the time at which this Scheduler must stop the simulation.
+	 * @param newStopTime Double; the new end time [s]
+	 */
+	public void setStopTime(double newStopTime) {
+		stopTime = newStopTime;
 	}
 	
-	/** 
-	 * RegexFormatter.
-	 * <br /> Derived from <a href="http://www.java2s.com/Tutorial/Java/0240__Swing/RegexFormatterwithaJFormattedTextField.htm">http://www.java2s.com/Tutorial/Java/0240__Swing/RegexFormatterwithaJFormattedTextField.htm</a>
-	 */
-	class RegexFormatter extends DefaultFormatter {
-		private static final long serialVersionUID = 1L;
-		private Pattern pattern;
-		
-		/**
-		 * Create a new RegexFormatter.
-		 * @param pattern String; regular expression pattern that defines what
-		 * this RexexFormatter will accept
-		 * @throws PatternSyntaxException
-		 */
-		public RegexFormatter(String pattern) throws PatternSyntaxException {
-			this.pattern = Pattern.compile(pattern);
-		}
-		
-		@Override
-		public Object stringToValue(String text) throws ParseException {
-			Matcher matcher = pattern.matcher(text);
-			if (matcher.matches())
-				return super.stringToValue(text);
-			throw new ParseException("Pattern did not match", 0);
-		}
-	}
-
 	/**
 	 * Run a complete simulation and terminate.
 	 */
@@ -648,5 +538,31 @@ public class Scheduler extends JPanel implements ActionListener, PropertyChangeL
 		stepUpTo(Double.MAX_VALUE);
 		Main.mainFrame.actionPerformed(new ActionEvent(Main.mainFrame, 0, "Exit"));
 	}
-		
+	
+	/**
+	 * Retrieve the current state of this Scheduler.
+	 * @return {@link SchedulerState}; the current state of this Scheduler
+	 */
+	public SchedulerState getState() {
+		return schedulerState;
+	}
+
+	/**
+	 * Retrieve the {@link SchedulerController} of this Scheduler.
+	 * @return {@link SchedulerController}; the SchedulerController of this
+	 * Scheduler, or null if this Scheduler does not have a
+	 * SchedulerController
+	 */
+	public JPanel getSchedulerController() {
+		return schedulerController;
+	}
+
+	/**
+	 * Set/Change the {@link SchedulerController} for this Scheduler
+	 * @param newSchedulerController {@link SchedulerController} the new
+	 * SchedulerController of this Scheduler (may be null)
+	 */
+	public void setSchedulerController(SchedulerController newSchedulerController) {
+		schedulerController = newSchedulerController;		
+	}
 }

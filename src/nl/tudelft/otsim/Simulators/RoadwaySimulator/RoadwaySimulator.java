@@ -9,7 +9,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.swing.JCheckBox;
+import javax.swing.JPanel;
 
 import nl.tudelft.otsim.Events.Scheduler;
 import nl.tudelft.otsim.Events.Step;
@@ -52,17 +54,20 @@ public class RoadwaySimulator extends Simulator implements ActionListener {
 	 */
 	public RoadwaySimulator(String networkDescription, GraphicsPanel graphicsPanel, Scheduler scheduler) {
 		this.scheduler = scheduler;
-		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.gridx = 0;
-		gbc.gridy = 20;	// any value higher than number of rows in Scheduler will do
-		gbc.fill = GridBagConstraints.HORIZONTAL;
-		drawNetworkBackground = new JCheckBox("Draw background");
-		drawNetworkBackground.addActionListener(this);
-		scheduler.add(drawNetworkBackground, gbc);
-		gbc.gridy++;
-		drawScans = new JCheckBox("Draw scans");
-		drawScans.addActionListener(this);
-		scheduler.add(drawScans, gbc);
+		JPanel controlPanel = scheduler.getSchedulerController();
+		if (null != controlPanel) {
+			GridBagConstraints gbc = new GridBagConstraints();
+			gbc.gridx = 0;
+			gbc.gridy = 20;	// any value higher than number of rows in Scheduler will do
+			gbc.fill = GridBagConstraints.HORIZONTAL;
+			drawNetworkBackground = new JCheckBox("Draw background");
+			drawNetworkBackground.addActionListener(this);
+			controlPanel.add(drawNetworkBackground, gbc);
+			gbc.gridy++;
+			drawScans = new JCheckBox("Draw scans");
+			drawScans.addActionListener(this);
+			controlPanel.add(drawScans, gbc);
+		}
 		String[] lines = networkDescription.split("\n");
 		for (String line : lines) {
 			String fields[] = line.split("\t");
@@ -304,8 +309,9 @@ class BorderOutLine implements SimulatedObject, Step {
 	}
 	
 	@Override
-	public boolean step(double now) {
-		return false;
+	public Scheduler.SchedulerState step(double now) {
+		// This method should never be scheduled and never be called
+		return Scheduler.SchedulerState.SimulatorError;
 	}
 
 	@Override
