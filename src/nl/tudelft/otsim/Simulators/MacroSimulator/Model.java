@@ -1,8 +1,11 @@
 package nl.tudelft.otsim.Simulators.MacroSimulator;
 
+import nl.tudelft.otsim.Simulators.SimulatedModel;
 
 
-public class Model {
+
+public class Model implements SimulatedModel {
+	
     /** Time step number. Always starts as 0. */
     protected int k;
     
@@ -14,6 +17,14 @@ public class Model {
     
     /** Maximum simulation period [s]. */
     public double period;
+    
+    public double getPeriod() {
+		return period;
+	}
+
+	public void setPeriod(double period) {
+		this.period = period;
+	}
     
     protected java.util.ArrayList<MacroCell> cells = new java.util.ArrayList<MacroCell>();
     
@@ -33,9 +44,9 @@ public class Model {
 		//System.out.println("testrun");
     	for (int nn = 0; (nn < n) && (t < period); nn++) {
     		//System.out.println("test");
-    		java.util.ArrayList<MacroCell> tmp2 = new java.util.ArrayList<MacroCell>(cells);
+    		//java.util.ArrayList<MacroCell> tmp2 = new java.util.ArrayList<MacroCell>(cells);
     		//System.out.println("size Arraylist: " + Integer.toString(tmp2.size()));
-    		for (MacroCell c : tmp2) {
+    		for (MacroCell c : cells) {
     			//System.out.println("ID:\t" + Integer.toString(c.id()));
     			//System.out.println(Double.toString(c.getK_r()));
     			//System.out.println(Double.toString(c.getV_r()));
@@ -58,7 +69,7 @@ public class Model {
     				
     			}*/
     		}
-    		for (MacroCell c2: tmp2) {
+    		for (MacroCell c2: cells) {
     			 c2.calcFluxOut();
     			 c2.calcFluxIn();
     			 c2.updateDensity();
@@ -78,5 +89,8 @@ public class Model {
 	}
 	public void addNode(Node m) {
 		nodes.add(m);
+	}
+	public String saveState() {
+		return null;
 	}
 }
