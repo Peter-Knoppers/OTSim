@@ -77,10 +77,13 @@ public class SimpleVehicle implements SimulatedObject, Step{
 	}
 	
 	@Override
-	public boolean step(double time) {
+	public Scheduler.SchedulerState step(double time) {
 		scanTrail = null;
 		scanTime = time;
-		return step(time, roadwaySimulator.borders(), roadwaySimulator.nearbyVehicles(new Point2D.Double(0, 0), 999999d), roadwaySimulator.redOrYellowTrafficLights());
+		if (step(time, roadwaySimulator.borders(), roadwaySimulator.nearbyVehicles(new Point2D.Double(0, 0), 999999d), roadwaySimulator.redOrYellowTrafficLights()))
+			return null;
+		return Scheduler.SchedulerState.SimulatorError;
+		
 	}
 
 	private void updateState(double nextStepDue, double acceleration, double curvedness) {
@@ -349,10 +352,10 @@ public class SimpleVehicle implements SimulatedObject, Step{
 		}
 
 		@Override
-		public boolean step(double time) {
+		public Scheduler.SchedulerState step(double time) {
 			System.out.println("DetectorActivator: time is " + scheduler.getSimulatedTime() + "; adding vehicle " + sv.toString() + " to detector " + detector.toString());
 			detector.addVehicle(sv);
-			return true;
+			return null;
 		}
 
 	}

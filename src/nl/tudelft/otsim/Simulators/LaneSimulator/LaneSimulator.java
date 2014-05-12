@@ -1174,11 +1174,11 @@ class Stepper implements Step {
 	}
 	
 	@Override
-	public boolean step(double now) {
+	public Scheduler.SchedulerState step(double now) {
     	//System.out.println("step entered");
     	Model model = laneSimulator.getModel();
     	if (now >= model.period)
-    		return false;
+    		return Scheduler.SchedulerState.EndTimeReached;
     	while (model.t < now) {
     		//System.out.println("step calling run(1)");
     		try {
@@ -1186,13 +1186,13 @@ class Stepper implements Step {
     			model.run(1);
     		} catch (RuntimeException e) {
     			WED.showProblem(WED.ENVIRONMENTERROR, "Error in LaneSimulator:\r\n%s", WED.exeptionStackTraceToString(e));
-    			return false;
+    			return Scheduler.SchedulerState.SimulatorError;
     		}
     	}
     	// re-schedule myself
     	laneSimulator.getScheduler().enqueueEvent(model.t + model.dt, this);
     	//System.out.println("step returning true");
-		return true;
+		return null;
 	}
 	
 }

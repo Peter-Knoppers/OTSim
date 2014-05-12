@@ -1,5 +1,7 @@
 package nl.tudelft.otsim.Events;
 
+import nl.tudelft.otsim.Events.Scheduler.SchedulerState;
+
 /**
  * Interface for objects that must be stepped by the Scheduler.
  * 
@@ -12,5 +14,5 @@ public interface Step {
 	 * @return Boolean; true if no fatal problems occurred; false if some
 	 * problem occurred and further simulation is not possible or sensible
 	 */
-	public boolean step(double now);
+	public SchedulerState step(double now);
 }

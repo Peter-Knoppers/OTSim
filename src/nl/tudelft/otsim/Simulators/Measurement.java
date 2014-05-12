@@ -428,7 +428,7 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 	}
 
 	@Override
-	public boolean step(double now) {
+	public Scheduler.SchedulerState step(double now) {
 		if (now > timeRange)
 			timeRange = now;
 		for (SimulatedObject vehicle : simulator.SampleMovables()) {
@@ -478,7 +478,7 @@ public class Measurement extends JFrame implements Step, SimulatedObject, XYData
 		if (0 == now % timeGranularity)
 			reGraph();
 		scheduler.enqueueEvent(now + 1, this);
-		return true;
+		return null;
 	}
 	
 	private void reGraph() {

@@ -130,18 +130,19 @@ public class Main extends JPanel implements ActionListener {
 		System.out.println("runSimulation: index is " + index);
 		if (index < 0)
 			return;
+		ActionEvent event = new ActionEvent(this, 0, "RunFast");
     	if (roadWaySimulatorIndex == index) {
     		if (0 == roadwaySimulatorControlPanel.getComponentCount()) {
     			WED.showProblem(WED.INFORMATION, "Could not load roadway simulator");
     			return;
     		}
-    		((Scheduler) roadwaySimulatorControlPanel.getComponent(0)).runSimulation();
+    		((SchedulerController) roadwaySimulatorControlPanel.getComponent(0)).actionPerformed(event);
     	} else if (laneSimulatorIndex == index) {
     		if (0 == laneSimulatorControlPanel.getComponentCount()) {
     			WED.showProblem(WED.INFORMATION, "Could not load lane simulator");
     			return;
     		}
-    		((Scheduler) laneSimulatorControlPanel.getComponent(0)).runSimulation();
+    		((SchedulerController) laneSimulatorControlPanel.getComponent(0)).actionPerformed(event);
     	} else 
     		throw new Error("no Simulator selected");
 	}
@@ -743,35 +744,32 @@ public class Main extends JPanel implements ActionListener {
 		System.out.println("SetActiveGraph: index is " + index);
 		if (index < 0)
 			return;
-    	if (roadWaySimulatorIndex == index) {
-    		if (0 == roadwaySimulatorControlPanel.getComponentCount())
-    			roadwaySimulatorControlPanel.add(new Scheduler(RoadwaySimulator.simulatorType, graphicsPanel));
-    		if (0 == roadwaySimulatorControlPanel.getComponentCount()) {
-    			WED.showProblem(WED.INFORMATION, "Could not load roadway simulator");
-    			return;
-    		}
-    		graphicsPanel.setClient(((Scheduler)(roadwaySimulatorControlPanel.getComponent(0))).getSimulator());
-    	} else if (laneSimulatorIndex == index) {
-    		if (0 == laneSimulatorControlPanel.getComponentCount())
-    			laneSimulatorControlPanel.add(new Scheduler(LaneSimulator.simulatorType, graphicsPanel));
-    		if (0 == laneSimulatorControlPanel.getComponentCount()) {
-    			WED.showProblem(WED.INFORMATION, "Could not load lane simulator");
-    			return;
-    		}
-    		graphicsPanel.setClient(((Scheduler)(laneSimulatorControlPanel.getComponent(0))).getSimulator());
-    	} else if (macroSimulatorIndex == index) {
-    		if (0 == macroSimulatorControlPanel.getComponentCount())
-    			macroSimulatorControlPanel.add(new Scheduler(MacroSimulator.simulatorType, graphicsPanel));
-    		if (0 == macroSimulatorControlPanel.getComponentCount()) {
-    			WED.showProblem(WED.INFORMATION, "Could not load lane simulator");
-    			return;
-    		}
-    		graphicsPanel.setClient(((Scheduler)(macroSimulatorControlPanel.getComponent(0))).getSimulator());    		
-    	} else if ((measurementPlanIndex == index) && (comboBoxMeasurementPlans.getSelectedIndex() >= 0))
+		String simulatorType = null;
+		JPanel controlPanel = null;
+		if (roadWaySimulatorIndex == index) {
+			simulatorType = RoadwaySimulator.simulatorType;
+			controlPanel = roadwaySimulatorControlPanel;
+		} else if (laneSimulatorIndex == index) {
+			simulatorType = LaneSimulator.simulatorType;
+			controlPanel = laneSimulatorControlPanel;
+		} else if (macroSimulatorIndex == index) {
+			simulatorType = MacroSimulator.simulatorType;
+			controlPanel = macroSimulatorControlPanel;
+		} else if ((measurementPlanIndex == index) && (comboBoxMeasurementPlans.getSelectedIndex() >= 0))
     		graphicsPanel.setClient((GraphicsPanelClient) comboBoxMeasurementPlans.getSelectedItem());
     	else if (null != model)
     	  	graphicsPanel.setClient(model.network);
-    	graphicsPanel.repaint();
+
+		if (null != controlPanel) {
+			if (0 == controlPanel.getComponentCount())
+				controlPanel.add(new SchedulerController(new Scheduler(simulatorType, graphicsPanel)));
+			if (0 == controlPanel.getComponentCount()) {
+				WED.showProblem(WED.INFORMATION, "Could not load " + simulatorType);
+				return;
+			}
+			graphicsPanel.setClient(((SchedulerController)(controlPanel.getComponent(0))).getScheduler().getSimulator());
+		}
+		graphicsPanel.repaint();			
     	System.out.println("SetActiveGraph: done");
 	}
 	
