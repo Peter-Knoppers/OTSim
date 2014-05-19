@@ -1,37 +1,12 @@
 package nl.tudelft.otsim.Events;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.geom.Rectangle2D;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JFormattedTextField;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 import javax.swing.Timer;
-import javax.swing.text.DefaultFormatter;
-import javax.swing.text.MaskFormatter;
 
 import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GUI.Main;
@@ -42,6 +17,8 @@ import nl.tudelft.otsim.Simulators.Simulator;
 import nl.tudelft.otsim.Simulators.LaneSimulator.LaneSimulator;
 import nl.tudelft.otsim.Simulators.MacroSimulator.MacroSimulator;
 import nl.tudelft.otsim.Simulators.RoadwaySimulator.RoadwaySimulator;
+
+// TODO: Change/Replace this class by/to use DSOL
 
 /**
  * Scheduler for OTSim.
@@ -374,7 +351,8 @@ public class Scheduler implements ActionListener {
 			result = SchedulerState.StopTimeReached;
 		if ((null == result) && (stepUpTo != stopTime)) {
 			timer.start();
-			graphicsPanel.repaint();
+			if (null != graphicsPanel)
+				graphicsPanel.repaint();
 		} else if (null != result)
 			changeState(result);
 	}
@@ -432,7 +410,8 @@ public class Scheduler implements ActionListener {
 				runningSimulation.postStep();
 				if (null != schedulerController)
 					schedulerController.schedulerClockChanged(simulatedTime);
-				graphicsPanel.repaint(true);
+				if (null != graphicsPanel)
+					graphicsPanel.repaint(true);
 				if (reasonForStopping != null) {
 					break;
 				}
@@ -494,8 +473,10 @@ public class Scheduler implements ActionListener {
 		}
         simulatedTime = 0;
         changeState (SchedulerState.Stopped);
-        graphicsPanel.setClient(runningSimulation);	// don't you forget it!
-        graphicsPanel.repaint();
+        if (null != graphicsPanel) {
+        	graphicsPanel.setClient(runningSimulation);	// don't you forget it!
+        	graphicsPanel.repaint();
+        }
 		if (null != schedulerController)
 			schedulerController.schedulerClockChanged(simulatedTime);
 	}
@@ -505,8 +486,8 @@ public class Scheduler implements ActionListener {
 		if (null != schedulerController) {
 			schedulerController.schedulerStateChanged();
 		}
-        graphicsPanel.repaint();
-
+		if (null != graphicsPanel)
+			graphicsPanel.repaint();
 	}
 
 	/**
@@ -553,7 +534,7 @@ public class Scheduler implements ActionListener {
 	 * Scheduler, or null if this Scheduler does not have a
 	 * SchedulerController
 	 */
-	public JPanel getSchedulerController() {
+	public javax.swing.JPanel getSchedulerController() {
 		return schedulerController;
 	}
 

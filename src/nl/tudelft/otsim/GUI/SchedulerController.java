@@ -34,7 +34,7 @@ import nl.tudelft.otsim.Events.Scheduler;
 import nl.tudelft.otsim.Events.Scheduler.SchedulerState;
 
 /**
- * Panel with controls for a {@link Scheduler}.
+ * JPanel with controls for a {@link Scheduler}.
  * 
  * @author Peter Knoppers
  */
@@ -58,8 +58,8 @@ public class SchedulerController extends JPanel implements ActionListener, Prope
 		this.scheduler = scheduler;
 		setLayout(new GridBagLayout());
 		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.gridx = 0;
-		gbc.gridy = 0;
+		gbc.gridx = 0;	// Documentation does not specify that this field defaults to 0
+		gbc.gridy = 0;	// Documentation does not specify that this field defaults to 0
 		gbc.weightx = 0.5;
 		gbc.fill = GridBagConstraints.HORIZONTAL;
         add(buttonStep = makeButton("Step", "Simulate one step", "Step", "Last_recor.png"), gbc);
@@ -206,7 +206,7 @@ public class SchedulerController extends JPanel implements ActionListener, Prope
 	
 	private void updateControls(Scheduler.SchedulerState newState) {
 		if (! SwingUtilities.isEventDispatchThread())
-			throw new Error("Controls can only be updated in the EventDispatchThread");
+			throw new Error("Swing controls can only be updated in the EventDispatchThread");
 		switch (newState) {
 		case Stopped:
 		case StopTimeReached:
@@ -237,6 +237,7 @@ public class SchedulerController extends JPanel implements ActionListener, Prope
 		case Reload:
 		case Restart:
 			// These states end automatically and another event will follow when this state ends.
+			// FALL THROUGH
 		case SimulatorError:
 			buttonRealTime.setEnabled(false);
 			buttonFast.setEnabled(false);
@@ -245,7 +246,7 @@ public class SchedulerController extends JPanel implements ActionListener, Prope
 		default:
 			break;
 		}
-		System.out.println("newState=" + newState + ", Button states: Stop=" + buttonStop.isEnabled() + " Real time=" + buttonRealTime.isEnabled() + " Fast=" + buttonFast.isEnabled());
+		//System.out.println("newState=" + newState + ", Button states: Stop=" + buttonStop.isEnabled() + " Real time=" + buttonRealTime.isEnabled() + " Fast=" + buttonFast.isEnabled());
 		repaint();
 	}
 	
