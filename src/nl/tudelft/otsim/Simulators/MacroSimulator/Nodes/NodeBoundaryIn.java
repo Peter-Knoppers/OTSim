@@ -1,4 +1,4 @@
-package nl.tudelft.otsim.Simulators.MacroSimulator;
+package nl.tudelft.otsim.Simulators.MacroSimulator.Nodes;
 
 import nl.tudelft.otsim.GeoObjects.Vertex;
 
@@ -20,7 +20,7 @@ public class NodeBoundaryIn extends Node {
 		inflowPerLane = in/cellsOut.get(0).lanes;
 	}
 	public double  getInflow() {
-		return inflowPerLane/cellsOut.get(0).lanes;
+		return inflowPerLane*cellsOut.get(0).lanes;
 	}
 	public void calcFlux() {
 		

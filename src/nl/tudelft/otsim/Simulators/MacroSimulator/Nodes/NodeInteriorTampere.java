@@ -1,8 +1,9 @@
-package nl.tudelft.otsim.Simulators.MacroSimulator;
+package nl.tudelft.otsim.Simulators.MacroSimulator.Nodes;
 
 import java.util.ArrayList;
 
 import nl.tudelft.otsim.GeoObjects.Vertex;
+import nl.tudelft.otsim.Simulators.MacroSimulator.MacroCell;
 
 /*
  *  This class implements the generic node model as described by
@@ -18,6 +19,93 @@ public class NodeInteriorTampere extends NodeInterior {
 	}
 	
 	public void calcFlux() {
+		double[] supply = new double[nrOut];
+		double[] demand = new double[nrIn];
+		double[] qCapIn = new double[nrIn];
+		for(int j=0; j<nrOut ;j++) {
+			supply[j] = cellsOut.get(j).Supply;
+		}
+		for(int i=0;i<nrIn;i++) {
+			demand[i] = cellsIn.get(i).Demand;
+			qCapIn[i] = cellsIn.get(i).qCap;
+		}
+		calcFlux(supply, demand, qCapIn);
+		
+	}
+	public void calcFlux(double[] supply, double[] demand, double[] qCapIn) {
+		ArrayList<Double[]> result = calcFluxValues(supply, demand, qCapIn);
+		
+		for (int i = 0; i< result.get(0).length; i++) {
+			fluxesIn[i] = (double) result.get(0)[i];
+		}
+		for (int j = 0; j< result.get(1).length; j++) {
+			fluxesOut[j] = (double) result.get(1)[j];
+		}
+		
+	}
+/*	public double calcFluxValue(MacroCell cell, double addedK) {
+		double[] supply = new double[nrOut];
+		double[] demand = new double[nrIn];
+		double[] qCapIn = new double[nrIn];
+		
+		for(int j=0; j<nrOut ;j++) {
+			supply[j] = cellsOut.get(j).Supply;
+		}
+		for(int i=0;i<nrIn;i++) {
+			demand[i] = cellsIn.get(i).Demand;
+			qCapIn[i] = cellsIn.get(i).qCap;
+		}
+		int indexCellsOut = cellsOut.indexOf(cell);
+		int indexCellsIn = cellsIn.indexOf(cell);
+		if (indexCellsOut!=-1) {
+			supply[indexCellsOut] = cellsOut.get(indexCellsOut).calcSupplyValue(cell.KCell+addedK);
+		}
+		if (indexCellsIn!=-1) {
+			demand[indexCellsIn] = cellsIn.get(indexCellsIn).calcDemandValue(cell.KCell+addedK);
+				
+		}
+		ArrayList<Double[]> result = calcFluxValues(supply, demand, qCapIn);
+		double res = -1;
+		if (indexCellsOut!=-1) {
+			res = (double) result.get(1)[indexCellsOut];
+		}
+		if (indexCellsIn!=-1) {
+			res = (double) result.get(0)[indexCellsIn];	
+		}
+		return res;
+	}*/
+	public double calcFluxValue(MacroCell cell, double[] addedParam) {
+		double[] supply = new double[nrOut];
+		double[] demand = new double[nrIn];
+		double[] qCapIn = new double[nrIn];
+		
+		for(int j=0; j<nrOut ;j++) {
+			supply[j] = cellsOut.get(j).Supply;
+		}
+		for(int i=0;i<nrIn;i++) {
+			demand[i] = cellsIn.get(i).Demand;
+			qCapIn[i] = cellsIn.get(i).qCap;
+		}
+		int indexCellsOut = cellsOut.indexOf(cell);
+		int indexCellsIn = cellsIn.indexOf(cell);
+		if (indexCellsOut!=-1) {
+			supply[indexCellsOut] = cellsOut.get(indexCellsOut).calcSupplyValue(new double[]{cell.KCell+addedParam[0], cell.vLim + addedParam[1], cell.kCri + addedParam[2], cell.kJam+addedParam[3]});
+		}
+		if (indexCellsIn!=-1) {
+			demand[indexCellsIn] = cellsIn.get(indexCellsIn).calcDemandValue(new double[]{cell.KCell+addedParam[0],cell.vLim + addedParam[1], cell.kCri + addedParam[2], cell.kJam+addedParam[3]});
+			qCapIn[indexCellsIn] = cellsIn.get(indexCellsIn).fd.calcQCap(new double[]{cell.KCell+addedParam[0],cell.vLim + addedParam[1], cell.kCri + addedParam[2], cell.kJam+addedParam[3]});	
+		}
+		ArrayList<Double[]> result = calcFluxValues(supply, demand, qCapIn);
+		double res = -1;
+		if (indexCellsOut!=-1) {
+			res = (double) result.get(1)[indexCellsOut];
+		}
+		if (indexCellsIn!=-1) {
+			res = (double) result.get(0)[indexCellsIn];	
+		}
+		return res;
+	}
+	public ArrayList<Double[]>  calcFluxValues(double[] supply, double[] demand, double[] qCapIn) {
 		//step 1:
 		int k = 0;
 		int maxK = nrIn+2;
@@ -30,6 +118,8 @@ public class NodeInteriorTampere extends NodeInterior {
 		double[][] Rt = new double[maxK][nrOut];
 		double[][] q = new double[nrIn][nrOut];
 		
+		Double[] calcfluxesIn = new Double[nrIn];
+		Double[] calcfluxesOut = new Double[nrOut];
 		//ArrayList<double[]> R = new ArrayList<double[]>();
 		//double[] R0 = new double[nrOut];
 		
@@ -39,17 +129,17 @@ public class NodeInteriorTampere extends NodeInterior {
 		R.add(0,R0);
 			*/
 		
-		for(int j=0; j<nrOut ;j++) {
+		/*for(int j=0; j<nrOut ;j++) {
 			Rt[0][j] = cellsOut.get(j).Supply;
-		}
+		}*/
+		Rt[0] = supply;
 		
-		
-		double[] S1 = new double[nrIn];
-		double[] C1 = new double[nrIn];
-		for(int i=0;i<nrIn;i++) {
+		double[] S1 = demand;
+		double[] C1 = qCapIn;
+		/*for(int i=0;i<nrIn;i++) {
 			S1[i] = cellsIn.get(i).Demand;
 			C1[i] = cellsIn.get(i).qCap;
-		}
+		}*/
 		
 		
 		double[][] S2 = new double[nrIn][nrOut];
@@ -246,9 +336,11 @@ public class NodeInteriorTampere extends NodeInterior {
 				
 				
 			}
-			fluxesIn[i] = tmpj;
-			if (fluxesIn[i] > 20000) 
-				throw new Error("high flux");
+			calcfluxesIn[i] = tmpj;
+			if (calcfluxesIn[i] > 20000) 
+				throw new Error("high flux: " + calcfluxesIn[i]);
+			
+			
 		}
 		for (int j = 0; j< nrOut; j++) {
 		
@@ -258,9 +350,14 @@ public class NodeInteriorTampere extends NodeInterior {
 				
 				
 			}
-			fluxesOut[j] = tmpi;
+			calcfluxesOut[j] = tmpi;
 		}
 		
+		ArrayList<Double[]> result = new ArrayList<Double[]>();
+		result.add(0,calcfluxesIn);
+		result.add(1,calcfluxesOut);
+		
+		return result;
 		//System.out.println("geslaagd");
 		
 		

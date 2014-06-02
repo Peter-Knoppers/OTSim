@@ -1,4 +1,4 @@
-package nl.tudelft.otsim.Simulators.MacroSimulator;
+package nl.tudelft.otsim.Simulators.MacroSimulator.Nodes;
 
 import nl.tudelft.otsim.GeoObjects.Vertex;
 

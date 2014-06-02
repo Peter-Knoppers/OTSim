@@ -1,7 +1,13 @@
-package nl.tudelft.otsim.Simulators.MacroSimulator;
+package nl.tudelft.otsim.Simulators.MacroSimulator.TestCases;
 
 import static org.junit.Assert.*;
+
+import java.util.Arrays;
+
 import nl.tudelft.otsim.GeoObjects.Vertex;
+import nl.tudelft.otsim.Simulators.MacroSimulator.MacroCell;
+import nl.tudelft.otsim.Simulators.MacroSimulator.Model;
+import nl.tudelft.otsim.Simulators.MacroSimulator.Nodes.NodeInteriorTampere;
 
 import org.junit.Test;
 
@@ -27,10 +33,10 @@ public class TestNIT {
 		double[] s4 = {100,800,800,0};
 		double[][] s = {s1,s2,s3,s4};
 		
-		cellIn1.DemandTest = s1;
-		cellIn2.DemandTest = s2;
-		cellIn3.DemandTest = s3;
-		cellIn4.DemandTest = s4;
+		//cellIn1.DemandTest = s1;
+		//cellIn2.DemandTest = s2;
+		//cellIn3.DemandTest = s3;
+		//cellIn4.DemandTest = s4;
 		cellIn1.Demand = 500;
 		cellIn2.Demand = 2000;
 		cellIn3.Demand = 800;
@@ -95,7 +101,8 @@ public class TestNIT {
 		node.init();
 		node.setTurningRatio(s);
 		node.calcFlux();
-		
+		System.out.println(Arrays.toString(node.fluxesIn));
+		System.out.println(Arrays.toString(node.fluxesOut));
 		System.out.println("klaar");
 		//fail("Not yet implemented");
 	}

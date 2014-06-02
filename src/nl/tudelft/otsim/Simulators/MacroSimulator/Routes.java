@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import nl.tudelft.otsim.Simulators.MacroSimulator.Nodes.Node;
+import nl.tudelft.otsim.Simulators.MacroSimulator.Nodes.NodeBoundaryIn;
+import nl.tudelft.otsim.Simulators.MacroSimulator.Nodes.NodeInterior;
+
 public class Routes {
 	protected ArrayList<ArrayList<Integer>> routes = new ArrayList<ArrayList<Integer>>();
 	protected ArrayList<Double> flows = new ArrayList<Double>();

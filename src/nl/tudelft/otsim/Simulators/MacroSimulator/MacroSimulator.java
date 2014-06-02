@@ -18,6 +18,13 @@ import nl.tudelft.otsim.Simulators.ShutDownAble;
 import nl.tudelft.otsim.Simulators.SimulatedObject;
 import nl.tudelft.otsim.Simulators.Simulator;
 import nl.tudelft.otsim.Simulators.MacroSimulator.MacroSimulator;
+import nl.tudelft.otsim.Simulators.MacroSimulator.FundamentalDiagrams.IFD;
+import nl.tudelft.otsim.Simulators.MacroSimulator.FundamentalDiagrams.FDSmulders;
+import nl.tudelft.otsim.Simulators.MacroSimulator.Nodes.Node;
+import nl.tudelft.otsim.Simulators.MacroSimulator.Nodes.NodeBoundaryIn;
+import nl.tudelft.otsim.Simulators.MacroSimulator.Nodes.NodeBoundaryOut;
+import nl.tudelft.otsim.Simulators.MacroSimulator.Nodes.NodeInterior;
+import nl.tudelft.otsim.Simulators.MacroSimulator.Nodes.NodeInteriorTampere;
 //import nl.tudelft.otsim.Simulators.MacroSimulator.MacroModel;
 import nl.tudelft.otsim.Utilities.TimeScaleFunction;
 
@@ -57,10 +64,10 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 		model.dt = 0.2;
 		
 		// Set minimum length of cells to be generated (in [m])
-		double minLengthCells = 30;
+		double minLengthCells = 100;
 		
 		// Set used fundamental diagram
-		FD fd = new FDSmulders();
+		IFD fd = new FDSmulders();
 		
 		// Set inflow at boundaries in (in vehicles per sec per lane)
 		double inflowBoundary = (2000.0/3600.0);
@@ -273,12 +280,22 @@ public class MacroSimulator extends Simulator implements ShutDownAble{
 		System.out.println(routes.routes);
 		HashSet<Integer> nodesUsed = new HashSet<Integer>();
 		for (MacroCell m: macroCells) {
-			//System.out.println("Vertices pre-split: "+m.vertices.toString());
+			if (m.downs.size()==1 & m.getConfigNodeOut()==0) {
+				m.setConfigNodeOut(m.downs.get(0).getConfigNodeOut());
+			}
+			if (m.ups.size()==1 & m.getConfigNodeIn()==0) {
+				m.setConfigNodeIn(m.ups.get(0).getConfigNodeIn());
+			}
+		}
+		for (MacroCell m: macroCells) {
+			System.out.println("Vertices pre-split: "+m.vertices.toString());
 			System.out.println("Node at In: "+m.getConfigNodeIn());
 			System.out.println("Node at Out: "+m.getConfigNodeOut());
+			
 			nodesUsed.add(m.getConfigNodeIn());
 			nodesUsed.add(m.getConfigNodeOut());
 		}
+		
 		System.out.println(nodesUsed);
 		routes.cleanRoutes(nodesUsed);
 		System.out.println(routes.routes);
@@ -420,8 +437,14 @@ for (MacroCell m: macroCells) {
 			//System.out.println("NodeIn: "+m.indexNodeIn);
 			//System.out.println("NodeOut: "+m.indexNodeOut);
 		}
-			
+		model.init();	
+		for (MacroCell m: macroCells) {
+			System.out.println("index: "+macroCells.indexOf(m)+" from:"+m.vertices.get(0));
+			//System.out.println("NodeIn: "+m.indexNodeIn);
+			//System.out.println("NodeOut: "+m.indexNodeOut);
+		}
 	}
+	
 	
 	
 	public final Model getModel() {
@@ -506,7 +529,7 @@ class Stepper implements Step {
 
 	@Override
 	public Scheduler.SchedulerState step(double now) {
-    	System.out.println("step entered");
+    	//System.out.println("step entered");
     	Model model = macroSimulator.getModel();
     	//System.out.println(Double.toString(model.period));
     	//System.out.println(Double.toString(now));

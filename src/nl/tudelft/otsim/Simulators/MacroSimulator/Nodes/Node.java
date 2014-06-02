@@ -1,4 +1,4 @@
-package nl.tudelft.otsim.Simulators.MacroSimulator;
+package nl.tudelft.otsim.Simulators.MacroSimulator.Nodes;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -6,6 +6,7 @@ import java.util.Arrays;
 
 import nl.tudelft.otsim.GUI.GraphicsPanel;
 import nl.tudelft.otsim.GeoObjects.Vertex;
+import nl.tudelft.otsim.Simulators.MacroSimulator.MacroCell;
 
 //import nl.tudelft.otsim.GUI.GraphicsPanel;
 

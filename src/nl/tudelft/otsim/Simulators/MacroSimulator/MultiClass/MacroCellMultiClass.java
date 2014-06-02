@@ -1,8 +1,10 @@
-package nl.tudelft.otsim.Simulators.MacroSimulator;
+package nl.tudelft.otsim.Simulators.MacroSimulator.MultiClass;
 
 import java.awt.Color;
 //import java.awt.geom.Point2D;
 //import java.awt.geom.Point2D.Double;
+
+
 
 
 
@@ -17,8 +19,13 @@ import nl.tudelft.otsim.GUI.GraphicsPanel;
 
 
 
+
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
+
+
 
 
 
@@ -33,7 +40,7 @@ import nl.tudelft.otsim.GeoObjects.Vertex;
  * <br>
  * <br>
  */
-public class MacroCell {
+public class MacroCellMultiClass {
 	// TODO: delete unnecessary variables and methods! 
 	// TODO: merges and splits at nodes
 	// TODO: boundary conditions
@@ -63,10 +70,10 @@ public class MacroCell {
     public int id;
 
     /** Set of upstream cells in case of a merge. */
-    public java.util.ArrayList<MacroCell> ups = new java.util.ArrayList<MacroCell>();
+    public java.util.ArrayList<MacroCellMultiClass> ups = new java.util.ArrayList<MacroCellMultiClass>();
 
     /** Set of downstream cells in case of a split. */
-    public java.util.ArrayList<MacroCell> downs = new java.util.ArrayList<MacroCell>();
+    public java.util.ArrayList<MacroCellMultiClass> downs = new java.util.ArrayList<MacroCellMultiClass>();
     
     /** Set of upstream cells in case of a merge. */
     public java.util.ArrayList<Integer> upsInt = new java.util.ArrayList<Integer>();
@@ -75,10 +82,10 @@ public class MacroCell {
     public java.util.ArrayList<Integer> downsInt = new java.util.ArrayList<Integer>();
 
     /** Left cell (if any). for multi-lane modeling */
-    public MacroCell left;
+    public MacroCellMultiClass left;
 
     /** Right cell (if any). */
-    public MacroCell right;
+    public MacroCellMultiClass right;
     
     public Node nodeIn;
     
@@ -98,16 +105,16 @@ public class MacroCell {
 
     //Traffic states
     /** Flow in this cell. [veh/s] */
-    public double QCell;
+    public double[] QCell;
     
     /** Density in this cell. [veh/m] */
-    public double KCell;
+    public double[] KCell;
     
     /** Average spacing in this cell. [km or m] */
     //public double SCell;
     
     /** Average speed in this cell. [m/s] */
-    public double VCell;
+    public double[] VCell;
     
     /** Flux into this cell. [ veh/s] */
     public double FluxIn;
@@ -127,23 +134,90 @@ public class MacroCell {
     
     // Parameters    
     /** Legal speed limit [m/s]. */
-    public double vLim = 120/3.6;
+    public double vLim;
     
     /** Legal critical density [veh/m]. */
-    public double kCri = 0.018;
+    public double kCri;
     
     /** Legal jam density [veh/m]. */
-    public double kJam = 0.125;
+    public double kJam;
     
     /** Legal flow capacity [veh/m/lane]. */
     public double qCap;
     
+    public double vCri;
+    
     public double[] FluxIn2;
 	public double[] FluxOut2;
 	public int lanes;
+	private ArrayList<VehicleClass> vehicleClasses = new ArrayList<VehicleClass>();
+	private int nrVehicleClasses;
 	
+	public double[] vehicleShare;
 	
+	public double effDensity;
+	public double effFlow;
+	public double effDemand;
+	public double effSupply;
+	public double[] labda;
+	public double[] classSupply;
+	public double[] classDemand;
+	public double[] classFluxOut;
+	public double[] classFluxIn;
+	
+	public void addVehicleClass(VehicleClass vehicleClass) {
+		vehicleClasses.add(vehicleClass);
+	}
+	public void updateVehicleShare() {
+		double[] temp = new double[nrVehicleClasses];
+		double[] n = new double[nrVehicleClasses];
+		//double total = 0;
+		for (int u=0; u<nrVehicleClasses; u++) {
+			temp[u]= vehicleClasses.get(u).getSpaceOccupancy(VCell[u]);
+			//total += temp[u];
+		}
+		for (int u=0; u<nrVehicleClasses; u++) {
+			n[u]=temp[u]/temp[0];
+		}
+		this.vehicleShare = n;
+	}
     
+	public void updateEffectiveDensity() {
+		//double vCri = 85/3.6;
+		double sumACong = 0;
+		double sumBCong = 0;
+		double sumAFree = 0;
+		double sumBFree=0;
+		double tmpEffDensity=0;
+		double a1ff=vehicleClasses.get(0).getAFreeFlow();
+		double b1ff=vehicleClasses.get(0).getBFreeFlow(vCri, kCri);
+		double a1con=vehicleClasses.get(0).getACongested(vCri, kCri, kJam);
+		double b1con=vehicleClasses.get(0).getBCongested(vCri, kCri, kJam);
+		
+		for (int u=0; u<nrVehicleClasses; u++) {
+			sumACong += vehicleClasses.get(u).getACongested(vCri, kCri, kJam)*KCell[u];
+			sumBCong += vehicleClasses.get(u).getBCongested(vCri, kCri, kJam)*KCell[u]; 
+			sumAFree += vehicleClasses.get(u).getAFreeFlow()*KCell[u]; 
+			sumBFree += vehicleClasses.get(u).getBFreeFlow(vCri, kCri)*KCell[u]; 
+		}
+		if (b1ff !=0) {
+			tmpEffDensity = (a1ff- sumBFree - Math.sqrt(Math.pow(a1ff - sumBFree,2)+4*b1ff*sumAFree))/(-2*b1ff);
+		} else {
+			tmpEffDensity = (sumAFree)/(a1ff - sumBFree);
+		}
+		if (tmpEffDensity <= kCri) {
+			
+			this.effDensity = tmpEffDensity;
+		} else {
+			if (b1con !=0) {
+				tmpEffDensity = (a1con - sumBCong - Math.sqrt(Math.pow(a1con - sumBCong,2)+4*b1con*sumACong))/(-2*b1con);
+			} else {
+				tmpEffDensity = (sumACong)/(a1con - sumBCong);
+			}
+			this.effDensity = tmpEffDensity;
+		}
+	}
+	
     /**
      * Constructor that will calculate the lane length from the x and y
      * coordinates.
@@ -152,7 +226,7 @@ public class MacroCell {
      * @param id User recognizable lane id.
      * @param model Main model.
      */
-    public MacroCell(Model model, double[] x, double[] y, int id) {
+    public MacroCellMultiClass(Model model, double[] x, double[] y, int id) {
         this.model = model;
         this.x = x;
         this.y = y;
@@ -160,7 +234,7 @@ public class MacroCell {
         l = calcLength();
         
     }
-    public MacroCell(Model model, double length, int id) {
+    public MacroCellMultiClass(Model model, double length, int id) {
         this.model = model;
         this.l = length;
         //this.x = {0,0};
@@ -168,23 +242,38 @@ public class MacroCell {
         this.id = id;
              
     }
-    public MacroCell(Model model) {
+    public MacroCellMultiClass(Model model) {
     	this.model = model;
     	this.l = calcLength();
     }
+    public void init(int nrVehicleClasses) {
+    	
+    }
     public void init() {
+    	this.nrVehicleClasses = vehicleClasses.size();
     	lanes = (int) (width/3.5);
     	kCri = 0.020*lanes;
     	kJam = 0.125*lanes;
-    	qCap = fd.calcQCap(this);
-    	KCell = 0;
-    	QCell = calcQ(KCell);
-    	VCell = calcV(KCell);
-    	l = calcLength();
+    	vCri = 85/3.6;
+    	qCap = kCri*vCri;
+    	//qCap = fd.calcQcap(this);
+    	KCell = new double[nrVehicleClasses];
+    	QCell = new double[nrVehicleClasses];
+    	VCell = new double[nrVehicleClasses];
+    	labda = new double[nrVehicleClasses];
+    	vehicleShare = new double[nrVehicleClasses];
+    	classSupply = new double[nrVehicleClasses];
+    	classFluxOut = new double[nrVehicleClasses];
+    	classFluxIn = new double[nrVehicleClasses];
+    	//updateEffectiveDensity();
+    	//updateVehicleShare();
+    	//updateEffectiveFlow();
+    	
+    	//l = calcLength();
     	
     	
-    	indexNodeIn = nodeIn.cellsOut.indexOf(this);
-    	indexNodeOut = nodeOut.cellsIn.indexOf(this);
+    	//indexNodeIn = nodeIn.cellsOut.indexOf(this);
+    	//indexNodeOut = nodeOut.cellsIn.indexOf(this);
     	
     }
     
@@ -252,8 +341,8 @@ public class MacroCell {
 		outs.add(i);
 	}
 	@SuppressWarnings("unchecked")
-	public ArrayList<MacroCell> splitInParts(int nrParts) {
-		ArrayList<MacroCell> result = new ArrayList<MacroCell>();
+	public ArrayList<MacroCellMultiClass> splitInParts(int nrParts) {
+		ArrayList<MacroCellMultiClass> result = new ArrayList<MacroCellMultiClass>();
 		System.out.println("Joined link " + id + " is splitted into " + nrParts + " parts");
 		//System.out.println(nrParts);
 		if (nrParts == 1 || nrParts == 0) {
@@ -264,7 +353,7 @@ public class MacroCell {
 			this.l = calcLength();
 		for (int i = 0; i< nrParts - 1; i++) {
 			
-			MacroCell m = new MacroCell(this.model);
+			MacroCellMultiClass m = new MacroCellMultiClass(this.model);
 			
 			m.setWidth(this.width);
 			m.setVLim(this.vLim);
@@ -286,8 +375,8 @@ public class MacroCell {
 		this.vertices = new ArrayList<Vertex>(this.vertices.subList(vert, this.vertices.size()));
 	
 		
-		result.get(0).ups = (ArrayList<MacroCell>) this.ups.clone();
-		for (MacroCell c: ups) {
+		result.get(0).ups = (ArrayList<MacroCellMultiClass>) this.ups.clone();
+		for (MacroCellMultiClass c: ups) {
 			c.downs.remove(this);
 			c.downs.add(result.get(0));
 		}
@@ -328,96 +417,157 @@ public class MacroCell {
 	
 
     /** calculate using q given fundamental diagram **/
-    public double calcQ() {
-    	return fd.calcQ(this);
-    	/*if (k<0 || k > kJam)
-    		throw new Error ("density is not correct" + Double.toString(k));
-    	else if (k<kCri) 
-    		*//** triangular FD **//*
-    		return k*vLim;
-    	else
-    		*//** triangular FD **//*
-    		return (kJam - k)/(kJam - kCri)*(kCri*vLim);*/
-    }
-    public double calcQ(double k) {
-    	return fd.calcQ(this, new double[]{k-this.KCell,0,0,0});
-    	/*if (k<0 || k > kJam)
-    		throw new Error ("density is not correct" + Double.toString(k));
-    	else if (k<kCri) 
-    		*//** triangular FD **//*
-    		return k*vLim;
-    	else
-    		*//** triangular FD **//*
-    		return (kJam - k)/(kJam - kCri)*(kCri*vLim);*/
-    }
-    
-    public double calcV(double k) {
-    	if (k>0)
-    	return calcQ(k)/k;
-    	else 
-    		return vLim;
-    }
-    public void updateV() {
-    	VCell = calcV(KCell);
-    }
-    
-    public void calcDemand() {
-    	if (KCell < kCri)
-    		Demand =  calcQ();
-    	else
-    		Demand = qCap;
-   	
-    }
-    public void calcSupply() {
-    	if (KCell < kCri)
-    		Supply =  qCap;
-    	else
-    		Supply = calcQ();
-    }
-   /* public double calcDemandValue(double k) {
-    	if (k < kCri) {
-    		if (k>=0) 
-    			return calcQ(k);
-    		else
-    			return -1*calcQ(-1*k);
+    public double[] calcQ(double[] k) {
+    	double[] q = new double[nrVehicleClasses];
+    	double[] v = calcV(effDensity);
+    	for (int u=0; u<nrVehicleClasses; u++) {
+    		q[u] = k[u]*v[u];
     	}
-    		
+    	return q;
+    	/*if (k<0 || k > kJam)
+    		throw new Error ("density is not correct" + Double.toString(k));
+    	else if (k<kCri) 
+    		*//** triangular FD **//*
+    		return k*vLim;
     	else
-    		return qCap;
-   	
-    }*/
-    public double calcDemandValue(double[] param) {
-    	double k = param[0];
-		double vLim = param[1];
-		double kCri = param[2];
-		double kJam = param[3];
+    		*//** triangular FD **//*
+    		return (kJam - k)/(kJam - kCri)*(kCri*vLim);*/
+    }
+    public double[] calcV(double k) {
+    	double[] v = new double[nrVehicleClasses];
+    	double vCri = 85/3.6;
+    	double w = kCri*vCri/(kJam - kCri);
+    	if (k<=kCri) {
+    		for (int u=0; u<nrVehicleClasses; u++) {
+    			v[u] = vehicleClasses.get(u).getVMax() - (vehicleClasses.get(u).getVMax() - vCri)/kCri*k;
+    		}
+    	} else {
+    		Arrays.fill(v, w*(kJam/k - 1));
+    	}
+    	return v;
+    }
+    public void updateFlow() {
+    	double[] q = new double[nrVehicleClasses];
     	
-    	if (k < kCri) {
-    		if (k>=0) 
-    			return fd.calcQ(param);
-    		else
-    			return -1*fd.calcQ(new double[]{-param[0],param[1],param[2],param[3]});
+    	for (int u=0; u<nrVehicleClasses; u++) {
+    		q[u] = KCell[u]*VCell[u];
     	}
-    		
+    	QCell = q;
+    	/*if (k<0 || k > kJam)
+    		throw new Error ("density is not correct" + Double.toString(k));
+    	else if (k<kCri) 
+    		*//** triangular FD **//*
+    		return k*vLim;
     	else
-    		return fd.calcQCap(param);
+    		*//** triangular FD **//*
+    		return (kJam - k)/(kJam - kCri)*(kCri*vLim);*/
+    }
+
+    public void updateVelocity() {
+    	double[] v = new double[nrVehicleClasses];
+    	
+    	double w = kCri*vCri/(kJam - kCri);
+    	if (effDensity<=kCri) {
+    		for (int u=0; u<nrVehicleClasses; u++) {
+    			v[u] = vehicleClasses.get(u).getVMax() - (vehicleClasses.get(u).getVMax() - vCri)/kCri*effDensity;
+    		}
+    	} else {
+    		Arrays.fill(v, w*(kJam/effDensity - 1));
+    	}
+    	VCell = v;
+    }
+    public void updateEffectiveFlow() {
+    	//double[] q = new double[nrVehicleClasses];
+    	double qEff = 0;
+    	for (int u=0; u<nrVehicleClasses; u++) {
+    		qEff += vehicleShare[u]*QCell[u]; 
+    	}
+    	this.effFlow = qEff;
+    }
+    
+    public void updateEffectiveDemand() {
+    	
+    		if (effDensity < kCri)
+        		effDemand =  effFlow;
+        	else
+        		effDemand = qCap;
+    	
+    	
    	
     }
-    public double calcSupplyValue(double[] param) {
-    	double k = param[0];
-		double vLim = param[1];
-		double kCri = param[2];
-		double kJam = param[3];
-    	if (k < kCri) {
-    		return fd.calcQCap(param);
+    public void updateLabda() {
+    	double tmpDens = 0;
+    	double tmpVel = 0;
+    	double effVel = 0;
+    	double[] shares = new double[nrVehicleClasses];
+    	for (int u=0; u<nrVehicleClasses; u++) {
+    		tmpDens += KCell[u];
+    		tmpVel += VCell[u];
+    		effVel += vehicleShare[u]*VCell[u];
+    	}
+    	
+    	if (tmpDens != 0 && tmpVel == 0) {
+    		for (int u=0; u<nrVehicleClasses; u++) {
+    			shares[u] = vehicleShare[u]*KCell[u]/effDensity;
+    		}
+    	} else if (tmpDens == 0 && tmpVel != 0) {
+    		for (int u=0; u<nrVehicleClasses; u++) {
+    			shares[u] = vehicleShare[u]*VCell[u]/effVel;
+    		}
+    	} else {
+    		for (int u=0; u<nrVehicleClasses; u++) {
+    			shares[u] = vehicleShare[u]*QCell[u]/effFlow;
+    		}
+    	}
+    	this.labda = shares;
+    }
+    
+    public void updateEffectiveSupply() {
+    	
+    	if (effDensity < kCri)
+    		effSupply =  qCap;
+    	else
+    		effSupply = effFlow;
+    }
+    public void updateClassSupply() {
+    	double[] tmpClassSupply = new double[nrVehicleClasses]; 
+    	double[] tmpLabda = new double[nrVehicleClasses];
+    	if (ups.size() == 0) {
+    		Arrays.fill(tmpLabda, 1.0/nrVehicleClasses);
+    	} else {
+    		tmpLabda = ups.get(0).labda;
     	}
     		
-    	else {
-    		if (k<=kJam) 
-    			return fd.calcQ(param);
-    		else
-    			return -1*fd.calcQ(new double[]{2*param[3]-param[0],param[1],param[2],param[3]});
-
+    	for (int u=0; u<nrVehicleClasses; u++) {
+    		tmpClassSupply[u]=tmpLabda[u]*effSupply;
+    	}
+    	this.classSupply = tmpClassSupply;
+    }
+    public void updateClassDemand() {
+    	double[] tmpClassDemand = new double[nrVehicleClasses]; 
+    	
+    	for (int u=0; u<nrVehicleClasses; u++) {
+    		tmpClassDemand[u]=labda[u]*effDemand;
+    	}
+    	this.classDemand = tmpClassDemand;
+    }
+    public void updateClassFluxIn() {
+    	if (ups.size() == 1) {
+    	for (int u=0; u<nrVehicleClasses; u++) {
+    		classFluxIn[u] = Math.min(classSupply[u], ups.get(0).classDemand[u])/vehicleShare[u];
+    	} } else {
+    		for (int u=0; u<nrVehicleClasses; u++) {
+        		classFluxIn[u] = Math.min(classSupply[u], 0.3)/vehicleShare[u];
+        	}
+    	}
+    }
+    public void updateClassFluxOut() {
+    	if (downs.size() == 1) {
+    	for (int u=0; u<nrVehicleClasses; u++) {
+    		classFluxOut[u] = Math.min(downs.get(0).classSupply[u], classDemand[u])/downs.get(0).vehicleShare[u];
+    	} } else { for (int u=0; u<nrVehicleClasses; u++) {
+    		classFluxOut[u] = Math.min(0.3, classDemand[u])/vehicleShare[u];
+    	}
     		
     	}
     }
@@ -428,17 +578,19 @@ public class MacroCell {
     			
     }
     public void calcFluxIn() {
-    	
+    	double effectiveFluxIn = nodeIn.fluxesOut[indexNodeIn];
     	FluxIn = nodeIn.fluxesOut[indexNodeIn];
     			
     }
     public void updateDensity() {
+    	for (int u=0; u<nrVehicleClasses; u++) {
+    		KCell[u] = KCell[u]+model.dt/l*(classFluxIn[u] - classFluxOut[u]);
     	
-    	KCell = KCell + model.dt/l*(FluxIn - FluxOut);
-    	
-    	QCell = calcQ(KCell);
-    	VCell = calcV(KCell);
+    	//QCell = calcQ(KCell);
+    	//VCell = calcV(KCell);
+    	}
     }
+   
     
     /**
      * Sets the lane length based on the x and y coordinates. This method is 
@@ -452,8 +604,8 @@ public class MacroCell {
     public void draw(GraphicsPanel graphicsPanel) {
     	//Color color = getDensColor(KCell); 
     	//Color color = getDensColor(new Random().nextInt()); 
-    	Color color = getVelocityColor(VCell); 
-    	graphicsPanel.setStroke((float) (5+(KCell/(kJam/lanes))*15));
+    	Color color = getVelocityColor(VCell[0]); 
+    	graphicsPanel.setStroke((float) (5+(KCell[0]/(kJam/lanes))*15));
 		graphicsPanel.setColor(color);
 		graphicsPanel.drawPolyLine(vertices);
    	
@@ -490,7 +642,7 @@ public class MacroCell {
      * Retrieve the upstream connected MacroCell of this MacroCell.
      * @return MacroCell; the upstream connected MacroCell of this MacroCell
      */
-    public java.util.ArrayList<MacroCell> getUps_r() {
+    public java.util.ArrayList<MacroCellMultiClass> getUps_r() {
     	return ups;
     }
     
@@ -498,7 +650,7 @@ public class MacroCell {
      * Retrieve the downstream connected MacroCell of this MacroCell.
      * @return MacroCell; the downstream connected MacroCell of this MacroCell
      */
-    public java.util.ArrayList<MacroCell> getDowns_r() {
+    public java.util.ArrayList<MacroCellMultiClass> getDowns_r() {
     	return downs;
     }
     
@@ -506,7 +658,7 @@ public class MacroCell {
      * Retrieve the left MacroCell of this MacroCell.
      * @return MacroCell; the left MacroCell of this MacroCell
      */
-    public MacroCell getLeft_r() {
+    public MacroCellMultiClass getLeft_r() {
     	return left;
     }
     
@@ -514,7 +666,7 @@ public class MacroCell {
      * Retrieve the right MacroCell of this MacroCell.
      * @return MacroCell; the right MacroCell of this MacroCell
      */
-    public MacroCell getRight_r() {
+    public MacroCellMultiClass getRight_r() {
     	return right;
     }
     
@@ -548,7 +700,7 @@ public class MacroCell {
      * Retrieve the flow of this MacroCell.
      * @return Double; the flow of this MacroCell
      */
-    public double getQ_r() {
+    public double[] getQ_r() {
     	return QCell;
     }
     
@@ -556,7 +708,7 @@ public class MacroCell {
      * Retrieve the density of this MacroCell.
      * @return Double; the density of this MacroCell
      */
-    public double getK_r() {
+    public double[] getK_r() {
     	return KCell;
     }
     
@@ -564,7 +716,7 @@ public class MacroCell {
      * Retrieve the average speed of this MacroCell.
      * @return Double; the average speed of this MacroCell
      */
-    public double getV_r() {
+    public double[] getV_r() {
     	return VCell;
     }
     
@@ -573,7 +725,7 @@ public class MacroCell {
      * Sets the flow of this MacroCell.
      * @param flow Flow of this cell [veh/h or veh/s].
      */
-    public void setQ(double flow) {
+    public void setQ(double[] flow) {
         this.QCell = flow;
     }
     
@@ -581,7 +733,7 @@ public class MacroCell {
      * Sets the density of this MacroCell.
      * @param density Density of this cell [veh/km or veh/m].
      */
-    public void setK(double density) {
+    public void setK(double[] density) {
         this.KCell = density;
     }
     
@@ -589,7 +741,7 @@ public class MacroCell {
      * Sets the average speed of this MacroCell.
      * @param speed Speed of this cell [km/h or m/s].
      */
-    public void setV(double speed) {
+    public void setV(double[] speed) {
         this.VCell = speed;
     }
     
@@ -609,10 +761,10 @@ public class MacroCell {
     //public double getVLim() {
     //    return vLim/3.6;
     //}
-    void addIn(MacroCell m) {
+    void addIn(MacroCellMultiClass m) {
     	ups.add(m);
     }
-    void addOut(MacroCell m) {
+    void addOut(MacroCellMultiClass m) {
     	downs.add(m);
     }
     public String getIns() {
@@ -622,7 +774,7 @@ public class MacroCell {
     	} else {
     	output = "(";
     	//System.out.println(output);
-    	for (MacroCell c: ups) {
+    	for (MacroCellMultiClass c: ups) {
     		output = output.concat(Integer.toString(c.id()).concat(","));
     		//System.out.println(output);
     	}
@@ -639,7 +791,7 @@ public class MacroCell {
     	} else {
     	output = "(";
     	//System.out.println(output);
-    	for (MacroCell c: downs) {
+    	for (MacroCellMultiClass c: downs) {
     		output = output.concat(Integer.toString(c.id()).concat(","));
     		//System.out.println(output);
     	}
